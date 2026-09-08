@@ -1,0 +1,58 @@
+# Task Index — Innoventix Platform Build
+
+Read `00-MASTER-PROMPT-project-orchestrator.md` first, then work through these in order.
+
+- `00-MASTER-PROMPT-project-orchestrator.md` — MASTER PROMPT — Innoventix Platform Build Orchestrator
+- `01-repository-and-monorepo-foundation.md` — TASK 01 — Repository & Monorepo Foundation
+- `02-multi-tenant-architecture-decision-record.md` — TASK 02 — Multi-Tenant Architecture Decision Record
+- `03-core-database-schema--organizations-users-roles.md` — TASK 03 — Core Database Schema — Organizations, Users, Roles
+- `04-core-database-schema--crm-and-project-management-tables.md` — TASK 04 — Core Database Schema — CRM & Project Management Tables
+- `05-core-database-schema--communication-hub-and-billing.md` — TASK 05 — Core Database Schema — Communication Hub & Billing
+- `06-authentication-supabase-auth--team-members.md` — TASK 06 — Authentication (Supabase Auth) — Team Members
+- `07-authorization--roles-and-row-level-security-policies.md` — TASK 07 — Authorization — Roles & Row-Level Security Policies
+- `08-organization-onboarding-and-tenant-provisioning.md` — TASK 08 — Organization Onboarding & Tenant Provisioning
+- `09-subscription-plans-definition.md` — TASK 09 — Subscription Plans Definition
+- `10-stripe-billing-integration.md` — TASK 10 — Stripe Billing Integration
+- `11-application-shell-navigation-and-organization-switcher.md` — TASK 11 — Application Shell, Navigation & Organization Switcher
+- `12-main-dashboard-overview.md` — TASK 12 — Main Dashboard Overview
+- `13-organization-settings-and-team-management.md` — TASK 13 — Organization Settings & Team Management
+- `14-crm--clients-list-and-management.md` — TASK 14 — CRM — Clients List & Management
+- `15-crm--client-detail-page.md` — TASK 15 — CRM — Client Detail Page
+- `16-crm--leads--sales-pipeline-kanban.md` — TASK 16 — CRM — Leads / Sales Pipeline (Kanban)
+- `17-crm--client-communication-log.md` — TASK 17 — CRM — Client Communication Log
+- `18-crm--tags-segmentation-and-advanced-search.md` — TASK 18 — CRM — Tags, Segmentation & Advanced Search
+- `19-projects--list-and-kanban-board.md` — TASK 19 — Projects — List & Kanban Board
+- `20-projects--detail-page.md` — TASK 20 — Projects — Detail Page
+- `21-tasks-module.md` — TASK 21 — Tasks Module
+- `22-deliverables-module.md` — TASK 22 — Deliverables Module
+- `23-project-templates.md` — TASK 23 — Project Templates
+- `24-team-workload-view.md` — TASK 24 — Team Workload View
+- `25-status-tag-system--shared-component-library.md` — TASK 25 — Status Tag System — Shared Component Library
+- `26-communication-hub--architecture-and-unified-inbox-data-layer.md` — TASK 26 — Communication Hub — Architecture & Unified Inbox Data Layer
+- `27-communication-hub--slack-integration.md` — TASK 27 — Communication Hub — Slack Integration
+- `28-communication-hub--whatsapp-integration.md` — TASK 28 — Communication Hub — WhatsApp Integration
+- `29-communication-hub--email-integration.md` — TASK 29 — Communication Hub — Email Integration
+- `30-communication-hub--discord-and-upwork-channel-stubs.md` — TASK 30 — Communication Hub — Discord & Upwork Channel Stubs
+- `31-communication-hub--unified-inbox-ui.md` — TASK 31 — Communication Hub — Unified Inbox UI
+- `32-n8n-automation-architecture-and-webhook-contracts.md` — TASK 32 — N8N Automation Architecture & Webhook Contracts
+- `33-automation--project-delivered-→-invoice-trigger.md` — TASK 33 — Automation — Project Delivered → Invoice Trigger
+- `34-automation--deadline-and-overdue-alerts.md` — TASK 34 — Automation — Deadline & Overdue Alerts
+- `35-automation--weekly-summary-report.md` — TASK 35 — Automation — Weekly Summary Report
+- `36-in-app-notification-center.md` — TASK 36 — In-App Notification Center
+- `37-client-portal--auth-and-rls.md` — TASK 37 — Client Portal — Auth & RLS
+- `38-client-portal--dashboard.md` — TASK 38 — Client Portal — Dashboard
+- `39-client-portal--project-detail-and-approval-flow.md` — TASK 39 — Client Portal — Project Detail & Approval Flow
+- `40-client-portal--invoice-and-payment-status-view.md` — TASK 40 — Client Portal — Invoice & Payment Status View
+- `41-analytics-dashboard.md` — TASK 41 — Analytics Dashboard
+- `42-revenue-and-plan-usage-reporting.md` — TASK 42 — Revenue & Plan-Usage Reporting
+- `43-exportable-reports-pdf-csv.md` — TASK 43 — Exportable Reports (PDF/CSV)
+- `44-input-validation-and-sanitization-layer.md` — TASK 44 — Input Validation & Sanitization Layer
+- `45-secrets-management-and-api-security.md` — TASK 45 — Secrets Management & API Security
+- `46-audit-logging.md` — TASK 46 — Audit Logging
+- `47-automated-testing-setup--unit-and-integration.md` — TASK 47 — Automated Testing Setup — Unit & Integration
+- `48-end-to-end-testing--critical-user-flows.md` — TASK 48 — End-to-End Testing — Critical User Flows
+- `49-load-and-multi-tenant-scale-testing.md` — TASK 49 — Load & Multi-Tenant Scale Testing
+- `50-environment-configuration-and-secrets-for-production.md` — TASK 50 — Environment Configuration & Secrets for Production
+- `51-netlify-deployment-pipeline.md` — TASK 51 — Netlify Deployment Pipeline
+- `52-n8n-workflow-activation-on-contabo-vps.md` — TASK 52 — N8N Workflow Activation on Contabo VPS
+- `53-final-qa-security-audit-and-demo-preparation.md` — TASK 53 — Final QA, Security Audit & Demo Preparation
