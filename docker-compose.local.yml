@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  local-db:
+    image: supabase/postgres:15.1.1.130
+    container_name: supabase-local-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres_dev_password
+      POSTGRES_DB: postgres
+      JWT_SECRET: dev_jwt_secret_key_32_characters_long_min
+    ports:
+      - "54322:5432"
+
+  local-auth:
+    image: supabase/gotrue:v2.132.0
+    container_name: supabase-local-auth
+    depends_on:
+      local-db:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:postgres_dev_password@local-db:5432/postgres
+      GOTRUE_SITE_URL: http://localhost:3000
+      GOTRUE_JWT_SECRET: dev_jwt_secret_key_32_characters_long_min
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+    ports:
+      - "9999:9999"
+
+  local-rest:
+    image: postgrest/postgrest:v12.0.1
+    container_name: supabase-local-rest
+    depends_on:
+      local-db:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      PGRST_DB_URI: postgres://authenticator:postgres_dev_password@local-db:5432/postgres
+      PGRST_DB_SCHEMAS: public,storage
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: dev_jwt_secret_key_32_characters_long_min
+    ports:
+      - "3001:3000"
+
+  local-studio:
+    image: supabase/studio:20240101-8b3e8e1
+    container_name: supabase-local-studio
+    restart: unless-stopped
+    environment:
+      STUDIO_PG_META_URL: http://local-meta:08080
+      POSTGREST_URL: http://local-rest:3000
+      SUPABASE_URL: http://local-kong:8000
+      SUPABASE_REST_URL: http://local-kong:8000/rest/v1/
+      SUPABASE_ANON_KEY: REDACTED_JWT
+      SUPABASE_SERVICE_KEY: REDACTED_JWT
+    ports:
+      - "54323:3000"
+
+  local-meta:
+    image: supabase/postgres-meta:v0.68.0
+    container_name: supabase-local-meta
+    depends_on:
+      local-db:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      PG_META_PORT: 08080
+      PG_META_DB_HOST: local-db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: postgres
+      PG_META_DB_PASSWORD: postgres_dev_password
+
+  local-kong:
+    image: kong:2.8.1-alpine
+    container_name: supabase-local-kong
+    restart: unless-stopped
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors
+    volumes:
+      - ./infra/kong/kong.local.yml:/var/lib/kong/kong.yml:ro
+    ports:
+      - "54321:8000"
