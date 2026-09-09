@@ -1,0 +1,74 @@
+{
+  ".eslintrc.json": {
+    "mtime": 1788869007.6280086,
+    "seen": 1788933809.7057297,
+    "ast_hash": "6c636976577d27c2ebdc12da2f6f2b56",
+    "semantic_hash": "6c636976577d27c2ebdc12da2f6f2b56"
+  },
+  "app/layout.tsx": {
+    "mtime": 1788869140.464274,
+    "seen": 1788933809.705735,
+    "ast_hash": "fac9f853ec661e0d4e57f3016aa73017",
+    "semantic_hash": "fac9f853ec661e0d4e57f3016aa73017"
+  },
+  "app/page.tsx": {
+    "mtime": 1788869152.5156195,
+    "seen": 1788933809.705737,
+    "ast_hash": "742f89c16108b2fadcbd6086d901bece",
+    "semantic_hash": "742f89c16108b2fadcbd6086d901bece"
+  },
+  "package.json": {
+    "mtime": 1788868989.5272985,
+    "seen": 1788933809.7057388,
+    "ast_hash": "021969f05680787c4ba3b3f3ec2ef0fe",
+    "semantic_hash": "021969f05680787c4ba3b3f3ec2ef0fe"
+  },
+  "postcss.config.js": {
+    "mtime": 1788869116.4563153,
+    "seen": 1788933809.70574,
+    "ast_hash": "8640f9b2e6475cc3f5b1ff4548925765",
+    "semantic_hash": "8640f9b2e6475cc3f5b1ff4548925765"
+  },
+  "tailwind.config.ts": {
+    "mtime": 1788869105.6916497,
+    "seen": 1788933809.7057412,
+    "ast_hash": "802625f0b2734e6d62397641c7b8a3db",
+    "semantic_hash": "802625f0b2734e6d62397641c7b8a3db"
+  },
+  "tsconfig.json": {
+    "mtime": 1788868997.3661182,
+    "seen": 1788933809.7057426,
+    "ast_hash": "130469b4894d9a3d8783798ab6587893",
+    "semantic_hash": "130469b4894d9a3d8783798ab6587893"
+  },
+  "supabase/migrations/0001_organizations.sql": {
+    "mtime": 1788869172.4457045,
+    "seen": 1788933840.8031912,
+    "ast_hash": "153713f699985aecb0c394381db9fc70",
+    "semantic_hash": "153713f699985aecb0c394381db9fc70"
+  },
+  "supabase/migrations/0002_memberships_roles.sql": {
+    "mtime": 1788869192.4669526,
+    "seen": 1788933840.803194,
+    "ast_hash": "7b664d0ad412547e92971e74af3c71d2",
+    "semantic_hash": "7b664d0ad412547e92971e74af3c71d2"
+  },
+  "supabase/migrations/0003_crm_clients.sql": {
+    "mtime": 1788873167.074736,
+    "seen": 1788933840.8031955,
+    "ast_hash": "b6f49dfc0f29f8e77e7560ec76643127",
+    "semantic_hash": "b6f49dfc0f29f8e77e7560ec76643127"
+  },
+  "supabase/migrations/0004_projects_tasks_deliverables.sql": {
+    "mtime": 1788873184.9389417,
+    "seen": 1788933840.803197,
+    "ast_hash": "14f987d5c36d644940a4c0a1238b2a3f",
+    "semantic_hash": "14f987d5c36d644940a4c0a1238b2a3f"
+  },
+  "supabase/seed.sql": {
+    "mtime": 1788873197.6262379,
+    "seen": 1788933840.8031986,
+    "ast_hash": "6feb994f06b521508171462577dbc129",
+    "semantic_hash": "6feb994f06b521508171462577dbc129"
+  }
+}
