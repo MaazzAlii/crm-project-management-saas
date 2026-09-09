@@ -34,6 +34,7 @@ export async function POST(req: Request) {
 
       if (organizationId && subscriptionId) {
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+        const subData = subscription as unknown as { current_period_start: number; current_period_end: number }
         
         await supabase
           .from('organization_subscriptions')
@@ -42,8 +43,8 @@ export async function POST(req: Request) {
             stripe_customer_id: session.customer as string,
             stripe_subscription_id: subscriptionId,
             status: subscription.status,
-            current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            current_period_start: new Date((subData.current_period_start || Date.now() / 1000) * 1000).toISOString(),
+            current_period_end: new Date((subData.current_period_end || Date.now() / 1000) * 1000).toISOString(),
             updated_at: new Date().toISOString(),
           }, { onConflict: 'organization_id' })
       }
@@ -53,6 +54,7 @@ export async function POST(req: Request) {
     case 'customer.subscription.updated':
     case 'customer.subscription.deleted': {
       const subscription = event.data.object as Stripe.Subscription
+      const subData = subscription as unknown as { current_period_start: number; current_period_end: number }
       const customerId = subscription.customer as string
 
       // Sync database subscription status with Stripe source of truth
@@ -60,8 +62,8 @@ export async function POST(req: Request) {
         .from('organization_subscriptions')
         .update({
           status: subscription.status,
-          current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+          current_period_start: new Date((subData.current_period_start || Date.now() / 1000) * 1000).toISOString(),
+          current_period_end: new Date((subData.current_period_end || Date.now() / 1000) * 1000).toISOString(),
           cancel_at_period_end: subscription.cancel_at_period_end,
           updated_at: new Date().toISOString(),
         })
