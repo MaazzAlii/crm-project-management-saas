@@ -1,55 +1,59 @@
-# ADR 001: Multi-Tenant Architecture & Data Isolation
+# ADR 001: Multi-Tenant Architecture, Data Isolation & Super Admin Platform Tier
 
 ## Status
 Accepted
 
 ## Context
-The platform originated as an internal tool for Innoventix Hub but has been expanded into a commercial multi-tenant SaaS product sold to external agencies and SMBs. We need a clear, scalable, and secure multi-tenancy model before building the database schema, auth policies, or application features.
+The platform originated as an internal tool for Innoventix Hub and has evolved into a self-hosted, commercial multi-tenant SaaS. It features a dual-tier tenancy structure: tenant organizations (agencies/SMBs) and a platform-level Super Admin operator tier. We require an unambiguous architectural decision defining data boundaries, authorization models, and Super Admin privilege isolation before schema creation.
 
-## Options Considered
+## Options Considered for Tenancy
 
 ### 1. Database-Per-Tenant
-- **Pros**: Complete physical isolation, easy backup/restore per tenant.
-- **Cons**: High operational complexity, high cost at scale, difficult schema migrations across hundreds of databases.
+- **Pros**: Complete physical isolation.
+- **Cons**: High operational overhead on self-hosted VPS, complex migrations across instances.
 
-### 2. Schema-Per-Tenant (PostgreSQL Schemas)
-- **Pros**: Strong logical isolation, shared DB instance.
-- **Cons**: Schema migration overhead, connection pool challenges with hundreds of schemas.
+### 2. Shared Database, Shared Schema with Row-Level Security (RLS) — SELECTED
+- **Pros**: Operational simplicity, single migration pipeline, high performance, robust RLS-enforced security.
+- **Cons**: Requires strict RLS enforcement on 100% of tenant tables.
 
-### 3. Shared Database, Shared Schema (Row-Level Tenancy) — SELECTED
-- **Pros**: Simple operational overhead, cost-effective, seamless schema migrations, highly scalable.
-- **Cons**: Requires strict row-level security (RLS) on every table to prevent data leaks across tenants.
+---
 
 ## Decision
-We adopt **Shared Database, Shared Schema with Row-Level Isolation**.
 
-1. **Organization as Tenant Root**:
-   - An `organizations` table represents each tenant (paying company / agency).
-   - Innoventix Hub is tenant #1 in the database (no special code branches).
+We adopt **Shared Database, Shared Schema with Row-Level Isolation** for tenants, coupled with a **Strictly Separated Super Admin Table** for platform management.
 
-2. **Foreign Key Enforcement**:
-   - Every tenant-scoped table MUST include `organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE`.
+### 1. Complete Hierarchy Structure
+```
+Super Admin Tier (Platform Operator / DEVMARK)
+  │ (Stored in `super_admins` table; ZERO membership in `organization_members`)
+  │
+  ▼
+Organization Tier (Tenants - Innoventix Hub = Org #1)
+  ├── Organization Members (Owner, Admin, Member, Billing Manager)
+  ├── Clients (Agency Clients - Manual or Connected Communication Mode)
+  │     └── Projects
+  │           ├── Tasks
+  │           └── Deliverables
+  ├── Communication Hub (Slack, WhatsApp, Email, Discord, Upwork)
+  ├── AI Settings & Feature Flags (Per-Organization Controls)
+  └── Subscription & Stripe Billing (Plan Tier & Limits)
+```
 
-3. **Supabase Row-Level Security (RLS)**:
-   - RLS is ENABLED on every tenant table.
-   - Access is granted by evaluating whether `auth.uid()` belongs to `organization_members` for the given `organization_id`.
+### 2. Tenant Isolation Rules
+- Every tenant-scoped table MUST include `organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE`.
+- RLS MUST be enabled on every tenant table.
+- Policies validate that `auth.uid()` exists in `organization_members` for the target `organization_id`.
+- Innoventix Hub is Organization #1 in the database, with zero hardcoded code branches.
 
-4. **Tenant Hierarchy**:
-   ```
-   Organization (e.g. Innoventix Hub or Agency X)
-     ├── Members (Owners, Admins, Members, Billing Managers)
-     ├── Clients (Agency's customers)
-     │     └── Projects
-     │           ├── Tasks
-     │           └── Deliverables
-     ├── Communication Hub (Org-connected Slack, Email, WhatsApp)
-     └── Subscriptions & Billing (Stripe Customer per Org)
-   ```
+### 3. Super Admin Isolation Rules
+- Super Admins are stored in a dedicated `super_admins` table (`id`, `user_id`, `created_at`).
+- Super Admin status is NEVER derived or inherited from any organization role (`owner`/`admin`).
+- Super Admin API endpoints (`/api/super-admin/*`) and UI routes (`/super-admin/*`) explicitly check the `super_admins` table.
+- A compromised organization owner role CANNOT escalate to platform Super Admin access.
 
-5. **Feature Gating**:
-   - Feature gating and limits are checked at the `organizations.plan_tier` level.
+---
 
 ## Consequences
-- Every database migration must include `organization_id` on new tenant tables.
-- RLS policies must be thoroughly tested for tenant isolation.
-- No developer should write queries omitting `organization_id` filtering or bypassing RLS.
+- Every database migration must include `organization_id` on tenant tables and appropriate RLS policies.
+- Super Admin functionality is strictly isolated from tenant RLS contexts.
+- Automated tests must verify both multi-tenant isolation and Super Admin security boundaries.
