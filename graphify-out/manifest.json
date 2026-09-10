@@ -18,10 +18,10 @@
     "semantic_hash": "742f89c16108b2fadcbd6086d901bece"
   },
   "package.json": {
-    "mtime": 1788868989.5272985,
-    "seen": 1788933809.7057388,
-    "ast_hash": "021969f05680787c4ba3b3f3ec2ef0fe",
-    "semantic_hash": "021969f05680787c4ba3b3f3ec2ef0fe"
+    "mtime": 1788939043.1792026,
+    "seen": 1789023458.5077755,
+    "ast_hash": "3d52c088e274c7372f03a5505ff8cf95",
+    "semantic_hash": ""
   },
   "postcss.config.js": {
     "mtime": 1788869116.4563153,
@@ -30,10 +30,10 @@
     "semantic_hash": "8640f9b2e6475cc3f5b1ff4548925765"
   },
   "tailwind.config.ts": {
-    "mtime": 1788869105.6916497,
-    "seen": 1788933809.7057412,
-    "ast_hash": "802625f0b2734e6d62397641c7b8a3db",
-    "semantic_hash": "802625f0b2734e6d62397641c7b8a3db"
+    "mtime": 1788939612.2791889,
+    "seen": 1789023458.507798,
+    "ast_hash": "2cd9be2a59ef0ea30924e7aababe3eb1",
+    "semantic_hash": ""
   },
   "tsconfig.json": {
     "mtime": 1788868997.3661182,
@@ -53,22 +53,1102 @@
     "ast_hash": "7b664d0ad412547e92971e74af3c71d2",
     "semantic_hash": "7b664d0ad412547e92971e74af3c71d2"
   },
-  "supabase/migrations/0003_crm_clients.sql": {
-    "mtime": 1788873167.074736,
-    "seen": 1788933840.8031955,
-    "ast_hash": "b6f49dfc0f29f8e77e7560ec76643127",
-    "semantic_hash": "b6f49dfc0f29f8e77e7560ec76643127"
-  },
-  "supabase/migrations/0004_projects_tasks_deliverables.sql": {
-    "mtime": 1788873184.9389417,
-    "seen": 1788933840.803197,
-    "ast_hash": "14f987d5c36d644940a4c0a1238b2a3f",
-    "semantic_hash": "14f987d5c36d644940a4c0a1238b2a3f"
-  },
   "supabase/seed.sql": {
-    "mtime": 1788873197.6262379,
-    "seen": 1788933840.8031986,
-    "ast_hash": "6feb994f06b521508171462577dbc129",
-    "semantic_hash": "6feb994f06b521508171462577dbc129"
+    "mtime": 1788936055.8844676,
+    "seen": 1789023458.5077956,
+    "ast_hash": "1fba08cec5cbd6d0de8eb65f9eacf899",
+    "semantic_hash": ""
+  },
+  "app/(auth)/login/page.tsx": {
+    "mtime": 1788939739.6075666,
+    "seen": 1789023458.5077436,
+    "ast_hash": "f62cd2b1d3e0ee90f3a23acd6f2bb782",
+    "semantic_hash": ""
+  },
+  "app/(auth)/signup/page.tsx": {
+    "mtime": 1788936166.2054625,
+    "seen": 1789023458.507747,
+    "ast_hash": "047941dbad62eef88b737b11e1f3d02d",
+    "semantic_hash": ""
+  },
+  "app/(dashboard)/settings/billing/page.tsx": {
+    "mtime": 1788939113.164601,
+    "seen": 1789023458.5077486,
+    "ast_hash": "9b5ec89abc9ee97b720c6144e8f31f0e",
+    "semantic_hash": ""
+  },
+  "app/actions/onboarding.ts": {
+    "mtime": 1788938064.503987,
+    "seen": 1789023458.5077496,
+    "ast_hash": "d57688ff2165559a414307a551880664",
+    "semantic_hash": ""
+  },
+  "app/actions/stripe.ts": {
+    "mtime": 1788939095.4400804,
+    "seen": 1789023458.5077512,
+    "ast_hash": "ec8de3c2997e2c4d3c9574ef9d032860",
+    "semantic_hash": ""
+  },
+  "app/api/stripe/webhook/route.ts": {
+    "mtime": 1788939144.0446517,
+    "seen": 1789023458.5077522,
+    "ast_hash": "89c95c4c6d095974c1031ff950263fa1",
+    "semantic_hash": ""
+  },
+  "app/onboarding/page.tsx": {
+    "mtime": 1788938248.495726,
+    "seen": 1789023458.5077567,
+    "ast_hash": "3f580944f70c3fa8af44d6e0cca49040",
+    "semantic_hash": ""
+  },
+  "app/onboarding/steps/ChoosePlanStep.tsx": {
+    "mtime": 1788938171.0493908,
+    "seen": 1789023458.5077581,
+    "ast_hash": "674b1b0612dd300ccffc3cd50820e47e",
+    "semantic_hash": ""
+  },
+  "app/onboarding/steps/InviteTeamStep.tsx": {
+    "mtime": 1788938137.6394353,
+    "seen": 1789023458.507759,
+    "ast_hash": "cd824dec264aca9e9d32c849678f7bea",
+    "semantic_hash": ""
+  },
+  "app/onboarding/steps/OnboardingCompleteStep.tsx": {
+    "mtime": 1788938207.5253608,
+    "seen": 1789023458.5077603,
+    "ast_hash": "7e58c8ec24389f82a2437cf98ee403b2",
+    "semantic_hash": ""
+  },
+  "app/onboarding/steps/OrgDetailsStep.tsx": {
+    "mtime": 1788938107.9434817,
+    "seen": 1789023458.5077617,
+    "ast_hash": "2ea9a2fe137b205f893dc1ba1aca3657",
+    "semantic_hash": ""
+  },
+  "app/super-admin/page.tsx": {
+    "mtime": 1789023401.9189816,
+    "seen": 1789023458.5077653,
+    "ast_hash": "3e7beed5d205d2d7acf98a9169042e07",
+    "semantic_hash": ""
+  },
+  "lib/auth/session.ts": {
+    "mtime": 1788936120.8943176,
+    "seen": 1789023458.507767,
+    "ast_hash": "75133484158bd8fd9b513fcf26875c3a",
+    "semantic_hash": ""
+  },
+  "lib/auth/super-admin.ts": {
+    "mtime": 1788939719.5927508,
+    "seen": 1789023458.5077684,
+    "ast_hash": "cdae83692c4888f5639f077c0ef1cf3b",
+    "semantic_hash": ""
+  },
+  "lib/billing/plan-limits.ts": {
+    "mtime": 1788938959.549597,
+    "seen": 1789023458.5077696,
+    "ast_hash": "ce3250184a51fd1a3d0c55e6f48f7683",
+    "semantic_hash": ""
+  },
+  "lib/stripe/client.ts": {
+    "mtime": 1788939059.5980153,
+    "seen": 1789023458.5077705,
+    "ast_hash": "66397b0ca1d6cbc8d22d3f0ed3f7fae8",
+    "semantic_hash": ""
+  },
+  "lib/supabase/client.ts": {
+    "mtime": 1788938842.14677,
+    "seen": 1789023458.507772,
+    "ast_hash": "09b563665954625b866c0be4967dac77",
+    "semantic_hash": ""
+  },
+  "lib/supabase/server.ts": {
+    "mtime": 1788938851.069128,
+    "seen": 1789023458.507773,
+    "ast_hash": "8811aee5602f5e06f765f906f74cb030",
+    "semantic_hash": ""
+  },
+  "middleware.ts": {
+    "mtime": 1789023389.5603287,
+    "seen": 1789023458.507774,
+    "ast_hash": "f8f76a23c561f420a2ffe51556358a2f",
+    "semantic_hash": ""
+  },
+  "scripts/infra/backup-postgres.sh": {
+    "mtime": 1788935743.8221495,
+    "seen": 1789023458.507779,
+    "ast_hash": "66b04d54e5280c80122227ef712fd0f9",
+    "semantic_hash": ""
+  },
+  "scripts/infra/harden.sh": {
+    "mtime": 1788935597.7019377,
+    "seen": 1789023458.5077798,
+    "ast_hash": "70d4eebe1e7a79b9879a29a7bf624069",
+    "semantic_hash": ""
+  },
+  "scripts/infra/restore-postgres.sh": {
+    "mtime": 1788935750.7741318,
+    "seen": 1789023458.507781,
+    "ast_hash": "1df61c27a53617bccbef4105d05b8b90",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0003_super_admins.sql": {
+    "mtime": 1788935960.2902346,
+    "seen": 1789023458.5077858,
+    "ast_hash": "946008ebbcacdebea1ee040e8e8069c2",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0004_crm_clients.sql": {
+    "mtime": 1788935994.2721698,
+    "seen": 1789023458.5077868,
+    "ast_hash": "6c7e0e847a2c94ebc34bd58b1d74f79a",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0005_projects_tasks_deliverables.sql": {
+    "mtime": 1788936000.260698,
+    "seen": 1789023458.507788,
+    "ast_hash": "5e96a7f0d52947e05f3c2cc49bb845d4",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0006_communication_hub.sql": {
+    "mtime": 1788936041.4448042,
+    "seen": 1789023458.5077894,
+    "ast_hash": "ecf5f9ebd14da02e5e7ceae41bbc1de6",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0007_billing_subscriptions.sql": {
+    "mtime": 1788936047.5322683,
+    "seen": 1789023458.5077906,
+    "ast_hash": "5145eaf83350b238ce53177b691d1dce",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0008_rls_policies.sql": {
+    "mtime": 1788937947.466167,
+    "seen": 1789023458.5077918,
+    "ast_hash": "841b386a1052bc8b9daea0cfeec77c96",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0009_onboarding_fields.sql": {
+    "mtime": 1788938025.7141888,
+    "seen": 1789023458.507793,
+    "ast_hash": "61cd6a811c244b232655363bbc2c1468",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0010_super_admin_rls.sql": {
+    "mtime": 1789023376.5497177,
+    "seen": 1789023458.5077941,
+    "ast_hash": "1b0f0b363a45b4a3a3bf0a6b2d519d7b",
+    "semantic_hash": ""
+  },
+  "supabase/seed/plans.sql": {
+    "mtime": 1788938943.496477,
+    "seen": 1789023458.5077965,
+    "ast_hash": "b627ea60d479a74991a9bc7a721ba01f",
+    "semantic_hash": ""
+  },
+  ".agent-state.md": {
+    "mtime": 1788873208.6130147,
+    "seen": 1789023458.507801,
+    "ast_hash": "328fa9a1e19cd3c102c32dc99d823b2d",
+    "semantic_hash": ""
+  },
+  ".agents/rules/graphify.md": {
+    "mtime": 1788933791.8699286,
+    "seen": 1789023458.507802,
+    "ast_hash": "a0e4d192b9e2e17256124dbfc8e24e6a",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/graphify.md": {
+    "mtime": 1788933791.8699286,
+    "seen": 1789023458.507804,
+    "ast_hash": "a831cf3669f1e6ab85d8a80ebe655f99",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/.agent-state.md": {
+    "mtime": 1788865628.6481745,
+    "seen": 1789023458.507805,
+    "ast_hash": "9ac3d70e0bae5fdc81d2dccb6331151d",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/00-MASTER-PROMPT-project-orchestrator.md": {
+    "mtime": 1788865628.9846294,
+    "seen": 1789023458.5078065,
+    "ast_hash": "97c8240f8c9b39cb3bfd8ca3605ad1a3",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/01-repository-and-monorepo-foundation.md": {
+    "mtime": 1788865628.8406477,
+    "seen": 1789023458.5078075,
+    "ast_hash": "1d345193607d37768681d848b19a5730",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/02-multi-tenant-architecture-decision-record.md": {
+    "mtime": 1788865629.1461334,
+    "seen": 1789023458.5078087,
+    "ast_hash": "a98189f528f733f46e10258a0bd2c06f",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/03-core-database-schema--organizations-users-roles.md": {
+    "mtime": 1788865629.0874703,
+    "seen": 1789023458.5078099,
+    "ast_hash": "979e81ffca70fd51ce10a8062ddf71b3",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/04-core-database-schema--crm-and-project-management-tables.md": {
+    "mtime": 1788865629.200379,
+    "seen": 1789023458.5078108,
+    "ast_hash": "6b3c5146c4667129522d74ca1da75574",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/05-core-database-schema--communication-hub-and-billing.md": {
+    "mtime": 1788865628.7762787,
+    "seen": 1789023458.5078118,
+    "ast_hash": "eccb96ad2f9d4ea399bd7933592a5588",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/06-authentication-supabase-auth--team-members.md": {
+    "mtime": 1788865628.808671,
+    "seen": 1789023458.5078132,
+    "ast_hash": "ff789760ae9e031753b92b7c06c0ffd2",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/07-authorization--roles-and-row-level-security-policies.md": {
+    "mtime": 1788865628.6839423,
+    "seen": 1789023458.5078144,
+    "ast_hash": "b3aa7e8ac3197612ccc9561b08d9a1e0",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/08-organization-onboarding-and-tenant-provisioning.md": {
+    "mtime": 1788865629.014831,
+    "seen": 1789023458.5078154,
+    "ast_hash": "03477901f6545003a03549b0d7c9aedf",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/09-subscription-plans-definition.md": {
+    "mtime": 1788865628.7313251,
+    "seen": 1789023458.5078168,
+    "ast_hash": "be33d40f0c3a90e7d9b4b6a217c9ce67",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/10-stripe-billing-integration.md": {
+    "mtime": 1788865628.374702,
+    "seen": 1789023458.5078177,
+    "ast_hash": "35f820e67be06df3e4587374916b21da",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/11-application-shell-navigation-and-organization-switcher.md": {
+    "mtime": 1788865628.610118,
+    "seen": 1789023458.5078187,
+    "ast_hash": "07ebb9a5fec0567fa1aeb34eff05538c",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/12-main-dashboard-overview.md": {
+    "mtime": 1788865629.1318402,
+    "seen": 1789023458.50782,
+    "ast_hash": "bc3a12f1723a2886bcccc19f5a1fb0a1",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/13-organization-settings-and-team-management.md": {
+    "mtime": 1788865628.7200866,
+    "seen": 1789023458.5078208,
+    "ast_hash": "3b6a2deb2f32cc587e80ac3fa0d04c60",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/14-crm--clients-list-and-management.md": {
+    "mtime": 1788865628.5963156,
+    "seen": 1789023458.5078223,
+    "ast_hash": "e730421161d023311ebbea18f6dd5bf3",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/15-crm--client-detail-page.md": {
+    "mtime": 1788865628.4922519,
+    "seen": 1789023458.5078235,
+    "ast_hash": "1a99e7f98f9e0c50111f4ca3f570a4fb",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/16-crm--leads--sales-pipeline-kanban.md": {
+    "mtime": 1788865628.6716824,
+    "seen": 1789023458.5078247,
+    "ast_hash": "272fb82bae7672b3e5d7c6b599958645",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/17-crm--client-communication-log.md": {
+    "mtime": 1788865628.5726497,
+    "seen": 1789023458.5078256,
+    "ast_hash": "58385a1241c9672b4591c6f1d61d6054",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/18-crm--tags-segmentation-and-advanced-search.md": {
+    "mtime": 1788865628.5848653,
+    "seen": 1789023458.507827,
+    "ast_hash": "0934f7af727db795e8a24a727bcc04dd",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/19-projects--list-and-kanban-board.md": {
+    "mtime": 1788865628.9396784,
+    "seen": 1789023458.507828,
+    "ast_hash": "328377f60cf86e974fbd894c2c28e217",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/20-projects--detail-page.md": {
+    "mtime": 1788865628.441038,
+    "seen": 1789023458.507829,
+    "ast_hash": "a090a911910f832f7755c2edf517887a",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/21-tasks-module.md": {
+    "mtime": 1788865628.7609334,
+    "seen": 1789023458.5078304,
+    "ast_hash": "e84966125ea2af77cf064d1e5aabf9ff",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/22-deliverables-module.md": {
+    "mtime": 1788865628.6343203,
+    "seen": 1789023458.5078316,
+    "ast_hash": "7417f00a9cb1c9e5c6ce48819bf5bcb4",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/23-project-templates.md": {
+    "mtime": 1788865629.0302424,
+    "seen": 1789023458.5078328,
+    "ast_hash": "0338131046f6a55790d879f47aff16c3",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/24-team-workload-view.md": {
+    "mtime": 1788865628.9693854,
+    "seen": 1789023458.507834,
+    "ast_hash": "e284582bed49cbd65eb288b7c91d3e25",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/25-status-tag-system--shared-component-library.md": {
+    "mtime": 1788865628.4286404,
+    "seen": 1789023458.507835,
+    "ast_hash": "27598f6bbd46a27103f7760f7e0de77c",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/26-communication-hub--architecture-and-unified-inbox-data-layer.md": {
+    "mtime": 1788865628.7079935,
+    "seen": 1789023458.507836,
+    "ast_hash": "5005218453c7eee26b5c583fac334d1c",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/27-communication-hub--slack-integration.md": {
+    "mtime": 1788865628.874127,
+    "seen": 1789023458.5078373,
+    "ast_hash": "2dd67ccfd84291a53fc583312940bda5",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/28-communication-hub--whatsapp-integration.md": {
+    "mtime": 1788865628.5471554,
+    "seen": 1789023458.5078382,
+    "ast_hash": "4dbadc1eab0b4c07c4350e49e810b66b",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/29-communication-hub--email-integration.md": {
+    "mtime": 1788865628.5160632,
+    "seen": 1789023458.5078394,
+    "ast_hash": "77b0d4798959ffd79d9d3ce9f0242a94",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/30-communication-hub--discord-and-upwork-channel-stubs.md": {
+    "mtime": 1788865628.4794436,
+    "seen": 1789023458.5078404,
+    "ast_hash": "9dd23703e085c5497d8dca481b85780a",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/31-communication-hub--unified-inbox-ui.md": {
+    "mtime": 1788865628.924345,
+    "seen": 1789023458.5078416,
+    "ast_hash": "2656c3efd185793fae62f754946c8eb6",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/32-n8n-automation-architecture-and-webhook-contracts.md": {
+    "mtime": 1788865628.8891406,
+    "seen": 1789023458.5078425,
+    "ast_hash": "304851ef9115fe03f55b00ca2269fec8",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/33-automation--project-delivered-\u00d4\u00e5\u00c6-invoice-trigger.md": {
+    "mtime": 1788865628.9081392,
+    "seen": 1789023458.507845,
+    "ast_hash": "53296235e3da184c157dec763532a164",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/34-automation--deadline-and-overdue-alerts.md": {
+    "mtime": 1788865628.6231205,
+    "seen": 1789023458.5078459,
+    "ast_hash": "ffd748d9ed33ced8fc22ba590f80927a",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/35-automation--weekly-summary-report.md": {
+    "mtime": 1788865629.1728127,
+    "seen": 1789023458.5078468,
+    "ast_hash": "83301ca3d2258a38754d3821902351e9",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/36-in-app-notification-center.md": {
+    "mtime": 1788865628.560081,
+    "seen": 1789023458.5078483,
+    "ast_hash": "3849bef6dc3ecb3d832a3b726a22e2d7",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/37-client-portal--auth-and-rls.md": {
+    "mtime": 1788865629.0480623,
+    "seen": 1789023458.5078492,
+    "ast_hash": "4da0bc8e73c60158f6a9993b8593ec84",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/38-client-portal--dashboard.md": {
+    "mtime": 1788865629.0680618,
+    "seen": 1789023458.5078504,
+    "ast_hash": "d0012959e7032a75f2b765921d13e48d",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/39-client-portal--project-detail-and-approval-flow.md": {
+    "mtime": 1788865629.1196887,
+    "seen": 1789023458.5078516,
+    "ast_hash": "16218b0dabd6751bc21455bec6c99a50",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/40-client-portal--invoice-and-payment-status-view.md": {
+    "mtime": 1788865628.4673069,
+    "seen": 1789023458.5078526,
+    "ast_hash": "407f6e96c68941cf92c68a6f283ea38a",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/41-analytics-dashboard.md": {
+    "mtime": 1788865629.0000863,
+    "seen": 1789023458.5078547,
+    "ast_hash": "e8165c2d1a980a14e5f458c711514d08",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/42-revenue-and-plan-usage-reporting.md": {
+    "mtime": 1788865629.1058521,
+    "seen": 1789023458.507856,
+    "ast_hash": "53be0ca0292885387adc536b3efef97c",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/43-exportable-reports-pdf-csv.md": {
+    "mtime": 1788865628.792863,
+    "seen": 1789023458.5078568,
+    "ast_hash": "4a15943a2123acbd06c49c4cd5ffea3b",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/44-input-validation-and-sanitization-layer.md": {
+    "mtime": 1788865629.185177,
+    "seen": 1789023458.507858,
+    "ast_hash": "c531ff1037ac2e7fb437a13420e9a675",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/45-secrets-management-and-api-security.md": {
+    "mtime": 1788865628.9537263,
+    "seen": 1789023458.507859,
+    "ast_hash": "5ce00196081634aecc2f92ed3f4bc627",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/46-audit-logging.md": {
+    "mtime": 1788865628.8572407,
+    "seen": 1789023458.50786,
+    "ast_hash": "26c42a98f5b5d84e705f5a921ddefd7c",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/47-automated-testing-setup--unit-and-integration.md": {
+    "mtime": 1788865628.3993948,
+    "seen": 1789023458.5078611,
+    "ast_hash": "1d641de4fa028ca7f2ae61f458763f6a",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/48-end-to-end-testing--critical-user-flows.md": {
+    "mtime": 1788865628.4152024,
+    "seen": 1789023458.5078626,
+    "ast_hash": "0f747d97cd413c020d767d12e4a082f1",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/49-load-and-multi-tenant-scale-testing.md": {
+    "mtime": 1788865628.504874,
+    "seen": 1789023458.5078635,
+    "ast_hash": "13eda4d64cb2cc05fb3610aa0767a06f",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/50-environment-configuration-and-secrets-for-production.md": {
+    "mtime": 1788865628.4553466,
+    "seen": 1789023458.5078645,
+    "ast_hash": "dc0e9fa3a32195dd4b3d193944f64d48",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/51-netlify-deployment-pipeline.md": {
+    "mtime": 1788865629.159126,
+    "seen": 1789023458.5078657,
+    "ast_hash": "4b8383c6fe9f2238b9e7a8786910978d",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/52-n8n-workflow-activation-on-contabo-vps.md": {
+    "mtime": 1788865628.5353198,
+    "seen": 1789023458.5078666,
+    "ast_hash": "0741a68a552fd19d82f98bfddf700e82",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/53-final-qa-security-audit-and-demo-preparation.md": {
+    "mtime": 1788865628.8254323,
+    "seen": 1789023458.5078678,
+    "ast_hash": "af403d391b7527df09e3690fd7d4427e",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/ORCHESTRATOR-FULL-RULES.md": {
+    "mtime": 1788865628.6954381,
+    "seen": 1789023458.507869,
+    "ast_hash": "17c305eec03d29826a506a88ad4b9f0f",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/ORIGINAL-ASSIGNMENT-INNOVENTIX-PM.md": {
+    "mtime": 1788865628.744616,
+    "seen": 1789023458.5078702,
+    "ast_hash": "efcc070710b5fa60037923b48b32ed8e",
+    "semantic_hash": ""
+  },
+  "Prompts To Build System/README.md": {
+    "mtime": 1788865628.6603043,
+    "seen": 1789023458.507871,
+    "ast_hash": "ea46b3ca4154b24819abac0329118a59",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1788935865.5293343,
+    "seen": 1789023458.5078723,
+    "ast_hash": "7126f25ca124b7a648242f789fb90516",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/.agent-state.md": {
+    "mtime": 1789023421.9695997,
+    "seen": 1789023458.5078733,
+    "ast_hash": "f97f9c5e51d14a51c80bc778682e1099",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/00-MASTER-PROMPT-v2-self-hosted.md": {
+    "mtime": 1788932169.8094678,
+    "seen": 1789023458.5078743,
+    "ast_hash": "8da9ad0b7264dfa75b1056f0c0af2a30",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/01-contabo-vps-provisioning-and-base-server-hardening.md": {
+    "mtime": 1788932169.87598,
+    "seen": 1789023458.5078754,
+    "ast_hash": "fe9908bba75b75e78748835e3114e2ae",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/02-self-hosted-supabase-stack-via-docker-compose.md": {
+    "mtime": 1788932170.5542307,
+    "seen": 1789023458.5078766,
+    "ast_hash": "6adedca531664382e120d4ab447f9f9b",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/03-nginx-reverse-proxy-domains-and-ssl.md": {
+    "mtime": 1788932170.029075,
+    "seen": 1789023458.5078778,
+    "ast_hash": "d3296fa4595798dead3092d581550a52",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/04-backup-and-disaster-recovery-strategy.md": {
+    "mtime": 1788932170.486992,
+    "seen": 1789023458.507879,
+    "ast_hash": "9c256c07d995631a9196d213b35d812a",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/05-local-development-environment-parity.md": {
+    "mtime": 1788932170.3079493,
+    "seen": 1789023458.50788,
+    "ast_hash": "8870c29c1312b1a1b4e6cfb446298b26",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/06-repository-and-application-foundation.md": {
+    "mtime": 1788932169.8567438,
+    "seen": 1789023458.507881,
+    "ast_hash": "f311d93e921d7d38e2b86e7239662e97",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/07-multi-tenant-architecture-decision-record.md": {
+    "mtime": 1788932169.8194377,
+    "seen": 1789023458.5078819,
+    "ast_hash": "73238b60eda444aa09d2e4aa89552a6d",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/08-core-database-schema--organizations-users-roles-super-admins.md": {
+    "mtime": 1788932169.9681296,
+    "seen": 1789023458.5078833,
+    "ast_hash": "2307b6f3ca1e09c08b949ed22cd9a5ca",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/09-core-database-schema--crm-and-project-management-tables.md": {
+    "mtime": 1788932170.6011403,
+    "seen": 1789023458.5078843,
+    "ast_hash": "2c92b3f5551cd5b33f57cd559a1ba319",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/10-core-database-schema--communication-hub-and-billing.md": {
+    "mtime": 1788932169.9169364,
+    "seen": 1789023458.5078852,
+    "ast_hash": "65593f0de347186cc305ba56e19bcd9e",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/11-authentication-self-hosted-gotrue--team-members.md": {
+    "mtime": 1788932170.131086,
+    "seen": 1789023458.5078866,
+    "ast_hash": "0360d999f87061cbc54d57a3b4490f67",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/12-authorization--roles-and-row-level-security-policies.md": {
+    "mtime": 1788932170.2527933,
+    "seen": 1789023458.5078876,
+    "ast_hash": "4468bcd4b2c10270e1b7eeb86f665e40",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/13-organization-onboarding-and-tenant-provisioning.md": {
+    "mtime": 1788932170.2018661,
+    "seen": 1789023458.5078886,
+    "ast_hash": "af17294f69977c571cd5352d815979d4",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/14-subscription-plans-definition.md": {
+    "mtime": 1788932170.5257902,
+    "seen": 1789023458.50789,
+    "ast_hash": "113811074e215d5a61c18bd56a4df3d5",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/15-stripe-billing-integration.md": {
+    "mtime": 1788932170.7114356,
+    "seen": 1789023458.5078912,
+    "ast_hash": "dfb3b1da4106fc152b864d9b02fc0217",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/16-super-admin--access-control-layer.md": {
+    "mtime": 1788932170.144788,
+    "seen": 1789023458.5078924,
+    "ast_hash": "b01fe3eb06638e3315330307e793855a",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/17-super-admin--platform-dashboard.md": {
+    "mtime": 1788932170.3666706,
+    "seen": 1789023458.5078936,
+    "ast_hash": "7e9cd3e805134be1142f9d16959bcae7",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/18-super-admin--organization-management.md": {
+    "mtime": 1788932170.5913236,
+    "seen": 1789023458.5078945,
+    "ast_hash": "d4b2f592b892ffae445c1c652b497829",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/19-super-admin--impersonation-and-support-access.md": {
+    "mtime": 1788932170.3287265,
+    "seen": 1789023458.5078957,
+    "ast_hash": "14410893f13a7ebd7a1000ebb93282db",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/20-super-admin--platform-settings-and-global-configuration.md": {
+    "mtime": 1788932170.8281274,
+    "seen": 1789023458.507897,
+    "ast_hash": "184373fbff416cffbc7c22cf4e97da7d",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/21-application-shell-navigation-and-organization-switcher.md": {
+    "mtime": 1788932169.90288,
+    "seen": 1789023458.5078979,
+    "ast_hash": "b768dc2204137145e1406db433d5bc79",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/22-main-dashboard-overview.md": {
+    "mtime": 1788932170.1859958,
+    "seen": 1789023458.5078988,
+    "ast_hash": "a07ae515fdadc22a02f6d1e4d77fc898",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/23-organization-settings-and-team-management.md": {
+    "mtime": 1788932170.2332878,
+    "seen": 1789023458.5079002,
+    "ast_hash": "fc14c7c40d68428ab9eb9a2e1f2a5a33",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/24-crm--clients-list-and-management.md": {
+    "mtime": 1788932170.0443594,
+    "seen": 1789023458.5079012,
+    "ast_hash": "bdc43804db34309d49c1ff4349ae9d62",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/25-crm--client-detail-page.md": {
+    "mtime": 1788932170.5652916,
+    "seen": 1789023458.5079024,
+    "ast_hash": "af5592a5bf2096a96b8078555bb46552",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/26-crm--leads--sales-pipeline-kanban.md": {
+    "mtime": 1788932170.660463,
+    "seen": 1789023458.5079036,
+    "ast_hash": "9f3f7cfefb54401a1a629fcb944967ed",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/27-crm--client-communication-log.md": {
+    "mtime": 1788932170.6511803,
+    "seen": 1789023458.5079045,
+    "ast_hash": "3ac1fd53d6da5e5e4592f119bd4f2765",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/28-crm--tags-segmentation-and-advanced-search.md": {
+    "mtime": 1788932169.797743,
+    "seen": 1789023458.5079057,
+    "ast_hash": "fa285e57172c7c66d896346edfe80eae",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/29-projects--list-and-kanban-board.md": {
+    "mtime": 1788932170.223029,
+    "seen": 1789023458.507907,
+    "ast_hash": "ba7168696cd927c6f34217dadc13505d",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/30-projects--detail-page.md": {
+    "mtime": 1788932169.9436579,
+    "seen": 1789023458.507908,
+    "ast_hash": "672fe6e9ec4fa84a3c066a01b218cb6d",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/31-tasks-module.md": {
+    "mtime": 1788932169.8871374,
+    "seen": 1789023458.507909,
+    "ast_hash": "6cf7d59296ce983a6a812a48558e3221",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/32-deliverables-module.md": {
+    "mtime": 1788932170.2894607,
+    "seen": 1789023458.5079105,
+    "ast_hash": "3a3312295130e99c06d33fad79881093",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/33-project-templates.md": {
+    "mtime": 1788932170.4760969,
+    "seen": 1789023458.5079114,
+    "ast_hash": "6120838122dfffb1a5072786941d0486",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/34-team-workload-view.md": {
+    "mtime": 1788932170.693618,
+    "seen": 1789023458.5079126,
+    "ast_hash": "fd69fb2b379bef25295696813c565152",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/35-status-tag-system--shared-component-library.md": {
+    "mtime": 1788932170.7881594,
+    "seen": 1789023458.5079138,
+    "ast_hash": "87f51df92cfb9bf0ec4b856655a18be1",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/36-communication-hub--architecture-and-unified-inbox-data-layer.md": {
+    "mtime": 1788932170.4275267,
+    "seen": 1789023458.507915,
+    "ast_hash": "782faab50ff4339237d18878b96d6409",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/37-communication-hub--slack-integration.md": {
+    "mtime": 1788932170.741187,
+    "seen": 1789023458.507916,
+    "ast_hash": "4c6fc5d3e3274f2b2ed818dfad4effbd",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/38-communication-hub--whatsapp-integration.md": {
+    "mtime": 1788932170.6802986,
+    "seen": 1789023458.5079172,
+    "ast_hash": "89ea6401b3ddc0a2f0ab72e4cdff3554",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/39-communication-hub--email-integration.md": {
+    "mtime": 1788932169.997507,
+    "seen": 1789023458.5079181,
+    "ast_hash": "2acc4aba8be292e6939202619ef3c103",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/40-communication-hub--discord-and-upwork-channel-stubs.md": {
+    "mtime": 1788932169.7777543,
+    "seen": 1789023458.5079193,
+    "ast_hash": "12d8b3771a013e0748249e83d7b57d70",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/41-communication-hub--unified-inbox-ui.md": {
+    "mtime": 1788932170.3232992,
+    "seen": 1789023458.5079203,
+    "ast_hash": "bfdac5e98e49be453d07d035455b2d01",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/42-client-communication-mode--manual-vs-connected-workflow.md": {
+    "mtime": 1788932170.573174,
+    "seen": 1789023458.5079217,
+    "ast_hash": "03945ceae0f3cbb4738b55cc98c14447",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/43-ai-feature-architecture-and-model-provider-configuration.md": {
+    "mtime": 1788932170.0916698,
+    "seen": 1789023458.5079226,
+    "ast_hash": "d5c1a9bab4887faaf71d6afd1ebe582e",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/44-ai--inbox-reply-suggestions.md": {
+    "mtime": 1788932169.8510478,
+    "seen": 1789023458.5079236,
+    "ast_hash": "b1234a8b6b5b82fc7929eb28f467a155",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/45-ai--lead-scoring-in-the-sales-pipeline.md": {
+    "mtime": 1788932170.8062742,
+    "seen": 1789023458.507925,
+    "ast_hash": "055c6db9167dde63b9af7377bc9ee481",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/46-ai--auto-task-extraction-from-messages.md": {
+    "mtime": 1788932170.4395585,
+    "seen": 1789023458.507926,
+    "ast_hash": "7d0432807a445b0fb88dfd26f694c1d6",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/47-ai--weekly-report-narrative-generation.md": {
+    "mtime": 1788932170.280879,
+    "seen": 1789023458.507927,
+    "ast_hash": "709aeebaeea10d8f819e7f512ce38512",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/48-ai-settings-and-usage-controls.md": {
+    "mtime": 1788932170.4010322,
+    "seen": 1789023458.5079284,
+    "ast_hash": "3fa20ce9feca1d47c731c46712b7fca8",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/49-n8n-automation-architecture-and-webhook-contracts.md": {
+    "mtime": 1788932170.852059,
+    "seen": 1789023458.5079293,
+    "ast_hash": "98ed053228a6ac5770ee955c1669965b",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/50-automation--project-delivered-\u00d4\u00e5\u00c6-invoice-trigger.md": {
+    "mtime": 1788932170.413191,
+    "seen": 1789023458.507931,
+    "ast_hash": "044b52d994c5309a5e4f842e5b2fc78a",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/51-automation--deadline-and-overdue-alerts.md": {
+    "mtime": 1788932170.6289766,
+    "seen": 1789023458.5079322,
+    "ast_hash": "e5d3c6bf6bee72e8968ae7cbbeb02079",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/52-automation--weekly-summary-report.md": {
+    "mtime": 1788932170.2018661,
+    "seen": 1789023458.5079331,
+    "ast_hash": "72690da8c0925abe06266e20e158f077",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/53-in-app-notification-center.md": {
+    "mtime": 1788932170.0725112,
+    "seen": 1789023458.5079346,
+    "ast_hash": "8032d2f2555d8f912d8ed2775dfd5a6e",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/54-client-portal--auth-and-rls.md": {
+    "mtime": 1788932169.9503465,
+    "seen": 1789023458.5079355,
+    "ast_hash": "dd6d9d0b1a0a9567b73e9dcf66252f3a",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/55-client-portal--dashboard.md": {
+    "mtime": 1788932170.0860257,
+    "seen": 1789023458.5079365,
+    "ast_hash": "6591261986999776df2854723950b015",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/56-client-portal--project-detail-and-approval-flow.md": {
+    "mtime": 1788932170.3494303,
+    "seen": 1789023458.507938,
+    "ast_hash": "6f76b7141c4146d9d810ab631c66941b",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/57-client-portal--invoice-and-payment-status-view.md": {
+    "mtime": 1788932170.7657166,
+    "seen": 1789023458.5079389,
+    "ast_hash": "9c6354dc0728fbca2fc73057f194cc16",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/58-analytics-dashboard.md": {
+    "mtime": 1788932170.4984014,
+    "seen": 1789023458.5079398,
+    "ast_hash": "1ccbce04d4174d65cd6a6f38abd0aca1",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/59-revenue-and-plan-usage-reporting.md": {
+    "mtime": 1788932170.4395585,
+    "seen": 1789023458.507941,
+    "ast_hash": "e134bbd8d0f6e7a7edd2a077ea2877f1",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/60-exportable-reports-pdf-csv.md": {
+    "mtime": 1788932170.1565719,
+    "seen": 1789023458.5079422,
+    "ast_hash": "e43a779415f16100e123398a031d095d",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/61-input-validation-and-sanitization-layer.md": {
+    "mtime": 1788932169.9233336,
+    "seen": 1789023458.5079432,
+    "ast_hash": "c1043ae3ce7bb8c9eb23de42b7c973d9",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/62-secrets-management-and-api-security.md": {
+    "mtime": 1788932170.5100577,
+    "seen": 1789023458.5079443,
+    "ast_hash": "1b05747a9b576d6a2e8fae0905481536",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/63-audit-logging.md": {
+    "mtime": 1788932170.53952,
+    "seen": 1789023458.5079455,
+    "ast_hash": "8d8c39ea0cb4eb23bb1ef08fb58cc74f",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/64-automated-testing-setup--unit-and-integration.md": {
+    "mtime": 1788932169.834649,
+    "seen": 1789023458.5079465,
+    "ast_hash": "86ae4c32fe49eb13df5432d8560dcd39",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/65-end-to-end-testing--critical-user-flows.md": {
+    "mtime": 1788932170.613224,
+    "seen": 1789023458.5079477,
+    "ast_hash": "751a7862c9ee8a26fba60d16d183f541",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/66-load-and-multi-tenant-scale-testing.md": {
+    "mtime": 1788932170.2648118,
+    "seen": 1789023458.5079489,
+    "ast_hash": "62bd43c9c613cd87d5ea7ff49d1acd7b",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/67-environment-configuration-and-secrets-for-production.md": {
+    "mtime": 1788932169.9838493,
+    "seen": 1789023458.5079513,
+    "ast_hash": "4533191294d2dfb2d8e10b352cf9b701",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/68-ci-cd-pipeline-to-contabo-vps.md": {
+    "mtime": 1788932170.3815527,
+    "seen": 1789023458.5079525,
+    "ast_hash": "f44964cfbcf4322958b20e7d00637937",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/69-n8n-workflow-activation-on-contabo-vps.md": {
+    "mtime": 1788932170.644783,
+    "seen": 1789023458.507954,
+    "ast_hash": "1edca4940cb786f96992eecf4945b283",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/70-monitoring-logging-and-uptime-for-self-hosted-infrastructure.md": {
+    "mtime": 1788932170.360113,
+    "seen": 1789023458.5079548,
+    "ast_hash": "b845645077d0711ac255ac52c6208ba4",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/71-final-qa-security-audit-and-demo-preparation.md": {
+    "mtime": 1788932170.4598904,
+    "seen": 1789023458.5079563,
+    "ast_hash": "b77cc330dc9f467ce288f9015ad57a03",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/ORCHESTRATOR-FULL-RULES.md": {
+    "mtime": 1788932170.1076727,
+    "seen": 1789023458.5079572,
+    "ast_hash": "17c305eec03d29826a506a88ad4b9f0f",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/ORIGINAL-ASSIGNMENT-INNOVENTIX-PM.md": {
+    "mtime": 1788932170.1763813,
+    "seen": 1789023458.5079582,
+    "ast_hash": "efcc070710b5fa60037923b48b32ed8e",
+    "semantic_hash": ""
+  },
+  "V2 Prompt to build system/README.md": {
+    "mtime": 1788932170.0578406,
+    "seen": 1789023458.5079594,
+    "ast_hash": "99c3d6f883e8773a4eaa95e06133f517",
+    "semantic_hash": ""
+  },
+  "docker-compose.local.yml": {
+    "mtime": 1788935782.267428,
+    "seen": 1789023458.5079606,
+    "ast_hash": "80cc9082d2cf533bb6915357a1c41812",
+    "semantic_hash": ""
+  },
+  "docker-compose.supabase.yml": {
+    "mtime": 1788935633.9397395,
+    "seen": 1789023458.5079615,
+    "ast_hash": "c1e04d86456edb4c9ce92462e149e400",
+    "semantic_hash": ""
+  },
+  "documentation/adr/001-multi-tenancy.md": {
+    "mtime": 1788935922.2156687,
+    "seen": 1789023458.5079627,
+    "ast_hash": "205341f20ac25edc48d722fb83e07765",
+    "semantic_hash": ""
+  },
+  "documentation/architecture.md": {
+    "mtime": 1788935842.3735483,
+    "seen": 1789023458.507964,
+    "ast_hash": "ffc7d47a4c349b58937b9fd6f8f6d3b8",
+    "semantic_hash": ""
+  },
+  "documentation/infra/backup-restore.md": {
+    "mtime": 1788935756.0457315,
+    "seen": 1789023458.5079648,
+    "ast_hash": "d30cb92126b6db0b4304d60c97eb4e85",
+    "semantic_hash": ""
+  },
+  "documentation/infra/dns-ssl.md": {
+    "mtime": 1788935702.0734072,
+    "seen": 1789023458.507966,
+    "ast_hash": "03d3b60778fed3651b7d7220af80040c",
+    "semantic_hash": ""
+  },
+  "documentation/infra/local-dev-setup.md": {
+    "mtime": 1788935803.8042076,
+    "seen": 1789023458.507967,
+    "ast_hash": "59ecb8b5d6a42c8e62de62e52fc5e0d6",
+    "semantic_hash": ""
+  },
+  "documentation/infra/self-hosted-supabase.md": {
+    "mtime": 1788935650.5828323,
+    "seen": 1789023458.5079684,
+    "ast_hash": "edfa7648a78a47420db01bfefc951a7b",
+    "semantic_hash": ""
+  },
+  "documentation/infra/server-setup.md": {
+    "mtime": 1788935588.529396,
+    "seen": 1789023458.5079696,
+    "ast_hash": "aaa6c02efa5c3def48a589fb544fd3d5",
+    "semantic_hash": ""
+  },
+  "documentation/pricing-plans.md": {
+    "mtime": 1788938927.1365654,
+    "seen": 1789023458.5079706,
+    "ast_hash": "b1766ab98848292a055bba1c675a007f",
+    "semantic_hash": ""
+  },
+  "full_project_dump.md": {
+    "mtime": 1788933453.6561093,
+    "seen": 1789023458.5079715,
+    "ast_hash": "eb87be314557223c4ecd41a79abf019c",
+    "semantic_hash": ""
+  },
+  "infra/kong/kong.local.yml": {
+    "mtime": 1788935788.4591835,
+    "seen": 1789023458.5079727,
+    "ast_hash": "3c274778c0b588565e13cc8b7d7a4def",
+    "semantic_hash": ""
+  },
+  "infra/kong/kong.yml": {
+    "mtime": 1788935639.5664961,
+    "seen": 1789023458.507974,
+    "ast_hash": "dc3f3b818f060d691fefd0504c8ed4d1",
+    "semantic_hash": ""
   }
 }
