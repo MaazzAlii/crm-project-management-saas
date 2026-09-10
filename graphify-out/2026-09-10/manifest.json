@@ -168,9 +168,9 @@
     "semantic_hash": ""
   },
   "middleware.ts": {
-    "mtime": 1789024683.4919903,
-    "seen": 1789025094.9646418,
-    "ast_hash": "3b63d5ebbbc51d5b745712335822796b",
+    "mtime": 1789023389.5603287,
+    "seen": 1789023458.507774,
+    "ast_hash": "f8f76a23c561f420a2ffe51556358a2f",
     "semantic_hash": ""
   },
   "scripts/infra/backup-postgres.sh": {
@@ -618,9 +618,9 @@
     "semantic_hash": ""
   },
   "V2 Prompt to build system/.agent-state.md": {
-    "mtime": 1789025004.3950698,
-    "seen": 1789025094.9649525,
-    "ast_hash": "8a4d1fe2465b9c131fb23ded833537af",
+    "mtime": 1789023421.9695997,
+    "seen": 1789023458.5078733,
+    "ast_hash": "f97f9c5e51d14a51c80bc778682e1099",
     "semantic_hash": ""
   },
   "V2 Prompt to build system/00-MASTER-PROMPT-v2-self-hosted.md": {
@@ -1149,90 +1149,6 @@
     "mtime": 1788935639.5664961,
     "seen": 1789023458.507974,
     "ast_hash": "dc3f3b818f060d691fefd0504c8ed4d1",
-    "semantic_hash": ""
-  },
-  "app/org-suspended/page.tsx": {
-    "mtime": 1789024606.127906,
-    "seen": 1789025094.9645805,
-    "ast_hash": "4818fd0694a9d04dd946acc858b89a65",
-    "semantic_hash": ""
-  },
-  "app/super-admin/actions.ts": {
-    "mtime": 1789024271.352133,
-    "seen": 1789025094.9645884,
-    "ast_hash": "5a6a19f178fa690883c28d240704ebff",
-    "semantic_hash": ""
-  },
-  "app/super-admin/dashboard/page.tsx": {
-    "mtime": 1789024185.0995247,
-    "seen": 1789025094.964591,
-    "ast_hash": "555fa2db8de513c81a331ec68a93c1d7",
-    "semantic_hash": ""
-  },
-  "app/super-admin/layout.tsx": {
-    "mtime": 1789024114.2945578,
-    "seen": 1789025094.964594,
-    "ast_hash": "15ec89b490e7f04f3949f72995b33e36",
-    "semantic_hash": ""
-  },
-  "app/super-admin/organizations/[id]/page.tsx": {
-    "mtime": 1789024881.3039148,
-    "seen": 1789025094.9645965,
-    "ast_hash": "868697d6c9f02ce64e89052503878931",
-    "semantic_hash": ""
-  },
-  "app/super-admin/organizations/page.tsx": {
-    "mtime": 1789024500.8680372,
-    "seen": 1789025094.9645994,
-    "ast_hash": "d00bbe2f9005251e08b46db1c0b983d8",
-    "semantic_hash": ""
-  },
-  "components/super-admin/org-list-filter.tsx": {
-    "mtime": 1789024400.8156862,
-    "seen": 1789025094.9646049,
-    "ast_hash": "327e0e4cf3c5d3e1f03673f5c9bd4546",
-    "semantic_hash": ""
-  },
-  "components/super-admin/org-list-table.tsx": {
-    "mtime": 1789024439.4004798,
-    "seen": 1789025094.9646075,
-    "ast_hash": "10a8a50e85c79cb09cf239b53d802918",
-    "semantic_hash": ""
-  },
-  "components/super-admin/org-management-actions.tsx": {
-    "mtime": 1789024336.2147033,
-    "seen": 1789025094.9646099,
-    "ast_hash": "3e8db2df04014dc8dc5e0fbbac3b64ab",
-    "semantic_hash": ""
-  },
-  "components/super-admin/platform-metrics-cards.tsx": {
-    "mtime": 1789024140.0108976,
-    "seen": 1789025094.964612,
-    "ast_hash": "0ce01009fcdd21ac5b9a72ee7476d441",
-    "semantic_hash": ""
-  },
-  "components/super-admin/recent-activity-tables.tsx": {
-    "mtime": 1789024166.247117,
-    "seen": 1789025094.9646146,
-    "ast_hash": "b31f50f88cd667557ad5317e529a27a0",
-    "semantic_hash": ""
-  },
-  "components/super-admin/super-admin-nav.tsx": {
-    "mtime": 1789024096.8783164,
-    "seen": 1789025094.9646173,
-    "ast_hash": "c5fea0a526d380510f3bc5aec080f3b6",
-    "semantic_hash": ""
-  },
-  "lib/audit/logger.ts": {
-    "mtime": 1789024236.9628901,
-    "seen": 1789025094.964619,
-    "ast_hash": "43744bbc81672b614192012d1523110a",
-    "semantic_hash": ""
-  },
-  "supabase/migrations/0011_org_suspension.sql": {
-    "mtime": 1789024078.6150072,
-    "seen": 1789025094.9646926,
-    "ast_hash": "8de20a4304d677e84bf7990e4231b746",
     "semantic_hash": ""
   }
 }

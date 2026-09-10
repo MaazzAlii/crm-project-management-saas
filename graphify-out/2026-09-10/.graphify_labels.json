@@ -290,7 +290,7 @@
   "288": "Agent State",
   "289": "Agent State",
   "290": "Agent State",
-  "291": "login/page.tsx",
+  "291": "lucide-react",
   "292": "ADR 001: Multi-Tenant Architecture, Data Isolation & Super Admin Platform Tier",
   "293": "createClient",
   "294": "00-MASTER-PROMPT-v2-self-hosted.md",
@@ -317,7 +317,7 @@
   "315": "39. IF REQUIREMENTS ARE AMBIGUOUS",
   "316": "Agent State — Project Build Continuity Log",
   "317": "Multi-Tenant CRM & Project Management SaaS Platform",
-  "318": "lucide-react",
+  "318": "@supabase/ssr",
   "319": "39. IF REQUIREMENTS ARE AMBIGUOUS",
   "320": "39. IF REQUIREMENTS ARE AMBIGUOUS",
   "321": "rules/graphify.md",
@@ -344,8 +344,5 @@
   "342": "0009_onboarding_fields.sql",
   "343": "public.organizations",
   "344": "0010_super_admin_rls.sql",
-  "345": "plans.sql",
-  "346": "org-list-table.tsx",
-  "347": "0011_org_suspension.sql",
-  "348": "public.organizations"
+  "345": "plans.sql"
 }

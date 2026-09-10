@@ -30,19 +30,6 @@
       "source_location": "L5"
     },
     {
-      "id": "app_onboarding_steps_inviteteamstep_inviteteamstepprops",
-      "label": "InviteTeamStepProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 281,
-      "community_name": "onboarding/page.tsx",
-      "file_type": "code",
-      "norm_label": "inviteteamstepprops",
-      "source_file": "app/onboarding/steps/InviteTeamStep.tsx",
-      "source_location": "L6"
-    },
-    {
       "id": "app_onboarding_steps_onboardingcompletestep_onboardingcompletestepprops",
       "label": "OnboardingCompleteStepProps",
       "_callable": true,
@@ -82,56 +69,17 @@
       "source_location": "L3"
     },
     {
-      "id": "app_super_admin_organizations_id_page_orgdetailpageprops",
-      "label": "OrgDetailPageProps",
+      "id": "app_onboarding_steps_inviteteamstep_inviteteamstepprops",
+      "label": "InviteTeamStepProps",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
+      "community": 291,
+      "community_name": "lucide-react",
       "file_type": "code",
-      "norm_label": "orgdetailpageprops",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L23"
-    },
-    {
-      "id": "components_super_admin_org_management_actions_overrideplanmodalprops",
-      "label": "OverridePlanModalProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "overrideplanmodalprops",
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L135"
-    },
-    {
-      "id": "components_super_admin_org_management_actions_suspendorgmodalprops",
-      "label": "SuspendOrgModalProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "suspendorgmodalprops",
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "lib_audit_logger_auditlogevent",
-      "label": "AuditLogEvent",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "auditlogevent",
-      "source_file": "lib/audit/logger.ts",
-      "source_location": "L3"
+      "norm_label": "inviteteamstepprops",
+      "source_file": "app/onboarding/steps/InviteTeamStep.tsx",
+      "source_location": "L6"
     },
     {
       "id": "lib_billing_plan_limits_featurelimits",
@@ -157,110 +105,6 @@
       "file_type": "code",
       "norm_label": "limitcheckresult",
       "source_file": "lib/billing/plan-limits.ts",
-      "source_location": "L20"
-    },
-    {
-      "id": "components_super_admin_platform_metrics_cards_platformmetrics",
-      "label": "PlatformMetrics",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 318,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "platformmetrics",
-      "source_file": "components/super-admin/platform-metrics-cards.tsx",
-      "source_location": "L3"
-    },
-    {
-      "id": "components_super_admin_platform_metrics_cards_platformmetricscardsprops",
-      "label": "PlatformMetricsCardsProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 318,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "platformmetricscardsprops",
-      "source_file": "components/super-admin/platform-metrics-cards.tsx",
-      "source_location": "L15"
-    },
-    {
-      "id": "components_super_admin_recent_activity_tables_recentactivitytablesprops",
-      "label": "RecentActivityTablesProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 318,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "recentactivitytablesprops",
-      "source_file": "components/super-admin/recent-activity-tables.tsx",
-      "source_location": "L14"
-    },
-    {
-      "id": "components_super_admin_recent_activity_tables_recentorganization",
-      "label": "RecentOrganization",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 318,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "recentorganization",
-      "source_file": "components/super-admin/recent-activity-tables.tsx",
-      "source_location": "L4"
-    },
-    {
-      "id": "components_super_admin_super_admin_nav_superadminnavprops",
-      "label": "SuperAdminNavProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 318,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "superadminnavprops",
-      "source_file": "components/super-admin/super-admin-nav.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "components_super_admin_org_list_filter_orglistfilterprops",
-      "label": "OrgListFilterProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 346,
-      "community_name": "org-list-table.tsx",
-      "file_type": "code",
-      "norm_label": "orglistfilterprops",
-      "source_file": "components/super-admin/org-list-filter.tsx",
-      "source_location": "L5"
-    },
-    {
-      "id": "components_super_admin_org_list_table_orglistitem",
-      "label": "OrgListItem",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 346,
-      "community_name": "org-list-table.tsx",
-      "file_type": "code",
-      "norm_label": "orglistitem",
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "components_super_admin_org_list_table_orglisttableprops",
-      "label": "OrgListTableProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 346,
-      "community_name": "org-list-table.tsx",
-      "file_type": "code",
-      "norm_label": "orglisttableprops",
-      "source_file": "components/super-admin/org-list-table.tsx",
       "source_location": "L20"
     },
     {
@@ -322,18 +166,6 @@
       "norm_label": "chooseplanstep()",
       "source_file": "app/onboarding/steps/ChoosePlanStep.tsx",
       "source_location": "L39"
-    },
-    {
-      "id": "app_onboarding_steps_inviteteamstep_inviteteamstep",
-      "label": "InviteTeamStep()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 281,
-      "community_name": "onboarding/page.tsx",
-      "file_type": "code",
-      "norm_label": "inviteteamstep()",
-      "source_file": "app/onboarding/steps/InviteTeamStep.tsx",
-      "source_location": "L13"
     },
     {
       "id": "app_onboarding_steps_onboardingcompletestep_onboardingcompletestep",
@@ -425,7 +257,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 291,
-      "community_name": "login/page.tsx",
+      "community_name": "lucide-react",
       "file_type": "code",
       "norm_label": "loginform()",
       "source_file": "app/(auth)/login/page.tsx",
@@ -437,7 +269,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 291,
-      "community_name": "login/page.tsx",
+      "community_name": "lucide-react",
       "file_type": "code",
       "norm_label": "loginpage()",
       "source_file": "app/(auth)/login/page.tsx",
@@ -449,11 +281,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 291,
-      "community_name": "login/page.tsx",
+      "community_name": "lucide-react",
       "file_type": "code",
       "norm_label": "signuppage()",
       "source_file": "app/(auth)/signup/page.tsx",
       "source_location": "L9"
+    },
+    {
+      "id": "app_onboarding_steps_inviteteamstep_inviteteamstep",
+      "label": "InviteTeamStep()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 291,
+      "community_name": "lucide-react",
+      "file_type": "code",
+      "norm_label": "inviteteamstep()",
+      "source_file": "app/onboarding/steps/InviteTeamStep.tsx",
+      "source_location": "L13"
     },
     {
       "id": "lib_supabase_client_createclient",
@@ -461,131 +305,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 291,
-      "community_name": "login/page.tsx",
+      "community_name": "lucide-react",
       "file_type": "code",
       "norm_label": "createclient()",
       "source_file": "lib/supabase/client.ts",
       "source_location": "L3"
-    },
-    {
-      "id": "middleware_middleware",
-      "label": "middleware()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 291,
-      "community_name": "login/page.tsx",
-      "file_type": "code",
-      "norm_label": "middleware()",
-      "source_file": "middleware.ts",
-      "source_location": "L4"
-    },
-    {
-      "id": "app_super_admin_actions_overrideorganizationplan",
-      "label": "overrideOrganizationPlan()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "overrideorganizationplan()",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L50"
-    },
-    {
-      "id": "app_super_admin_actions_togglesuspendorganization",
-      "label": "toggleSuspendOrganization()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "togglesuspendorganization()",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L8"
-    },
-    {
-      "id": "app_super_admin_dashboard_page_superadmindashboardpage",
-      "label": "SuperAdminDashboardPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "superadmindashboardpage()",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "app_super_admin_layout_superadminlayout",
-      "label": "SuperAdminLayout()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "superadminlayout()",
-      "source_file": "app/super-admin/layout.tsx",
-      "source_location": "L5"
-    },
-    {
-      "id": "app_super_admin_organizations_id_page_superadminorgdetailpage",
-      "label": "SuperAdminOrgDetailPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "superadminorgdetailpage()",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L29"
-    },
-    {
-      "id": "app_super_admin_organizations_page_superadminorganizationspage",
-      "label": "SuperAdminOrganizationsPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "superadminorganizationspage()",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L8"
-    },
-    {
-      "id": "components_super_admin_org_management_actions_overrideplanmodal",
-      "label": "OverridePlanModal()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "overrideplanmodal()",
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L141"
-    },
-    {
-      "id": "components_super_admin_org_management_actions_suspendorgmodal",
-      "label": "SuspendOrgModal()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "suspendorgmodal()",
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L13"
-    },
-    {
-      "id": "lib_audit_logger_logauditevent",
-      "label": "logAuditEvent()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "logauditevent()",
-      "source_file": "lib/audit/logger.ts",
-      "source_location": "L15"
     },
     {
       "id": "lib_auth_super_admin_issuperadmin",
@@ -684,52 +408,16 @@
       "source_location": "L4"
     },
     {
-      "id": "app_org_suspended_page_orgsuspendedpage",
-      "label": "OrgSuspendedPage()",
+      "id": "middleware_middleware",
+      "label": "middleware()",
       "_callable": true,
       "_origin": "ast",
       "community": 318,
-      "community_name": "lucide-react",
+      "community_name": "@supabase/ssr",
       "file_type": "code",
-      "norm_label": "orgsuspendedpage()",
-      "source_file": "app/org-suspended/page.tsx",
+      "norm_label": "middleware()",
+      "source_file": "middleware.ts",
       "source_location": "L4"
-    },
-    {
-      "id": "components_super_admin_platform_metrics_cards_platformmetricscards",
-      "label": "PlatformMetricsCards()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 318,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "platformmetricscards()",
-      "source_file": "components/super-admin/platform-metrics-cards.tsx",
-      "source_location": "L19"
-    },
-    {
-      "id": "components_super_admin_recent_activity_tables_recentactivitytables",
-      "label": "RecentActivityTables()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 318,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "recentactivitytables()",
-      "source_file": "components/super-admin/recent-activity-tables.tsx",
-      "source_location": "L19"
-    },
-    {
-      "id": "components_super_admin_super_admin_nav_superadminnav",
-      "label": "SuperAdminNav()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 318,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "superadminnav()",
-      "source_file": "components/super-admin/super-admin-nav.tsx",
-      "source_location": "L11"
     },
     {
       "id": "app_super_admin_page_superadminrootpage",
@@ -744,37 +432,13 @@
       "source_location": "L3"
     },
     {
-      "id": "components_super_admin_org_list_filter_orglistfilter",
-      "label": "OrgListFilter()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 346,
-      "community_name": "org-list-table.tsx",
-      "file_type": "code",
-      "norm_label": "orglistfilter()",
-      "source_file": "components/super-admin/org-list-filter.tsx",
-      "source_location": "L14"
-    },
-    {
-      "id": "components_super_admin_org_list_table_orglisttable",
-      "label": "OrgListTable()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 346,
-      "community_name": "org-list-table.tsx",
-      "file_type": "code",
-      "norm_label": "orglisttable()",
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L24"
-    },
-    {
       "id": "app_layout",
-      "label": "app/layout.tsx",
+      "label": "layout.tsx",
       "_origin": "ast",
       "community": 0,
       "community_name": "package.json",
       "file_type": "code",
-      "norm_label": "app/layout.tsx",
+      "norm_label": "layout.tsx",
       "source_file": "app/layout.tsx",
       "source_location": "L1"
     },
@@ -47884,17 +47548,6 @@
       "source_location": "L12"
     },
     {
-      "id": "app_onboarding_steps_inviteteamstep",
-      "label": "InviteTeamStep.tsx",
-      "_origin": "ast",
-      "community": 281,
-      "community_name": "onboarding/page.tsx",
-      "file_type": "code",
-      "norm_label": "inviteteamstep.tsx",
-      "source_file": "app/onboarding/steps/InviteTeamStep.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "app_onboarding_steps_onboardingcompletestep",
       "label": "OnboardingCompleteStep.tsx",
       "_origin": "ast",
@@ -47926,17 +47579,6 @@
       "norm_label": "industries",
       "source_file": "app/onboarding/steps/OrgDetailsStep.tsx",
       "source_location": "L13"
-    },
-    {
-      "id": "ref_react",
-      "label": "react",
-      "_origin": "ast",
-      "community": 281,
-      "community_name": "onboarding/page.tsx",
-      "file_type": "concept",
-      "norm_label": "react",
-      "source_file": "package.json",
-      "source_location": "L19"
     },
     {
       "id": "full_project_dump_51_final_completion_report",
@@ -48773,6 +48415,17 @@
       "source_location": "L3"
     },
     {
+      "id": "lib_supabase_server",
+      "label": "server.ts",
+      "_origin": "ast",
+      "community": 286,
+      "community_name": "stripe.ts",
+      "file_type": "code",
+      "norm_label": "server.ts",
+      "source_file": "lib/supabase/server.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "ref_stripe",
       "label": "stripe",
       "_origin": "ast",
@@ -48985,7 +48638,7 @@
       "node_kind": "heading",
       "norm_label": "architecture decisions made",
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L35"
+      "source_location": "L33"
     },
     {
       "id": "v2_prompt_to_build_system_agent_state_blockers",
@@ -48997,7 +48650,7 @@
       "node_kind": "heading",
       "norm_label": "blockers",
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L41"
+      "source_location": "L39"
     },
     {
       "id": "v2_prompt_to_build_system_agent_state_completed",
@@ -49021,7 +48674,7 @@
       "node_kind": "heading",
       "norm_label": "deferred",
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L32"
+      "source_location": "L30"
     },
     {
       "id": "v2_prompt_to_build_system_agent_state_deployment_status",
@@ -49033,7 +48686,7 @@
       "node_kind": "heading",
       "norm_label": "deployment status",
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L50"
+      "source_location": "L48"
     },
     {
       "id": "v2_prompt_to_build_system_agent_state_in_progress",
@@ -49045,7 +48698,7 @@
       "node_kind": "heading",
       "norm_label": "in progress",
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L29"
+      "source_location": "L27"
     },
     {
       "id": "v2_prompt_to_build_system_agent_state_known_bugs",
@@ -49057,7 +48710,7 @@
       "node_kind": "heading",
       "norm_label": "known bugs",
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L53"
+      "source_location": "L51"
     },
     {
       "id": "v2_prompt_to_build_system_agent_state_last_completed_task",
@@ -49069,7 +48722,7 @@
       "node_kind": "heading",
       "norm_label": "last completed task",
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L44"
+      "source_location": "L42"
     },
     {
       "id": "v2_prompt_to_build_system_agent_state_last_successful_commit",
@@ -49081,7 +48734,7 @@
       "node_kind": "heading",
       "norm_label": "last successful commit",
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L47"
+      "source_location": "L45"
     },
     {
       "id": "v2_prompt_to_build_system_agent_state_next_recommended_task",
@@ -49093,7 +48746,7 @@
       "node_kind": "heading",
       "norm_label": "next recommended task",
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L57"
+      "source_location": "L55"
     },
     {
       "id": "v2_prompt_to_build_system_agent_state_project",
@@ -49676,7 +49329,7 @@
       "label": "login/page.tsx",
       "_origin": "ast",
       "community": 291,
-      "community_name": "login/page.tsx",
+      "community_name": "lucide-react",
       "file_type": "code",
       "norm_label": "login/page.tsx",
       "source_file": "app/(auth)/login/page.tsx",
@@ -49687,10 +49340,21 @@
       "label": "signup/page.tsx",
       "_origin": "ast",
       "community": 291,
-      "community_name": "login/page.tsx",
+      "community_name": "lucide-react",
       "file_type": "code",
       "norm_label": "signup/page.tsx",
       "source_file": "app/(auth)/signup/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_onboarding_steps_inviteteamstep",
+      "label": "InviteTeamStep.tsx",
+      "_origin": "ast",
+      "community": 291,
+      "community_name": "lucide-react",
+      "file_type": "code",
+      "norm_label": "inviteteamstep.tsx",
+      "source_file": "app/onboarding/steps/InviteTeamStep.tsx",
       "source_location": "L1"
     },
     {
@@ -49698,44 +49362,33 @@
       "label": "supabase/client.ts",
       "_origin": "ast",
       "community": 291,
-      "community_name": "login/page.tsx",
+      "community_name": "lucide-react",
       "file_type": "code",
       "norm_label": "supabase/client.ts",
       "source_file": "lib/supabase/client.ts",
       "source_location": "L1"
     },
     {
-      "id": "middleware",
-      "label": "middleware.ts",
+      "id": "ref_lucide_react",
+      "label": "lucide-react",
       "_origin": "ast",
       "community": 291,
-      "community_name": "login/page.tsx",
-      "file_type": "code",
-      "norm_label": "middleware.ts",
-      "source_file": "middleware.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "middleware_config",
-      "label": "config",
-      "_origin": "ast",
-      "community": 291,
-      "community_name": "login/page.tsx",
-      "file_type": "code",
-      "norm_label": "config",
-      "source_file": "middleware.ts",
-      "source_location": "L116"
-    },
-    {
-      "id": "ref_supabase_ssr",
-      "label": "@supabase/ssr",
-      "_origin": "ast",
-      "community": 291,
-      "community_name": "login/page.tsx",
+      "community_name": "lucide-react",
       "file_type": "concept",
-      "norm_label": "@supabase/ssr",
+      "norm_label": "lucide-react",
       "source_file": "package.json",
-      "source_location": "L14"
+      "source_location": "L17"
+    },
+    {
+      "id": "ref_react",
+      "label": "react",
+      "_origin": "ast",
+      "community": 291,
+      "community_name": "lucide-react",
+      "file_type": "concept",
+      "norm_label": "react",
+      "source_file": "package.json",
+      "source_location": "L19"
     },
     {
       "id": "documentation_adr_001_multi_tenancy",
@@ -49882,72 +49535,6 @@
       "source_location": "L3"
     },
     {
-      "id": "app_super_admin_actions",
-      "label": "actions.ts",
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "actions.ts",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_super_admin_layout",
-      "label": "super-admin/layout.tsx",
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "super-admin/layout.tsx",
-      "source_file": "app/super-admin/layout.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_super_admin_organizations_id_page",
-      "label": "[id]/page.tsx",
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "[id]/page.tsx",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_super_admin_organizations_id_page_dynamic",
-      "label": "dynamic",
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "dynamic",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L21"
-    },
-    {
-      "id": "components_super_admin_org_management_actions",
-      "label": "org-management-actions.tsx",
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "org-management-actions.tsx",
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "lib_audit_logger",
-      "label": "logger.ts",
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "logger.ts",
-      "source_file": "lib/audit/logger.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "lib_auth_super_admin",
       "label": "super-admin.ts",
       "_origin": "ast",
@@ -49967,17 +49554,6 @@
       "file_type": "code",
       "norm_label": "plan-limits.ts",
       "source_file": "lib/billing/plan-limits.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "lib_supabase_server",
-      "label": "server.ts",
-      "_origin": "ast",
-      "community": 293,
-      "community_name": "createClient",
-      "file_type": "code",
-      "norm_label": "server.ts",
-      "source_file": "lib/supabase/server.ts",
       "source_location": "L1"
     },
     {
@@ -53803,81 +53379,37 @@
       "source_location": "L6766"
     },
     {
-      "id": "app_org_suspended_page",
-      "label": "org-suspended/page.tsx",
+      "id": "middleware",
+      "label": "middleware.ts",
       "_origin": "ast",
       "community": 318,
-      "community_name": "lucide-react",
+      "community_name": "@supabase/ssr",
       "file_type": "code",
-      "norm_label": "org-suspended/page.tsx",
-      "source_file": "app/org-suspended/page.tsx",
+      "norm_label": "middleware.ts",
+      "source_file": "middleware.ts",
       "source_location": "L1"
     },
     {
-      "id": "app_super_admin_dashboard_page",
-      "label": "dashboard/page.tsx",
+      "id": "middleware_config",
+      "label": "config",
       "_origin": "ast",
       "community": 318,
-      "community_name": "lucide-react",
+      "community_name": "@supabase/ssr",
       "file_type": "code",
-      "norm_label": "dashboard/page.tsx",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L1"
+      "norm_label": "config",
+      "source_file": "middleware.ts",
+      "source_location": "L91"
     },
     {
-      "id": "app_super_admin_dashboard_page_dynamic",
-      "label": "dynamic",
+      "id": "ref_supabase_ssr",
+      "label": "@supabase/ssr",
       "_origin": "ast",
       "community": 318,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "dynamic",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "components_super_admin_platform_metrics_cards",
-      "label": "platform-metrics-cards.tsx",
-      "_origin": "ast",
-      "community": 318,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "platform-metrics-cards.tsx",
-      "source_file": "components/super-admin/platform-metrics-cards.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "components_super_admin_recent_activity_tables",
-      "label": "recent-activity-tables.tsx",
-      "_origin": "ast",
-      "community": 318,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "recent-activity-tables.tsx",
-      "source_file": "components/super-admin/recent-activity-tables.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "components_super_admin_super_admin_nav",
-      "label": "super-admin-nav.tsx",
-      "_origin": "ast",
-      "community": 318,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "super-admin-nav.tsx",
-      "source_file": "components/super-admin/super-admin-nav.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "ref_lucide_react",
-      "label": "lucide-react",
-      "_origin": "ast",
-      "community": 318,
-      "community_name": "lucide-react",
+      "community_name": "@supabase/ssr",
       "file_type": "concept",
-      "norm_label": "lucide-react",
+      "norm_label": "@supabase/ssr",
       "source_file": "package.json",
-      "source_location": "L17"
+      "source_location": "L14"
     },
     {
       "id": "prompts_to_build_system_orchestrator_full_rules_39_if_requirements_are_ambiguous",
@@ -55138,72 +54670,6 @@
       "norm_label": "plans.sql",
       "source_file": "supabase/seed/plans.sql",
       "source_location": null
-    },
-    {
-      "id": "app_super_admin_organizations_page",
-      "label": "organizations/page.tsx",
-      "_origin": "ast",
-      "community": 346,
-      "community_name": "org-list-table.tsx",
-      "file_type": "code",
-      "norm_label": "organizations/page.tsx",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_super_admin_organizations_page_dynamic",
-      "label": "dynamic",
-      "_origin": "ast",
-      "community": 346,
-      "community_name": "org-list-table.tsx",
-      "file_type": "code",
-      "norm_label": "dynamic",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L6"
-    },
-    {
-      "id": "components_super_admin_org_list_filter",
-      "label": "org-list-filter.tsx",
-      "_origin": "ast",
-      "community": 346,
-      "community_name": "org-list-table.tsx",
-      "file_type": "code",
-      "norm_label": "org-list-filter.tsx",
-      "source_file": "components/super-admin/org-list-filter.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "components_super_admin_org_list_table",
-      "label": "org-list-table.tsx",
-      "_origin": "ast",
-      "community": 346,
-      "community_name": "org-list-table.tsx",
-      "file_type": "code",
-      "norm_label": "org-list-table.tsx",
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "supabase_migrations_0011_org_suspension",
-      "label": "0011_org_suspension.sql",
-      "_origin": "ast",
-      "community": 347,
-      "community_name": "0011_org_suspension.sql",
-      "file_type": "code",
-      "norm_label": "0011_org_suspension.sql",
-      "source_file": "supabase/migrations/0011_org_suspension.sql",
-      "source_location": null
-    },
-    {
-      "id": "supabase_migrations_0011_org_suspension_sql_public_organizations",
-      "label": "public.organizations",
-      "_origin": "ast",
-      "community": 348,
-      "community_name": "public.organizations",
-      "file_type": "code",
-      "norm_label": "public.organizations",
-      "source_file": "",
-      "source_location": ""
     },
     {
       "id": "prompts_to_build_system_15_crm_client_detail_page",
@@ -72469,222 +71935,6 @@
       "weight": 1.0
     },
     {
-      "source": "app_super_admin_actions_overrideorganizationplan",
-      "target": "lib_auth_super_admin_requiresuperadmin",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L56",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_actions_overrideorganizationplan",
-      "target": "lib_supabase_server_createclient",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L57",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_actions_overrideorganizationplan",
-      "target": "lib_audit_logger_logauditevent",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L90",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_actions_togglesuspendorganization",
-      "target": "lib_auth_super_admin_requiresuperadmin",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_actions_togglesuspendorganization",
-      "target": "lib_supabase_server_createclient",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_actions_togglesuspendorganization",
-      "target": "lib_audit_logger_logauditevent",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L32",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page_superadmindashboardpage",
-      "target": "lib_auth_super_admin_requiresuperadmin",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page_superadmindashboardpage",
-      "target": "lib_supabase_server_createclient",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_layout_superadminlayout",
-      "target": "lib_auth_super_admin_requiresuperadmin",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/layout.tsx",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_layout_superadminlayout",
-      "target": "lib_supabase_server_createclient",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/layout.tsx",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page_superadminorgdetailpage",
-      "target": "lib_auth_super_admin_requiresuperadmin",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L30",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page_superadminorgdetailpage",
-      "target": "lib_supabase_server_createclient",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L31",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page_superadminorgdetailpage",
-      "target": "lib_billing_plan_limits_getorganizationplanlimits",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L92",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_page_superadminorganizationspage",
-      "target": "lib_supabase_server_createclient",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_page_superadminorganizationspage",
-      "target": "lib_auth_super_admin_requiresuperadmin",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L9",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_management_actions_overrideplanmodal",
-      "target": "app_super_admin_actions_overrideorganizationplan",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L153",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_management_actions_suspendorgmodal",
-      "target": "app_super_admin_actions_togglesuspendorganization",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L22",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_audit_logger_logauditevent",
-      "target": "lib_supabase_server_createclient",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "lib/audit/logger.ts",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
       "source": "lib_auth_session_getcurrentsessioncontext",
       "target": "lib_supabase_server_createclient",
       "relation": "calls",
@@ -73006,318 +72256,6 @@
       "context": "import",
       "source_file": "app/onboarding/page.tsx",
       "source_location": "L9",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_actions",
-      "target": "lib_supabase_server_createclient",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_actions",
-      "target": "lib_auth_super_admin_requiresuperadmin",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_actions",
-      "target": "lib_audit_logger_logauditevent",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L6",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page",
-      "target": "lib_supabase_server_createclient",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page",
-      "target": "lib_auth_super_admin_requiresuperadmin",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page",
-      "target": "components_super_admin_platform_metrics_cards_platformmetrics",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page",
-      "target": "components_super_admin_platform_metrics_cards_platformmetricscards",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page",
-      "target": "components_super_admin_recent_activity_tables_recentactivitytables",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_layout",
-      "target": "lib_supabase_server_createclient",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/layout.tsx",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_layout",
-      "target": "components_super_admin_super_admin_nav_superadminnav",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/layout.tsx",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_layout",
-      "target": "lib_auth_super_admin_requiresuperadmin",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/layout.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "lib_supabase_server_createclient",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "lib_auth_super_admin_requiresuperadmin",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "components_super_admin_org_management_actions_overrideplanmodal",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "components_super_admin_org_management_actions_suspendorgmodal",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "lib_billing_plan_limits_getorganizationplanlimits",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_page",
-      "target": "lib_supabase_server_createclient",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_page",
-      "target": "lib_auth_super_admin_requiresuperadmin",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_page",
-      "target": "components_super_admin_org_list_table_orglistitem",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_page",
-      "target": "components_super_admin_org_list_table_orglisttable",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_table",
-      "target": "components_super_admin_org_list_filter_orglistfilter",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L6",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_table",
-      "target": "components_super_admin_org_management_actions_overrideplanmodal",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_table",
-      "target": "components_super_admin_org_management_actions_suspendorgmodal",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_management_actions",
-      "target": "app_super_admin_actions_overrideorganizationplan",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_management_actions",
-      "target": "app_super_admin_actions_togglesuspendorganization",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_audit_logger",
-      "target": "lib_supabase_server_createclient",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "lib/audit/logger.ts",
-      "source_location": "L1",
       "weight": 1.0
     },
     {
@@ -73935,402 +72873,6 @@
       "weight": 1.0
     },
     {
-      "source": "app_org_suspended_page",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/org-suspended/page.tsx",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_actions",
-      "target": "lib_supabase_server",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_actions",
-      "target": "lib_auth_super_admin",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_actions",
-      "target": "lib_audit_logger",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L6",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page",
-      "target": "lib_supabase_server",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page",
-      "target": "lib_auth_super_admin",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page",
-      "target": "components_super_admin_platform_metrics_cards",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page",
-      "target": "components_super_admin_recent_activity_tables",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_layout",
-      "target": "lib_supabase_server",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/layout.tsx",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_layout",
-      "target": "components_super_admin_super_admin_nav",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/layout.tsx",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_layout",
-      "target": "lib_auth_super_admin",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/layout.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "lib_supabase_server",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "lib_auth_super_admin",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "components_super_admin_org_management_actions",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "lib_billing_plan_limits",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_page",
-      "target": "lib_supabase_server",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_page",
-      "target": "lib_auth_super_admin",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_page",
-      "target": "components_super_admin_org_list_table",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_page",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_filter",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-list-filter.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_table",
-      "target": "ref_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_table",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_table",
-      "target": "components_super_admin_org_list_filter",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L6",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_table",
-      "target": "components_super_admin_org_management_actions",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_management_actions",
-      "target": "ref_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_management_actions",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_management_actions",
-      "target": "app_super_admin_actions",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_platform_metrics_cards",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/platform-metrics-cards.tsx",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_recent_activity_tables",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/recent-activity-tables.tsx",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_super_admin_nav",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/super-admin/super-admin-nav.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_audit_logger",
-      "target": "lib_supabase_server",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "lib/audit/logger.ts",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
       "source": "lib_auth_session",
       "target": "lib_supabase_server",
       "relation": "imports_from",
@@ -74736,17 +73278,6 @@
       "weight": 1.0
     },
     {
-      "source": "app_org_suspended_page",
-      "target": "app_org_suspended_page_orgsuspendedpage",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/org-suspended/page.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
       "source": "app_page",
       "target": "app_page_home",
       "relation": "contains",
@@ -74758,116 +73289,6 @@
       "weight": 1.0
     },
     {
-      "source": "app_super_admin_actions",
-      "target": "app_super_admin_actions_overrideorganizationplan",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L50",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_actions",
-      "target": "app_super_admin_actions_togglesuspendorganization",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/super-admin/actions.ts",
-      "source_location": "L8",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page",
-      "target": "app_super_admin_dashboard_page_dynamic",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_dashboard_page",
-      "target": "app_super_admin_dashboard_page_superadmindashboardpage",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/super-admin/dashboard/page.tsx",
-      "source_location": "L9",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_layout",
-      "target": "app_super_admin_layout_superadminlayout",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/super-admin/layout.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "app_super_admin_organizations_id_page_dynamic",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L21",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "app_super_admin_organizations_id_page_orgdetailpageprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L23",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_id_page",
-      "target": "app_super_admin_organizations_id_page_superadminorgdetailpage",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/super-admin/organizations/[id]/page.tsx",
-      "source_location": "L29",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_page",
-      "target": "app_super_admin_organizations_page_dynamic",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0
-    },
-    {
-      "source": "app_super_admin_organizations_page",
-      "target": "app_super_admin_organizations_page_superadminorganizationspage",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/super-admin/organizations/page.tsx",
-      "source_location": "L8",
-      "weight": 1.0
-    },
-    {
       "source": "app_super_admin_page",
       "target": "app_super_admin_page_superadminrootpage",
       "relation": "contains",
@@ -74876,193 +73297,6 @@
       "confidence_score": 1.0,
       "source_file": "app/super-admin/page.tsx",
       "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_filter",
-      "target": "components_super_admin_org_list_filter_orglistfilter",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/org-list-filter.tsx",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_filter",
-      "target": "components_super_admin_org_list_filter_orglistfilterprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/org-list-filter.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_table",
-      "target": "components_super_admin_org_list_table_orglisttableprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L20",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_table",
-      "target": "components_super_admin_org_list_table_orglisttable",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L24",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_list_table",
-      "target": "components_super_admin_org_list_table_orglistitem",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/org-list-table.tsx",
-      "source_location": "L9",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_management_actions",
-      "target": "components_super_admin_org_management_actions_suspendorgmodal",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L13",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_management_actions",
-      "target": "components_super_admin_org_management_actions_overrideplanmodalprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L135",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_management_actions",
-      "target": "components_super_admin_org_management_actions_overrideplanmodal",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L141",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_org_management_actions",
-      "target": "components_super_admin_org_management_actions_suspendorgmodalprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/org-management-actions.tsx",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_platform_metrics_cards",
-      "target": "components_super_admin_platform_metrics_cards_platformmetricscardsprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/platform-metrics-cards.tsx",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_platform_metrics_cards",
-      "target": "components_super_admin_platform_metrics_cards_platformmetricscards",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/platform-metrics-cards.tsx",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_platform_metrics_cards",
-      "target": "components_super_admin_platform_metrics_cards_platformmetrics",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/platform-metrics-cards.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_recent_activity_tables",
-      "target": "components_super_admin_recent_activity_tables_recentactivitytablesprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/recent-activity-tables.tsx",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_recent_activity_tables",
-      "target": "components_super_admin_recent_activity_tables_recentactivitytables",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/recent-activity-tables.tsx",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_recent_activity_tables",
-      "target": "components_super_admin_recent_activity_tables_recentorganization",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/recent-activity-tables.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_super_admin_nav",
-      "target": "components_super_admin_super_admin_nav_superadminnav",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/super-admin-nav.tsx",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "components_super_admin_super_admin_nav",
-      "target": "components_super_admin_super_admin_nav_superadminnavprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/super-admin/super-admin-nav.tsx",
-      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -106526,28 +104760,6 @@
       "weight": 1.0
     },
     {
-      "source": "lib_audit_logger",
-      "target": "lib_audit_logger_logauditevent",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/audit/logger.ts",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_audit_logger",
-      "target": "lib_audit_logger_auditlogevent",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/audit/logger.ts",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
       "source": "lib_auth_session",
       "target": "lib_auth_session_getcurrentsessioncontext",
       "relation": "contains",
@@ -106703,17 +104915,6 @@
     },
     {
       "source": "middleware",
-      "target": "middleware_config",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "middleware.ts",
-      "source_location": "L116",
-      "weight": 1.0
-    },
-    {
-      "source": "middleware",
       "target": "middleware_middleware",
       "relation": "contains",
       "_origin": "ast",
@@ -106721,6 +104922,17 @@
       "confidence_score": 1.0,
       "source_file": "middleware.ts",
       "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware",
+      "target": "middleware_config",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "middleware.ts",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -135991,7 +134203,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L29",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -136013,7 +134225,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L32",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -136024,7 +134236,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L35",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -136035,7 +134247,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L41",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -136046,7 +134258,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L44",
+      "source_location": "L42",
       "weight": 1.0
     },
     {
@@ -136057,7 +134269,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L47",
+      "source_location": "L45",
       "weight": 1.0
     },
     {
@@ -136068,7 +134280,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L50",
+      "source_location": "L48",
       "weight": 1.0
     },
     {
@@ -136079,7 +134291,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L53",
+      "source_location": "L51",
       "weight": 1.0
     },
     {
@@ -136090,7 +134302,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "V2 Prompt to build system/.agent-state.md",
-      "source_location": "L57",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -138537,5 +136749,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "529c4a295bdba85a8a1ce789d9ab568dba8996e2"
+  "built_at_commit": "1ab0014b31eb5f2e5f64c1151ca8fc29c9f4cf64"
 }

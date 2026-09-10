@@ -1,16 +1,16 @@
 # Graph Report - crm-project-management-saas  (2026-09-10)
 
 ## Corpus Check
-- 202 files · ~122,048 words
+- 188 files · ~116,984 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 6040 nodes · 6001 edges · 349 communities (318 shown, 23 thin omitted)
+- 5995 nodes · 5894 edges · 346 communities (316 shown, 23 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `529c4a29`
+- Built from commit: `1ab0014b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -303,7 +303,7 @@
 - Agent State
 - Agent State
 - Agent State
-- login/page.tsx
+- lucide-react
 - ADR 001: Multi-Tenant Architecture, Data Isolation & Super Admin Platform Tier
 - createClient
 - 00-MASTER-PROMPT-v2-self-hosted.md
@@ -330,7 +330,7 @@
 - 39. IF REQUIREMENTS ARE AMBIGUOUS
 - Agent State — Project Build Continuity Log
 - Multi-Tenant CRM & Project Management SaaS Platform
-- lucide-react
+- @supabase/ssr
 - 39. IF REQUIREMENTS ARE AMBIGUOUS
 - 39. IF REQUIREMENTS ARE AMBIGUOUS
 - rules/graphify.md
@@ -354,20 +354,18 @@
 - public.organizations
 - public.profiles
 - public.organizations
-- org-list-table.tsx
-- public.organizations
 
 ## God Nodes (most connected - your core abstractions)
-1. `createClient()` - 29 edges
-2. `8. SCREEN-BY-SCREEN REQUIREMENT` - 20 edges
-3. `Agent State` - 20 edges
-4. `8. SCREEN-BY-SCREEN REQUIREMENT` - 20 edges
-5. `Agent State` - 20 edges
-6. `8. SCREEN-BY-SCREEN REQUIREMENT` - 20 edges
-7. `Agent State` - 20 edges
-8. `8. SCREEN-BY-SCREEN REQUIREMENT` - 20 edges
-9. `Agent State` - 20 edges
-10. `TASK 01 — Repository & Monorepo Foundation` - 19 edges
+1. `8. SCREEN-BY-SCREEN REQUIREMENT` - 20 edges
+2. `Agent State` - 20 edges
+3. `8. SCREEN-BY-SCREEN REQUIREMENT` - 20 edges
+4. `Agent State` - 20 edges
+5. `8. SCREEN-BY-SCREEN REQUIREMENT` - 20 edges
+6. `Agent State` - 20 edges
+7. `8. SCREEN-BY-SCREEN REQUIREMENT` - 20 edges
+8. `Agent State` - 20 edges
+9. `TASK 01 — Repository & Monorepo Foundation` - 19 edges
+10. `TASK 02 — Multi-Tenant Architecture Decision Record` - 19 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `POST()` --calls--> `createClient()`  [EXTRACTED]
@@ -384,7 +382,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (349 total, 23 thin omitted)
+## Communities (346 total, 23 thin omitted)
 
 ### Community 0 - "package.json"
 Cohesion: 0.08
@@ -1495,8 +1493,8 @@ Cohesion: 0.11
 Nodes (18): 7. EACH MD FILE MUST BE SELF-CONTAINED, Acceptance criteria, API requirements, Backend requirements, Context, Database requirements, Dependencies, Files to create (+10 more)
 
 ### Community 281 - "onboarding/page.tsx"
-Cohesion: 0.14
-Nodes (14): completeOnboarding(), CompleteOnboardingInput, OnboardingPage(), ChoosePlanStep(), ChoosePlanStepProps, PLANS, InviteTeamStep(), InviteTeamStepProps (+6 more)
+Cohesion: 0.17
+Nodes (11): completeOnboarding(), CompleteOnboardingInput, OnboardingPage(), ChoosePlanStep(), ChoosePlanStepProps, PLANS, OnboardingCompleteStep(), OnboardingCompleteStepProps (+3 more)
 
 ### Community 282 - "51. FINAL COMPLETION REPORT"
 Cohesion: 0.12
@@ -1515,7 +1513,7 @@ Cohesion: 0.12
 Nodes (16): 51. FINAL COMPLETION REPORT, API, Architecture, Authentication, Completed Tasks, Database, Deployment, Final Agent State (+8 more)
 
 ### Community 286 - "stripe.ts"
-Cohesion: 0.28
+Cohesion: 0.27
 Nodes (8): createCheckoutSession(), createCustomerPortalSession(), POST(), BillingSettingsPage(), getCurrentSessionContext(), UserSessionContext, stripe, stripe
 
 ### Community 287 - "Agent State"
@@ -1534,17 +1532,17 @@ Nodes (13): Agent State, Architecture Decisions Made, Blockers, Completed, Defer
 Cohesion: 0.15
 Nodes (13): Agent State, Architecture Decisions Made, Blockers, Completed, Deferred, Deployment Status, In Progress, Known Bugs (+5 more)
 
-### Community 291 - "login/page.tsx"
-Cohesion: 0.25
-Nodes (5): LoginForm(), SignUpPage(), createClient(), config, @supabase/ssr
+### Community 291 - "lucide-react"
+Cohesion: 0.27
+Nodes (7): LoginForm(), SignUpPage(), InviteTeamStep(), InviteTeamStepProps, createClient(), lucide-react, react
 
 ### Community 292 - "ADR 001: Multi-Tenant Architecture, Data Isolation & Super Admin Platform Tier"
 Cohesion: 0.17
 Nodes (11): 1. Complete Hierarchy Structure, 1. Database-Per-Tenant, 2. Shared Database, Shared Schema with Row-Level Security (RLS) — SELECTED, 2. Tenant Isolation Rules, 3. Super Admin Isolation Rules, ADR 001: Multi-Tenant Architecture, Data Isolation & Super Admin Platform Tier, Consequences, Context (+3 more)
 
 ### Community 293 - "createClient"
-Cohesion: 0.16
-Nodes (24): overrideOrganizationPlan(), toggleSuspendOrganization(), SuperAdminDashboardPage(), SuperAdminLayout(), dynamic, OrgDetailPageProps, SuperAdminOrgDetailPage(), SuperAdminOrganizationsPage() (+16 more)
+Cohesion: 0.32
+Nodes (10): isSuperAdmin(), requireSuperAdmin(), checkClientLimit(), checkProjectLimit(), checkTeamMemberLimit(), FeatureLimits, getOrganizationPlanLimits(), isAIFeatureAllowed() (+2 more)
 
 ### Community 294 - "00-MASTER-PROMPT-v2-self-hosted.md"
 Cohesion: 0.18
@@ -1642,10 +1640,6 @@ Nodes (4): Agent State — Project Build Continuity Log, Completed Tasks Log, Cr
 Cohesion: 0.50
 Nodes (4): Folder Structure, Getting Started, Multi-Tenant CRM & Project Management SaaS Platform, Tech Stack
 
-### Community 318 - "lucide-react"
-Cohesion: 0.17
-Nodes (10): dynamic, PlatformMetrics, PlatformMetricsCards(), PlatformMetricsCardsProps, RecentActivityTables(), RecentActivityTablesProps, RecentOrganization, SuperAdminNav() (+2 more)
-
 ### Community 319 - "39. IF REQUIREMENTS ARE AMBIGUOUS"
 Cohesion: 0.50
 Nodes (4): 39. IF REQUIREMENTS ARE AMBIGUOUS, Confirmed, Needs clarification, Reasonable assumption
@@ -1654,13 +1648,9 @@ Nodes (4): 39. IF REQUIREMENTS ARE AMBIGUOUS, Confirmed, Needs clarification, Re
 Cohesion: 0.50
 Nodes (4): 39. IF REQUIREMENTS ARE AMBIGUOUS, Confirmed, Needs clarification, Reasonable assumption
 
-### Community 346 - "org-list-table.tsx"
-Cohesion: 0.31
-Nodes (6): dynamic, OrgListFilter(), OrgListFilterProps, OrgListItem, OrgListTable(), OrgListTableProps
-
 ## Knowledge Gaps
-- **5409 isolated node(s):** `next/core-web-vitals`, `CompleteOnboardingInput`, `metadata`, `ChoosePlanStepProps`, `PLANS` (+5404 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 5588 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **5396 isolated node(s):** `next/core-web-vitals`, `CompleteOnboardingInput`, `metadata`, `ChoosePlanStepProps`, `PLANS` (+5391 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 5572 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **23 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
@@ -1668,12 +1658,12 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Assignment — SMB Project Management Tool` connect `Assignment — SMB Project Management Tool` to `full_project_dump.md`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `TASK 37 — Communication Hub — Slack Integration` connect `TASK 37 — Communication Hub — Slack Integration` to `full_project_dump.md`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Why does `TASK 39 — Communication Hub — Email Integration` connect `TASK 39 — Communication Hub — Email Integration` to `full_project_dump.md`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **Why does `TASK 12 — Main Dashboard Overview` connect `TASK 12 — Main Dashboard Overview` to `full_project_dump.md`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `TASK 01 — Contabo VPS Provisioning & Base Server Hardening` connect `TASK 01 — Contabo VPS Provisioning & Base Server Hardening` to `full_project_dump.md`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **What connects `next/core-web-vitals`, `CompleteOnboardingInput`, `metadata` to the rest of the system?**
-  _5409 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _5396 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `package.json` be split into smaller, more focused modules?**
   _Cohesion score 0.08 - nodes in this community are weakly interconnected._
 - **Should `compilerOptions` be split into smaller, more focused modules?**
