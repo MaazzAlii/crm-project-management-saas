@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
 import { SuspendOrgModal, OverridePlanModal } from '@/components/super-admin/org-management-actions'
-import { PLAN_TIERS } from '@/lib/billing/plans'
+import { getOrganizationPlanLimits } from '@/lib/billing/plan-limits'
 import {
   Building2,
   ArrowLeft,
@@ -88,9 +88,8 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
   const currentClients = clientsCount || 0
   const currentProjects = projectsCount || 0
 
-  // Plan limits lookup
-  const planTierConfig = PLAN_TIERS[org.plan_tier as keyof typeof PLAN_TIERS] || PLAN_TIERS.free
-  const limits = planTierConfig.limits
+  // Plan limits lookup via helper
+  const limits = await getOrganizationPlanLimits(org.id)
 
   const getBadgeStyle = (tier: string) => {
     switch (tier.toLowerCase()) {
