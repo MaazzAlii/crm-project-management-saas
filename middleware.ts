@@ -57,6 +57,28 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Super Admin Guard — strictly isolated tier checking super_admins table
+  if (pathname.startsWith('/super-admin')) {
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.searchParams.set('redirectTo', pathname)
+      return NextResponse.redirect(url)
+    }
+
+    const { data: superAdmin } = await supabase
+      .from('super_admins')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (!superAdmin) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
+  }
+
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
