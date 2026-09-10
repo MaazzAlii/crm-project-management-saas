@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { handleSignUpAction } from '@/app/actions/signup'
 import { User, Building, Mail, Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
 
 export default function SignUpPage() {
@@ -21,71 +21,23 @@ export default function SignUpPage() {
     setLoading(true)
     setError(null)
 
-    const supabase = createClient()
-
-    // 1. Sign up user via Supabase GoTrue Auth
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
+    const res = await handleSignUpAction({
+      fullName,
+      orgName,
       email,
       password,
-      options: {
-        data: {
-          full_name: fullName,
-          org_name: orgName,
-        },
-      },
     })
 
-    if (signUpError || !authData.user) {
-      setError(signUpError?.message || 'Sign up failed')
+    if (res.error) {
+      setError(res.error)
       setLoading(false)
       return
     }
 
-    const userId = authData.user.id
-
-    // 2. Create Profile
-    const { error: profileError } = await supabase.from('profiles').upsert({
-      id: userId,
-      email: email,
-      full_name: fullName,
-    })
-
-    if (profileError) {
-      setError(profileError.message)
-      setLoading(false)
-      return
+    if (res.redirectUrl) {
+      router.push(res.redirectUrl)
+      router.refresh()
     }
-
-    // 3. Create Organization
-    const slug = orgName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || 'my-workspace'
-    const { data: orgData, error: orgError } = await supabase.from('organizations').insert({
-      name: orgName,
-      slug: `${slug}-${Math.floor(Math.random() * 1000)}`,
-      plan_tier: 'free',
-      billing_status: 'active',
-    }).select().single()
-
-    if (orgError || !orgData) {
-      setError(orgError?.message || 'Failed to create organization')
-      setLoading(false)
-      return
-    }
-
-    // 4. Link User as Owner of Organization
-    const { error: memberError } = await supabase.from('organization_members').insert({
-      organization_id: orgData.id,
-      user_id: userId,
-      role: 'owner',
-    })
-
-    if (memberError) {
-      setError(memberError.message)
-      setLoading(false)
-      return
-    }
-
-    router.push('/dashboard')
-    router.refresh()
   }
 
   return (
