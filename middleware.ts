@@ -79,6 +79,31 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Tenant Organization Suspension Guard — block suspended org access for non-super-admins
+  if (user && isProtectedRoute && !pathname.startsWith('/super-admin') && !pathname.startsWith('/org-suspended')) {
+    const { data: member } = await supabase
+      .from('organization_members')
+      .select('organization_id, organizations!inner(is_suspended)')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle()
+
+    if (member && (member.organizations as any)?.is_suspended) {
+      // Confirm user is not a super admin before blocking
+      const { data: superAdmin } = await supabase
+        .from('super_admins')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (!superAdmin) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/org-suspended'
+        return NextResponse.redirect(url)
+      }
+    }
+  }
+
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
