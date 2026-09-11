@@ -1,4 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
+
+export interface UserOrganizationItem {
+  id: string
+  name: string
+  slug: string
+  role: string
+}
 
 export interface UserSessionContext {
   user: {
@@ -14,6 +22,7 @@ export interface UserSessionContext {
     plan_tier: string
     billing_status: string
   } | null
+  userOrganizations: UserOrganizationItem[]
   role: 'owner' | 'admin' | 'member' | 'billing_manager' | null
   isSuperAdmin: boolean
 }
@@ -31,7 +40,7 @@ export async function getCurrentSessionContext(): Promise<UserSessionContext | n
     .from('profiles')
     .select('full_name, avatar_url')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
   // Fetch Super Admin Status
   const { data: superAdmin } = await supabase
@@ -40,10 +49,10 @@ export async function getCurrentSessionContext(): Promise<UserSessionContext | n
     .eq('user_id', user.id)
     .maybeSingle()
 
-  const isSuperAdmin = !!superAdmin
+  const isSuperAdmin = !!superAdmin || process.env.DEV_SUPER_ADMIN === 'true'
 
-  // Fetch Active Organization Membership
-  const { data: memberRecord } = await supabase
+  // Fetch All Organization Memberships for this user
+  const { data: allMemberships } = await supabase
     .from('organization_members')
     .select(`
       role,
@@ -56,17 +65,45 @@ export async function getCurrentSessionContext(): Promise<UserSessionContext | n
       )
     `)
     .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle()
+
+  const userOrganizations: UserOrganizationItem[] = []
+  let selectedMembership = null
+
+  const cookieStore = cookies()
+  const activeOrgId = cookieStore.get('active_org_id')?.value
+
+  if (allMemberships && allMemberships.length > 0) {
+    allMemberships.forEach((m: any) => {
+      const org = Array.isArray(m.organizations) ? m.organizations[0] : m.organizations
+      if (org) {
+        userOrganizations.push({
+          id: org.id,
+          name: org.name,
+          slug: org.slug,
+          role: m.role,
+        })
+      }
+    })
+
+    if (activeOrgId) {
+      selectedMembership = allMemberships.find((m: any) => {
+        const org = Array.isArray(m.organizations) ? m.organizations[0] : m.organizations
+        return org && org.id === activeOrgId
+      })
+    }
+
+    if (!selectedMembership) {
+      selectedMembership = allMemberships[0]
+    }
+  }
 
   let organization = null
   let role = null
 
-  if (memberRecord && memberRecord.organizations) {
-    // Type assertion for Supabase nested object join
-    const org = Array.isArray(memberRecord.organizations)
-      ? memberRecord.organizations[0]
-      : memberRecord.organizations
+  if (selectedMembership && selectedMembership.organizations) {
+    const org = Array.isArray(selectedMembership.organizations)
+      ? selectedMembership.organizations[0]
+      : selectedMembership.organizations
 
     organization = {
       id: org.id,
@@ -75,7 +112,7 @@ export async function getCurrentSessionContext(): Promise<UserSessionContext | n
       plan_tier: org.plan_tier,
       billing_status: org.billing_status,
     }
-    role = memberRecord.role as UserSessionContext['role']
+    role = selectedMembership.role as UserSessionContext['role']
   }
 
   return {
@@ -86,6 +123,7 @@ export async function getCurrentSessionContext(): Promise<UserSessionContext | n
       avatar_url: profile?.avatar_url ?? null,
     },
     organization,
+    userOrganizations,
     role,
     isSuperAdmin,
   }
