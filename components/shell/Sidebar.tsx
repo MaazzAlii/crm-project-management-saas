@@ -28,9 +28,9 @@ export const navItems = [
   { name: 'Projects', href: '/projects', icon: Briefcase },
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },
   { name: 'Unified Inbox', href: '/inbox', icon: Inbox },
-  { name: 'Team Members', href: '/team', icon: UserCheck },
+  { name: 'Team Members', href: '/settings/team', icon: UserCheck },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'Org Settings', href: '/settings', icon: Settings },
+  { name: 'Org Settings', href: '/settings/organization', icon: Settings },
 ]
 
 export function Sidebar({ isSuperAdmin, isOpenMobile, onCloseMobile }: SidebarProps) {
