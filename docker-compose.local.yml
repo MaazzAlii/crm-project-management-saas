@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   local-db:
-    image: supabase/postgres:15.1.1.130
+    image: supabase/postgres:15.1.0.147
     container_name: supabase-local-db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
@@ -27,8 +27,10 @@ services:
     environment:
       GOTRUE_API_HOST: 0.0.0.0
       GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: http://localhost:54321/auth/v1
+      GOTRUE_API_EXTERNAL_URL: http://localhost:54321/auth/v1
       GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:postgres_dev_password@local-db:5432/postgres
+      GOTRUE_DB_DATABASE_URL: postgres://postgres:postgres_dev_password@local-db:5432/postgres?search_path=auth,public
       GOTRUE_SITE_URL: http://localhost:3000
       GOTRUE_JWT_SECRET: dev_jwt_secret_key_32_characters_long_min
       GOTRUE_JWT_EXP: 3600
@@ -47,7 +49,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     environment:
-      PGRST_DB_URI: postgres://authenticator:postgres_dev_password@local-db:5432/postgres
+      PGRST_DB_URI: postgres://postgres:postgres_dev_password@local-db:5432/postgres
       PGRST_DB_SCHEMAS: public,storage
       PGRST_DB_ANON_ROLE: anon
       PGRST_JWT_SECRET: dev_jwt_secret_key_32_characters_long_min
@@ -55,7 +57,7 @@ services:
       - "3001:3000"
 
   local-studio:
-    image: supabase/studio:20240101-8b3e8e1
+    image: supabase/studio:latest
     container_name: supabase-local-studio
     restart: unless-stopped
     environment:
@@ -86,11 +88,14 @@ services:
   local-kong:
     image: kong:2.8.1-alpine
     container_name: supabase-local-kong
+    depends_on:
+      - local-auth
+      - local-rest
     restart: unless-stopped
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
-      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_DNS_ORDER: A,CNAME,LAST
       KONG_PLUGINS: request-transformer,cors
     volumes:
       - ./infra/kong/kong.local.yml:/var/lib/kong/kong.yml:ro
