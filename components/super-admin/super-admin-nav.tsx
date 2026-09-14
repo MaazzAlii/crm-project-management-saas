@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Building2, ShieldAlert, ArrowLeft } from 'lucide-react'
+import { LayoutDashboard, Building2, ShieldAlert, ArrowLeft, Sliders } from 'lucide-react'
 
 interface SuperAdminNavProps {
   userEmail?: string
@@ -21,6 +21,11 @@ export function SuperAdminNav({ userEmail }: SuperAdminNavProps) {
       name: 'Organizations',
       href: '/super-admin/organizations',
       icon: Building2,
+    },
+    {
+      name: 'Platform Settings',
+      href: '/super-admin/settings',
+      icon: Sliders,
     },
   ]
 
