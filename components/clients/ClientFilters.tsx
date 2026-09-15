@@ -9,6 +9,7 @@ export interface ClientFiltersState {
   platform: string
   country: string
   communicationMode: string
+  tag: string
 }
 
 export interface ClientFiltersProps {
@@ -18,6 +19,7 @@ export interface ClientFiltersProps {
   totalCount: number
   filteredCount: number
   countriesList: string[]
+  tagsList?: string[]
 }
 
 export const PLATFORMS = ['WhatsApp', 'Slack', 'Upwork', 'Discord', 'Email', 'Other']
@@ -35,6 +37,7 @@ export function ClientFilters({
   totalCount,
   filteredCount,
   countriesList,
+  tagsList = [],
 }: ClientFiltersProps) {
   const [isMobileExpanded, setIsMobileExpanded] = useState(false)
 
@@ -43,6 +46,7 @@ export function ClientFilters({
     filters.platform,
     filters.country,
     filters.communicationMode,
+    filters.tag,
     filters.search ? 'search' : '',
   ].filter(Boolean).length
 
@@ -178,6 +182,25 @@ export function ClientFilters({
             {countriesList.map((c) => (
               <option key={c} value={c}>
                 {c}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Tag Dropdown */}
+        <div>
+          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            Client Tag
+          </label>
+          <select
+            value={filters.tag}
+            onChange={(e) => handleSelectChange('tag', e.target.value)}
+            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-200 focus:border-sky-500 focus:outline-none"
+          >
+            <option value="">All Tags</option>
+            {tagsList.map((t) => (
+              <option key={t} value={t}>
+                {t}
               </option>
             ))}
           </select>
