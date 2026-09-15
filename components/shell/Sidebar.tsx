@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
   Users,
+  Kanban,
   Briefcase,
   CheckSquare,
   Inbox,
@@ -25,6 +26,7 @@ export interface SidebarProps {
 export const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Clients (CRM)', href: '/clients', icon: Users },
+  { name: 'Sales Pipeline', href: '/leads', icon: Kanban },
   { name: 'Projects', href: '/projects', icon: Briefcase },
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },
   { name: 'Unified Inbox', href: '/inbox', icon: Inbox },
