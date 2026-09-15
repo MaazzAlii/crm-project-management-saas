@@ -95,8 +95,8 @@ export async function createClientAction(formData: FormData) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }
-      global.__DEV_CLIENTS = global.__DEV_CLIENTS || []
-      global.__DEV_CLIENTS.unshift(devRecord)
+      ;(global as any).__DEV_CLIENTS = (global as any).__DEV_CLIENTS || []
+      ;(global as any).__DEV_CLIENTS.unshift(devRecord)
 
       revalidatePath('/clients')
       return { success: true, clientId: devClientId }
@@ -174,5 +174,144 @@ export async function deleteClientAction(clientId: string) {
   } catch (error: any) {
     console.error('deleteClientAction error:', error)
     return { error: error?.message || 'Internal server error.' }
+  }
+}
+
+export async function updateClientAction(clientId: string, formData: FormData) {
+  try {
+    const session = await getCurrentSessionContext()
+
+    if (!session || !session.user || !session.organization) {
+      return { error: 'Unauthorized session.' }
+    }
+
+    const name = formData.get('name')?.toString().trim()
+    const company = formData.get('company')?.toString().trim() || null
+    const email = formData.get('email')?.toString().trim() || null
+    const phone = formData.get('phone')?.toString().trim() || null
+    const platform = formData.get('platform')?.toString().trim() || 'WhatsApp'
+    const country = formData.get('country')?.toString().trim() || null
+    const currency = formData.get('currency')?.toString().trim() || 'USD'
+    const payment_schedule = formData.get('payment_schedule')?.toString().trim() || 'Per Project'
+    const status = formData.get('status')?.toString().trim() || 'active'
+    const communication_mode = (formData.get('communication_mode')?.toString().trim() || 'manual') as 'manual' | 'connected'
+    const notes = formData.get('notes')?.toString().trim() || null
+
+    if (!name) {
+      return { error: 'Client name is required.' }
+    }
+
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email)) {
+        return { error: 'Invalid email address format.' }
+      }
+    }
+
+    const supabase = await createClient()
+
+    let updateError: any = null
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .update({
+          name,
+          company,
+          email,
+          phone,
+          platform,
+          country,
+          currency,
+          payment_schedule,
+          status,
+          communication_mode,
+          notes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', clientId)
+        .eq('organization_id', session.organization.id)
+
+      updateError = error
+    } catch (err) {
+      updateError = err
+    }
+
+    if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
+      const idx = (global as any).__DEV_CLIENTS.findIndex((c: any) => c.id === clientId)
+      if (idx !== -1) {
+        ;(global as any).__DEV_CLIENTS[idx] = {
+          ...(global as any).__DEV_CLIENTS[idx],
+          name,
+          company,
+          email,
+          phone,
+          platform,
+          country,
+          currency,
+          payment_schedule,
+          status,
+          communication_mode,
+          notes,
+          updated_at: new Date().toISOString(),
+        }
+      }
+    }
+
+    try {
+      await logAuditEvent({
+        actorId: session.user.id,
+        action: 'CLIENT_UPDATED',
+        targetType: 'client',
+        targetId: clientId,
+        details: {
+          name,
+          communication_mode,
+          organizationId: session.organization.id,
+        },
+      })
+    } catch (e) {}
+
+    revalidatePath('/clients')
+    revalidatePath(`/clients/${clientId}`)
+    return { success: true }
+  } catch (error: any) {
+    console.error('updateClientAction error:', error)
+    return { error: error?.message || 'Internal server error.' }
+  }
+}
+
+export async function updateClientNotesAction(clientId: string, notes: string) {
+  try {
+    const session = await getCurrentSessionContext()
+
+    if (!session || !session.user || !session.organization) {
+      return { error: 'Unauthorized session.' }
+    }
+
+    const supabase = await createClient()
+
+    try {
+      await supabase
+        .from('clients')
+        .update({
+          notes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', clientId)
+        .eq('organization_id', session.organization.id)
+    } catch (e) {}
+
+    if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
+      const idx = (global as any).__DEV_CLIENTS.findIndex((c: any) => c.id === clientId)
+      if (idx !== -1) {
+        ;(global as any).__DEV_CLIENTS[idx].notes = notes
+        ;(global as any).__DEV_CLIENTS[idx].updated_at = new Date().toISOString()
+      }
+    }
+
+    revalidatePath(`/clients/${clientId}`)
+    return { success: true }
+  } catch (error: any) {
+    return { error: error?.message || 'Failed to update notes.' }
   }
 }
