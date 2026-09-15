@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { ProjectRecord, updateProjectStatusAction, updateProjectTeamAssigneeAction } from '@/app/(dashboard)/projects/actions'
 import { ProjectStatusBadge } from './ProjectStatusBadge'
+import { ProjectHealthBadge } from '@/components/shared/ProjectHealthBadge'
 
 interface ProjectHeaderProps {
   project: ProjectRecord
@@ -128,6 +129,7 @@ export function ProjectHeader({ project, membersList, onProjectUpdated }: Projec
               {project.title}
             </h1>
             <ProjectStatusBadge status={status} />
+            <ProjectHealthBadge deadline={project.deadline} status={status} />
           </div>
           {project.description && (
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl">
