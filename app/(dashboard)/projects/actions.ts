@@ -466,3 +466,511 @@ function getDevProjects(): ProjectRecord[] {
 
   return defaultProjects
 }
+
+// Deliverables, Tasks & Activity Log Interfaces
+export interface DeliverableRecord {
+  id: string
+  organization_id: string
+  project_id: string
+  title: string
+  file_url?: string | null
+  drive_link?: string | null
+  status: 'pending' | 'approved' | 'revision_required'
+  client_feedback?: string | null
+  submitted_at?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface TaskRecord {
+  id: string
+  organization_id: string
+  project_id: string
+  title: string
+  description?: string | null
+  assigned_to?: string | null
+  assigned_name?: string | null
+  status: 'todo' | 'in_progress' | 'review' | 'done'
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  due_date?: string | null
+  completed_at?: string | null
+  created_at: string
+}
+
+export interface ProjectActivityLogRecord {
+  id: string
+  organization_id: string
+  project_id: string
+  actor_id?: string | null
+  actor_name?: string | null
+  action: string
+  details?: any
+  created_at: string
+}
+
+// Helper to log project activity
+export async function logProjectActivity(
+  projectId: string,
+  action: string,
+  details: any = {}
+) {
+  try {
+    const session = await getCurrentSessionContext()
+    if (!session || !session.organization) return
+
+    const supabase = await createClient()
+
+    await supabase.from('project_activity_log').insert({
+      organization_id: session.organization.id,
+      project_id: projectId,
+      actor_id: session.user?.id || null,
+      actor_name: session.user?.full_name || session.user?.email || 'System User',
+      action,
+      details,
+      created_at: new Date().toISOString()
+    })
+  } catch (e) {}
+}
+
+// Fetch single project detail with client & assigned profile
+export async function fetchProjectDetailAction(projectId: string): Promise<ProjectRecord | null> {
+  try {
+    const session = await getCurrentSessionContext()
+    const supabase = await createClient()
+
+    if (session && session.organization) {
+      const { data } = await supabase
+        .from('projects')
+        .select(`
+          *,
+          clients ( name, company ),
+          profiles!projects_assigned_to_fkey ( full_name, email )
+        `)
+        .eq('id', projectId)
+        .eq('organization_id', session.organization.id)
+        .maybeSingle()
+
+      if (data) {
+        return {
+          id: data.id,
+          organization_id: data.organization_id,
+          client_id: data.client_id,
+          client_name: data.clients?.name || 'Client',
+          client_company: data.clients?.company || null,
+          title: data.title,
+          description: data.description,
+          type: data.type,
+          brief_source: data.brief_source,
+          amount: parseFloat(data.amount || '0'),
+          currency: data.currency || 'USD',
+          status: data.status || 'Planning',
+          priority: data.priority || 'medium',
+          start_date: data.start_date,
+          deadline: data.deadline,
+          assigned_to: data.assigned_to,
+          assigned_name: data.profiles?.full_name || data.profiles?.email || null,
+          notes: data.notes,
+          created_at: data.created_at,
+          updated_at: data.updated_at
+        }
+      }
+    }
+
+    // Dev Fallback
+    const devProjects = getDevProjects()
+    return devProjects.find((p) => p.id === projectId) || devProjects[0] || null
+  } catch (err) {
+    console.error('fetchProjectDetailAction error:', err)
+    const devProjects = getDevProjects()
+    return devProjects.find((p) => p.id === projectId) || null
+  }
+}
+
+// Fetch deliverables for a project
+export async function fetchProjectDeliverablesAction(projectId: string): Promise<DeliverableRecord[]> {
+  try {
+    const session = await getCurrentSessionContext()
+    if (!session || !session.organization) return getDevDeliverables(projectId)
+
+    const supabase = await createClient()
+
+    const { data } = await supabase
+      .from('deliverables')
+      .select('*')
+      .eq('project_id', projectId)
+      .eq('organization_id', session.organization.id)
+      .order('created_at', { ascending: false })
+
+    if (data && data.length > 0) return data as DeliverableRecord[]
+    return getDevDeliverables(projectId)
+  } catch (err) {
+    return getDevDeliverables(projectId)
+  }
+}
+
+// Create deliverable action
+export async function createDeliverableAction(projectId: string, formData: FormData) {
+  try {
+    const session = await getCurrentSessionContext()
+    if (!session || !session.user || !session.organization) {
+      return { error: 'Unauthorized.' }
+    }
+
+    const title = formData.get('title')?.toString().trim()
+    const file_url = formData.get('file_url')?.toString().trim() || null
+    const drive_link = formData.get('drive_link')?.toString().trim() || null
+
+    if (!title) return { error: 'Deliverable title is required.' }
+
+    const supabase = await createClient()
+    const payload = {
+      organization_id: session.organization.id,
+      project_id: projectId,
+      title,
+      file_url,
+      drive_link,
+      status: 'pending',
+      submitted_at: new Date().toISOString()
+    }
+
+    const { data, error } = await supabase
+      .from('deliverables')
+      .insert(payload)
+      .select('id')
+      .single()
+
+    if (error) {
+      console.error('Failed to create deliverable:', error)
+      return { error: error.message || 'Failed to create deliverable.' }
+    }
+
+    await logProjectActivity(projectId, 'DELIVERABLE_CREATED', { title })
+    revalidatePath(`/projects/${projectId}`)
+    return { success: true, deliverableId: data.id }
+  } catch (err: any) {
+    return { error: err.message || 'Failed to create deliverable.' }
+  }
+}
+
+// Update deliverable review status (pending/approved/revision_required)
+export async function updateDeliverableStatusAction(
+  deliverableId: string,
+  projectId: string,
+  status: 'pending' | 'approved' | 'revision_required',
+  clientFeedback?: string
+) {
+  try {
+    const session = await getCurrentSessionContext()
+    if (!session || !session.organization) return { error: 'Unauthorized.' }
+
+    const supabase = await createClient()
+
+    await supabase
+      .from('deliverables')
+      .update({
+        status,
+        client_feedback: clientFeedback || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', deliverableId)
+      .eq('organization_id', session.organization.id)
+
+    await logProjectActivity(projectId, 'DELIVERABLE_STATUS_UPDATED', {
+      deliverableId,
+      status,
+      clientFeedback
+    })
+    revalidatePath(`/projects/${projectId}`)
+    return { success: true }
+  } catch (err: any) {
+    return { error: err.message || 'Failed to update deliverable status.' }
+  }
+}
+
+// Delete deliverable
+export async function deleteDeliverableAction(deliverableId: string, projectId: string) {
+  try {
+    const session = await getCurrentSessionContext()
+    if (!session || !session.organization) return { error: 'Unauthorized.' }
+
+    const supabase = await createClient()
+
+    await supabase
+      .from('deliverables')
+      .delete()
+      .eq('id', deliverableId)
+      .eq('organization_id', session.organization.id)
+
+    await logProjectActivity(projectId, 'DELIVERABLE_DELETED', { deliverableId })
+    revalidatePath(`/projects/${projectId}`)
+    return { success: true }
+  } catch (err: any) {
+    return { error: err.message || 'Failed to delete deliverable.' }
+  }
+}
+
+// Fetch project tasks
+export async function fetchProjectTasksAction(projectId: string): Promise<TaskRecord[]> {
+  try {
+    const session = await getCurrentSessionContext()
+    if (!session || !session.organization) return getDevTasks(projectId)
+
+    const supabase = await createClient()
+
+    const { data } = await supabase
+      .from('tasks')
+      .select(`
+        *,
+        profiles ( full_name, email )
+      `)
+      .eq('project_id', projectId)
+      .eq('organization_id', session.organization.id)
+      .order('created_at', { ascending: true })
+
+    if (data && data.length > 0) {
+      return data.map((t) => ({
+        id: t.id,
+        organization_id: t.organization_id,
+        project_id: t.project_id,
+        title: t.title,
+        description: t.description,
+        assigned_to: t.assigned_to,
+        assigned_name: t.profiles?.full_name || t.profiles?.email || null,
+        status: t.status,
+        priority: t.priority,
+        due_date: t.due_date,
+        completed_at: t.completed_at,
+        created_at: t.created_at
+      }))
+    }
+
+    return getDevTasks(projectId)
+  } catch (err) {
+    return getDevTasks(projectId)
+  }
+}
+
+// Create task action
+export async function createProjectTaskAction(projectId: string, formData: FormData) {
+  try {
+    const session = await getCurrentSessionContext()
+    if (!session || !session.user || !session.organization) return { error: 'Unauthorized.' }
+
+    const title = formData.get('title')?.toString().trim()
+    const description = formData.get('description')?.toString().trim() || null
+    const priority = (formData.get('priority')?.toString().trim() || 'medium') as any
+    const due_date = formData.get('due_date')?.toString().trim() || null
+    const assigned_to = formData.get('assigned_to')?.toString().trim() || null
+
+    if (!title) return { error: 'Task title is required.' }
+
+    const supabase = await createClient()
+    const payload = {
+      organization_id: session.organization.id,
+      project_id: projectId,
+      title,
+      description,
+      priority,
+      status: 'todo',
+      due_date,
+      assigned_to: assigned_to || null
+    }
+
+    const { data, error } = await supabase.from('tasks').insert(payload).select('id').single()
+
+    if (error) return { error: error.message || 'Failed to create task.' }
+
+    await logProjectActivity(projectId, 'TASK_CREATED', { title })
+    revalidatePath(`/projects/${projectId}`)
+    return { success: true, taskId: data.id }
+  } catch (err: any) {
+    return { error: err.message || 'Failed to create task.' }
+  }
+}
+
+// Update task status
+export async function updateTaskStatusAction(
+  taskId: string,
+  projectId: string,
+  newStatus: 'todo' | 'in_progress' | 'review' | 'done'
+) {
+  try {
+    const session = await getCurrentSessionContext()
+    if (!session || !session.organization) return { error: 'Unauthorized.' }
+
+    const supabase = await createClient()
+
+    const updatePayload: any = {
+      status: newStatus,
+      updated_at: new Date().toISOString()
+    }
+    if (newStatus === 'done') {
+      updatePayload.completed_at = new Date().toISOString()
+    }
+
+    await supabase
+      .from('tasks')
+      .update(updatePayload)
+      .eq('id', taskId)
+      .eq('organization_id', session.organization.id)
+
+    await logProjectActivity(projectId, 'TASK_STATUS_UPDATED', { taskId, newStatus })
+    revalidatePath(`/projects/${projectId}`)
+    return { success: true }
+  } catch (err: any) {
+    return { error: err.message || 'Failed to update task status.' }
+  }
+}
+
+// Update project team assignee
+export async function updateProjectTeamAssigneeAction(projectId: string, assignedToId: string | null) {
+  try {
+    const session = await getCurrentSessionContext()
+    if (!session || !session.organization) return { error: 'Unauthorized.' }
+
+    const supabase = await createClient()
+
+    await supabase
+      .from('projects')
+      .update({ assigned_to: assignedToId || null, updated_at: new Date().toISOString() })
+      .eq('id', projectId)
+      .eq('organization_id', session.organization.id)
+
+    await logProjectActivity(projectId, 'PROJECT_ASSIGNEE_UPDATED', { assignedToId })
+    revalidatePath(`/projects/${projectId}`)
+    return { success: true }
+  } catch (err: any) {
+    return { error: err.message || 'Failed to update team assignee.' }
+  }
+}
+
+// Fetch activity log for project
+export async function fetchProjectActivityLogAction(projectId: string): Promise<ProjectActivityLogRecord[]> {
+  try {
+    const session = await getCurrentSessionContext()
+    if (!session || !session.organization) return getDevActivityLogs(projectId)
+
+    const supabase = await createClient()
+
+    const { data } = await supabase
+      .from('project_activity_log')
+      .select('*')
+      .eq('project_id', projectId)
+      .eq('organization_id', session.organization.id)
+      .order('created_at', { ascending: false })
+
+    if (data && data.length > 0) return data as ProjectActivityLogRecord[]
+    return getDevActivityLogs(projectId)
+  } catch (err) {
+    return getDevActivityLogs(projectId)
+  }
+}
+
+// Dev Fallbacks for Deliverables, Tasks & Activity Logs
+function getDevDeliverables(projectId: string): DeliverableRecord[] {
+  return [
+    {
+      id: 'del-1',
+      organization_id: 'dev-org',
+      project_id: projectId,
+      title: 'Voice Bot Dialog Flow Architecture Diagram',
+      drive_link: 'https://drive.google.com/file/d/voice-bot-flow',
+      status: 'approved',
+      client_feedback: 'Approved! Clean workflow design.',
+      created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
+      updated_at: new Date(Date.now() - 3600000 * 24).toISOString()
+    },
+    {
+      id: 'del-2',
+      organization_id: 'dev-org',
+      project_id: projectId,
+      title: 'Twilio Webhook Integration & Audio Sample Test',
+      drive_link: 'https://drive.google.com/file/d/audio-sample',
+      status: 'pending',
+      client_feedback: null,
+      created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+      updated_at: new Date(Date.now() - 3600000 * 12).toISOString()
+    }
+  ]
+}
+
+function getDevTasks(projectId: string): TaskRecord[] {
+  return [
+    {
+      id: 'task-1',
+      organization_id: 'dev-org',
+      project_id: projectId,
+      title: 'Configure OpenAI Realtime API credentials & audio streaming',
+      description: 'Set up low-latency web sockets for live voice agent response.',
+      assigned_to: 'usr_1',
+      assigned_name: 'Alex Johnson',
+      status: 'done',
+      priority: 'high',
+      due_date: new Date(Date.now() - 3600000 * 24).toISOString().slice(0, 10),
+      completed_at: new Date(Date.now() - 3600000 * 24).toISOString(),
+      created_at: new Date(Date.now() - 3600000 * 72).toISOString()
+    },
+    {
+      id: 'task-2',
+      organization_id: 'dev-org',
+      project_id: projectId,
+      title: 'Build inbound call routing & fallback handler',
+      description: 'Handle offline mode and send SMS callback link if user hangs up.',
+      assigned_to: 'usr_2',
+      assigned_name: 'Sarah Smith',
+      status: 'in_progress',
+      priority: 'urgent',
+      due_date: new Date(Date.now() + 3600000 * 24 * 3).toISOString().slice(0, 10),
+      created_at: new Date(Date.now() - 3600000 * 36).toISOString()
+    },
+    {
+      id: 'task-3',
+      organization_id: 'dev-org',
+      project_id: projectId,
+      title: 'Conduct end-to-end load test on 50 concurrent calls',
+      description: 'Ensure system latency remains below 800ms during peak load.',
+      assigned_to: 'usr_3',
+      assigned_name: 'Michael Brown',
+      status: 'todo',
+      priority: 'medium',
+      due_date: new Date(Date.now() + 3600000 * 24 * 7).toISOString().slice(0, 10),
+      created_at: new Date(Date.now() - 3600000 * 10).toISOString()
+    }
+  ]
+}
+
+function getDevActivityLogs(projectId: string): ProjectActivityLogRecord[] {
+  return [
+    {
+      id: 'act-1',
+      organization_id: 'dev-org',
+      project_id: projectId,
+      actor_id: 'usr_1',
+      actor_name: 'Alex Johnson',
+      action: 'DELIVERABLE_CREATED',
+      details: { title: 'Twilio Webhook Integration & Audio Sample Test' },
+      created_at: new Date(Date.now() - 3600000 * 12).toISOString()
+    },
+    {
+      id: 'act-2',
+      organization_id: 'dev-org',
+      project_id: projectId,
+      actor_id: 'usr_2',
+      actor_name: 'Sarah Smith',
+      action: 'TASK_STATUS_UPDATED',
+      details: { taskId: 'task-1', newStatus: 'done' },
+      created_at: new Date(Date.now() - 3600000 * 24).toISOString()
+    },
+    {
+      id: 'act-3',
+      organization_id: 'dev-org',
+      project_id: projectId,
+      actor_id: 'usr_1',
+      actor_name: 'System Admin',
+      action: 'PROJECT_CREATED',
+      details: { title: 'Project Kickoff' },
+      created_at: new Date(Date.now() - 3600000 * 72).toISOString()
+    }
+  ]
+}
+
