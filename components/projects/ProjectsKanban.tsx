@@ -28,6 +28,7 @@ import {
 import { ProjectRecord, updateProjectStatusAction, deleteProjectAction } from '@/app/(dashboard)/projects/actions'
 import { NewProjectModal } from './NewProjectModal'
 import { EditProjectModal } from './EditProjectModal'
+import { ProjectHealthBadge } from '@/components/shared/ProjectHealthBadge'
 
 export interface ProjectsKanbanProps {
   initialProjects: ProjectRecord[]
@@ -455,19 +456,22 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
                             </div>
                           )}
 
-                          {/* Metadata row: Budget & Deadline */}
+                          {/* Metadata row: Budget & Deadline & Health */}
                           <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                             <div className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300">
                               <DollarSign className="w-3.5 h-3.5 text-amber-500" />
                               <span>{formatCurrency(project.amount, project.currency) || '$0'}</span>
                             </div>
 
-                            {project.deadline && (
-                              <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
-                                <Calendar className="w-3 h-3 text-slate-400" />
-                                <span>{new Date(project.deadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                              </div>
-                            )}
+                            <div className="flex items-center gap-2">
+                              <ProjectHealthBadge deadline={project.deadline} status={project.status} />
+                              {project.deadline && (
+                                <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                  <Calendar className="w-3 h-3 text-slate-400" />
+                                  <span>{new Date(project.deadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
 
                           {/* Assignee Footer */}
