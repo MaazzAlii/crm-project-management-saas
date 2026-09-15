@@ -10,6 +10,7 @@ interface NewProjectModalProps {
   onSuccess?: () => void
   clientsList: { id: string; name: string }[]
   membersList: { id: string; name: string }[]
+  templatesList?: { id: string; name: string; type?: string | null; default_amount?: number; description?: string | null }[]
   initialClientId?: string
 }
 
@@ -19,9 +20,11 @@ export function NewProjectModal({
   onSuccess,
   clientsList,
   membersList,
+  templatesList = [],
   initialClientId,
 }: NewProjectModalProps) {
   const [clientId, setClientId] = useState(initialClientId || clientsList[0]?.id || '')
+  const [templateId, setTemplateId] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [type, setType] = useState('Combined')
@@ -38,6 +41,17 @@ export function NewProjectModal({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const handleTemplateSelect = (selectedTmplId: string) => {
+    setTemplateId(selectedTmplId)
+    const tmpl = templatesList.find((t) => t.id === selectedTmplId)
+    if (tmpl) {
+      if (tmpl.type) setType(tmpl.type)
+      if (tmpl.default_amount) setAmount(tmpl.default_amount.toString())
+      if (tmpl.description && !description) setDescription(tmpl.description)
+      if (!title) setTitle(tmpl.name + ' Project')
+    }
+  }
+
   if (!isOpen) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,6 +61,7 @@ export function NewProjectModal({
 
     const formData = new FormData()
     formData.append('client_id', clientId)
+    if (templateId) formData.append('template_id', templateId)
     formData.append('title', title)
     formData.append('description', description)
     formData.append('type', type)
@@ -101,6 +116,30 @@ export function NewProjectModal({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs max-h-[70vh] overflow-y-auto pr-1">
+          {/* Template Selection Dropdown */}
+          {templatesList.length > 0 && (
+            <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl space-y-1">
+              <label className="block font-semibold text-indigo-300">
+                Use Project Template (Optional)
+              </label>
+              <select
+                value={templateId}
+                onChange={(e) => handleTemplateSelect(e.target.value)}
+                className="w-full px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">No Template (Custom Project)</option>
+                {templatesList.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name} ({t.type || 'Combined'})
+                  </option>
+                ))}
+              </select>
+              <p className="text-[11px] text-slate-400">
+                Selecting a template automatically populates tasks & default deliverables.
+              </p>
+            </div>
+          )}
+
           {/* Client & Project Title Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
