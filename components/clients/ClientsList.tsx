@@ -269,9 +269,13 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                         {/* Name & Company */}
                         <td className="px-5 py-4 font-medium">
                           <div className="flex flex-col">
-                            <span className="font-bold text-white text-sm">
-                              {client.name}
-                            </span>
+                            <Link
+                              href={`/clients/${client.id}`}
+                              className="font-bold text-white text-sm hover:text-sky-400 transition flex items-center gap-1.5"
+                            >
+                              <span>{client.name}</span>
+                              <ExternalLink className="h-3 w-3 text-slate-500 hover:text-sky-400 opacity-0 group-hover:opacity-100 transition" />
+                            </Link>
                             {client.company && (
                               <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
                                 <Building2 className="h-3 w-3 text-slate-500" />
@@ -360,9 +364,12 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                   {/* Top Card Header */}
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="font-extrabold text-white text-base leading-tight">
+                      <Link
+                        href={`/clients/${client.id}`}
+                        className="font-extrabold text-white text-base leading-tight hover:text-sky-400 transition"
+                      >
                         {client.name}
-                      </h3>
+                      </Link>
                       {client.company && (
                         <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
                           <Building2 className="h-3.5 w-3.5 text-slate-500" />
