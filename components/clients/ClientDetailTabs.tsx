@@ -13,15 +13,24 @@ import {
   Zap,
 } from 'lucide-react'
 
+import { ClientCommunicationsView } from '@/components/communications/ClientCommunicationsView'
+import { CommunicationItem } from '@/app/(dashboard)/clients/[id]/communications/actions'
+
 interface ClientDetailTabsProps {
   client: ClientRecord
   projects?: any[]
   auditLogs?: AuditItem[]
+  initialCommunications?: CommunicationItem[]
 }
 
 type TabType = 'overview' | 'projects' | 'communication' | 'activity'
 
-export function ClientDetailTabs({ client, projects = [], auditLogs = [] }: ClientDetailTabsProps) {
+export function ClientDetailTabs({
+  client,
+  projects = [],
+  auditLogs = [],
+  initialCommunications = [],
+}: ClientDetailTabsProps) {
   const [activeTab, setActiveTab] = useState<TabType>('overview')
 
   const tabs = [
@@ -29,7 +38,7 @@ export function ClientDetailTabs({ client, projects = [], auditLogs = [] }: Clie
     { id: 'projects', label: `Projects (${projects.length})`, icon: FolderGit2 },
     {
       id: 'communication',
-      label: 'Communication History',
+      label: `Communications (${initialCommunications.length})`,
       icon: client.communication_mode === 'connected' ? Zap : MessageSquare,
     },
     { id: 'activity', label: 'Activity Log', icon: Activity },
@@ -82,17 +91,11 @@ export function ClientDetailTabs({ client, projects = [], auditLogs = [] }: Clie
         {activeTab === 'overview' && <ClientOverviewTab client={client} />}
         {activeTab === 'projects' && <ClientProjectsTab projects={projects} />}
         {activeTab === 'communication' && (
-          <div className="rounded-2xl border border-slate-800/80 bg-slate-900/50 p-10 text-center space-y-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-400 mx-auto">
-              {client.communication_mode === 'connected' ? <Zap className="h-6 w-6" /> : <MessageSquare className="h-6 w-6" />}
-            </div>
-            <h3 className="text-base font-bold text-white">Communication Logs & Sync</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
-              {client.communication_mode === 'connected'
-                ? 'Connected Hub mode is active. Message history and automated channel updates will auto-sync here once channel integration is linked (Task 41).'
-                : 'Manual Mode is active. Log custom client calls, off-platform meetings, and manual notes.'}
-            </p>
-          </div>
+          <ClientCommunicationsView
+            client={client}
+            initialCommunications={initialCommunications}
+            showBackLink={false}
+          />
         )}
         {activeTab === 'activity' && <ClientActivityLogTab logs={auditLogs} />}
       </div>
