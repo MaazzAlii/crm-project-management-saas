@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation'
 import { ClientRecord } from '@/components/clients/ClientsList'
 import { ClientDetailHeader } from '@/components/clients/ClientDetailHeader'
 import { ClientDetailTabs } from '@/components/clients/ClientDetailTabs'
+import { fetchClientCommunicationsAction } from './communications/actions'
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   return {
@@ -95,6 +96,9 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
     auditLogs = auditData || []
   } catch (err) {}
 
+  // Fetch communications
+  const communications = await fetchClientCommunicationsAction(client.id)
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <ClientDetailHeader
@@ -106,6 +110,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
         client={client}
         projects={projects}
         auditLogs={auditLogs}
+        initialCommunications={communications}
       />
     </div>
   )
