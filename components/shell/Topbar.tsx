@@ -3,9 +3,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Menu, ChevronDown, LogOut } from 'lucide-react'
 import { OrgSwitcher } from './OrgSwitcher'
 import { type UserSessionContext, type UserOrganizationItem } from '@/lib/auth/session'
-import { Bell, Menu, LogOut, User, Shield, ChevronDown } from 'lucide-react'
+import { NotificationPanel } from './NotificationPanel'
 
 interface TopbarProps {
   sessionContext: UserSessionContext
@@ -75,14 +76,8 @@ export function Topbar({ sessionContext, onOpenMobileMenu }: TopbarProps) {
 
       {/* Right Header Actions */}
       <div className="flex items-center gap-3">
-        {/* Notification Bell Stub (Wired in Task 53) */}
-        <button
-          title="In-App Notifications"
-          className="relative rounded-xl border border-slate-800 bg-slate-900/80 p-2.5 text-slate-400 hover:border-slate-700 hover:bg-slate-800 hover:text-white transition"
-        >
-          <Bell className="h-4 w-4" />
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-sky-500 animate-pulse" />
-        </button>
+        {/* In-App Notification Center */}
+        <NotificationPanel />
 
         {/* User Account Dropdown */}
         <div className="relative" ref={dropdownRef}>
