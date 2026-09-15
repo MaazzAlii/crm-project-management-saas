@@ -22,6 +22,10 @@ import {
   ExternalLink,
 } from 'lucide-react'
 
+import { TagBadge } from './TagBadge'
+import { TagManagerModal } from './TagManagerModal'
+import { Tag as TagIcon } from 'lucide-react'
+
 export interface ClientRecord {
   id: string
   organization_id: string
@@ -36,6 +40,7 @@ export interface ClientRecord {
   status: string
   communication_mode: 'manual' | 'connected' | string
   notes?: string | null
+  tags?: string[]
   created_at: string
   updated_at: string
 }
@@ -51,6 +56,7 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
 
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table')
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false)
 
   const [filters, setFilters] = useState<ClientFiltersState>({
     search: '',
@@ -58,13 +64,24 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
     platform: '',
     country: '',
     communicationMode: '',
+    tag: '',
   })
 
-  // Extract unique countries for filter dropdown
+  // Extract unique countries & tags for filter dropdowns
   const countriesList = useMemo(() => {
     const set = new Set<string>()
     initialClients.forEach((c) => {
       if (c.country) set.add(c.country)
+    })
+    return Array.from(set).sort()
+  }, [initialClients])
+
+  const tagsList = useMemo(() => {
+    const set = new Set<string>()
+    initialClients.forEach((c) => {
+      if (c.tags && Array.isArray(c.tags)) {
+        c.tags.forEach((t) => set.add(t))
+      }
     })
     return Array.from(set).sort()
   }, [initialClients])
@@ -98,6 +115,11 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
 
       // Communication Mode filter
       if (filters.communicationMode && client.communication_mode !== filters.communicationMode) {
+        return false
+      }
+
+      // Tag filter
+      if (filters.tag && (!client.tags || !client.tags.includes(filters.tag))) {
         return false
       }
 
@@ -135,6 +157,7 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
       platform: '',
       country: '',
       communicationMode: '',
+      tag: '',
     })
   }
 
@@ -215,6 +238,15 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
             </button>
           </div>
 
+          {/* Manage Tags Button */}
+          <button
+            onClick={() => setIsTagManagerOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition"
+          >
+            <TagIcon className="h-3.5 w-3.5 text-sky-400" />
+            <span>Manage Tags</span>
+          </button>
+
           {/* Add Client Button */}
           <Link
             href="/clients/new"
@@ -234,6 +266,7 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
         totalCount={initialClients.length}
         filteredCount={filteredClients.length}
         countriesList={countriesList}
+        tagsList={tagsList}
       />
 
       {/* Empty State checks */}
@@ -249,6 +282,7 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                   <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     <tr>
                       <th className="px-5 py-3.5">Client & Company</th>
+                      <th className="px-4 py-3.5">Tags</th>
                       <th className="px-4 py-3.5">Contact Email</th>
                       <th className="px-4 py-3.5">Platform</th>
                       <th className="px-4 py-3.5">Country</th>
@@ -283,6 +317,19 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                               </span>
                             )}
                           </div>
+                        </td>
+
+                        {/* Tags */}
+                        <td className="px-4 py-4">
+                          {client.tags && client.tags.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {client.tags.map((t) => (
+                                <TagBadge key={t} name={t} />
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-slate-600 text-[11px]">—</span>
+                          )}
                         </td>
 
                         {/* Email */}
@@ -381,11 +428,14 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                   </div>
 
                   {/* Badges & Mode Row */}
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
                     <CommunicationModeBadge mode={client.communication_mode} />
                     <span className="inline-flex items-center rounded-lg border border-slate-800 bg-slate-950 px-2 py-0.5 text-[11px] font-medium text-slate-300">
                       {client.platform || 'WhatsApp'}
                     </span>
+                    {client.tags && client.tags.map((t) => (
+                      <TagBadge key={t} name={t} />
+                    ))}
                   </div>
 
                   {/* Contact Info List */}
@@ -438,6 +488,13 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
           )}
         </>
       )}
+
+      {/* Tag Manager Modal */}
+      <TagManagerModal
+        isOpen={isTagManagerOpen}
+        onClose={() => setIsTagManagerOpen(false)}
+        onTagsUpdated={() => router.refresh()}
+      />
     </div>
   )
 }
