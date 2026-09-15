@@ -1,11 +1,15 @@
 import { fetchProjectsAction } from './actions'
+import { fetchProjectTemplatesAction } from '@/app/(dashboard)/settings/templates/actions'
 import { ProjectsList } from '@/components/projects/ProjectsList'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ProjectsPage() {
-  const projects = await fetchProjectsAction()
+  const [projects, templates] = await Promise.all([
+    fetchProjectsAction(),
+    fetchProjectTemplatesAction()
+  ])
 
   // Fetch clients and profiles for filter & select dropdowns
   let clientsList: { id: string; name: string }[] = []
@@ -49,12 +53,21 @@ export default async function ProjectsPage() {
     ]
   }
 
+  const templatesList = templates.map((t) => ({
+    id: t.id,
+    name: t.name,
+    type: t.type,
+    default_amount: t.default_amount,
+    description: t.description
+  }))
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <ProjectsList
         initialProjects={projects}
         clientsList={clientsList}
         membersList={membersList}
+        templatesList={templatesList}
       />
     </div>
   )

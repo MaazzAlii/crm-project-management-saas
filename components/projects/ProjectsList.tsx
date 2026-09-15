@@ -27,9 +27,10 @@ interface ProjectsListProps {
   initialProjects: ProjectRecord[]
   clientsList: { id: string; name: string }[]
   membersList: { id: string; name: string }[]
+  templatesList?: { id: string; name: string; type?: string | null; default_amount?: number; description?: string | null }[]
 }
 
-export function ProjectsList({ initialProjects, clientsList, membersList }: ProjectsListProps) {
+export function ProjectsList({ initialProjects, clientsList, membersList, templatesList = [] }: ProjectsListProps) {
   const router = useRouter()
   const [projects, setProjects] = useState<ProjectRecord[]>(initialProjects)
   const [filters, setFilters] = useState<ProjectFiltersState>({
@@ -362,6 +363,7 @@ export function ProjectsList({ initialProjects, clientsList, membersList }: Proj
           }}
           clientsList={clientsList}
           membersList={membersList}
+          templatesList={templatesList}
         />
       )}
 
