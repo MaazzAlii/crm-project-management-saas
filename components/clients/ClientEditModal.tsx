@@ -19,6 +19,8 @@ import {
   Save,
 } from 'lucide-react'
 
+import { TagSelect } from '@/components/clients/TagSelect'
+
 interface ClientEditModalProps {
   client: ClientRecord
   isOpen: boolean
@@ -32,6 +34,7 @@ export function ClientEditModal({ client, isOpen, onClose }: ClientEditModalProp
   const [commMode, setCommMode] = useState<'manual' | 'connected'>(
     client.communication_mode === 'connected' ? 'connected' : 'manual'
   )
+  const [tags, setTags] = useState<string[]>(client.tags || [])
 
   if (!isOpen) return null
 
@@ -42,6 +45,7 @@ export function ClientEditModal({ client, isOpen, onClose }: ClientEditModalProp
 
     const formData = new FormData(e.currentTarget)
     formData.set('communication_mode', commMode)
+    formData.set('tags', JSON.stringify(tags))
 
     const res = await updateClientAction(client.id, formData)
 
@@ -248,6 +252,12 @@ export function ClientEditModal({ client, isOpen, onClose }: ClientEditModalProp
                 </select>
               </div>
             </div>
+          </div>
+
+          {/* Tags & Categorization */}
+          <div className="space-y-3 pt-2">
+            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tags & Categorization</h3>
+            <TagSelect selectedTags={tags} onChange={setTags} />
           </div>
 
           {/* Form Actions */}
