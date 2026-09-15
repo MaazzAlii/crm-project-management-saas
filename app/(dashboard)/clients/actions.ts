@@ -25,6 +25,13 @@ export async function createClientAction(formData: FormData) {
     const status = formData.get('status')?.toString().trim() || 'active'
     const communication_mode = (formData.get('communication_mode')?.toString().trim() || 'manual') as 'manual' | 'connected'
     const notes = formData.get('notes')?.toString().trim() || null
+    const tagsRaw = formData.get('tags')?.toString().trim()
+    let tags: string[] = []
+    if (tagsRaw) {
+      try {
+        tags = JSON.parse(tagsRaw)
+      } catch (e) {}
+    }
 
     if (!name) {
       return { error: 'Client name is required.' }
@@ -66,6 +73,7 @@ export async function createClientAction(formData: FormData) {
           status,
           communication_mode,
           notes,
+          tags,
         })
         .select('id')
         .single()
@@ -92,6 +100,7 @@ export async function createClientAction(formData: FormData) {
         status,
         communication_mode,
         notes,
+        tags,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }
@@ -196,6 +205,13 @@ export async function updateClientAction(clientId: string, formData: FormData) {
     const status = formData.get('status')?.toString().trim() || 'active'
     const communication_mode = (formData.get('communication_mode')?.toString().trim() || 'manual') as 'manual' | 'connected'
     const notes = formData.get('notes')?.toString().trim() || null
+    const tagsRaw = formData.get('tags')?.toString().trim()
+    let tags: string[] | undefined = undefined
+    if (tagsRaw !== undefined && tagsRaw !== null) {
+      try {
+        tags = JSON.parse(tagsRaw)
+      } catch (e) {}
+    }
 
     if (!name) {
       return { error: 'Client name is required.' }
@@ -210,24 +226,30 @@ export async function updateClientAction(clientId: string, formData: FormData) {
 
     const supabase = await createClient()
 
+    const updatePayload: any = {
+      name,
+      company,
+      email,
+      phone,
+      platform,
+      country,
+      currency,
+      payment_schedule,
+      status,
+      communication_mode,
+      notes,
+      updated_at: new Date().toISOString(),
+    }
+
+    if (tags !== undefined) {
+      updatePayload.tags = tags
+    }
+
     let updateError: any = null
     try {
       const { error } = await supabase
         .from('clients')
-        .update({
-          name,
-          company,
-          email,
-          phone,
-          platform,
-          country,
-          currency,
-          payment_schedule,
-          status,
-          communication_mode,
-          notes,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updatePayload)
         .eq('id', clientId)
         .eq('organization_id', session.organization.id)
 
@@ -241,18 +263,7 @@ export async function updateClientAction(clientId: string, formData: FormData) {
       if (idx !== -1) {
         ;(global as any).__DEV_CLIENTS[idx] = {
           ...(global as any).__DEV_CLIENTS[idx],
-          name,
-          company,
-          email,
-          phone,
-          platform,
-          country,
-          currency,
-          payment_schedule,
-          status,
-          communication_mode,
-          notes,
-          updated_at: new Date().toISOString(),
+          ...updatePayload,
         }
       }
     }
