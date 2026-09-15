@@ -111,6 +111,7 @@ export async function createProjectAction(formData: FormData) {
     const deadline = formData.get('deadline')?.toString().trim() || null
     const assigned_to = formData.get('assigned_to')?.toString().trim() || null
     const notes = formData.get('notes')?.toString().trim() || null
+    const template_id = formData.get('template_id')?.toString().trim() || null
 
     if (!clientId) {
       return { error: 'Client selection is required for a project.' }
@@ -149,6 +150,64 @@ export async function createProjectAction(formData: FormData) {
 
       newProject = data
       insertError = error
+
+      // Scaffold tasks and deliverables if template_id is provided
+      if (newProject && template_id) {
+        try {
+          const orgId = session.organization.id
+          const [{ data: template }, { data: templateTasks }] = await Promise.all([
+            supabase
+              .from('project_templates')
+              .select('*')
+              .eq('id', template_id)
+              .eq('organization_id', orgId)
+              .single(),
+            supabase
+              .from('project_template_tasks')
+              .select('*')
+              .eq('template_id', template_id)
+              .eq('organization_id', orgId)
+          ])
+
+          const baseStartDate = start_date ? new Date(start_date) : new Date()
+
+          // Scaffold Tasks
+          if (templateTasks && templateTasks.length > 0) {
+            const taskInserts = templateTasks.map((tt) => {
+              const taskDueDate = new Date(baseStartDate)
+              taskDueDate.setDate(taskDueDate.getDate() + (tt.day_offset || 0))
+
+              return {
+                organization_id: orgId,
+                project_id: newProject!.id,
+                title: tt.title,
+                description: tt.description || null,
+                priority: tt.priority || 'medium',
+                status: 'todo',
+                due_date: taskDueDate.toISOString().slice(0, 10),
+                assigned_to: assigned_to || null
+              }
+            })
+            await supabase.from('tasks').insert(taskInserts)
+          }
+
+          // Scaffold Deliverables
+          if (template && Array.isArray(template.default_deliverables)) {
+            const deliverableInserts = template.default_deliverables.map((delTitle: string) => ({
+              organization_id: orgId,
+              project_id: newProject!.id,
+              title: delTitle,
+              status: 'pending',
+              submitted_at: new Date().toISOString()
+            }))
+            if (deliverableInserts.length > 0) {
+              await supabase.from('deliverables').insert(deliverableInserts)
+            }
+          }
+        } catch (scaffoldErr) {
+          console.error('Template scaffolding error:', scaffoldErr)
+        }
+      }
     } catch (err: any) {
       insertError = err
     }
