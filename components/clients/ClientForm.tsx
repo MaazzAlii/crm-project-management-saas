@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClientAction } from '@/app/(dashboard)/clients/actions'
-import { Pencil, Zap, ArrowLeft, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { TagSelect } from './TagSelect'
+import { Pencil, Zap, ArrowLeft, Loader2, AlertCircle, CheckCircle2, Tag as TagIcon } from 'lucide-react'
 
 export interface ClientFormValues {
   name: string
@@ -18,6 +19,7 @@ export interface ClientFormValues {
   status: string
   communication_mode: 'manual' | 'connected'
   notes: string
+  tags: string[]
 }
 
 export function ClientForm() {
@@ -35,6 +37,7 @@ export function ClientForm() {
     status: 'active',
     communication_mode: 'manual',
     notes: '',
+    tags: [],
   })
 
   const [errors, setErrors] = useState<Partial<Record<keyof ClientFormValues, string>>>({})
@@ -82,7 +85,11 @@ export function ClientForm() {
     try {
       const payload = new FormData()
       Object.entries(formData).forEach(([key, val]) => {
-        payload.append(key, val)
+        if (key === 'tags') {
+          payload.append('tags', JSON.stringify(val))
+        } else {
+          payload.append(key, val as string)
+        }
       })
 
       const res = await createClientAction(payload)
@@ -380,6 +387,19 @@ export function ClientForm() {
             className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none transition"
           />
         </div>
+      </div>
+
+      {/* Section 4: Tags & Categorization */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
+        <h3 className="text-sm font-bold text-white uppercase tracking-wider text-sky-400 flex items-center gap-2">
+          <TagIcon className="h-4 w-4" />
+          Tags & Categorization
+        </h3>
+
+        <TagSelect
+          selectedTags={formData.tags}
+          onChange={(tags) => setFormData((prev) => ({ ...prev, tags }))}
+        />
       </div>
 
       {/* Form Action Buttons */}
