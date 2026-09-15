@@ -18,6 +18,7 @@ import {
   Kanban
 } from 'lucide-react'
 import { ProjectStatusBadge } from './ProjectStatusBadge'
+import { ProjectHealthBadge } from '@/components/shared/ProjectHealthBadge'
 import { ProjectFilters, ProjectFiltersState } from './ProjectFilters'
 import { NewProjectModal } from './NewProjectModal'
 import { EditProjectModal } from './EditProjectModal'
@@ -273,6 +274,7 @@ export function ProjectsList({ initialProjects, clientsList, membersList, templa
                   <th className="py-3.5 px-4">Project Title</th>
                   <th className="py-3.5 px-4">Client</th>
                   <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4">Health</th>
                   <th className="py-3.5 px-4">Assigned Member</th>
                   <th className="py-3.5 px-4">Amount</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
@@ -310,6 +312,10 @@ export function ProjectsList({ initialProjects, clientsList, membersList, templa
 
                       <td className="py-4 px-4">
                         <ProjectStatusBadge status={project.status} />
+                      </td>
+
+                      <td className="py-4 px-4">
+                        <ProjectHealthBadge deadline={project.deadline} status={project.status} />
                       </td>
 
                       <td className="py-4 px-4 text-slate-600 dark:text-slate-300">
