@@ -68,6 +68,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
     status: rawClient.status,
     communication_mode: rawClient.communication_mode,
     notes: rawClient.notes,
+    tags: rawClient.tags || [],
     created_at: rawClient.created_at,
     updated_at: rawClient.updated_at,
   }

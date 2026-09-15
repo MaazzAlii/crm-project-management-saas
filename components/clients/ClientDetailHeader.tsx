@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ClientRecord } from '@/components/clients/ClientsList'
 import { CommunicationModeBadge } from '@/components/clients/CommunicationModeBadge'
+import { TagBadge } from '@/components/clients/TagBadge'
 import { ClientEditModal } from '@/components/clients/ClientEditModal'
 import { deleteClientAction } from '@/app/(dashboard)/clients/actions'
 import {
@@ -95,6 +96,9 @@ export function ClientDetailHeader({ client, userRole, isSuperAdmin }: ClientDet
                 {client.status.toUpperCase()}
               </span>
               <CommunicationModeBadge mode={client.communication_mode} />
+              {client.tags && client.tags.map((tag) => (
+                <TagBadge key={tag} name={tag} size="md" />
+              ))}
             </div>
 
             <div className="flex items-center flex-wrap gap-4 text-xs text-slate-400">
