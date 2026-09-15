@@ -25,17 +25,27 @@ export default async function ClientsPage() {
 
   const supabase = await createClient()
 
-  const { data: clientsData, error } = await supabase
-    .from('clients')
-    .select('*')
-    .eq('organization_id', session.organization.id)
-    .order('created_at', { ascending: false })
+  let clientsDataRaw: any[] = []
+  try {
+    const { data: clientsData, error } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('organization_id', session.organization.id)
+      .order('created_at', { ascending: false })
 
-  if (error) {
-    console.error('Error fetching clients:', error)
+    if (error) {
+      console.error('Error fetching clients:', error)
+    }
+    clientsDataRaw = clientsData || []
+  } catch (err) {
+    console.error('Error in clients query:', err)
   }
 
-  const clients: ClientRecord[] = (clientsData || []).map((c: any) => ({
+  if (process.env.DEV_SUPER_ADMIN === 'true' && global.__DEV_CLIENTS && global.__DEV_CLIENTS.length > 0) {
+    clientsDataRaw = [...global.__DEV_CLIENTS, ...clientsDataRaw]
+  }
+
+  const clients: ClientRecord[] = (clientsDataRaw || []).map((c: any) => ({
     id: c.id,
     organization_id: c.organization_id,
     name: c.name,
