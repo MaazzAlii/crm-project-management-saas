@@ -30,8 +30,42 @@ export interface UserSessionContext {
 export async function getCurrentSessionContext(): Promise<UserSessionContext | null> {
   const supabase = await createClient()
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data?.user || null
+  } catch (err) {
+    // In dev environment when Supabase local server is offline
+  }
+
+  if (!user) {
+    if (process.env.DEV_SUPER_ADMIN === 'true') {
+      return {
+        user: {
+          id: '00000000-0000-0000-0000-000000000000',
+          email: 'dev_admin@innoventixhub.com',
+          full_name: 'Dev Super Admin',
+          avatar_url: null,
+        },
+        organization: {
+          id: '00000000-0000-0000-0000-000000000001',
+          name: 'Innoventix Hub Agency',
+          slug: 'innoventix-hub',
+          plan_tier: 'agency_pro',
+          billing_status: 'active',
+        },
+        userOrganizations: [
+          {
+            id: '00000000-0000-0000-0000-000000000001',
+            name: 'Innoventix Hub Agency',
+            slug: 'innoventix-hub',
+            role: 'owner',
+          },
+        ],
+        role: 'owner',
+        isSuperAdmin: true,
+      }
+    }
     return null
   }
 
