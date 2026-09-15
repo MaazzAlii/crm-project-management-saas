@@ -41,8 +41,8 @@ export default async function ClientsPage() {
     console.error('Error in clients query:', err)
   }
 
-  if (process.env.DEV_SUPER_ADMIN === 'true' && global.__DEV_CLIENTS && global.__DEV_CLIENTS.length > 0) {
-    clientsDataRaw = [...global.__DEV_CLIENTS, ...clientsDataRaw]
+  if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS && (global as any).__DEV_CLIENTS.length > 0) {
+    clientsDataRaw = [...(global as any).__DEV_CLIENTS, ...clientsDataRaw]
   }
 
   const clients: ClientRecord[] = (clientsDataRaw || []).map((c: any) => ({
