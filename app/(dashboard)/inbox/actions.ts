@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { fetchInboxMessages, getInboxSummary, markMessageRead, markAllMessagesRead, assignMessageClient, InboxMessageRecord, InboxSummary } from '@/lib/inbox/query'
 import { ingestMessage, CommunicationProvider } from '@/lib/inbox/ingest'
+import { decryptSecret } from '@/lib/security/encrypt'
+import { sendSlackOutboundMessage } from '@/lib/providers/slack'
 
 export interface ClientSelectItem {
   id: string
@@ -285,7 +287,7 @@ export async function sendOutboundMessageAction(formData: FormData) {
     // 1. Verify channel belongs to org
     const { data: channel } = await supabase
       .from('communication_channels')
-      .select('id, organization_id, provider')
+      .select('id, organization_id, provider, external_account_id, metadata')
       .eq('id', channelId)
       .eq('organization_id', session.organization.id)
       .single()
@@ -311,6 +313,25 @@ export async function sendOutboundMessageAction(formData: FormData) {
       }
     }
 
+    let externalMessageId: string | null = null
+
+    // Direct provider dispatch if provider is Slack
+    if (channel.provider === 'slack') {
+      const meta = (channel.metadata as Record<string, any>) || {}
+      const encryptedToken = meta.bot_access_token || process.env.SLACK_BOT_TOKEN || ''
+      const botToken = decryptSecret(encryptedToken)
+      const slackChannelId = meta.slack_channel_id || channel.external_account_id
+
+      if (botToken && slackChannelId) {
+        const slackRes = await sendSlackOutboundMessage(botToken, slackChannelId, body)
+        if (slackRes.ok && slackRes.ts) {
+          externalMessageId = slackRes.ts
+        } else if (!slackRes.ok) {
+          console.warn('[InboxAction] Slack API dispatch warning:', slackRes.error)
+        }
+      }
+    }
+
     // Insert outbound message row into communication_messages
     const { data: insertedMsg, error: insertError } = await supabase
       .from('communication_messages')
@@ -322,6 +343,7 @@ export async function sendOutboundMessageAction(formData: FormData) {
         sender_name: session.user.full_name || session.user.email,
         sender_identifier: session.user.email,
         body,
+        external_message_id: externalMessageId,
         sent_at: new Date().toISOString(),
         read_at: new Date().toISOString()
       })
