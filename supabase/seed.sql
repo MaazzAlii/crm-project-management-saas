@@ -46,3 +46,16 @@ VALUES (
     '10000000-0000-0000-0000-000000000003',
     'active'
 ) ON CONFLICT (organization_id) DO NOTHING;
+
+-- 4. Insert Sample Slack Communication Channel for Innoventix Hub
+INSERT INTO public.communication_channels (id, organization_id, provider, external_account_id, channel_name, status, metadata)
+VALUES (
+    '00000000-0000-0000-0000-000000000010',
+    '00000000-0000-0000-0000-000000000001',
+    'slack',
+    'C0123456789',
+    '#acme-redesign',
+    'active',
+    '{"slack_channel_id": "C0123456789", "slack_team_id": "T0123456789"}'::jsonb
+) ON CONFLICT (id) DO NOTHING;
+
