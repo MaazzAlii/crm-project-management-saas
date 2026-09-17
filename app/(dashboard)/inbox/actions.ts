@@ -8,6 +8,7 @@ import { ingestMessage, CommunicationProvider } from '@/lib/inbox/ingest'
 import { decryptSecret } from '@/lib/security/encrypt'
 import { sendSlackOutboundMessage } from '@/lib/providers/slack'
 import { sendWhatsAppOutboundMessage } from '@/lib/providers/whatsapp'
+import { sendEmailOutboundMessage } from '@/lib/providers/email'
 
 export interface ClientSelectItem {
   id: string
@@ -344,6 +345,27 @@ export async function sendOutboundMessageAction(formData: FormData) {
           externalMessageId = waRes.sid
         } else if (!waRes.ok) {
           console.warn('[InboxAction] WhatsApp Twilio dispatch warning:', waRes.error)
+        }
+      }
+    } else if (channel.provider === 'email') {
+      const meta = (channel.metadata as Record<string, any>) || {}
+      const apiKey = meta.sendgrid_api_key ? decryptSecret(meta.sendgrid_api_key) : process.env.SENDGRID_API_KEY || ''
+      const fromEmail = channel.external_account_id
+      const recipientEmail = recipientIdentifier || ''
+
+      if (apiKey && fromEmail && recipientEmail) {
+        const emailRes = await sendEmailOutboundMessage(
+          apiKey,
+          fromEmail,
+          session.organization.name || 'Agency Support',
+          recipientEmail,
+          'Re: Client Conversation Update',
+          body
+        )
+        if (emailRes.ok && emailRes.messageId) {
+          externalMessageId = emailRes.messageId
+        } else if (!emailRes.ok) {
+          console.warn('[InboxAction] SendGrid email dispatch warning:', emailRes.error)
         }
       }
     }
