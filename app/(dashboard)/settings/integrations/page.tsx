@@ -11,6 +11,7 @@ import {
   Sparkles
 } from 'lucide-react'
 import { getSlackIntegrationStatusAction } from './slack/actions'
+import { getWhatsAppIntegrationStatusAction } from './whatsapp/actions'
 
 export const metadata = {
   title: 'Channel Integrations | CRM Platform'
@@ -18,7 +19,9 @@ export const metadata = {
 
 export default async function IntegrationsSettingsPage() {
   const { channel: slackChannel } = await getSlackIntegrationStatusAction()
+  const { channel: waChannel } = await getWhatsAppIntegrationStatusAction()
   const isSlackConnected = slackChannel?.status === 'active'
+  const isWhatsAppConnected = waChannel?.status === 'active'
 
   const integrations = [
     {
@@ -38,10 +41,10 @@ export default async function IntegrationsSettingsPage() {
       description: 'Receive and reply to WhatsApp Business messaging API webhooks.',
       icon: MessageCircle,
       iconBg: 'bg-green-500/10 text-green-400 border-green-500/20',
-      status: 'Task 38',
-      isConnected: false,
-      href: '#',
-      active: false
+      status: isWhatsAppConnected ? 'Connected' : 'Configure',
+      isConnected: isWhatsAppConnected,
+      href: '/settings/integrations/whatsapp',
+      active: true
     },
     {
       id: 'email',

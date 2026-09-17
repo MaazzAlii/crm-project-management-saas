@@ -7,6 +7,7 @@ import { fetchInboxMessages, getInboxSummary, markMessageRead, markAllMessagesRe
 import { ingestMessage, CommunicationProvider } from '@/lib/inbox/ingest'
 import { decryptSecret } from '@/lib/security/encrypt'
 import { sendSlackOutboundMessage } from '@/lib/providers/slack'
+import { sendWhatsAppOutboundMessage } from '@/lib/providers/whatsapp'
 
 export interface ClientSelectItem {
   id: string
@@ -328,6 +329,21 @@ export async function sendOutboundMessageAction(formData: FormData) {
           externalMessageId = slackRes.ts
         } else if (!slackRes.ok) {
           console.warn('[InboxAction] Slack API dispatch warning:', slackRes.error)
+        }
+      }
+    } else if (channel.provider === 'whatsapp') {
+      const meta = (channel.metadata as Record<string, any>) || {}
+      const accountSid = meta.account_sid ? decryptSecret(meta.account_sid) : process.env.TWILIO_ACCOUNT_SID || ''
+      const authToken = meta.auth_token ? decryptSecret(meta.auth_token) : process.env.TWILIO_AUTH_TOKEN || ''
+      const fromPhone = meta.phone_number || channel.external_account_id
+      const recipientPhone = recipientIdentifier || ''
+
+      if (accountSid && authToken && fromPhone && recipientPhone) {
+        const waRes = await sendWhatsAppOutboundMessage(accountSid, authToken, fromPhone, recipientPhone, body)
+        if (waRes.ok && waRes.sid) {
+          externalMessageId = waRes.sid
+        } else if (!waRes.ok) {
+          console.warn('[InboxAction] WhatsApp Twilio dispatch warning:', waRes.error)
         }
       }
     }
