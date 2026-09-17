@@ -13,6 +13,8 @@ import {
 import { getSlackIntegrationStatusAction } from './slack/actions'
 import { getWhatsAppIntegrationStatusAction } from './whatsapp/actions'
 import { getEmailIntegrationStatusAction } from './email/actions'
+import { getDiscordIntegrationStatusAction } from './discord/actions'
+import { getUpworkIntegrationStatusAction } from './upwork/actions'
 
 export const metadata = {
   title: 'Channel Integrations | CRM Platform'
@@ -22,9 +24,14 @@ export default async function IntegrationsSettingsPage() {
   const { channel: slackChannel } = await getSlackIntegrationStatusAction()
   const { channel: waChannel } = await getWhatsAppIntegrationStatusAction()
   const { channel: emailChannel } = await getEmailIntegrationStatusAction()
+  const { channel: discordChannel } = await getDiscordIntegrationStatusAction()
+  const { channel: upworkChannel } = await getUpworkIntegrationStatusAction()
+
   const isSlackConnected = slackChannel?.status === 'active'
   const isWhatsAppConnected = waChannel?.status === 'active'
   const isEmailConnected = emailChannel?.status === 'active'
+  const isDiscordConnected = discordChannel?.status === 'active'
+  const isUpworkConnected = upworkChannel?.status === 'active'
 
   const integrations = [
     {
@@ -66,10 +73,10 @@ export default async function IntegrationsSettingsPage() {
       description: 'Ingest Discord server messages & DM channels into unified inbox.',
       icon: Gamepad2,
       iconBg: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-      status: 'Task 40',
-      isConnected: false,
-      href: '#',
-      active: false
+      status: isDiscordConnected ? 'Connected' : 'Configure',
+      isConnected: isDiscordConnected,
+      href: '/settings/integrations/discord',
+      active: true
     },
     {
       id: 'upwork',
@@ -77,10 +84,10 @@ export default async function IntegrationsSettingsPage() {
       description: 'Sync contract proposals and buyer messages from Upwork.',
       icon: Briefcase,
       iconBg: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
-      status: 'Task 40',
-      isConnected: false,
-      href: '#',
-      active: false
+      status: isUpworkConnected ? 'Connected' : 'Configure',
+      isConnected: isUpworkConnected,
+      href: '/settings/integrations/upwork',
+      active: true
     }
   ]
 

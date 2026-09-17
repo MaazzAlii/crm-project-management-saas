@@ -9,6 +9,8 @@ import { decryptSecret } from '@/lib/security/encrypt'
 import { sendSlackOutboundMessage } from '@/lib/providers/slack'
 import { sendWhatsAppOutboundMessage } from '@/lib/providers/whatsapp'
 import { sendEmailOutboundMessage } from '@/lib/providers/email'
+import { sendDiscordOutboundMessage } from '@/lib/providers/discord'
+import { sendUpworkOutboundMessage } from '@/lib/providers/upwork'
 
 export interface ClientSelectItem {
   id: string
@@ -366,6 +368,30 @@ export async function sendOutboundMessageAction(formData: FormData) {
           externalMessageId = emailRes.messageId
         } else if (!emailRes.ok) {
           console.warn('[InboxAction] SendGrid email dispatch warning:', emailRes.error)
+        }
+      }
+    } else if (channel.provider === 'discord') {
+      const meta = (channel.metadata as Record<string, any>) || {}
+      const botToken = meta.bot_token ? decryptSecret(meta.bot_token) : process.env.DISCORD_BOT_TOKEN || ''
+      const targetChannelId = meta.channel_id || channel.external_account_id
+
+      if (botToken && targetChannelId) {
+        const discordRes = await sendDiscordOutboundMessage(botToken, targetChannelId, body)
+        if (discordRes.ok && discordRes.messageId) {
+          externalMessageId = discordRes.messageId
+        } else if (!discordRes.ok) {
+          console.warn('[InboxAction] Discord dispatch warning:', discordRes.error)
+        }
+      }
+    } else if (channel.provider === 'upwork') {
+      const meta = (channel.metadata as Record<string, any>) || {}
+      const apiKey = meta.api_key ? decryptSecret(meta.api_key) : ''
+      const contractId = meta.contract_id || channel.external_account_id
+
+      if (contractId) {
+        const upwRes = await sendUpworkOutboundMessage(apiKey, contractId, body)
+        if (upwRes.ok && upwRes.messageId) {
+          externalMessageId = upwRes.messageId
         }
       }
     }
