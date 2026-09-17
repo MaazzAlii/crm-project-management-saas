@@ -47,7 +47,7 @@ export async function ingestMessage(
     // 1. Resolve channel and strictly derive organization_id from DB
     const { data: channel, error: channelError } = await supabase
       .from('communication_channels')
-      .select('id, organization_id, provider, status')
+      .select('id, organization_id, provider, status, metadata')
       .eq('id', channelId)
       .single()
 
@@ -101,6 +101,14 @@ export async function ingestMessage(
         if (matches.length === 1) {
           matchedClientId = matches[0].id
         }
+      }
+    }
+
+    // Fallback: Channel to client routing configured in channel metadata
+    if (!matchedClientId && channel.metadata) {
+      const channelMeta = channel.metadata as Record<string, any>
+      if (channelMeta.client_id || channelMeta.default_client_id) {
+        matchedClientId = channelMeta.client_id || channelMeta.default_client_id
       }
     }
 

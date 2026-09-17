@@ -67,7 +67,8 @@ export async function POST(req: NextRequest) {
         (c) =>
           c.external_account_id === slackChannelId ||
           c.external_account_id === slackTeamId ||
-          (c.metadata as any)?.slack_channel_id === slackChannelId
+          (c.metadata as any)?.slack_channel_id === slackChannelId ||
+          (c.metadata as any)?.slack_team_id === slackTeamId
       ) || channels[0]
 
     const channelMeta = (matchingChannel.metadata as Record<string, any>) || {}
