@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { fetchClientCommunicationsAction } from './actions'
 import { ClientCommunicationsView } from '@/components/communications/ClientCommunicationsView'
+import { isAIAccessible } from '@/lib/ai/client'
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   return {
@@ -53,6 +54,12 @@ export default async function ClientCommunicationsPage({ params }: { params: { i
 
   const communications = await fetchClientCommunicationsAction(rawClient.id)
 
+  let aiEnabled = false
+  try {
+    const aiCheck = await isAIAccessible(session.organization.id, 'task_extraction')
+    aiEnabled = aiCheck.allowed
+  } catch (e) {}
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <ClientCommunicationsView
@@ -65,6 +72,7 @@ export default async function ClientCommunicationsPage({ params }: { params: { i
           communication_mode: rawClient.communication_mode,
         }}
         initialCommunications={communications}
+        aiEnabled={aiEnabled}
         showBackLink={true}
       />
     </div>

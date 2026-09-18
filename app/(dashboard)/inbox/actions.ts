@@ -14,6 +14,9 @@ import { sendUpworkOutboundMessage } from '@/lib/providers/upwork'
 import { isAIAccessible } from '@/lib/ai/client'
 import { checkAIAccess } from '@/lib/ai/guard'
 import { getReplySuggestions, ReplySuggestionItem } from '@/lib/ai/features/reply-suggestions'
+import { extractTasksFromMessage } from '@/lib/ai/features/task-extraction'
+import { ExtractedTaskSuggestion } from '@/lib/ai/prompts/task-extraction'
+import { logAuditEvent } from '@/lib/audit/logger'
 
 export interface ClientSelectItem {
   id: string
@@ -40,6 +43,7 @@ export interface FetchInboxDataResult {
   clients: ClientSelectItem[]
   channels: ChannelInfo[]
   aiEnabled: boolean
+  aiTaskExtractionEnabled?: boolean
 }
 
 // Dev fallback sample conversations if database is empty
@@ -176,9 +180,12 @@ export async function fetchInboxDataAction(filters?: {
 
     // Check organization AI entitlement / platform gating
     let aiEnabled = false
+    let aiTaskExtractionEnabled = false
     try {
       const gateCheck = await isAIAccessible(orgId, 'reply_suggestions')
       aiEnabled = gateCheck.allowed
+      const taskGateCheck = await isAIAccessible(orgId, 'task_extraction')
+      aiTaskExtractionEnabled = taskGateCheck.allowed
     } catch (e) {
       console.warn('[InboxAction] AI access check error:', e)
     }
@@ -207,7 +214,8 @@ export async function fetchInboxDataAction(filters?: {
       summary,
       clients: (clientsData as ClientSelectItem[]) || [],
       channels: (channelsData as ChannelInfo[]) || [],
-      aiEnabled
+      aiEnabled,
+      aiTaskExtractionEnabled
     }
   } catch (err: any) {
     console.error('[CommunicationHub:Actions] Error fetching inbox data:', err)
@@ -621,3 +629,272 @@ export async function generateReplySuggestionsAction(
     }
   }
 }
+
+export interface ExtractTasksActionParams {
+  messageBody: string
+  senderName?: string
+  clientId?: string | null
+  clientName?: string | null
+  channel?: string | null
+  messageId?: string | null
+}
+
+export interface TaskCandidateProject {
+  id: string
+  title: string
+  client_id?: string
+}
+
+export interface TaskCandidateAssignee {
+  id: string
+  name: string
+  email?: string
+}
+
+export interface ExtractTasksActionResult {
+  success: boolean
+  tasks: ExtractedTaskSuggestion[]
+  projects: TaskCandidateProject[]
+  teamMembers: TaskCandidateAssignee[]
+  error?: string
+  errorCode?: string
+}
+
+/**
+ * Evaluates message content for actionable items and returns candidate tasks,
+ * alongside available projects and team members to populate assignment selectors.
+ */
+export async function extractTasksFromThreadAction(
+  params: ExtractTasksActionParams
+): Promise<ExtractTasksActionResult> {
+  try {
+    const session = await getCurrentSessionContext()
+    if (!session || !session.organization) {
+      return {
+        success: false,
+        tasks: [],
+        projects: [],
+        teamMembers: [],
+        error: 'Unauthorized organization session.',
+        errorCode: 'UNAUTHORIZED',
+      }
+    }
+
+    const orgId = session.organization.id
+    const gateCheck = await checkAIAccess(orgId, 'task_extraction')
+    if (!gateCheck.allowed) {
+      return {
+        success: false,
+        tasks: [],
+        projects: [],
+        teamMembers: [],
+        error: gateCheck.reason || 'AI Task Extraction is disabled.',
+        errorCode: gateCheck.code,
+      }
+    }
+
+    const supabase = await createClient()
+
+    // 1. Fetch Projects for org
+    let projects: TaskCandidateProject[] = []
+    try {
+      const { data: projData } = await supabase
+        .from('projects')
+        .select('id, title, client_id, status')
+        .eq('organization_id', orgId)
+        .order('created_at', { ascending: false })
+
+      if (projData && projData.length > 0) {
+        projects = projData.map((p) => ({
+          id: p.id,
+          title: p.title,
+          client_id: p.client_id,
+        }))
+      }
+    } catch (e) {}
+
+    if (projects.length === 0 && process.env.DEV_SUPER_ADMIN === 'true') {
+      projects = [
+        { id: 'proj-1', title: 'V2 AI Voice & CRM Portal Integration', client_id: params.clientId || 'client-1' },
+        { id: 'proj-2', title: 'Agency Mobile App Redesign', client_id: 'client-2' },
+      ]
+    }
+
+    // 2. Fetch Team Members
+    let teamMembers: TaskCandidateAssignee[] = []
+    try {
+      const { data: memberData } = await supabase
+        .from('organization_members')
+        .select(`
+          user_id,
+          profiles!organization_members_user_id_fkey (
+            id,
+            full_name,
+            email
+          )
+        `)
+        .eq('organization_id', orgId)
+
+      if (memberData && memberData.length > 0) {
+        teamMembers = memberData
+          .filter((m: any) => m.profiles)
+          .map((m: any) => ({
+            id: m.profiles.id,
+            name: m.profiles.full_name || m.profiles.email || 'Team Member',
+            email: m.profiles.email,
+          }))
+      }
+    } catch (e) {}
+
+    if (teamMembers.length === 0) {
+      teamMembers = [
+        { id: session.user?.id || 'user-1', name: session.user?.email || 'Current User', email: session.user?.email },
+      ]
+    }
+
+    // 3. Run AI Task Extraction
+    const extractionResult = await extractTasksFromMessage({
+      organizationId: orgId,
+      userId: session.user?.id,
+      messageBody: params.messageBody,
+      senderName: params.senderName || 'Client',
+      clientName: params.clientName || undefined,
+      channel: params.channel || undefined,
+    })
+
+    if (!extractionResult.success) {
+      return {
+        success: false,
+        tasks: [],
+        projects,
+        teamMembers,
+        error: extractionResult.error,
+        errorCode: extractionResult.errorCode,
+      }
+    }
+
+    return {
+      success: true,
+      tasks: extractionResult.tasks,
+      projects,
+      teamMembers,
+    }
+  } catch (err: any) {
+    console.error('[CommunicationHub:Actions] Error in extractTasksFromThreadAction:', err)
+    return {
+      success: false,
+      tasks: [],
+      projects: [],
+      teamMembers: [],
+      error: err.message || 'Failed to extract tasks.',
+    }
+  }
+}
+
+export interface CreateExtractedTaskParams {
+  projectId: string
+  title: string
+  description?: string
+  priority?: 'low' | 'medium' | 'high' | 'urgent'
+  dueDate?: string | null
+  assignedTo?: string | null
+  sourceSnippet?: string
+  clientId?: string | null
+  messageId?: string | null
+}
+
+/**
+ * Approves and creates an AI-extracted task linked to a target project and client.
+ * Strictly human-in-the-loop: called only upon explicit user confirmation.
+ */
+export async function createExtractedTaskAction(
+  params: CreateExtractedTaskParams
+) {
+  try {
+    const session = await getCurrentSessionContext()
+    if (!session || !session.user || !session.organization) {
+      return { success: false, error: 'Unauthorized.' }
+    }
+
+    const {
+      projectId,
+      title,
+      description = '',
+      priority = 'medium',
+      dueDate = null,
+      assignedTo = null,
+      sourceSnippet,
+      clientId,
+      messageId,
+    } = params
+
+    if (!title || !title.trim()) {
+      return { success: false, error: 'Task title is required.' }
+    }
+
+    if (!projectId) {
+      return { success: false, error: 'Please select a target project.' }
+    }
+
+    const supabase = await createClient()
+
+    let fullDescription = description.trim()
+    if (sourceSnippet) {
+      fullDescription += `\n\n> "${sourceSnippet}"\n— Extracted via AI from client communication`
+    } else {
+      fullDescription += `\n\n— Extracted via AI from client communication`
+    }
+
+    const payload = {
+      organization_id: session.organization.id,
+      project_id: projectId,
+      title: title.trim(),
+      description: fullDescription.trim(),
+      assigned_to: assignedTo || null,
+      priority,
+      status: 'todo',
+      due_date: dueDate || null,
+    }
+
+    const { data, error } = await supabase
+      .from('tasks')
+      .insert(payload)
+      .select('id')
+      .single()
+
+    if (error) {
+      console.error('[CommunicationHub:Actions] Error creating extracted task:', error)
+      return { success: false, error: error.message || 'Failed to insert task.' }
+    }
+
+    try {
+      await logAuditEvent({
+        actorId: session.user.id,
+        action: 'TASK_CREATED',
+        targetType: 'task',
+        targetId: data.id,
+        details: {
+          title,
+          project_id: projectId,
+          organizationId: session.organization.id,
+          source: 'ai_extraction',
+          clientId,
+          messageId,
+        },
+      })
+    } catch (e) {}
+
+    revalidatePath('/tasks')
+    revalidatePath('/inbox')
+    revalidatePath(`/projects/${projectId}`)
+    if (clientId) {
+      revalidatePath(`/clients/${clientId}/communications`)
+    }
+
+    return { success: true, taskId: data.id }
+  } catch (err: any) {
+    console.error('[CommunicationHub:Actions] Error creating extracted task:', err)
+    return { success: false, error: err.message || 'Failed to create task.' }
+  }
+}
+

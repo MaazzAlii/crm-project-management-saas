@@ -11,13 +11,23 @@ import {
   ExternalLink,
   ChevronDown,
   Activity,
-  AlertCircle
+  AlertCircle,
+  Sparkles,
+  Loader2,
 } from 'lucide-react'
 import { InboxMessageRecord } from '@/lib/inbox/query'
-import { ClientSelectItem, assignMessageClientAction } from '@/app/(dashboard)/inbox/actions'
+import {
+  ClientSelectItem,
+  assignMessageClientAction,
+  extractTasksFromThreadAction,
+  TaskCandidateProject,
+  TaskCandidateAssignee,
+} from '@/app/(dashboard)/inbox/actions'
+import { ExtractedTaskSuggestion } from '@/lib/ai/prompts/task-extraction'
 import { ComposeBox } from './ComposeBox'
 import { ChannelStatusBadge } from './ChannelStatusBadge'
 import { ConnectionStatusModal, ChannelStatusInfo } from './ConnectionStatusModal'
+import { TaskExtractionModal } from './TaskExtractionModal'
 import { getProviderMeta } from './providerBranding'
 
 interface MessageThreadProps {
@@ -41,6 +51,15 @@ export function MessageThread({
   const [isAssigning, setIsAssigning] = useState(false)
   const [showAssignDropdown, setShowAssignDropdown] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Task Extraction States
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
+  const [isExtracting, setIsExtracting] = useState(false)
+  const [extractedTasks, setExtractedTasks] = useState<ExtractedTaskSuggestion[]>([])
+  const [taskProjects, setTaskProjects] = useState<TaskCandidateProject[]>([])
+  const [taskTeamMembers, setTaskTeamMembers] = useState<TaskCandidateAssignee[]>([])
+  const [taskError, setTaskError] = useState<string | null>(null)
+  const [analyzedSnippet, setAnalyzedSnippet] = useState('')
 
   if (!messages || messages.length === 0) {
     return (
@@ -89,6 +108,45 @@ export function MessageThread({
     updated_at: channel?.updated_at,
     external_account_id: channel?.external_account_id,
     metadata: channel?.metadata
+  }
+
+  const handleExtractTasks = async () => {
+    // Pick thread messages to provide comprehensive context
+    const actionableText = messages
+      .slice(0, 5)
+      .map((m) => `${m.sender_name || 'Sender'}: ${m.body}`)
+      .join('\n')
+
+    const primarySnippet = messages[0]?.body || ''
+    setAnalyzedSnippet(primarySnippet)
+    setIsTaskModalOpen(true)
+    setIsExtracting(true)
+    setTaskError(null)
+
+    try {
+      const res = await extractTasksFromThreadAction({
+        messageBody: actionableText,
+        senderName,
+        clientId: client?.id || null,
+        clientName: client?.name || undefined,
+        channel: provider,
+        messageId: latestMessage.id,
+      })
+
+      if (res.success) {
+        setExtractedTasks(res.tasks)
+        setTaskProjects(res.projects)
+        setTaskTeamMembers(res.teamMembers)
+      } else {
+        setTaskError(res.error || 'Failed to extract tasks.')
+        setTaskProjects(res.projects || [])
+        setTaskTeamMembers(res.teamMembers || [])
+      }
+    } catch (err: any) {
+      setTaskError(err.message || 'Failed to extract tasks.')
+    } finally {
+      setIsExtracting(false)
+    }
   }
 
   return (
@@ -153,6 +211,24 @@ export function MessageThread({
 
         {/* Right Action: Link Client Profile or Channel Info */}
         <div className="flex items-center gap-2">
+          {/* AI Task Extraction Button (Zero-Button when AI disabled) */}
+          {aiEnabled && (
+            <button
+              type="button"
+              onClick={handleExtractTasks}
+              disabled={isExtracting}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 transition shadow-xs disabled:opacity-50"
+              title="Extract actionable tasks from this message thread"
+            >
+              {isExtracting ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5" />
+              )}
+              <span className="hidden sm:inline">Extract Tasks</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
@@ -293,6 +369,22 @@ export function MessageThread({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         channel={channelInfo}
+      />
+
+      {/* Task Extraction Modal */}
+      <TaskExtractionModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        tasks={extractedTasks}
+        projects={taskProjects}
+        teamMembers={taskTeamMembers}
+        messageSnippet={analyzedSnippet}
+        clientName={client?.name}
+        senderName={senderName}
+        clientId={client?.id}
+        messageId={latestMessage.id}
+        isLoading={isExtracting}
+        error={taskError}
       />
     </div>
   )

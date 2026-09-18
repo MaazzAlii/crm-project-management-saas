@@ -160,24 +160,122 @@ export async function executeMockCompletion(
     }
 
     case 'task_extraction': {
-      content = JSON.stringify({
-        tasks: [
-          {
-            title: 'Prepare staging deployment for responsive navigation bar',
-            description: 'Deploy the latest responsive navigation build to the client preview environment.',
+      // Extract client message from user prompt
+      const messageBodyMatch = userMessage.match(/"""\s*([\s\S]*?)\s*"""/)
+      const clientText = (messageBodyMatch ? messageBodyMatch[1] : userMessage).toLowerCase()
+      const tasks: any[] = []
+
+      // Helper to compute upcoming date
+      const getFutureDate = (daysAhead: number) => {
+        const d = new Date()
+        d.setDate(d.getDate() + daysAhead)
+        return d.toISOString().split('T')[0]
+      }
+
+      const hasActionRequest =
+        clientText.includes('please') ||
+        clientText.includes('can you') ||
+        clientText.includes('could you') ||
+        clientText.includes('need to') ||
+        clientText.includes('need you') ||
+        clientText.includes('send me') ||
+        clientText.includes('fix the') ||
+        clientText.includes('update the') ||
+        clientText.includes('deploy to')
+
+      const isConversationalOnly =
+        !hasActionRequest &&
+        (clientText.includes('thanks') ||
+         clientText.includes('thank you') ||
+         clientText.includes('sounds good') ||
+         clientText.includes('great work') ||
+         clientText.includes('look great') ||
+         clientText.includes('looks great') ||
+         clientText.includes('perfect') ||
+         clientText.includes('noted'))
+
+      if (!isConversationalOnly) {
+        const hasInvoice = clientText.includes('invoice') || clientText.includes('billing') || clientText.includes('payment')
+        const hasDeploy = clientText.includes('deploy') || clientText.includes('staging') || clientText.includes('release')
+        const hasDesignAction =
+          clientText.includes('wireframe') ||
+          clientText.includes('figma') ||
+          clientText.includes('redesign') ||
+          clientText.includes('logo') ||
+          clientText.includes('cta') ||
+          clientText.includes('banner') ||
+          (clientText.includes('design') && (clientText.includes('update') || clientText.includes('change') || clientText.includes('revise') || clientText.includes('create')))
+        const hasFix = clientText.includes('bug') || clientText.includes('fix') || clientText.includes('issue') || clientText.includes('error') || clientText.includes('broken')
+
+        if (hasInvoice) {
+          const dueFriday = clientText.includes('friday') ? getFutureDate(4) : getFutureDate(3)
+          tasks.push({
+            title: 'Prepare and send milestone invoice',
+            description: 'Client requested updated invoice documentation for deliverables review.',
             priority: 'high',
-            estimatedHours: 3,
-            suggestedAssignee: 'Frontend Team',
-          },
-          {
-            title: 'Send updated wireframe assets to client for sign-off',
-            description: 'Export Figma high-fidelity prototypes and share access link.',
-            priority: 'medium',
+            suggestedDueDate: dueFriday,
+            suggestedAssignee: 'Billing / Finance',
+            confidenceScore: 96,
+            sourceSnippet: clientText.includes('invoice') ? 'send me the invoice by Friday' : 'send over the invoice',
             estimatedHours: 1,
+          })
+        }
+
+        if (hasDesignAction) {
+          tasks.push({
+            title: 'Update UI design assets and wireframe mockups',
+            description: 'Refine visual styling and client interface deliverables per latest feedback.',
+            priority: 'medium',
+            suggestedDueDate: getFutureDate(3),
             suggestedAssignee: 'UI/UX Designer',
-          },
-        ],
-      }, null, 2)
+            confidenceScore: 91,
+            sourceSnippet: 'review the latest homepage mockup design draft',
+            estimatedHours: 2,
+          })
+        }
+
+        if (hasDeploy) {
+          tasks.push({
+            title: 'Deploy responsive build to staging environment',
+            description: 'Deploy latest application build to preview server for cross-browser testing.',
+            priority: 'high',
+            suggestedDueDate: getFutureDate(1),
+            suggestedAssignee: 'Frontend Engineer',
+            confidenceScore: 94,
+            sourceSnippet: 'deploy to preview environment',
+            estimatedHours: 3,
+          })
+        }
+
+        if (hasFix) {
+          tasks.push({
+            title: 'Investigate and resolve reported client issue',
+            description: 'Inspect logs and fix reported defect before scheduled release.',
+            priority: 'urgent',
+            suggestedDueDate: getFutureDate(1),
+            suggestedAssignee: 'QA Engineer',
+            confidenceScore: 95,
+            sourceSnippet: 'reported issue in production',
+            estimatedHours: 2,
+          })
+        }
+
+        // Generic fallback if user asked for something actionable
+        if (tasks.length === 0 && hasActionRequest) {
+          tasks.push({
+            title: 'Follow up on client inquiry and deliverables',
+            description: 'Client requested action item in latest communication thread.',
+            priority: 'medium',
+            suggestedDueDate: getFutureDate(3),
+            suggestedAssignee: 'Account Manager',
+            confidenceScore: 86,
+            sourceSnippet: 'Please take a look at the requirements',
+            estimatedHours: 2,
+          })
+        }
+      }
+
+      content = JSON.stringify({ tasks }, null, 2)
       break
     }
 

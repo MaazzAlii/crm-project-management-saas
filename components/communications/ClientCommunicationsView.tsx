@@ -4,7 +4,14 @@ import { useState } from 'react'
 import { CommunicationItem } from '@/app/(dashboard)/clients/[id]/communications/actions'
 import { LogCommunicationModal } from './LogCommunicationModal'
 import { CommunicationThread } from './CommunicationThread'
-import { Plus, MessageSquare, ArrowLeft } from 'lucide-react'
+import { Plus, MessageSquare, ArrowLeft, Sparkles, Loader2 } from 'lucide-react'
+import {
+  extractTasksFromThreadAction,
+  TaskCandidateProject,
+  TaskCandidateAssignee,
+} from '@/app/(dashboard)/inbox/actions'
+import { ExtractedTaskSuggestion } from '@/lib/ai/prompts/task-extraction'
+import { TaskExtractionModal } from '@/components/inbox/TaskExtractionModal'
 import Link from 'next/link'
 
 interface ClientCommunicationsViewProps {
@@ -17,16 +24,27 @@ interface ClientCommunicationsViewProps {
     communication_mode?: string
   }
   initialCommunications: CommunicationItem[]
+  aiEnabled?: boolean
   showBackLink?: boolean
 }
 
 export function ClientCommunicationsView({
   client,
   initialCommunications,
+  aiEnabled = false,
   showBackLink = false,
 }: ClientCommunicationsViewProps) {
   const [communications, setCommunications] = useState<CommunicationItem[]>(initialCommunications)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Task Extraction State
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
+  const [isExtracting, setIsExtracting] = useState(false)
+  const [extractedTasks, setExtractedTasks] = useState<ExtractedTaskSuggestion[]>([])
+  const [taskProjects, setTaskProjects] = useState<TaskCandidateProject[]>([])
+  const [taskTeamMembers, setTaskTeamMembers] = useState<TaskCandidateAssignee[]>([])
+  const [taskError, setTaskError] = useState<string | null>(null)
+  const [analyzedSnippet, setAnalyzedSnippet] = useState('')
 
   const handleRefresh = async () => {
     // Re-fetch client communications dynamically
@@ -38,6 +56,46 @@ export function ClientCommunicationsView({
       setCommunications(data)
     } catch (e) {
       console.error('Failed to refresh communications:', e)
+    }
+  }
+
+  const handleExtractTasks = async () => {
+    if (communications.length === 0) return
+
+    const actionableText = communications
+      .slice(0, 5)
+      .map((m) => `${m.sender_name || 'Sender'}: ${m.body}`)
+      .join('\n')
+
+    const primarySnippet = communications[0]?.body || ''
+    setAnalyzedSnippet(primarySnippet)
+    setIsTaskModalOpen(true)
+    setIsExtracting(true)
+    setTaskError(null)
+
+    try {
+      const res = await extractTasksFromThreadAction({
+        messageBody: actionableText,
+        senderName: client.name,
+        clientId: client.id,
+        clientName: client.name,
+        channel: communications[0]?.channel_type || 'communication',
+        messageId: communications[0]?.id,
+      })
+
+      if (res.success) {
+        setExtractedTasks(res.tasks)
+        setTaskProjects(res.projects)
+        setTaskTeamMembers(res.teamMembers)
+      } else {
+        setTaskError(res.error || 'Failed to extract tasks.')
+        setTaskProjects(res.projects || [])
+        setTaskTeamMembers(res.teamMembers || [])
+      }
+    } catch (err: any) {
+      setTaskError(err.message || 'Failed to extract tasks.')
+    } finally {
+      setIsExtracting(false)
     }
   }
 
@@ -69,13 +127,31 @@ export function ClientCommunicationsView({
           </div>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold shadow-lg shadow-sky-500/20 transition shrink-0"
-        >
-          <Plus className="h-4 w-4" />
-          Log Communication
-        </button>
+        <div className="flex items-center gap-3 shrink-0">
+          {aiEnabled && (
+            <button
+              onClick={handleExtractTasks}
+              disabled={isExtracting || communications.length === 0}
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 font-bold transition disabled:opacity-50 text-sm"
+              title="Extract actionable project tasks from client communications"
+            >
+              {isExtracting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              <span>Extract Tasks</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold shadow-lg shadow-sky-500/20 transition shrink-0 text-sm"
+          >
+            <Plus className="h-4 w-4" />
+            Log Communication
+          </button>
+        </div>
       </div>
 
       {/* Main Thread */}
@@ -93,6 +169,21 @@ export function ClientCommunicationsView({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={handleRefresh}
+      />
+
+      {/* AI Task Extraction Modal */}
+      <TaskExtractionModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        tasks={extractedTasks}
+        projects={taskProjects}
+        teamMembers={taskTeamMembers}
+        messageSnippet={analyzedSnippet}
+        clientName={client.name}
+        senderName={client.name}
+        clientId={client.id}
+        isLoading={isExtracting}
+        error={taskError}
       />
     </div>
   )
