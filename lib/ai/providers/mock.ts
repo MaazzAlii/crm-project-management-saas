@@ -280,21 +280,29 @@ export async function executeMockCompletion(
     }
 
     case 'weekly_narrative': {
-      content = `### Executive Summary — Weekly Progress Report
+      const meta = request.metadata || {}
+      const completedTasks = Number(meta.completedTasksCount ?? (userMessage.match(/Completed Tasks:\s*(\d+)/i)?.[1] ?? 14))
+      const activeProjects = Number(meta.activeProjectsCount ?? (userMessage.match(/Active Projects:\s*(\d+)/i)?.[1] ?? 5))
+      const newClients = Number(meta.newClientsCount ?? (userMessage.match(/New Clients Acquired:\s*(\d+)/i)?.[1] ?? 3))
+      const revenue = Number(meta.revenueGenerated ?? (userMessage.match(/Revenue \/ Invoiced Amount:[^\d]*([\d,]+)/i)?.[1]?.replace(/,/g, '') ?? 28500))
+      const commVolume = Number(meta.communicationVolume ?? (userMessage.match(/Client Messages & Interactions:\s*(\d+)/i)?.[1] ?? 42))
+      const overdueItems = Number(meta.overdueItemsCount ?? (userMessage.match(/Overdue Items \/ Flags:\s*(\d+)/i)?.[1] ?? 1))
+      const dateRange = meta.weekDateRange || (userMessage.match(/Week:\s*([^\n]+)/i)?.[1]?.trim() ?? 'Past 7 Days')
+      const orgName = meta.organizationName || (userMessage.match(/Agency:\s*([^\n]+)/i)?.[1]?.trim() ?? 'Agency Workspace')
 
-#### Key Achievements
-- Completed Sprint 4 deliverables ahead of schedule, including the unified inbox real-time notifications.
-- Resolved all outstanding high-priority tickets across the project kanban board.
-- Conducted client milestone walkthrough with full stakeholder approval.
+      content = `# Executive Summary — Weekly Progress Report (${dateRange})
 
-#### Active Focus & Upcoming Milestones
-- Initiating end-to-end load testing and cross-browser quality assurance.
-- Finalizing production deployment cutover checklist on Contabo VPS.
+### 1. Key Milestones & Operational Accomplishments
+The team at **${orgName}** maintained high delivery velocity throughout this reporting window, successfully closing out **${completedTasks} completed tasks** across client initiatives. On the growth front, the agency welcomed **${newClients} new clients**, expanding our client portfolio and reinforcing momentum in key accounts.
 
-#### Operational Health
-- Budget Utilization: 68% (on track)
-- Velocity: 42 story points completed
-- Risk Level: Low — no blockers identified.`
+### 2. Active Project Health & Revenue Summary
+Operations are currently driving **${activeProjects} active projects** through active delivery milestones. Revenue invoiced and recognized across contracts totaled **$${revenue.toLocaleString()}**, reflecting solid commercial progress against deliverables and milestones.
+
+### 3. Client Communications & Engagement
+Client communication channels logged a cumulative volume of **${commVolume} messages and interactions** across integrated platforms. High responsiveness and structured thread coordination contributed to prompt resolution and seamless stakeholder alignment.
+
+### 4. Risks, Overdue Items & Upcoming Priorities
+Operational risk remains controlled, though **${overdueItems} overdue item(s)** require focused team attention to clear delivery blockers. For the upcoming week, primary priorities center on closing out pending sprints, advancing active project milestones, and maintaining proactive client communications.`
       break
     }
 

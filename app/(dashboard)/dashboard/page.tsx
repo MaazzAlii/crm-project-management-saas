@@ -5,6 +5,8 @@ import { getCurrentSessionContext } from '@/lib/auth/session'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { QuickActions } from '@/components/dashboard/QuickActions'
 import { RecentActivity, type ActivityItem } from '@/components/dashboard/RecentActivity'
+import { WeeklyReportButton } from '@/components/reports/WeeklyReportButton'
+import { fetchWeeklyReportMetricsAction } from '@/app/(dashboard)/reports/actions'
 import {
   Briefcase,
   CheckSquare,
@@ -102,6 +104,7 @@ export default async function DashboardPage() {
   }
 
   const isBrandNewOrg = clientsCount === 0 && activeProjectsCount === 0
+  const reportData = await fetchWeeklyReportMetricsAction()
 
   return (
     <div className="space-y-8">
@@ -123,6 +126,10 @@ export default async function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <WeeklyReportButton
+            initialFigures={reportData.figures}
+            aiEnabled={reportData.aiEnabled}
+          />
           <Link
             href="/clients?action=new"
             className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-sky-600/20 hover:bg-sky-500 transition"
