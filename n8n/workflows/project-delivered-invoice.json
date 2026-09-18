@@ -1,0 +1,158 @@
+{
+  "name": "Project Delivered -> Invoice Trigger & Slack Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "project-delivered",
+        "responseMode": "onReceived",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\n\nconst secret = $env.AUTOMATION_WEBHOOK_SECRET || 'dev-secret-key';\nconst headers = $input.first().json.headers;\nconst rawBody = JSON.stringify($input.first().json.body);\nconst signatureHeader = headers['x-automation-signature'] || '';\n\nif (!signatureHeader) {\n  throw new Error('Unauthorized: Missing X-Automation-Signature header');\n}\n\nconst cleanSignature = signatureHeader.startsWith('sha256=') ? signatureHeader.slice(7) : signatureHeader;\nconst expectedSignature = crypto.createHmac('sha256', secret).update(rawBody, 'utf8').digest('hex');\n\nconst sigBuffer = Buffer.from(cleanSignature, 'hex');\nconst expectedBuffer = Buffer.from(expectedSignature, 'hex');\n\nif (sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)) {\n  throw new Error('Unauthorized: Invalid HMAC signature');\n}\n\nreturn [{ json: $input.first().json.body }];"
+      },
+      "id": "2",
+      "name": "Verify HMAC Signature",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.data.budget }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "3",
+      "name": "Check Budget > 0",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.INVOICE_GENERATOR_API_URL || 'https://api.innoventixhub.com/api/invoices/generate' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"project_id\": \"{{ $json.data.project_id }}\",\n  \"client_id\": \"{{ $json.data.client_id }}\",\n  \"client_name\": \"{{ $json.data.client_name }}\",\n  \"client_email\": \"{{ $json.data.client_email }}\",\n  \"amount\": {{ $json.data.budget }},\n  \"currency\": \"USD\"\n}",
+        "options": {}
+      },
+      "id": "4",
+      "name": "Trigger Invoice Generator",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [910, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.APP_URL || 'http://localhost:3000' }}/api/automation/callback/invoice-created",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"project_id\": \"{{ $('Verify HMAC Signature').item.json.data.project_id }}\",\n  \"organization_id\": \"{{ $('Verify HMAC Signature').item.json.organization_id }}\",\n  \"invoice_id\": \"inv_{{ $execution.id }}\",\n  \"amount\": {{ $('Verify HMAC Signature').item.json.data.budget }},\n  \"status\": \"invoiced\"\n}",
+        "options": {}
+      },
+      "id": "5",
+      "name": "Callback to App (Invoiced)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1130, 200]
+    },
+    {
+      "parameters": {
+        "channel": "agency-announcements",
+        "text": "=🚀 *Project Delivered & Invoiced!*\n• *Project:* {{ $('Verify HMAC Signature').item.json.data.project_name }}\n• *Client:* {{ $('Verify HMAC Signature').item.json.data.client_name }}\n• *Amount:* ${{ $('Verify HMAC Signature').item.json.data.budget }}\n• *Delivered By:* {{ $('Verify HMAC Signature').item.json.data.completed_by_name }}\n\nInvoice has been automatically triggered and client notified."
+      },
+      "id": "6",
+      "name": "Slack Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [1350, 200]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Verify HMAC Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify HMAC Signature": {
+      "main": [
+        [
+          {
+            "node": "Check Budget > 0",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Budget > 0": {
+      "main": [
+        [
+          {
+            "node": "Trigger Invoice Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Invoice Generator": {
+      "main": [
+        [
+          {
+            "node": "Callback to App (Invoiced)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Callback to App (Invoiced)": {
+      "main": [
+        [
+          {
+            "node": "Slack Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

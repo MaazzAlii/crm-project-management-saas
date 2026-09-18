@@ -15,6 +15,7 @@ import {
   CheckCircle2
 } from 'lucide-react'
 import { ProjectRecord, updateProjectStatusAction, updateProjectTeamAssigneeAction } from '@/app/(dashboard)/projects/actions'
+import { DeliverProjectConfirmModal } from './DeliverProjectConfirmModal'
 import { ProjectStatusBadge } from './ProjectStatusBadge'
 import { ProjectHealthBadge } from '@/components/shared/ProjectHealthBadge'
 
@@ -28,6 +29,8 @@ const STATUS_OPTIONS = [
   'Planning',
   'Active',
   'In Review',
+  'Delivered',
+  'Invoiced',
   'Completed',
   'On Hold',
   'Archived'
@@ -39,9 +42,10 @@ export function ProjectHeader({ project, membersList, onProjectUpdated }: Projec
   const [assignedTo, setAssignedTo] = useState(project.assigned_to || '')
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [isUpdatingAssignee, setIsUpdatingAssignee] = useState(false)
+  const [isDeliverModalOpen, setIsDeliverModalOpen] = useState(false)
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null)
 
-  // Handle status update
-  const handleStatusChange = async (newStatus: string) => {
+  const executeStatusChange = async (newStatus: string) => {
     setStatus(newStatus)
     setIsUpdatingStatus(true)
     try {
@@ -58,7 +62,19 @@ export function ProjectHeader({ project, membersList, onProjectUpdated }: Projec
       alert(err.message || 'Error updating status')
     } finally {
       setIsUpdatingStatus(false)
+      setIsDeliverModalOpen(false)
+      setPendingStatus(null)
     }
+  }
+
+  // Handle status update
+  const handleStatusChange = async (newStatus: string) => {
+    if (newStatus.toLowerCase() === 'delivered') {
+      setPendingStatus(newStatus)
+      setIsDeliverModalOpen(true)
+      return
+    }
+    await executeStatusChange(newStatus)
   }
 
   // Handle assignee change
@@ -228,6 +244,21 @@ export function ProjectHeader({ project, membersList, onProjectUpdated }: Projec
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal on Delivered Transition */}
+      <DeliverProjectConfirmModal
+        isOpen={isDeliverModalOpen}
+        onClose={() => {
+          setIsDeliverModalOpen(false)
+          setPendingStatus(null)
+        }}
+        onConfirm={() => executeStatusChange(pendingStatus || 'Delivered')}
+        isLoading={isUpdatingStatus}
+        projectTitle={project.title}
+        clientName={project.client_name || 'Client Profile'}
+        amount={project.amount || 0}
+        currency={project.currency || 'USD'}
+      />
     </div>
   )
 }

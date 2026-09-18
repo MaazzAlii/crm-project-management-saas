@@ -28,6 +28,7 @@ import {
 import { ProjectRecord, updateProjectStatusAction, deleteProjectAction } from '@/app/(dashboard)/projects/actions'
 import { NewProjectModal } from './NewProjectModal'
 import { EditProjectModal } from './EditProjectModal'
+import { DeliverProjectConfirmModal } from './DeliverProjectConfirmModal'
 import { ProjectHealthBadge } from '@/components/shared/ProjectHealthBadge'
 
 export interface ProjectsKanbanProps {
@@ -43,7 +44,7 @@ interface ColumnDef {
   badgeColor: string
   headerBg: string
   dotColor: string
-  icon: any
+  icon: React.ElementType
 }
 
 const COLUMNS: ColumnDef[] = [
@@ -68,16 +69,25 @@ const COLUMNS: ColumnDef[] = [
   {
     id: 'In Review',
     title: 'In Review',
-    statuses: ['In Review', 'in_review'],
+    statuses: ['In Review', 'in_review', 'review'],
     badgeColor: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
     headerBg: 'border-t-4 border-t-purple-500',
     dotColor: 'bg-purple-500',
     icon: Eye
   },
   {
+    id: 'Delivered',
+    title: 'Delivered',
+    statuses: ['Delivered', 'delivered', 'invoiced', 'Invoiced'],
+    badgeColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+    headerBg: 'border-t-4 border-t-indigo-500',
+    dotColor: 'bg-indigo-400',
+    icon: CheckCircle2
+  },
+  {
     id: 'Completed',
-    title: 'Completed',
-    statuses: ['Completed', 'completed', 'delivered'],
+    title: 'Completed / Paid',
+    statuses: ['Completed', 'completed', 'paid', 'Paid'],
     badgeColor: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
     headerBg: 'border-t-4 border-t-blue-500',
     dotColor: 'bg-blue-500',
@@ -111,6 +121,8 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
   const [isNewModalOpen, setIsNewModalOpen] = useState(false)
   const [newModalInitialClient, setNewModalInitialClient] = useState<string>('')
   const [editingProject, setEditingProject] = useState<ProjectRecord | null>(null)
+  const [deliverModalProject, setDeliverModalProject] = useState<ProjectRecord | null>(null)
+  const [isDelivering, setIsDelivering] = useState(false)
 
   // Quick menu active card id
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null)
@@ -136,8 +148,8 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
     return true
   })
 
-  // Handle status update
-  const handleMoveStatus = async (projectId: string, targetStatus: string) => {
+  // Execute actual status update
+  const executeMoveStatus = async (projectId: string, targetStatus: string) => {
     // Optimistic update
     const prevProjects = [...projects]
     setProjects((prev) =>
@@ -153,7 +165,22 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
     } catch (err: any) {
       setProjects(prevProjects)
       alert(err.message || 'Error updating project status')
+    } finally {
+      setIsDelivering(false)
+      setDeliverModalProject(null)
     }
+  }
+
+  // Handle status update with delivered intercept
+  const handleMoveStatus = async (projectId: string, targetStatus: string) => {
+    if (targetStatus.toLowerCase() === 'delivered') {
+      const proj = projects.find((p) => p.id === projectId)
+      if (proj) {
+        setDeliverModalProject(proj)
+        return
+      }
+    }
+    await executeMoveStatus(projectId, targetStatus)
   }
 
   // Handle Delete
@@ -517,6 +544,22 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
           }}
           project={editingProject}
           membersList={membersList}
+        />
+      )}
+
+      {deliverModalProject && (
+        <DeliverProjectConfirmModal
+          isOpen={!!deliverModalProject}
+          onClose={() => setDeliverModalProject(null)}
+          onConfirm={() => {
+            setIsDelivering(true)
+            executeMoveStatus(deliverModalProject.id, 'delivered')
+          }}
+          isLoading={isDelivering}
+          projectTitle={deliverModalProject.title}
+          clientName={deliverModalProject.client_name || 'Client Profile'}
+          amount={deliverModalProject.amount || 0}
+          currency={deliverModalProject.currency || 'USD'}
         />
       )}
     </div>

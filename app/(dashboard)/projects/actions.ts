@@ -3,6 +3,7 @@
 import { getCurrentSessionContext } from '@/lib/auth/session'
 import { createClient } from '@/lib/supabase/server'
 import { logAuditEvent } from '@/lib/audit/logger'
+import { emitAutomationEvent } from '@/lib/automation/emitter'
 import { revalidatePath } from 'next/cache'
 
 export interface ProjectRecord {
@@ -359,10 +360,82 @@ export async function updateProjectStatusAction(projectId: string, newStatus: st
 
     const supabase = await createClient()
 
+    // 1. Fetch current project and client info
+    let project: any = null
+    try {
+      const { data } = await supabase
+        .from('projects')
+        .select('*, client:clients(id, name, email, payment_schedule, currency)')
+        .eq('id', projectId)
+        .eq('organization_id', session.organization.id)
+        .maybeSingle()
+      project = data
+    } catch (err) {}
+
+    if (!project && process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_PROJECTS) {
+      project = (global as any).__DEV_PROJECTS.find((p: any) => p.id === projectId)
+    }
+
+    const normalizedStatus = newStatus.toLowerCase().replace(/ /g, '_')
+    const updatePayload: Record<string, any> = {
+      status: newStatus,
+      updated_at: new Date().toISOString(),
+    }
+
+    let invoiceTriggered = false
+    if (normalizedStatus === 'delivered') {
+      updatePayload.delivered_at = new Date().toISOString()
+
+      // Decision branch per spec: check payment_schedule (per_project vs recurring)
+      const schedule = (project?.client?.payment_schedule || 'Per Project').toLowerCase()
+      const isPerProject = schedule.includes('per project') || schedule.includes('per_project')
+
+      if (isPerProject) {
+        updatePayload.invoice_triggered = true
+        invoiceTriggered = true
+
+        // Outbound signed event emitter
+        try {
+          await emitAutomationEvent({
+            organizationId: session.organization.id,
+            event: 'project.delivered',
+            data: {
+              project_id: projectId,
+              project_name: project?.title || 'Project',
+              client_id: project?.client_id || project?.client?.id,
+              client_name: project?.client?.name || project?.client_name || 'Client',
+              client_email: project?.client?.email || null,
+              budget: Number(project?.amount) || 0,
+              delivered_at: updatePayload.delivered_at,
+              completed_by_id: session.user.id,
+              completed_by_name: session.user.email,
+              completed_by_email: session.user.email,
+            },
+          })
+        } catch (eventErr) {
+          console.warn('[Automation] Error emitting project.delivered event:', eventErr)
+        }
+
+        try {
+          await logAuditEvent({
+            actorId: session.user.id,
+            action: 'PROJECT_DELIVERED_INVOICE_TRIGGERED',
+            targetType: 'project',
+            targetId: projectId,
+            details: {
+              organizationId: session.organization.id,
+              amount: project?.amount,
+              paymentSchedule: project?.client?.payment_schedule || 'Per Project',
+            },
+          })
+        } catch (auditErr) {}
+      }
+    }
+
     try {
       await supabase
         .from('projects')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .update(updatePayload)
         .eq('id', projectId)
         .eq('organization_id', session.organization.id)
     } catch (err) {}
@@ -370,12 +443,27 @@ export async function updateProjectStatusAction(projectId: string, newStatus: st
     if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_PROJECTS) {
       const idx = (global as any).__DEV_PROJECTS.findIndex((p: any) => p.id === projectId)
       if (idx !== -1) {
-        ;(global as any).__DEV_PROJECTS[idx].status = newStatus
+        Object.assign((global as any).__DEV_PROJECTS[idx], updatePayload)
       }
     }
 
+    try {
+      await logAuditEvent({
+        actorId: session.user.id,
+        action: 'PROJECT_STATUS_UPDATED',
+        targetType: 'project',
+        targetId: projectId,
+        details: {
+          newStatus,
+          previousStatus: project?.status,
+          organizationId: session.organization.id,
+        },
+      })
+    } catch (e) {}
+
     revalidatePath('/projects')
-    return { success: true }
+    revalidatePath(`/projects/${projectId}`)
+    return { success: true, invoiceTriggered }
   } catch (error: any) {
     return { error: error?.message || 'Failed to update project status.' }
   }
