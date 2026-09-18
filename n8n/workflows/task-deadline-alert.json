@@ -1,0 +1,68 @@
+{
+  "name": "Task Deadline Alert (Due Tomorrow)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "task-deadline-alert",
+        "responseMode": "onReceived",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\n\nconst secret = $env.AUTOMATION_WEBHOOK_SECRET || 'dev-secret-key';\nconst headers = $input.first().json.headers;\nconst rawBody = JSON.stringify($input.first().json.body);\nconst signatureHeader = headers['x-automation-signature'] || '';\n\nif (!signatureHeader) {\n  throw new Error('Unauthorized: Missing X-Automation-Signature header');\n}\n\nconst cleanSignature = signatureHeader.startsWith('sha256=') ? signatureHeader.slice(7) : signatureHeader;\nconst expectedSignature = crypto.createHmac('sha256', secret).update(rawBody, 'utf8').digest('hex');\n\nconst sigBuffer = Buffer.from(cleanSignature, 'hex');\nconst expectedBuffer = Buffer.from(expectedSignature, 'hex');\n\nif (sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)) {\n  throw new Error('Unauthorized: Invalid HMAC signature');\n}\n\nreturn [{ json: $input.first().json.body }];"
+      },
+      "id": "2",
+      "name": "Verify HMAC Signature",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "channel": "project-tasks",
+        "text": "=⏰ *Task Due Tomorrow!*\n• *Task:* {{ $json.data.task_title }}\n• *Project:* {{ $json.data.project_name }}\n• *Priority:* {{ $json.data.priority }}\n• *Due Date:* {{ $json.data.due_date }}\n• *Assignee:* {{ $json.data.assignee_name }}\n\nPlease ensure your deliverables are prepared and submitted on time."
+      },
+      "id": "3",
+      "name": "Slack Alert to Assignee",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [690, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Verify HMAC Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify HMAC Signature": {
+      "main": [
+        [
+          {
+            "node": "Slack Alert to Assignee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
