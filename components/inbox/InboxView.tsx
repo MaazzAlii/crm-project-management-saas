@@ -3,24 +3,24 @@
 import { useState } from 'react'
 import {
   Inbox,
-  MessageSquare,
   AlertCircle,
-  CheckCircle2,
-  Mail,
-  Phone,
-  RefreshCw,
-  CheckCheck
+  CheckCheck,
+  Sparkles,
+  Layers,
+  Radio
 } from 'lucide-react'
 import { InboxMessageRecord, InboxSummary } from '@/lib/inbox/query'
-import { ClientSelectItem, markAllReadAction, markMessageReadAction } from '@/app/(dashboard)/inbox/actions'
+import { ClientSelectItem, ChannelInfo, markAllReadAction, markMessageReadAction } from '@/app/(dashboard)/inbox/actions'
 import { ConversationList } from './ConversationList'
 import { MessageThread } from './MessageThread'
+import { ChannelStatusBadge } from './ChannelStatusBadge'
+import { ConnectionStatusModal } from './ConnectionStatusModal'
 
 interface InboxViewProps {
   initialMessages: InboxMessageRecord[]
   initialSummary: InboxSummary
   clients: ClientSelectItem[]
-  channels: { id: string; provider: string; channel_name?: string | null }[]
+  channels: ChannelInfo[]
 }
 
 export function InboxView({
@@ -41,6 +41,16 @@ export function InboxView({
   const [activeProvider, setActiveProvider] = useState('ALL')
   const [readFilter, setReadFilter] = useState<'all' | 'unread' | 'unmatched'>('all')
   const [isMarkingAllRead, setIsMarkingAllRead] = useState(false)
+  const [activeModalChannel, setActiveModalChannel] = useState<ChannelInfo | null>(null)
+
+  // Compute unread counts per channel dynamically from state
+  const unreadByProvider: Record<string, number> = {
+    slack: 0,
+    whatsapp: 0,
+    email: 0,
+    discord: 0,
+    upwork: 0
+  }
 
   // Group messages into distinct conversation threads by sender key (client_id || sender_identifier)
   const conversationMap = new Map<
@@ -55,6 +65,14 @@ export function InboxView({
   >()
 
   messages.forEach((msg) => {
+    // Count unread per provider
+    if (!msg.read_at && msg.direction === 'inbound') {
+      const p = msg.channel?.provider?.toLowerCase()
+      if (p && unreadByProvider[p] !== undefined) {
+        unreadByProvider[p]++
+      }
+    }
+
     const key = msg.client_id || msg.sender_identifier || msg.id
     if (!conversationMap.has(key)) {
       conversationMap.set(key, {
@@ -132,7 +150,17 @@ export function InboxView({
       setMessages((prev) =>
         prev.map((m) => ({ ...m, read_at: m.read_at || new Date().toISOString() }))
       )
-      setSummary((prev) => ({ ...prev, unreadCount: 0 }))
+      setSummary((prev) => ({
+        ...prev,
+        unreadCount: 0,
+        unreadByProvider: {
+          slack: 0,
+          whatsapp: 0,
+          email: 0,
+          discord: 0,
+          upwork: 0
+        }
+      }))
     } catch (err: any) {
       alert(err.message || 'Error marking all read')
     } finally {
@@ -162,31 +190,51 @@ export function InboxView({
     )
   }
 
+  const currentTotalUnread = Object.values(unreadByProvider).reduce((acc, count) => acc + count, 0)
+
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col -m-4 md:-m-6">
       {/* Top Header & Metrics Strip */}
-      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shrink-0">
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-3.5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shrink-0">
         <div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Inbox className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               Communication Hub — Unified Inbox
             </h1>
             <span className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-              {summary.totalMessages} Messages
+              {messages.length} Messages
             </span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Real-time multi-channel communication across Slack, WhatsApp, Email, Discord, and Upwork.
-          </p>
+
+          {/* Connected Channels Visual Status Badges Ribbon */}
+          <div className="flex items-center gap-2 mt-2 flex-wrap text-xs">
+            <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1">
+              <Radio className="w-3 h-3 text-emerald-500" /> Channels:
+            </span>
+            {channels.map((chan) => (
+              <ChannelStatusBadge
+                key={chan.id || chan.provider}
+                provider={chan.provider}
+                channelName={chan.channel_name}
+                status={chan.status || 'active'}
+                showStatusDot={true}
+                showConnectionText={false}
+                unreadCount={unreadByProvider[chan.provider.toLowerCase()]}
+                size="sm"
+                allowModal={true}
+                channelInfo={chan}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Quick KPI Badges & Mark All Read */}
-        <div className="flex items-center gap-3">
+        {/* Quick KPI Badges & Actions */}
+        <div className="flex items-center gap-3 self-start lg:self-center">
           <div className="flex items-center gap-2 text-xs">
             <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900 rounded-lg font-semibold flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-indigo-500" />
-              {summary.unreadCount} Unread
+              {currentTotalUnread} Unread
             </span>
 
             <span className="px-3 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900 rounded-lg font-semibold flex items-center gap-1.5">
@@ -198,8 +246,8 @@ export function InboxView({
           <button
             type="button"
             onClick={handleMarkAllRead}
-            disabled={isMarkingAllRead || summary.unreadCount === 0}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold disabled:opacity-50 transition"
+            disabled={isMarkingAllRead || currentTotalUnread === 0}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold disabled:opacity-50 transition shadow-xs"
           >
             <CheckCheck className="w-3.5 h-3.5 text-slate-500" />
             Mark All Read
@@ -221,6 +269,7 @@ export function InboxView({
             onProviderChange={setActiveProvider}
             readFilter={readFilter}
             onReadFilterChange={setReadFilter}
+            unreadByProvider={unreadByProvider}
           />
         </div>
 
@@ -235,6 +284,15 @@ export function InboxView({
           />
         </div>
       </div>
+
+      {/* Header Channel Status Modal */}
+      {activeModalChannel && (
+        <ConnectionStatusModal
+          isOpen={Boolean(activeModalChannel)}
+          onClose={() => setActiveModalChannel(null)}
+          channel={activeModalChannel}
+        />
+      )}
     </div>
   )
 }
