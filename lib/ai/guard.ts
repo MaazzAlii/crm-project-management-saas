@@ -120,5 +120,27 @@ export async function checkAIAccess(
     console.warn('[AI:Guard] Error checking organization plan limits:', err)
   }
 
+  // 3. Check Organization-Level Feature Settings (Tenant Admin Controls)
+  try {
+    const { data: orgData, error: orgError } = await supabase
+      .from('organizations')
+      .select('ai_feature_settings')
+      .eq('id', organizationId)
+      .maybeSingle()
+
+    if (!orgError && orgData && orgData.ai_feature_settings) {
+      const orgSettings = orgData.ai_feature_settings as Record<string, boolean>
+      if (orgSettings[feature] === false) {
+        return {
+          allowed: false,
+          reason: `The ${feature.replace(/_/g, ' ')} AI capability has been disabled by your organization administrator.`,
+          code: 'FEATURE_DISABLED_BY_ORGANIZATION',
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[AI:Guard] Error checking organization AI feature settings:', err)
+  }
+
   return { allowed: true }
 }

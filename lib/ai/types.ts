@@ -45,6 +45,7 @@ export interface AICompletionResponse {
     | 'KILL_SWITCH_ACTIVE'
     | 'PLAN_LIMIT_REACHED'
     | 'CAPABILITY_DISABLED'
+    | 'FEATURE_DISABLED_BY_ORGANIZATION'
     | 'PROVIDER_ERROR'
     | 'INVALID_REQUEST'
 }
@@ -52,7 +53,14 @@ export interface AICompletionResponse {
 export interface AIGateCheckResult {
   allowed: boolean
   reason?: string
-  code?: 'KILL_SWITCH_ACTIVE' | 'PLAN_LIMIT_REACHED' | 'CAPABILITY_DISABLED'
+  code?: 'KILL_SWITCH_ACTIVE' | 'PLAN_LIMIT_REACHED' | 'CAPABILITY_DISABLED' | 'FEATURE_DISABLED_BY_ORGANIZATION'
+}
+
+export interface AIFeatureSettings {
+  reply_suggestions: boolean
+  lead_scoring: boolean
+  task_extraction: boolean
+  weekly_narrative: boolean
 }
 
 export interface AIUsageRecord {

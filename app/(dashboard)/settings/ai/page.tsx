@@ -1,21 +1,35 @@
-import { Bot, Sparkles } from 'lucide-react'
+import { redirect } from 'next/navigation'
+import { getCurrentSessionContext } from '@/lib/auth/session'
+import { fetchAIFeatureSettingsAction } from './actions'
+import { AIFeatureSettingsView } from '@/components/settings/AIFeatureSettingsView'
 
-export default function AISettingsPage() {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-8 text-center space-y-4 shadow-xl max-w-2xl mx-auto my-6">
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-        <Bot className="h-7 w-7" />
+export const dynamic = 'force-dynamic'
+export const metadata = {
+  title: 'AI Settings & Usage Controls | Agency Workspace',
+  description: 'Manage per-feature AI capabilities, inspect token consumption, and audit costs.',
+}
+
+export default async function AISettingsPage() {
+  const session = await getCurrentSessionContext()
+
+  if (!session || !session.user) {
+    redirect('/login')
+  }
+
+  if (!session.organization) {
+    redirect('/onboarding')
+  }
+
+  const result = await fetchAIFeatureSettingsAction()
+
+  if (!result.success || !result.data) {
+    return (
+      <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-6 text-center text-rose-300">
+        <p className="font-semibold">Unable to load AI settings</p>
+        <p className="text-xs text-rose-400/80 mt-1">{result.error || 'Unknown error occurred'}</p>
       </div>
-      <div>
-        <h2 className="text-xl font-extrabold text-white">AI Assistant & Model Configuration</h2>
-        <p className="mt-1 text-xs text-slate-400">
-          Configure agency AI models, auto-reply suggestions, lead scoring prompts, and task extraction thresholds.
-        </p>
-      </div>
-      <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-300 border border-purple-500/30">
-        <Sparkles className="h-3.5 w-3.5 text-purple-400" />
-        AI Engine Active
-      </div>
-    </div>
-  )
+    )
+  }
+
+  return <AIFeatureSettingsView initialData={result.data} />
 }
