@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ClientRecord } from '@/components/clients/ClientsList'
 import { CommunicationModeBadge } from '@/components/clients/CommunicationModeBadge'
+import { CommunicationModeSwitchModal } from '@/components/clients/CommunicationModeSwitchModal'
 import { TagBadge } from '@/components/clients/TagBadge'
 import { ClientEditModal } from '@/components/clients/ClientEditModal'
 import { deleteClientAction } from '@/app/(dashboard)/clients/actions'
@@ -30,6 +31,8 @@ export function ClientDetailHeader({ client, userRole, isSuperAdmin }: ClientDet
   const router = useRouter()
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false)
+  const [currentMode, setCurrentMode] = useState(client.communication_mode || 'manual')
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
@@ -95,7 +98,10 @@ export function ClientDetailHeader({ client, userRole, isSuperAdmin }: ClientDet
               >
                 {client.status.toUpperCase()}
               </span>
-              <CommunicationModeBadge mode={client.communication_mode} />
+              <CommunicationModeBadge
+                mode={currentMode}
+                onUpgrade={currentMode === 'manual' ? () => setIsSwitchModalOpen(true) : undefined}
+              />
               {client.tags && client.tags.map((tag) => (
                 <TagBadge key={tag} name={tag} size="md" />
               ))}
@@ -205,6 +211,16 @@ export function ClientDetailHeader({ client, userRole, isSuperAdmin }: ClientDet
           </div>
         </div>
       )}
+      {/* Switch Mode Confirmation Modal */}
+      <CommunicationModeSwitchModal
+        isOpen={isSwitchModalOpen}
+        onClose={() => setIsSwitchModalOpen(false)}
+        clientId={client.id}
+        clientName={client.name}
+        clientEmail={client.email}
+        clientPhone={client.phone}
+        onSuccess={() => setCurrentMode('connected')}
+      />
     </>
   )
 }

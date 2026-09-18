@@ -3,19 +3,20 @@
 import { useState } from 'react'
 import { ClientRecord } from '@/components/clients/ClientsList'
 import { updateClientNotesAction } from '@/app/(dashboard)/clients/actions'
+import { CommunicationModeSwitchModal } from './CommunicationModeSwitchModal'
 import {
   Building2,
   Mail,
   Phone,
   Globe,
   DollarSign,
-  Calendar,
   MessageSquare,
   Zap,
   Save,
   CheckCircle2,
   Loader2,
   FileText,
+  Lock,
 } from 'lucide-react'
 
 interface ClientOverviewTabProps {
@@ -26,6 +27,8 @@ export function ClientOverviewTab({ client }: ClientOverviewTabProps) {
   const [notes, setNotes] = useState(client.notes || '')
   const [savingNotes, setSavingNotes] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [currentMode, setCurrentMode] = useState(client.communication_mode || 'manual')
+  const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false)
 
   async function handleSaveNotes() {
     setSavingNotes(true)
@@ -37,6 +40,8 @@ export function ClientOverviewTab({ client }: ClientOverviewTabProps) {
     setSaveSuccess(true)
     setTimeout(() => setSaveSuccess(false), 3000)
   }
+
+  const isConnected = currentMode === 'connected'
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -81,28 +86,71 @@ export function ClientOverviewTab({ client }: ClientOverviewTabProps) {
             <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
                 <DollarSign className="h-4 w-4 text-emerald-400" />
-                <span>Currency & Payment Schedule</span>
+                <span>Currency &amp; Payment Schedule</span>
               </div>
               <div className="text-sm font-bold text-white">
                 {client.currency || 'USD'} — {client.payment_schedule || 'Per Project'}
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
-                {client.communication_mode === 'connected' ? (
-                  <Zap className="h-4 w-4 text-emerald-400" />
-                ) : (
-                  <MessageSquare className="h-4 w-4 text-sky-400" />
-                )}
-                <span>Communication Mode</span>
-              </div>
-              <div className="text-sm font-bold text-white flex items-center gap-2">
-                <span>{client.communication_mode === 'connected' ? 'Connected Hub' : 'Manual Mode'}</span>
-                {client.communication_mode === 'connected' && (
-                  <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">
-                    Auto-Sync
+            {/* Communication Mode Specification Card */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-2 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
+                    {isConnected ? (
+                      <Zap className="h-4 w-4 text-emerald-400" />
+                    ) : (
+                      <MessageSquare className="h-4 w-4 text-sky-400" />
+                    )}
+                    <span>Communication Mode</span>
+                  </div>
+
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                      isConnected
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                        : 'bg-sky-500/10 text-sky-400 border-sky-500/30'
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-sky-400'
+                      }`}
+                    />
+                    {isConnected ? 'Connected Hub' : 'Manual Mode'}
                   </span>
+                </div>
+
+                <div className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                  {isConnected ? (
+                    <span className="text-slate-300">
+                      Inbound &amp; outbound messages across WhatsApp, Slack, Email, Discord, and Upwork are automatically synced to the Unified Inbox.
+                    </span>
+                  ) : (
+                    <span>
+                      Logging by hand. Inbound channel messages are not automatically attributed to this client profile.
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Mode Action Button / Status Lock */}
+              <div className="pt-2">
+                {!isConnected ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsSwitchModalOpen(true)}
+                    className="inline-flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                  >
+                    <Zap className="h-3.5 w-3.5" />
+                    <span>Switch to Connected Mode</span>
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
+                    <Lock className="h-3.5 w-3.5 shrink-0" />
+                    <span>Connected Mode Active (Permanent)</span>
+                  </div>
                 )}
               </div>
             </div>
@@ -114,7 +162,7 @@ export function ClientOverviewTab({ client }: ClientOverviewTabProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-sky-400" />
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">Internal Notes & Context</h2>
+              <h2 className="text-sm font-bold text-white uppercase tracking-wider">Internal Notes &amp; Context</h2>
             </div>
             {saveSuccess && (
               <span className="flex items-center gap-1 text-xs text-emerald-400 font-semibold animate-in fade-in">
@@ -183,6 +231,17 @@ export function ClientOverviewTab({ client }: ClientOverviewTabProps) {
           </div>
         </div>
       </div>
+
+      {/* Switch Mode Confirmation Dialog */}
+      <CommunicationModeSwitchModal
+        isOpen={isSwitchModalOpen}
+        onClose={() => setIsSwitchModalOpen(false)}
+        clientId={client.id}
+        clientName={client.name}
+        clientEmail={client.email}
+        clientPhone={client.phone}
+        onSuccess={() => setCurrentMode('connected')}
+      />
     </div>
   )
 }

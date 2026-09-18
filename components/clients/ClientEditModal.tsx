@@ -136,13 +136,30 @@ export function ClientEditModal({ client, isOpen, onClose }: ClientEditModalProp
 
           {/* Communication Mode */}
           <div className="space-y-3 pt-2">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Communication Mode</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Communication Mode</h3>
+              {client.communication_mode === 'connected' && (
+                <span className="text-[10px] text-amber-400 font-bold flex items-center gap-1">
+                  Permanent Mode
+                </span>
+              )}
+            </div>
+
+            {client.communication_mode === 'connected' && (
+              <p className="text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded-xl p-2.5 leading-relaxed">
+                This client is in Connected Mode. Reverting to manual mode is blocked to preserve synced message threads and audit integrity.
+              </p>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <button
                 type="button"
+                disabled={client.communication_mode === 'connected'}
                 onClick={() => setCommMode('manual')}
                 className={`p-3.5 rounded-xl border text-left transition flex items-start gap-3 ${
-                  commMode === 'manual'
+                  client.communication_mode === 'connected'
+                    ? 'opacity-40 cursor-not-allowed border-slate-800 bg-slate-950/30'
+                    : commMode === 'manual'
                     ? 'border-sky-500 bg-sky-500/10 text-white'
                     : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:border-slate-700'
                 }`}
@@ -152,7 +169,9 @@ export function ClientEditModal({ client, isOpen, onClose }: ClientEditModalProp
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-white">Manual Mode</div>
-                  <div className="text-xs text-slate-400 mt-0.5">Log conversations manually.</div>
+                  <div className="text-xs text-slate-400 mt-0.5">
+                    {client.communication_mode === 'connected' ? 'Locked (Cannot revert)' : 'Log conversations manually.'}
+                  </div>
                 </div>
               </button>
 
