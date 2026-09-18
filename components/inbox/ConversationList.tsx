@@ -1,7 +1,9 @@
 'use client'
 
-import { Search, Filter, MessageSquare, AlertCircle } from 'lucide-react'
+import { Search, MessageSquare, Sparkles } from 'lucide-react'
 import { InboxMessageRecord } from '@/lib/inbox/query'
+import { PROVIDER_BRANDING, getProviderMeta } from './providerBranding'
+import { ChannelStatusBadge } from './ChannelStatusBadge'
 
 interface ConversationListProps {
   conversations: {
@@ -19,9 +21,10 @@ interface ConversationListProps {
   onProviderChange: (provider: string) => void
   readFilter: 'all' | 'unread' | 'unmatched'
   onReadFilterChange: (filter: 'all' | 'unread' | 'unmatched') => void
+  unreadByProvider?: Record<string, number>
 }
 
-const PROVIDERS = ['ALL', 'slack', 'whatsapp', 'email', 'upwork']
+const PROVIDERS = ['ALL', 'slack', 'whatsapp', 'email', 'discord', 'upwork']
 
 export function ConversationList({
   conversations,
@@ -32,33 +35,26 @@ export function ConversationList({
   activeProvider,
   onProviderChange,
   readFilter,
-  onReadFilterChange
+  onReadFilterChange,
+  unreadByProvider = {}
 }: ConversationListProps) {
-  const getProviderPill = (prov: string) => {
-    switch (prov.toLowerCase()) {
-      case 'slack':
-        return { label: 'Slack', style: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' }
-      case 'whatsapp':
-        return { label: 'WhatsApp', style: 'bg-green-500/10 text-green-500 border-green-500/20' }
-      case 'email':
-        return { label: 'Email', style: 'bg-blue-500/10 text-blue-500 border-blue-500/20' }
-      case 'upwork':
-        return { label: 'Upwork', style: 'bg-amber-500/10 text-amber-500 border-amber-500/20' }
-      default:
-        return { label: prov, style: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' }
-    }
-  }
-
   const formatTime = (isoString: string) => {
-    const d = new Date(isoString)
-    const now = new Date()
-    const diffHours = (now.getTime() - d.getTime()) / (1000 * 60 * 60)
+    try {
+      const d = new Date(isoString)
+      const now = new Date()
+      const diffHours = (now.getTime() - d.getTime()) / (1000 * 60 * 60)
 
-    if (diffHours < 24) {
-      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      if (diffHours < 24) {
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+      return d.toLocaleDateString([], { month: 'short', day: 'numeric' })
+    } catch {
+      return ''
     }
-    return d.toLocaleDateString([], { month: 'short', day: 'numeric' })
   }
+
+  // Calculate unread count for 'ALL'
+  const totalUnread = Object.values(unreadByProvider).reduce((sum, n) => sum + (n || 0), 0)
 
   return (
     <div className="h-full flex flex-col bg-slate-50/70 dark:bg-slate-900/60 border-r border-slate-200 dark:border-slate-800">
@@ -71,7 +67,7 @@ export function ConversationList({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search conversations..."
+            placeholder="Search messages, clients, handles..."
             className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition"
           />
         </div>
@@ -92,13 +88,18 @@ export function ConversationList({
           <button
             type="button"
             onClick={() => onReadFilterChange('unread')}
-            className={`flex-1 py-1 text-center rounded-lg transition ${
+            className={`flex-1 py-1 text-center rounded-lg transition flex items-center justify-center gap-1 ${
               readFilter === 'unread'
-                ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs font-bold'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
-            Unread
+            <span>Unread</span>
+            {totalUnread > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-extrabold bg-indigo-600 text-white">
+                {totalUnread}
+              </span>
+            )}
           </button>
           <button
             type="button"
@@ -113,22 +114,55 @@ export function ConversationList({
           </button>
         </div>
 
-        {/* Provider Pills */}
+        {/* Provider Pills with Brand Styling & Unread Indicators */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
-          {PROVIDERS.map((prov) => (
-            <button
-              key={prov}
-              type="button"
-              onClick={() => onProviderChange(prov)}
-              className={`px-2.5 py-1 rounded-full font-semibold border transition shrink-0 capitalize ${
-                activeProvider === prov
-                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              {prov}
-            </button>
-          ))}
+          {PROVIDERS.map((prov) => {
+            const isAll = prov === 'ALL'
+            const isSelected = activeProvider.toLowerCase() === prov.toLowerCase()
+            const meta = !isAll ? getProviderMeta(prov) : null
+            const unreadCount = isAll ? totalUnread : unreadByProvider[prov.toLowerCase()] || 0
+
+            return (
+              <button
+                key={prov}
+                type="button"
+                onClick={() => onProviderChange(prov)}
+                className={`px-2.5 py-1 rounded-full font-semibold border transition shrink-0 flex items-center gap-1.5 ${
+                  isSelected
+                    ? isAll
+                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                      : 'shadow-xs'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                }`}
+                style={
+                  isSelected && meta
+                    ? meta.activeTabStyle
+                    : undefined
+                }
+              >
+                {!isAll && meta && (
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: isSelected ? '#ffffff' : meta.color }}
+                  />
+                )}
+                <span className="capitalize">{prov}</span>
+
+                {/* Unread message indicator per channel */}
+                {unreadCount > 0 && (
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[9px] font-extrabold leading-none ${
+                      isSelected
+                        ? 'bg-white text-slate-900'
+                        : 'bg-indigo-600 text-white shadow-xs'
+                    }`}
+                  >
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -144,7 +178,7 @@ export function ConversationList({
             const isSelected = selectedSenderKey === conv.senderKey
             const latest = conv.latestMessage
             const prov = latest.channel?.provider || 'email'
-            const badge = getProviderPill(prov)
+            const channelStatus = latest.channel?.status || 'active'
             const title = latest.client?.name || latest.sender_name || latest.sender_identifier || 'Unknown Sender'
 
             return (
@@ -159,8 +193,11 @@ export function ConversationList({
                 }`}
               >
                 {/* Avatar / Initials */}
-                <div className="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-200 shrink-0">
+                <div className="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-200 shrink-0 relative">
                   {title.charAt(0).toUpperCase()}
+                  {conv.hasUnread && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-indigo-600 border-2 border-white dark:border-slate-900 shadow-[0_0_8px_rgba(79,70,229,0.9)]" />
+                  )}
                 </div>
 
                 {/* Content */}
@@ -168,24 +205,30 @@ export function ConversationList({
                   <div className="flex items-center justify-between gap-1">
                     <div className="font-semibold text-xs text-slate-900 dark:text-white truncate flex items-center gap-1.5">
                       <span className="truncate">{title}</span>
-                      {conv.hasUnread && (
-                        <span className="w-2 h-2 rounded-full bg-indigo-600 shrink-0" />
-                      )}
                     </div>
                     <span className="text-[10px] text-slate-400 shrink-0">
                       {formatTime(latest.sent_at)}
                     </span>
                   </div>
 
+                  {/* Channel Status Badges & Provider Pill */}
                   <div className="flex items-center gap-1.5 mt-1">
-                    <span className={`text-[9px] font-semibold px-1.5 py-0.2 rounded border ${badge.style}`}>
-                      {badge.label}
-                    </span>
+                    <ChannelStatusBadge
+                      provider={prov}
+                      channelName={latest.channel?.channel_name}
+                      status={channelStatus as any}
+                      showStatusDot={true}
+                      size="sm"
+                      allowModal={true}
+                      channelInfo={latest.channel as any}
+                    />
+
                     {conv.isUnmatched && (
-                      <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                      <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
                         Unmatched
                       </span>
                     )}
+
                     {latest.client?.company_name && (
                       <span className="text-[10px] text-slate-400 truncate">
                         {latest.client.company_name}
@@ -193,7 +236,11 @@ export function ConversationList({
                     )}
                   </div>
 
-                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-1 font-normal">
+                  <p className={`text-xs line-clamp-1 mt-1 font-normal ${
+                    conv.hasUnread
+                      ? 'text-slate-900 dark:text-white font-medium'
+                      : 'text-slate-500 dark:text-slate-400'
+                  }`}>
                     {latest.body}
                   </p>
                 </div>
