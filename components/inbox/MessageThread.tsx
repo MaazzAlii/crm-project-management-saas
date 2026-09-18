@@ -5,18 +5,20 @@ import Link from 'next/link'
 import {
   Building2,
   User,
-  Mail,
-  Phone,
   MessageSquare,
   CheckCircle2,
-  Clock,
   UserPlus,
   ExternalLink,
-  ChevronDown
+  ChevronDown,
+  Activity,
+  AlertCircle
 } from 'lucide-react'
 import { InboxMessageRecord } from '@/lib/inbox/query'
 import { ClientSelectItem, assignMessageClientAction } from '@/app/(dashboard)/inbox/actions'
 import { ComposeBox } from './ComposeBox'
+import { ChannelStatusBadge } from './ChannelStatusBadge'
+import { ConnectionStatusModal, ChannelStatusInfo } from './ConnectionStatusModal'
+import { getProviderMeta } from './providerBranding'
 
 interface MessageThreadProps {
   messages: InboxMessageRecord[]
@@ -36,6 +38,7 @@ export function MessageThread({
   const [selectedClientId, setSelectedClientId] = useState('')
   const [isAssigning, setIsAssigning] = useState(false)
   const [showAssignDropdown, setShowAssignDropdown] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   if (!messages || messages.length === 0) {
     return (
@@ -56,6 +59,7 @@ export function MessageThread({
   const activeChannelId = latestMessage.channel_id
   const senderName = latestMessage.sender_name || latestMessage.sender_identifier || 'Unknown Sender'
   const isUnmatched = !latestMessage.client_id
+  const isChannelActive = channel?.status === 'active' || !channel?.status
 
   const handleAssignClient = async (clientId: string) => {
     if (!clientId) return
@@ -74,40 +78,43 @@ export function MessageThread({
     }
   }
 
-  const getProviderBadge = (prov: string) => {
-    switch (prov.toLowerCase()) {
-      case 'slack':
-        return { label: 'Slack', style: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' }
-      case 'whatsapp':
-        return { label: 'WhatsApp', style: 'bg-green-500/10 text-green-500 border-green-500/20' }
-      case 'email':
-        return { label: 'Email', style: 'bg-blue-500/10 text-blue-500 border-blue-500/20' }
-      case 'upwork':
-        return { label: 'Upwork', style: 'bg-amber-500/10 text-amber-500 border-amber-500/20' }
-      default:
-        return { label: prov, style: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' }
-    }
+  const channelInfo: ChannelStatusInfo = {
+    id: channel?.id || latestMessage.channel_id,
+    provider,
+    channel_name: channel?.channel_name || `${getProviderMeta(provider).name} Channel`,
+    status: (channel?.status as any) || 'active',
+    connected_at: channel?.connected_at,
+    updated_at: channel?.updated_at,
+    external_account_id: channel?.external_account_id,
+    metadata: channel?.metadata
   }
-
-  const badge = getProviderBadge(provider)
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800">
       {/* Thread Header */}
       <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-xs">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-xs shrink-0">
             {senderName.charAt(0).toUpperCase()}
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="font-bold text-slate-900 dark:text-white text-base">
                 {client?.name || senderName}
               </h2>
-              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${badge.style}`}>
-                {badge.label}
-              </span>
+
+              {/* Channel Connection Status Badge & Provider Color-Coding */}
+              <ChannelStatusBadge
+                provider={provider}
+                channelName={channel?.channel_name}
+                status={channelInfo.status}
+                showStatusDot={true}
+                showConnectionText={true}
+                size="md"
+                allowModal={true}
+                channelInfo={channelInfo}
+              />
             </div>
 
             <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -118,21 +125,31 @@ export function MessageThread({
                 </span>
               )}
               {latestMessage.sender_identifier && (
-                <span>{latestMessage.sender_identifier}</span>
+                <span className="font-mono text-[11px]">{latestMessage.sender_identifier}</span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Right Action: Link or View Profile */}
-        <div>
+        {/* Right Action: Link Client Profile or Channel Info */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition"
+            title="Inspect Channel Connection & Webhook Health"
+          >
+            <Activity className="w-3.5 h-3.5 text-indigo-500" />
+            <span className="hidden sm:inline">Channel Status</span>
+          </button>
+
           {client ? (
             <Link
               href={`/clients/${client.id}`}
               className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg transition"
             >
               <User className="w-3.5 h-3.5" />
-              View Client Profile
+              <span className="hidden sm:inline">View Profile</span>
               <ExternalLink className="w-3 h-3 text-slate-400" />
             </Link>
           ) : (
@@ -143,7 +160,7 @@ export function MessageThread({
                 className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg transition"
               >
                 <UserPlus className="w-3.5 h-3.5" />
-                Assign to Client
+                <span>Assign Client</span>
                 <ChevronDown className="w-3 h-3" />
               </button>
 
@@ -174,6 +191,23 @@ export function MessageThread({
           )}
         </div>
       </div>
+
+      {/* Disconnected Channel Notice */}
+      {!isChannelActive && (
+        <div className="px-4 py-2 bg-red-500/10 border-b border-red-500/20 text-xs text-red-700 dark:text-red-400 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+            <span>Channel connection is inactive. Outbound replies may be queued until credentials are re-authenticated.</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="font-bold underline ml-2"
+          >
+            Check Status
+          </button>
+        </div>
+      )}
 
       {/* Unmatched Triage Banner */}
       {isUnmatched && (
@@ -227,6 +261,13 @@ export function MessageThread({
         clientId={latestMessage.client_id}
         recipientIdentifier={latestMessage.sender_identifier}
         onMessageSent={onMessageSent}
+      />
+
+      {/* Connection Status Modal */}
+      <ConnectionStatusModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        channel={channelInfo}
       />
     </div>
   )
