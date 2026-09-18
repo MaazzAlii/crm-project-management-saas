@@ -23,7 +23,8 @@ export async function createClientAction(formData: FormData) {
     const currency = formData.get('currency')?.toString().trim() || 'USD'
     const payment_schedule = formData.get('payment_schedule')?.toString().trim() || 'Per Project'
     const status = formData.get('status')?.toString().trim() || 'active'
-    const communication_mode = (formData.get('communication_mode')?.toString().trim() || 'manual') as 'manual' | 'connected'
+    const rawMode = formData.get('communication_mode')?.toString().trim()
+    const communication_mode: 'manual' | 'connected' = (rawMode === 'manual' || rawMode === 'connected') ? rawMode : 'connected'
     const notes = formData.get('notes')?.toString().trim() || null
     const tagsRaw = formData.get('tags')?.toString().trim()
     let tags: string[] = []

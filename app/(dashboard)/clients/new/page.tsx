@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import { ClientForm } from '@/components/clients/ClientForm'
 import { ArrowLeft, Users } from 'lucide-react'
 
+import { hasActiveChannels } from '@/lib/clients/communication-mode'
+
 export const metadata = {
   title: 'New Client | INNOVENTIX Hub',
   description: 'Add a new client record and select communication mode for your agency tenant.',
@@ -23,6 +25,8 @@ export default async function NewClientPage() {
       </div>
     )
   }
+
+  const orgHasChannels = await hasActiveChannels(session.organization.id)
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -49,7 +53,7 @@ export default async function NewClientPage() {
       </div>
 
       {/* Client Creation Form */}
-      <ClientForm />
+      <ClientForm initialMode="connected" hasActiveChannels={orgHasChannels} />
     </div>
   )
 }

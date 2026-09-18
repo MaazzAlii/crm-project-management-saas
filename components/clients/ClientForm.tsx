@@ -22,7 +22,15 @@ export interface ClientFormValues {
   tags: string[]
 }
 
-export function ClientForm() {
+export interface ClientFormProps {
+  initialMode?: 'manual' | 'connected'
+  hasActiveChannels?: boolean
+}
+
+export function ClientForm({
+  initialMode = 'connected',
+  hasActiveChannels = true
+}: ClientFormProps = {}) {
   const router = useRouter()
 
   const [formData, setFormData] = useState<ClientFormValues>({
@@ -35,7 +43,7 @@ export function ClientForm() {
     currency: 'USD',
     payment_schedule: 'Per Project',
     status: 'active',
-    communication_mode: 'manual',
+    communication_mode: initialMode,
     notes: '',
     tags: [],
   })
@@ -210,6 +218,21 @@ export function ClientForm() {
         <p className="text-xs text-slate-400 leading-relaxed">
           Select how communication logs and messages will be synced for this client across your agency workspace.
         </p>
+
+        {!hasActiveChannels && (
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-300 flex items-start gap-2.5">
+            <AlertCircle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <span className="font-semibold text-white">No active communication channels connected yet</span>
+              <p className="text-amber-300/80 leading-relaxed text-[11px]">
+                Connected mode will auto-match email and phone numbers as soon as you configure Slack, WhatsApp, Email, Discord, or Upwork in{' '}
+                <Link href="/settings/integrations" className="text-amber-200 underline hover:text-white font-medium">
+                  Settings &gt; Integrations
+                </Link>.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Radio Option 1: Manual */}
