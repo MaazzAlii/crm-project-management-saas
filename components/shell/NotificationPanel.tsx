@@ -9,14 +9,16 @@ import {
   Clock,
   Check,
   ExternalLink,
-  X,
-  MessageSquare
+  MessageSquare,
+  BarChart3,
+  FileText,
+  Zap,
 } from 'lucide-react'
 import {
   InAppNotificationRecord,
   fetchInAppNotificationsAction,
   markNotificationAsReadAction,
-  markAllNotificationsAsReadAction
+  markAllNotificationsAsReadAction,
 } from '@/app/(dashboard)/notifications/actions'
 
 export function NotificationPanel() {
@@ -27,6 +29,13 @@ export function NotificationPanel() {
 
   useEffect(() => {
     loadNotifications()
+
+    // Poll for updates every 30 seconds
+    const interval = setInterval(() => {
+      loadNotifications()
+    }, 30000)
+
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
@@ -40,19 +49,18 @@ export function NotificationPanel() {
   }, [])
 
   const loadNotifications = async () => {
-    setLoading(true)
     try {
       const data = await fetchInAppNotificationsAction()
       setNotifications(data)
     } catch (e) {
-    } finally {
-      setLoading(false)
+      // Fallback
     }
   }
 
   const unreadCount = notifications.filter((n) => !n.read_at).length
 
-  const handleMarkAsRead = async (id: string) => {
+  const handleMarkAsRead = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read_at: new Date().toISOString() } : n))
     )
@@ -69,13 +77,18 @@ export function NotificationPanel() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'project_overdue':
-        return <AlertCircle className="w-4 h-4 text-red-500" />
+        return <AlertCircle className="w-4 h-4 text-rose-500" />
       case 'deadline_approaching':
-        return <Clock className="w-4 h-4 text-amber-500" />
+        return <Clock className="w-4 h-4 text-amber-400" />
+      case 'weekly_summary':
+        return <BarChart3 className="w-4 h-4 text-sky-400" />
+      case 'project_delivered':
+      case 'invoice_created':
+        return <Zap className="w-4 h-4 text-purple-400" />
       case 'milestone_completed':
-        return <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+        return <CheckCircle2 className="w-4 h-4 text-emerald-400" />
       default:
-        return <MessageSquare className="w-4 h-4 text-sky-500" />
+        return <MessageSquare className="w-4 h-4 text-indigo-400" />
     }
   }
 
@@ -83,13 +96,16 @@ export function NotificationPanel() {
     <div className="relative" ref={panelRef}>
       {/* Bell Trigger Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen)
+          if (!isOpen) loadNotifications()
+        }}
         title="In-App Notifications"
-        className="relative rounded-xl border border-slate-800 bg-slate-900/80 p-2.5 text-slate-400 hover:border-slate-700 hover:bg-slate-800 hover:text-white transition"
+        className="relative rounded-xl border border-slate-800 bg-slate-900/80 p-2.5 text-slate-400 hover:border-slate-700 hover:bg-slate-800 hover:text-white transition focus:outline-none"
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white ring-2 ring-slate-950">
+          <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white ring-2 ring-slate-950 animate-pulse">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -147,7 +163,13 @@ export function NotificationPanel() {
                           {n.title}
                         </span>
                         {isUnread && (
-                          <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />
+                          <button
+                            onClick={(e) => handleMarkAsRead(e, n.id)}
+                            title="Mark as read"
+                            className="p-0.5 text-slate-500 hover:text-indigo-400 transition"
+                          >
+                            <span className="w-2 h-2 rounded-full bg-indigo-500 block" />
+                          </button>
                         )}
                       </div>
 
@@ -163,11 +185,11 @@ export function NotificationPanel() {
                             month: 'short',
                             day: 'numeric',
                             hour: '2-digit',
-                            minute: '2-digit'
+                            minute: '2-digit',
                           })}
                         </span>
 
-                        {/* Direct link */}
+                        {/* Direct deep links */}
                         {n.related_entity_type === 'project' && n.related_entity_id && (
                           <Link
                             href={`/projects/${n.related_entity_id}`}
@@ -184,6 +206,15 @@ export function NotificationPanel() {
                             className="text-indigo-400 hover:underline flex items-center gap-1"
                           >
                             View Tasks <ExternalLink className="w-2.5 h-2.5" />
+                          </Link>
+                        )}
+                        {n.related_entity_type === 'report' && (
+                          <Link
+                            href="/reports"
+                            onClick={() => setIsOpen(false)}
+                            className="text-sky-400 hover:underline flex items-center gap-1"
+                          >
+                            View Reports <ExternalLink className="w-2.5 h-2.5" />
                           </Link>
                         )}
                       </div>
