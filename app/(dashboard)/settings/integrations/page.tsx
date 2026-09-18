@@ -1,23 +1,14 @@
-import Link from 'next/link'
-import {
-  MessageSquare,
-  MessageCircle,
-  Mail,
-  Gamepad2,
-  Briefcase,
-  ChevronRight,
-  CheckCircle2,
-  Puzzle,
-  Sparkles
-} from 'lucide-react'
+import { Metadata } from 'next'
+import { Puzzle, Sparkles } from 'lucide-react'
 import { getSlackIntegrationStatusAction } from './slack/actions'
 import { getWhatsAppIntegrationStatusAction } from './whatsapp/actions'
 import { getEmailIntegrationStatusAction } from './email/actions'
 import { getDiscordIntegrationStatusAction } from './discord/actions'
 import { getUpworkIntegrationStatusAction } from './upwork/actions'
+import { IntegrationsList, IntegrationCardItem } from '@/components/settings/IntegrationsList'
 
-export const metadata = {
-  title: 'Channel Integrations | CRM Platform'
+export const metadata: Metadata = {
+  title: 'Channel Integrations & Status | CRM Platform'
 }
 
 export default async function IntegrationsSettingsPage() {
@@ -33,61 +24,46 @@ export default async function IntegrationsSettingsPage() {
   const isDiscordConnected = discordChannel?.status === 'active'
   const isUpworkConnected = upworkChannel?.status === 'active'
 
-  const integrations = [
+  const integrations: IntegrationCardItem[] = [
     {
       id: 'slack',
       name: 'Slack Workspace',
       description: 'Connect Slack channels for two-way client conversations and unified inbox routing.',
-      icon: MessageSquare,
-      iconBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-      status: isSlackConnected ? 'Connected' : 'Configure',
       isConnected: isSlackConnected,
-      href: '/settings/integrations/slack',
-      active: true
+      channel: slackChannel,
+      href: '/settings/integrations/slack'
     },
     {
       id: 'whatsapp',
       name: 'WhatsApp Business',
       description: 'Receive and reply to WhatsApp Business messaging API webhooks.',
-      icon: MessageCircle,
-      iconBg: 'bg-green-500/10 text-green-400 border-green-500/20',
-      status: isWhatsAppConnected ? 'Connected' : 'Configure',
       isConnected: isWhatsAppConnected,
-      href: '/settings/integrations/whatsapp',
-      active: true
+      channel: waChannel,
+      href: '/settings/integrations/whatsapp'
     },
     {
       id: 'email',
       name: 'Email (Inbound & Outbound)',
       description: 'Connect IMAP/SMTP or SendGrid webhooks for email thread sync.',
-      icon: Mail,
-      iconBg: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
-      status: isEmailConnected ? 'Connected' : 'Configure',
       isConnected: isEmailConnected,
-      href: '/settings/integrations/email',
-      active: true
+      channel: emailChannel,
+      href: '/settings/integrations/email'
     },
     {
       id: 'discord',
       name: 'Discord Communities',
       description: 'Ingest Discord server messages & DM channels into unified inbox.',
-      icon: Gamepad2,
-      iconBg: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-      status: isDiscordConnected ? 'Connected' : 'Configure',
       isConnected: isDiscordConnected,
-      href: '/settings/integrations/discord',
-      active: true
+      channel: discordChannel,
+      href: '/settings/integrations/discord'
     },
     {
       id: 'upwork',
       name: 'Upwork Direct Messages',
       description: 'Sync contract proposals and buyer messages from Upwork.',
-      icon: Briefcase,
-      iconBg: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
-      status: isUpworkConnected ? 'Connected' : 'Configure',
       isConnected: isUpworkConnected,
-      href: '/settings/integrations/upwork',
-      active: true
+      channel: upworkChannel,
+      href: '/settings/integrations/upwork'
     }
   ]
 
@@ -103,74 +79,17 @@ export default async function IntegrationsSettingsPage() {
             <h1 className="text-xl font-extrabold text-white">Channel Integrations &amp; Webhooks</h1>
           </div>
           <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
-            Manage connected external communication channels. Inbound webhooks normalizes messages into your Unified Inbox, matching client accounts automatically.
+            Manage external communication channels. Inbound webhooks normalize messages into your Unified Inbox, matching client accounts automatically. Click any channel status to inspect last sync times, webhook endpoints, and credential validation.
           </p>
         </div>
         <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300 border border-slate-700 shrink-0">
           <Sparkles className="h-3.5 w-3.5 text-sky-400" />
-          Hub Adapters Active
+          Hub Status Active
         </div>
       </div>
 
-      {/* Grid of Integration Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {integrations.map((item) => {
-          const Icon = item.icon
-          return (
-            <div
-              key={item.id}
-              className={`rounded-2xl border bg-slate-900/80 p-6 flex flex-col justify-between transition-all ${
-                item.active
-                  ? 'border-slate-800 hover:border-slate-700 shadow-lg hover:shadow-sky-500/5'
-                  : 'border-slate-800/60 opacity-70'
-              }`}
-            >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className={`h-11 w-11 rounded-xl border flex items-center justify-center ${item.iconBg}`}>
-                    <Icon className="h-5.5 w-5.5" />
-                  </div>
-                  {item.isConnected ? (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-bold">
-                      <CheckCircle2 className="h-3 w-3" /> Connected
-                    </span>
-                  ) : (
-                    <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[11px] font-semibold">
-                      {item.status}
-                    </span>
-                  )}
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    {item.name}
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                    {item.description}
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-5 mt-4 border-t border-slate-800/60 flex items-center justify-between">
-                <span className="text-[11px] font-medium text-slate-500">
-                  {item.active ? 'Webhook Adapter Ready' : 'Planned Adapter'}
-                </span>
-
-                {item.active ? (
-                  <Link
-                    href={item.href}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors"
-                  >
-                    Manage Settings <ChevronRight className="h-4 w-4" />
-                  </Link>
-                ) : (
-                  <span className="text-xs font-semibold text-slate-600">Coming Soon</span>
-                )}
-              </div>
-            </div>
-          )
-        })}
-      </div>
+      {/* Grid of Interactive Integration Cards */}
+      <IntegrationsList integrations={integrations} />
     </div>
   )
 }
