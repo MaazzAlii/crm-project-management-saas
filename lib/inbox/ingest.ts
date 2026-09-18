@@ -74,13 +74,16 @@ export async function ingestMessage(
     if (searchEmail) {
       const { data: emailMatch } = await supabase
         .from('clients')
-        .select('id')
+        .select('id, communication_mode')
         .eq('organization_id', orgId)
         .ilike('email', searchEmail)
         .limit(2)
 
       if (emailMatch && emailMatch.length === 1) {
-        matchedClientId = emailMatch[0].id
+        // Auto-matching applies exclusively to clients in 'connected' mode
+        if (emailMatch[0].communication_mode === 'connected') {
+          matchedClientId = emailMatch[0].id
+        }
       }
     }
 
@@ -88,7 +91,7 @@ export async function ingestMessage(
       // Fetch clients for org to compare normalized phone numbers
       const { data: clients } = await supabase
         .from('clients')
-        .select('id, phone')
+        .select('id, phone, communication_mode')
         .eq('organization_id', orgId)
         .not('phone', 'is', null)
 
@@ -98,7 +101,7 @@ export async function ingestMessage(
           return norm && (norm === searchPhone || norm.endsWith(searchPhone) || searchPhone.endsWith(norm))
         })
 
-        if (matches.length === 1) {
+        if (matches.length === 1 && matches[0].communication_mode === 'connected') {
           matchedClientId = matches[0].id
         }
       }

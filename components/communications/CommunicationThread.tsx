@@ -90,7 +90,7 @@ export function CommunicationThread({
             <p className="text-xs text-slate-400 mt-0.5">
               {communicationMode === 'connected'
                 ? 'All synced messages from integrated platforms (WhatsApp, Slack, Email) and manual logs are unified below.'
-                : 'Logging communications manually via calls, meetings, notes, and direct messages.'}
+                : 'Logging communications manually via calls, meetings, notes, and direct messages. Auto-syncing from external channels is disabled.'}
             </p>
           </div>
         </div>
@@ -235,15 +235,17 @@ export function CommunicationThread({
                         {channelMeta.label}
                       </span>
 
-                      {/* Manual / Auto badge */}
-                      {msg.is_manual ? (
-                        <span className="text-[10px] font-semibold text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">
-                          Manual Log
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-semibold text-sky-400 bg-sky-950/80 px-2 py-0.5 rounded-md border border-sky-800">
-                          Auto-Synced
-                        </span>
+                      {/* Manual / Auto badge (connected mode only) */}
+                      {communicationMode === 'connected' && (
+                        msg.is_manual ? (
+                          <span className="text-[10px] font-semibold text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">
+                            Manual Log
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-semibold text-sky-400 bg-sky-950/80 px-2 py-0.5 rounded-md border border-sky-800">
+                            Auto-Synced
+                          </span>
+                        )
                       )}
                     </div>
 

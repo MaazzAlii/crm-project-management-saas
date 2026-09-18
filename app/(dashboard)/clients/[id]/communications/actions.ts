@@ -149,15 +149,33 @@ export async function fetchClientCommunicationsAction(clientId: string): Promise
 
     const supabase = await createClient()
 
+    let isManualMode = false
+    try {
+      const { data: clientData } = await supabase
+        .from('clients')
+        .select('communication_mode')
+        .eq('id', clientId)
+        .eq('organization_id', session.organization.id)
+        .single()
+      if (clientData?.communication_mode === 'manual') {
+        isManualMode = true
+      }
+    } catch (err) {}
+
     let items: CommunicationItem[] = []
 
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('communication_messages')
         .select('*')
         .eq('client_id', clientId)
         .eq('organization_id', session.organization.id)
-        .order('sent_at', { ascending: false })
+
+      if (isManualMode) {
+        query = query.eq('is_manual', true)
+      }
+
+      const { data, error } = await query.order('sent_at', { ascending: false })
 
       if (!error && data) {
         items = data as CommunicationItem[]
@@ -165,7 +183,10 @@ export async function fetchClientCommunicationsAction(clientId: string): Promise
     } catch (err) {}
 
     // Merge dev mode records if active
-    const devItems = getDevCommunications(clientId)
+    let devItems = getDevCommunications(clientId)
+    if (isManualMode) {
+      devItems = devItems.filter((item) => item.is_manual)
+    }
     const combined = [...items, ...devItems]
 
     // Deduplicate by ID

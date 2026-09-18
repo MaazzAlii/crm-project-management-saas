@@ -310,6 +310,20 @@ export async function assignMessageClient(
       console.error('[CommunicationHub:Query] Error assigning message client:', error.message)
       return false
     }
+
+    // Manual triage: linking an unmatched message flips the client to connected mode
+    try {
+      await supabase
+        .from('clients')
+        .update({
+          communication_mode: 'connected',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', clientId)
+        .eq('organization_id', orgId)
+        .eq('communication_mode', 'manual')
+    } catch (e) {}
+
     return true
   } catch (err) {
     return false
