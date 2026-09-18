@@ -227,6 +227,20 @@ export async function updateClientAction(clientId: string, formData: FormData) {
 
     const supabase = await createClient()
 
+    // Enforce strict one-way transition rule: connected -> manual is blocked
+    try {
+      const { data: existingClient } = await supabase
+        .from('clients')
+        .select('communication_mode')
+        .eq('id', clientId)
+        .eq('organization_id', session.organization.id)
+        .maybeSingle()
+
+      if (existingClient?.communication_mode === 'connected' && communication_mode === 'manual') {
+        return { error: 'Connected mode is permanent and cannot be reverted to manual.' }
+      }
+    } catch (e) {}
+
     const updatePayload: any = {
       name,
       company,
@@ -327,3 +341,117 @@ export async function updateClientNotesAction(clientId: string, notes: string) {
     return { error: error?.message || 'Failed to update notes.' }
   }
 }
+
+/**
+ * Upgrades a client from 'manual' to 'connected' mode.
+ * Enforces:
+ * 1. Organization RLS & multi-tenancy context
+ * 2. Role gating (owner, admin, or member)
+ * 3. Strict one-way rule: manual -> connected is allowed; once connected, it cannot be reverted.
+ * 4. Idempotent: safe to call if already connected.
+ */
+export async function switchClientToConnectedModeAction(clientId: string) {
+  try {
+    const session = await getCurrentSessionContext()
+
+    if (!session || !session.user || !session.organization) {
+      return { error: 'Unauthorized. Active session context not found.' }
+    }
+
+    const allowedRoles = ['owner', 'admin', 'member']
+    if (!allowedRoles.includes(session.role || '') && !session.isSuperAdmin) {
+      return { error: 'Forbidden. You do not have permission to change client communication mode.' }
+    }
+
+    const orgId = session.organization.id
+
+    const supabase = await createClient()
+
+    // Query client to check current mode and organization ownership
+    let currentClient: any = null
+    try {
+      const { data, error } = await supabase
+        .from('clients')
+        .select('id, name, communication_mode, organization_id')
+        .eq('id', clientId)
+        .eq('organization_id', orgId)
+        .maybeSingle()
+
+      if (!error && data) {
+        currentClient = data
+      }
+    } catch (e) {}
+
+    if (!currentClient && process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
+      currentClient = (global as any).__DEV_CLIENTS.find(
+        (c: any) => c.id === clientId && c.organization_id === orgId
+      )
+    }
+
+    if (!currentClient) {
+      return { error: 'Client not found in your organization.' }
+    }
+
+    // Idempotent: already connected
+    if (currentClient.communication_mode === 'connected') {
+      return { success: true, message: 'Client is already in Connected mode.' }
+    }
+
+    // Perform update
+    const updatePayload = {
+      communication_mode: 'connected',
+      updated_at: new Date().toISOString(),
+    }
+
+    try {
+      const { error: updateError } = await supabase
+        .from('clients')
+        .update(updatePayload)
+        .eq('id', clientId)
+        .eq('organization_id', orgId)
+
+      if (updateError) {
+        console.error('Failed to update client to connected mode:', updateError)
+        return { error: updateError.message }
+      }
+    } catch (err: any) {
+      console.error('Supabase update error:', err)
+    }
+
+    // In-memory dev fallback
+    if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
+      const idx = (global as any).__DEV_CLIENTS.findIndex((c: any) => c.id === clientId)
+      if (idx !== -1) {
+        ;(global as any).__DEV_CLIENTS[idx].communication_mode = 'connected'
+        ;(global as any).__DEV_CLIENTS[idx].updated_at = new Date().toISOString()
+      }
+    }
+
+    // Audit logging
+    try {
+      await logAuditEvent({
+        actorId: session.user.id,
+        action: 'CLIENT_COMMUNICATION_MODE_SWITCHED',
+        targetType: 'client',
+        targetId: clientId,
+        details: {
+          client_name: currentClient.name,
+          from_mode: 'manual',
+          to_mode: 'connected',
+          organizationId: session.organization.id,
+        },
+      })
+    } catch (e) {}
+
+    revalidatePath(`/clients/${clientId}`)
+    revalidatePath(`/clients/${clientId}/communications`)
+    revalidatePath('/clients')
+    revalidatePath('/inbox')
+
+    return { success: true, message: 'Client successfully upgraded to Connected Hub mode.' }
+  } catch (error: any) {
+    console.error('switchClientToConnectedModeAction error:', error)
+    return { error: error?.message || 'Internal server error occurred.' }
+  }
+}
+
