@@ -33,6 +33,7 @@ export interface InboxMessageRecord {
     name: string
     company_name?: string | null
     email?: string | null
+    communication_mode?: 'manual' | 'connected'
   } | null
 }
 
@@ -86,7 +87,8 @@ export async function fetchInboxMessages(options: FetchInboxMessagesOptions): Pr
           id,
           name,
           company_name,
-          email
+          email,
+          communication_mode
         )
       `,
         { count: 'exact' }

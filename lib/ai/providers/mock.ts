@@ -15,25 +15,60 @@ export async function executeMockCompletion(
 
   switch (request.feature) {
     case 'reply_suggestions': {
+      const channel = (request.metadata?.channel || '').toLowerCase()
+      const isManual = request.metadata?.communicationMode === 'manual'
+
+      let suggestions = [
+        {
+          tone: 'Professional',
+          text: 'Thank you for reaching out. We have reviewed your request and are preparing the required deliverables for your review by tomorrow morning.',
+        },
+        {
+          tone: 'Collaborative',
+          text: 'Great update! Let’s hop on a brief 10-minute sync to finalize the details and align on the next milestone.',
+        },
+        {
+          tone: 'Direct',
+          text: 'Received and confirmed. We are on track with the agreed roadmap.',
+        },
+      ]
+
+      if (channel === 'whatsapp') {
+        suggestions = [
+          {
+            tone: 'Professional',
+            text: 'Hi there! We’ve reviewed your message and are finalizing your updates for review tomorrow morning.',
+          },
+          {
+            tone: 'Collaborative',
+            text: 'Sounds great! Can we do a quick 5-min WhatsApp call or sync to lock in next steps?',
+          },
+          {
+            tone: 'Direct',
+            text: 'Got it! Working on this now and will update you shortly.',
+          },
+        ]
+      } else if (isManual) {
+        suggestions = [
+          {
+            tone: 'Professional',
+            text: 'Thank you for reaching out. Our team has logged your notes and we will follow up with the detailed proposal shortly.',
+          },
+          {
+            tone: 'Collaborative',
+            text: 'Appreciate the feedback! We are syncing internally and will reach out with the next milestone overview.',
+          },
+          {
+            tone: 'Direct',
+            text: 'Acknowledged. Message logged and our account manager is following up today.',
+          },
+        ]
+      }
+
       if (request.responseFormat === 'json') {
-        content = JSON.stringify({
-          suggestions: [
-            {
-              tone: 'Professional',
-              text: 'Thank you for reaching out. We have reviewed your request and are preparing the required deliverables for your review by tomorrow morning.',
-            },
-            {
-              tone: 'Collaborative',
-              text: 'Great update! Let’s hop on a brief 10-minute sync to finalize the details and align on the next milestone.',
-            },
-            {
-              tone: 'Concise',
-              text: 'Received and confirmed. We are on track with the agreed roadmap.',
-            },
-          ],
-        }, null, 2)
+        content = JSON.stringify({ suggestions }, null, 2)
       } else {
-        content = `1. Professional: Thank you for reaching out. We have reviewed your request and are preparing the required deliverables for your review by tomorrow morning.\n2. Collaborative: Great update! Let’s hop on a brief 10-minute sync to finalize the details.\n3. Concise: Received and confirmed. We are on track with the agreed roadmap.`
+        content = suggestions.map((s, idx) => `${idx + 1}. ${s.tone}: ${s.text}`).join('\n')
       }
       break
     }

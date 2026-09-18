@@ -55,6 +55,11 @@ export async function logAIUsage(record: AIUsageRecord): Promise<boolean> {
           record.completionTokens || 0
         )
 
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(record.organizationId)
+    if (!isUuid) {
+      return true
+    }
+
     const { error } = await supabase.from('ai_usage_log').insert({
       organization_id: record.organizationId,
       user_id: record.userId || null,

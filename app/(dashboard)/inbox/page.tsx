@@ -16,6 +16,7 @@ export default async function InboxPage() {
       initialSummary={data.summary}
       clients={data.clients}
       channels={data.channels}
+      aiEnabled={data.aiEnabled}
     />
   )
 }

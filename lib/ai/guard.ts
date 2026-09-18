@@ -29,8 +29,8 @@ export async function checkAIAccess(
     }
   }
 
-  // Bypass for health check/test prompt if in dev mode
-  if (feature === 'test_prompt' && process.env.NODE_ENV === 'test') {
+  // Bypass for health check/test prompt or dev-org in dev/test mode
+  if (organizationId === 'dev-org' || (feature === 'test_prompt' && process.env.NODE_ENV === 'test')) {
     return { allowed: true }
   }
 

@@ -24,6 +24,7 @@ interface MessageThreadProps {
   messages: InboxMessageRecord[]
   selectedSenderKey: string
   clients: ClientSelectItem[]
+  aiEnabled?: boolean
   onMessageSent: (newMessage: InboxMessageRecord) => void
   onClientAssigned: (messageId: string, clientId: string) => void
 }
@@ -32,6 +33,7 @@ export function MessageThread({
   messages,
   selectedSenderKey,
   clients,
+  aiEnabled = true,
   onMessageSent,
   onClientAssigned
 }: MessageThreadProps) {
@@ -115,6 +117,24 @@ export function MessageThread({
                 allowModal={true}
                 channelInfo={channelInfo}
               />
+
+              {/* Client Communication Mode Badge */}
+              {client && (
+                <span
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                    client.communication_mode === 'connected'
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                      : 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20'
+                  }`}
+                  title={
+                    client.communication_mode === 'connected'
+                      ? 'Auto-synced multi-channel communication enabled'
+                      : 'Manual communication log mode'
+                  }
+                >
+                  {client.communication_mode === 'connected' ? 'Connected Sync' : 'Manual Logging'}
+                </span>
+              )}
             </div>
 
             <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -259,7 +279,12 @@ export function MessageThread({
         activeChannelId={activeChannelId}
         activeProvider={provider}
         clientId={latestMessage.client_id}
+        clientName={client?.name || senderName}
+        clientCompany={client?.company_name}
+        clientMode={client?.communication_mode || 'connected'}
         recipientIdentifier={latestMessage.sender_identifier}
+        threadMessages={messages}
+        aiEnabled={aiEnabled}
         onMessageSent={onMessageSent}
       />
 

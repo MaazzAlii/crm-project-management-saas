@@ -21,13 +21,15 @@ interface InboxViewProps {
   initialSummary: InboxSummary
   clients: ClientSelectItem[]
   channels: ChannelInfo[]
+  aiEnabled?: boolean
 }
 
 export function InboxView({
   initialMessages,
   initialSummary,
   clients,
-  channels
+  channels,
+  aiEnabled = true
 }: InboxViewProps) {
   const [messages, setMessages] = useState<InboxMessageRecord[]>(initialMessages)
   const [summary, setSummary] = useState<InboxSummary>(initialSummary)
@@ -279,6 +281,7 @@ export function InboxView({
             messages={activeMessages}
             selectedSenderKey={selectedSenderKey}
             clients={clients}
+            aiEnabled={aiEnabled}
             onMessageSent={handleMessageSent}
             onClientAssigned={handleClientAssigned}
           />

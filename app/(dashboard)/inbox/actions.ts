@@ -11,12 +11,16 @@ import { sendWhatsAppOutboundMessage } from '@/lib/providers/whatsapp'
 import { sendEmailOutboundMessage } from '@/lib/providers/email'
 import { sendDiscordOutboundMessage } from '@/lib/providers/discord'
 import { sendUpworkOutboundMessage } from '@/lib/providers/upwork'
+import { isAIAccessible } from '@/lib/ai/client'
+import { checkAIAccess } from '@/lib/ai/guard'
+import { getReplySuggestions, ReplySuggestionItem } from '@/lib/ai/features/reply-suggestions'
 
 export interface ClientSelectItem {
   id: string
   name: string
   company_name?: string | null
   email?: string | null
+  communication_mode?: 'manual' | 'connected'
 }
 
 export interface ChannelInfo {
@@ -35,6 +39,7 @@ export interface FetchInboxDataResult {
   summary: InboxSummary
   clients: ClientSelectItem[]
   channels: ChannelInfo[]
+  aiEnabled: boolean
 }
 
 // Dev fallback sample conversations if database is empty
@@ -53,7 +58,7 @@ const DEV_SAMPLE_MESSAGES: InboxMessageRecord[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     channel: { id: 'chan-slack-1', provider: 'slack', channel_name: '#acme-redesign', status: 'active' },
-    client: { id: 'cli-sample-1', name: 'Sarah Jenkins', company_name: 'Acme Corp', email: 'sarah.j@acmecorp.com' }
+    client: { id: 'cli-sample-1', name: 'Sarah Jenkins', company_name: 'Acme Corp', email: 'sarah.j@acmecorp.com', communication_mode: 'connected' }
   },
   {
     id: 'msg-sample-2',
@@ -69,7 +74,7 @@ const DEV_SAMPLE_MESSAGES: InboxMessageRecord[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     channel: { id: 'chan-whatsapp-1', provider: 'whatsapp', channel_name: 'WhatsApp Business (+1 555-019-2831)', status: 'active' },
-    client: { id: 'cli-sample-2', name: 'Michael Chang', company_name: 'Nexus Tech', email: 'mchang@nexustech.io' }
+    client: { id: 'cli-sample-2', name: 'Michael Chang', company_name: 'Nexus Tech', email: 'mchang@nexustech.io', communication_mode: 'manual' }
   },
   {
     id: 'msg-sample-3',
@@ -101,7 +106,7 @@ const DEV_SAMPLE_MESSAGES: InboxMessageRecord[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     channel: { id: 'chan-slack-1', provider: 'slack', channel_name: '#acme-redesign', status: 'active' },
-    client: { id: 'cli-sample-1', name: 'Sarah Jenkins', company_name: 'Acme Corp', email: 'sarah.j@acmecorp.com' }
+    client: { id: 'cli-sample-1', name: 'Sarah Jenkins', company_name: 'Acme Corp', email: 'sarah.j@acmecorp.com', communication_mode: 'connected' }
   },
   {
     id: 'msg-sample-5',
@@ -117,7 +122,7 @@ const DEV_SAMPLE_MESSAGES: InboxMessageRecord[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     channel: { id: 'chan-discord-1', provider: 'discord', channel_name: 'Discord VIP Community', status: 'active' },
-    client: { id: 'cli-sample-2', name: 'Michael Chang', company_name: 'Nexus Tech', email: 'mchang@nexustech.io' }
+    client: { id: 'cli-sample-2', name: 'Michael Chang', company_name: 'Nexus Tech', email: 'mchang@nexustech.io', communication_mode: 'manual' }
   },
   {
     id: 'msg-sample-6',
@@ -169,10 +174,19 @@ export async function fetchInboxDataAction(filters?: {
     // Fetch summary
     const summary = await getInboxSummary(orgId)
 
+    // Check organization AI entitlement / platform gating
+    let aiEnabled = false
+    try {
+      const gateCheck = await isAIAccessible(orgId, 'reply_suggestions')
+      aiEnabled = gateCheck.allowed
+    } catch (e) {
+      console.warn('[InboxAction] AI access check error:', e)
+    }
+
     // Fetch clients for dropdown
     const { data: clientsData } = await supabase
       .from('clients')
-      .select('id, name, company_name, email')
+      .select('id, name, company_name, email, communication_mode')
       .eq('organization_id', orgId)
       .order('name', { ascending: true })
 
@@ -191,8 +205,9 @@ export async function fetchInboxDataAction(filters?: {
     return {
       messages,
       summary,
-      clients: clientsData || [],
-      channels: (channelsData as ChannelInfo[]) || []
+      clients: (clientsData as ClientSelectItem[]) || [],
+      channels: (channelsData as ChannelInfo[]) || [],
+      aiEnabled
     }
   } catch (err: any) {
     console.error('[CommunicationHub:Actions] Error fetching inbox data:', err)
@@ -259,9 +274,9 @@ function getDevInboxData(filters?: {
       }
     },
     clients: [
-      { id: 'cli-sample-1', name: 'Sarah Jenkins', company_name: 'Acme Corp', email: 'sarah.j@acmecorp.com' },
-      { id: 'cli-sample-2', name: 'Michael Chang', company_name: 'Nexus Tech', email: 'mchang@nexustech.io' },
-      { id: 'cli-sample-3', name: 'Elena Rostova', company_name: 'Global Ventures', email: 'elena@globalventures.com' }
+      { id: 'cli-sample-1', name: 'Sarah Jenkins', company_name: 'Acme Corp', email: 'sarah.j@acmecorp.com', communication_mode: 'connected' },
+      { id: 'cli-sample-2', name: 'Michael Chang', company_name: 'Nexus Tech', email: 'mchang@nexustech.io', communication_mode: 'manual' },
+      { id: 'cli-sample-3', name: 'Elena Rostova', company_name: 'Global Ventures', email: 'elena@globalventures.com', communication_mode: 'connected' }
     ],
     channels: [
       { id: 'chan-slack-1', provider: 'slack', channel_name: '#acme-redesign', status: 'active', connected_at: new Date(Date.now() - 86400000 * 5).toISOString(), external_account_id: 'T08DEMO_SLACK' },
@@ -269,7 +284,8 @@ function getDevInboxData(filters?: {
       { id: 'chan-email-1', provider: 'email', channel_name: 'support@agency.com', status: 'active', connected_at: new Date(Date.now() - 86400000 * 10).toISOString(), external_account_id: 'support@agency.com' },
       { id: 'chan-discord-1', provider: 'discord', channel_name: 'Discord VIP Community', status: 'active', connected_at: new Date(Date.now() - 86400000 * 2).toISOString(), external_account_id: '123456789012345678' },
       { id: 'chan-upwork-1', provider: 'upwork', channel_name: 'Upwork Direct Contracts', status: 'active', connected_at: new Date(Date.now() - 86400000 * 1).toISOString(), external_account_id: '~0198273645' }
-    ]
+    ],
+    aiEnabled: true
   }
 }
 
@@ -470,5 +486,138 @@ export async function sendOutboundMessageAction(formData: FormData) {
     return { success: true, newMessage: insertedMsg }
   } catch (err: any) {
     return { error: err.message || 'Failed to send outbound message' }
+  }
+}
+
+export interface GenerateReplySuggestionsParams {
+  channelId: string
+  channelProvider?: string
+  clientId?: string | null
+  clientName?: string
+  clientCompany?: string
+  communicationMode?: 'manual' | 'connected'
+  messages: Array<{
+    sender_name?: string | null
+    sender_identifier?: string | null
+    body: string
+    direction: 'inbound' | 'outbound'
+    sent_at: string
+  }>
+}
+
+/**
+ * Server action to generate AI reply suggestions for an inbox conversation thread.
+ * Enforces dual-tier gating (super-admin kill switch + subscription plan limit)
+ * and logs token usage in public.ai_usage_log.
+ */
+export async function generateReplySuggestionsAction(
+  params: GenerateReplySuggestionsParams
+): Promise<{
+  success: boolean
+  suggestions: ReplySuggestionItem[]
+  provider?: string
+  model?: string
+  error?: string
+  errorCode?: string
+}> {
+  try {
+    const session = await getCurrentSessionContext()
+    const orgId = session?.organization?.id
+
+    if (!orgId) {
+      // In dev fallback scenario without session, run with mock execution
+      const mockResult = await getReplySuggestions({
+        organizationId: 'dev-org',
+        channel: params.channelProvider || 'email',
+        communicationMode: params.communicationMode || 'connected',
+        clientName: params.clientName || 'Valued Client',
+        clientCompany: params.clientCompany,
+        conversationHistory: (params.messages || []).map((m) => ({
+          sender: m.sender_name || m.sender_identifier || (m.direction === 'outbound' ? 'You' : 'Client'),
+          body: m.body,
+          isClient: m.direction === 'inbound',
+          sentAt: m.sent_at,
+        })),
+        agencyName: 'Agency Support',
+      })
+      return mockResult
+    }
+
+    // 1. Dual-tier gating check: Platform kill switch + organization subscription plan limit
+    const gateCheck = await checkAIAccess(orgId, 'reply_suggestions')
+    if (!gateCheck.allowed) {
+      return {
+        success: false,
+        suggestions: [],
+        error: gateCheck.reason || 'AI Reply Suggestions are not enabled for this organization.',
+        errorCode: gateCheck.code || 'PLAN_LIMIT_REACHED',
+      }
+    }
+
+    const supabase = await createClient()
+
+    // 2. Fetch authoritative client info if clientId is provided
+    let effectiveMode = params.communicationMode || 'connected'
+    let effectiveClientName = params.clientName
+    let effectiveClientCompany = params.clientCompany
+
+    if (params.clientId) {
+      const { data: clientRecord } = await supabase
+        .from('clients')
+        .select('name, company_name, communication_mode')
+        .eq('id', params.clientId)
+        .eq('organization_id', orgId)
+        .maybeSingle()
+
+      if (clientRecord) {
+        effectiveMode = (clientRecord.communication_mode as any) || effectiveMode
+        effectiveClientName = clientRecord.name || effectiveClientName
+        effectiveClientCompany = clientRecord.company_name || effectiveClientCompany
+      }
+    }
+
+    // 3. Resolve channel provider
+    let providerName = params.channelProvider || 'email'
+    if (params.channelId) {
+      const { data: channelRecord } = await supabase
+        .from('communication_channels')
+        .select('provider')
+        .eq('id', params.channelId)
+        .eq('organization_id', orgId)
+        .maybeSingle()
+
+      if (channelRecord && channelRecord.provider) {
+        providerName = channelRecord.provider
+      }
+    }
+
+    // 4. Format conversation history (last 6 messages)
+    const history = (params.messages || []).slice(-6).map((m) => ({
+      sender: m.sender_name || m.sender_identifier || (m.direction === 'outbound' ? 'You' : 'Client'),
+      body: m.body,
+      isClient: m.direction === 'inbound',
+      sentAt: m.sent_at,
+    }))
+
+    // 5. Invoke AI reply suggestion feature layer
+    const result = await getReplySuggestions({
+      organizationId: orgId,
+      userId: session.user?.id,
+      channel: providerName,
+      communicationMode: effectiveMode as any,
+      clientName: effectiveClientName,
+      clientCompany: effectiveClientCompany,
+      conversationHistory: history,
+      agencyName: session?.organization?.name || 'Agency Support',
+    })
+
+    return result
+  } catch (err: any) {
+    console.error('[CommunicationHub:Actions] Error generating AI reply suggestions:', err)
+    return {
+      success: false,
+      suggestions: [],
+      error: err.message || 'Failed to generate AI suggestions.',
+    }
   }
 }

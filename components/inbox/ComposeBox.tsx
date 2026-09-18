@@ -4,12 +4,18 @@ import { useState } from 'react'
 import { Send, Paperclip, Sparkles, MessageSquare, Mail, PhoneCall, CheckCircle2 } from 'lucide-react'
 import { sendOutboundMessageAction } from '@/app/(dashboard)/inbox/actions'
 import { InboxMessageRecord } from '@/lib/inbox/query'
+import { AISuggestButton } from './AISuggestButton'
 
 interface ComposeBoxProps {
   activeChannelId: string
   activeProvider: string
   clientId?: string | null
+  clientName?: string | null
+  clientCompany?: string | null
+  clientMode?: 'manual' | 'connected'
   recipientIdentifier?: string | null
+  threadMessages?: InboxMessageRecord[]
+  aiEnabled?: boolean
   onMessageSent: (newMessage: InboxMessageRecord) => void
 }
 
@@ -23,22 +29,28 @@ export function ComposeBox({
   activeChannelId,
   activeProvider,
   clientId,
+  clientName,
+  clientCompany,
+  clientMode = 'connected',
   recipientIdentifier,
+  threadMessages = [],
+  aiEnabled = true,
   onMessageSent
 }: ComposeBoxProps) {
   const [body, setBody] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
 
-  const handleSend = async () => {
-    if (!body.trim() || isSending) return
+  const handleSend = async (overrideBody?: string) => {
+    const textToSend = (overrideBody !== undefined ? overrideBody : body).trim()
+    if (!textToSend || isSending) return
 
     setIsSending(true)
 
     try {
       const formData = new FormData()
       formData.set('channel_id', activeChannelId)
-      formData.set('body', body.trim())
+      formData.set('body', textToSend)
       if (clientId) formData.set('client_id', clientId)
       if (recipientIdentifier) formData.set('recipient_identifier', recipientIdentifier)
 
@@ -124,14 +136,31 @@ export function ComposeBox({
           {badge.label}
         </span>
 
-        <button
-          type="button"
-          onClick={() => setShowTemplates(!showTemplates)}
-          className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition"
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          Templates
-        </button>
+        <div className="flex items-center gap-2">
+          {/* AI Reply Suggestions Button */}
+          <AISuggestButton
+            channelId={activeChannelId}
+            channelProvider={activeProvider}
+            clientId={clientId}
+            clientName={clientName || undefined}
+            clientCompany={clientCompany || undefined}
+            communicationMode={clientMode}
+            threadMessages={threadMessages}
+            aiEnabled={aiEnabled}
+            onSelectSuggestion={(text) => setBody(text)}
+            onDirectSend={(text) => handleSend(text)}
+            isSending={isSending}
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowTemplates(!showTemplates)}
+            className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            Templates
+          </button>
+        </div>
       </div>
 
       <div className="relative">
@@ -153,7 +182,7 @@ export function ComposeBox({
 
         <button
           type="button"
-          onClick={handleSend}
+          onClick={() => handleSend()}
           disabled={!body.trim() || isSending}
           className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl font-semibold text-xs transition shadow-sm"
         >
