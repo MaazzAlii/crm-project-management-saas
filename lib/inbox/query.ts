@@ -22,6 +22,11 @@ export interface InboxMessageRecord {
     id: string
     provider: CommunicationProvider
     channel_name?: string | null
+    status?: string | null
+    connected_at?: string | null
+    updated_at?: string | null
+    external_account_id?: string | null
+    metadata?: Record<string, any> | null
   } | null
   client?: {
     id: string
@@ -48,6 +53,7 @@ export interface InboxSummary {
   unreadCount: number
   unmatchedCount: number
   byProvider: Record<string, number>
+  unreadByProvider: Record<string, number>
 }
 
 /**
@@ -69,7 +75,12 @@ export async function fetchInboxMessages(options: FetchInboxMessagesOptions): Pr
         channel:communication_channels (
           id,
           provider,
-          channel_name
+          channel_name,
+          status,
+          connected_at,
+          updated_at,
+          external_account_id,
+          metadata
         ),
         client:clients (
           id,
@@ -118,9 +129,9 @@ export async function fetchInboxMessages(options: FetchInboxMessagesOptions): Pr
     }
 
     // Filter by provider if specified in options (since channel provider is in joined relation)
-    let filteredData = (data as InboxMessageRecord[]) || []
+    let filteredData = (data as unknown as InboxMessageRecord[]) || []
     if (options.provider) {
-      filteredData = filteredData.filter((msg) => msg.channel?.provider === options.provider)
+      filteredData = filteredData.filter((m) => m.channel?.provider === options.provider)
     }
 
     return {
@@ -128,8 +139,8 @@ export async function fetchInboxMessages(options: FetchInboxMessagesOptions): Pr
       totalCount: count || filteredData.length
     }
   } catch (err: any) {
-    console.error('[CommunicationHub:Query] Unexpected error:', err)
-    return { data: [], totalCount: 0, error: err.message || 'Failed to fetch inbox messages' }
+    console.error('[CommunicationHub:Query] Unexpected error fetching inbox messages:', err)
+    return { data: [], totalCount: 0, error: err.message || 'Unknown query error' }
   }
 }
 
@@ -142,6 +153,13 @@ export async function getInboxSummary(orgId: string): Promise<InboxSummary> {
     unreadCount: 0,
     unmatchedCount: 0,
     byProvider: {
+      slack: 0,
+      whatsapp: 0,
+      email: 0,
+      discord: 0,
+      upwork: 0
+    },
+    unreadByProvider: {
       slack: 0,
       whatsapp: 0,
       email: 0,
@@ -174,13 +192,21 @@ export async function getInboxSummary(orgId: string): Promise<InboxSummary> {
       .eq('organization_id', orgId)
       .is('client_id', null)
 
-    // 4. Counts by provider
+    // 4. Counts by provider and unread per provider
     const { data: messages } = await supabase
       .from('communication_messages')
-      .select('id, channel:communication_channels ( provider )')
+      .select('id, read_at, direction, channel:communication_channels ( provider )')
       .eq('organization_id', orgId)
 
     const byProvider: Record<string, number> = {
+      slack: 0,
+      whatsapp: 0,
+      email: 0,
+      discord: 0,
+      upwork: 0
+    }
+
+    const unreadByProvider: Record<string, number> = {
       slack: 0,
       whatsapp: 0,
       email: 0,
@@ -193,6 +219,9 @@ export async function getInboxSummary(orgId: string): Promise<InboxSummary> {
         const prov = m.channel?.provider
         if (prov && byProvider[prov] !== undefined) {
           byProvider[prov]++
+          if (!m.read_at && m.direction === 'inbound') {
+            unreadByProvider[prov]++
+          }
         }
       })
     }
@@ -201,7 +230,8 @@ export async function getInboxSummary(orgId: string): Promise<InboxSummary> {
       totalMessages: totalMessages || 0,
       unreadCount: unreadCount || 0,
       unmatchedCount: unmatchedCount || 0,
-      byProvider
+      byProvider,
+      unreadByProvider
     }
   } catch (err: any) {
     console.error('[CommunicationHub:Query] Error getting inbox summary:', err)
