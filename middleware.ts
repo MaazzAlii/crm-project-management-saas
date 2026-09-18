@@ -38,7 +38,19 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  // Protected Routes requiring Auth
+  // Client Portal Routes — separate auth boundary
+  const isPortalRoute = pathname.startsWith('/client')
+  const isPortalPublic = pathname.startsWith('/client/login') || pathname.startsWith('/client/auth')
+
+  // Portal: require session for protected portal paths
+  if (isPortalRoute && !isPortalPublic && !user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/client/login'
+    url.search = ''
+    return NextResponse.redirect(url)
+  }
+
+  // Protected Routes requiring Auth (org-member app)
   const isProtectedRoute = pathname.startsWith('/dashboard') ||
     pathname.startsWith('/projects') ||
     pathname.startsWith('/clients') ||
