@@ -1,0 +1,118 @@
+{
+  "name": "Weekly Summary Report & Executive AI Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "1",
+      "name": "Schedule: Monday 9AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.APP_URL || 'http://localhost:3000' }}/api/automation/cron/weekly-summary",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-cron-secret",
+              "value": "={{ $env.AUTOMATION_WEBHOOK_SECRET || 'dev-secret-key' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2",
+      "name": "Trigger SaaS Weekly Cron",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "weekly-summary-receiver",
+        "responseMode": "onReceived",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "id": "3",
+      "name": "Receive weekly.summary_ready",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\n\nconst secret = $env.AUTOMATION_WEBHOOK_SECRET || 'dev-secret-key';\nconst headers = $input.first().json.headers;\nconst rawBody = JSON.stringify($input.first().json.body);\nconst signatureHeader = headers['x-automation-signature'] || '';\n\nif (!signatureHeader) {\n  throw new Error('Unauthorized: Missing X-Automation-Signature header');\n}\n\nconst cleanSignature = signatureHeader.startsWith('sha256=') ? signatureHeader.slice(7) : signatureHeader;\nconst expectedSignature = crypto.createHmac('sha256', secret).update(rawBody, 'utf8').digest('hex');\n\nconst sigBuffer = Buffer.from(cleanSignature, 'hex');\nconst expectedBuffer = Buffer.from(expectedSignature, 'hex');\n\nif (sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)) {\n  throw new Error('Unauthorized: Invalid HMAC signature');\n}\n\nreturn [{ json: $input.first().json.body }];"
+      },
+      "id": "4",
+      "name": "Verify HMAC Signature",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 500]
+    },
+    {
+      "parameters": {
+        "channel": "leadership",
+        "text": "=📊 *WEEKLY PERFORMANCE DIGEST*\n*Tasks Completed:* {{ $json.data.metrics.tasks_completed }}\n*Active Projects:* {{ $json.data.metrics.active_projects }}\n*New Clients:* {{ $json.data.metrics.new_clients }}\n*Delivered Revenue:* ${{ $json.data.metrics.revenue }}\n*Client Messages:* {{ $json.data.metrics.communication_volume }}\n*Overdue Items:* {{ $json.data.metrics.overdue_items }}\n\n{{ $json.data.narrative_summary ? '📝 *Executive Narrative:*\n' + $json.data.narrative_summary : '_AI narrative disabled for organization._' }}"
+      },
+      "id": "5",
+      "name": "Slack Post to #leadership",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [690, 500]
+    }
+  ],
+  "connections": {
+    "Schedule: Monday 9AM": {
+      "main": [
+        [
+          {
+            "node": "Trigger SaaS Weekly Cron",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive weekly.summary_ready": {
+      "main": [
+        [
+          {
+            "node": "Verify HMAC Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify HMAC Signature": {
+      "main": [
+        [
+          {
+            "node": "Slack Post to #leadership",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
