@@ -19,11 +19,22 @@ export interface ClientSelectItem {
   email?: string | null
 }
 
+export interface ChannelInfo {
+  id: string
+  provider: string
+  channel_name?: string | null
+  status?: string | 'active' | 'disconnected' | 'error'
+  connected_at?: string | null
+  updated_at?: string | null
+  external_account_id?: string | null
+  metadata?: Record<string, any> | null
+}
+
 export interface FetchInboxDataResult {
   messages: InboxMessageRecord[]
   summary: InboxSummary
   clients: ClientSelectItem[]
-  channels: { id: string; provider: string; channel_name?: string | null }[]
+  channels: ChannelInfo[]
 }
 
 // Dev fallback sample conversations if database is empty
@@ -41,7 +52,7 @@ const DEV_SAMPLE_MESSAGES: InboxMessageRecord[] = [
     read_at: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    channel: { id: 'chan-slack-1', provider: 'slack', channel_name: '#acme-redesign' },
+    channel: { id: 'chan-slack-1', provider: 'slack', channel_name: '#acme-redesign', status: 'active' },
     client: { id: 'cli-sample-1', name: 'Sarah Jenkins', company_name: 'Acme Corp', email: 'sarah.j@acmecorp.com' }
   },
   {
@@ -57,7 +68,7 @@ const DEV_SAMPLE_MESSAGES: InboxMessageRecord[] = [
     read_at: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    channel: { id: 'chan-whatsapp-1', provider: 'whatsapp', channel_name: 'WhatsApp Business (+1 555-019-2831)' },
+    channel: { id: 'chan-whatsapp-1', provider: 'whatsapp', channel_name: 'WhatsApp Business (+1 555-019-2831)', status: 'active' },
     client: { id: 'cli-sample-2', name: 'Michael Chang', company_name: 'Nexus Tech', email: 'mchang@nexustech.io' }
   },
   {
@@ -73,13 +84,13 @@ const DEV_SAMPLE_MESSAGES: InboxMessageRecord[] = [
     read_at: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    channel: { id: 'chan-email-1', provider: 'email', channel_name: 'support@agency.com' },
+    channel: { id: 'chan-email-1', provider: 'email', channel_name: 'support@agency.com', status: 'active' },
     client: null
   },
   {
     id: 'msg-sample-4',
     organization_id: 'dev-org',
-    channel_id: 'chan-discord-1',
+    channel_id: 'chan-slack-1',
     client_id: 'cli-sample-1',
     direction: 'outbound',
     sender_name: 'Agency Support',
@@ -89,11 +100,27 @@ const DEV_SAMPLE_MESSAGES: InboxMessageRecord[] = [
     read_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    channel: { id: 'chan-discord-1', provider: 'slack', channel_name: '#acme-redesign' },
+    channel: { id: 'chan-slack-1', provider: 'slack', channel_name: '#acme-redesign', status: 'active' },
     client: { id: 'cli-sample-1', name: 'Sarah Jenkins', company_name: 'Acme Corp', email: 'sarah.j@acmecorp.com' }
   },
   {
     id: 'msg-sample-5',
+    organization_id: 'dev-org',
+    channel_id: 'chan-discord-1',
+    client_id: 'cli-sample-2',
+    direction: 'inbound',
+    sender_name: 'Marcus Vance',
+    sender_identifier: 'marcus_v#0001',
+    body: 'Hey guys, pinging from the Discord VIP server. Can you check the build artifact link?',
+    sent_at: new Date(Date.now() - 1000 * 60 * 450).toISOString(),
+    read_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    channel: { id: 'chan-discord-1', provider: 'discord', channel_name: 'Discord VIP Community', status: 'active' },
+    client: { id: 'cli-sample-2', name: 'Michael Chang', company_name: 'Nexus Tech', email: 'mchang@nexustech.io' }
+  },
+  {
+    id: 'msg-sample-6',
     organization_id: 'dev-org',
     channel_id: 'chan-upwork-1',
     client_id: null,
@@ -105,7 +132,7 @@ const DEV_SAMPLE_MESSAGES: InboxMessageRecord[] = [
     read_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    channel: { id: 'chan-upwork-1', provider: 'upwork', channel_name: 'Upwork Direct Contracts' },
+    channel: { id: 'chan-upwork-1', provider: 'upwork', channel_name: 'Upwork Direct Contracts', status: 'active' },
     client: null
   }
 ]
@@ -152,7 +179,7 @@ export async function fetchInboxDataAction(filters?: {
     // Fetch channels for org
     const { data: channelsData } = await supabase
       .from('communication_channels')
-      .select('id, provider, channel_name')
+      .select('id, provider, channel_name, status, connected_at, updated_at, external_account_id, metadata')
       .eq('organization_id', orgId)
 
     let messages = messagesRes.data || []
@@ -165,17 +192,30 @@ export async function fetchInboxDataAction(filters?: {
       messages,
       summary,
       clients: clientsData || [],
-      channels: channelsData || []
+      channels: (channelsData as ChannelInfo[]) || []
     }
   } catch (err: any) {
-    console.error('[InboxAction] Error fetching inbox data:', err)
+    console.error('[CommunicationHub:Actions] Error fetching inbox data:', err)
     return getDevInboxData(filters)
   }
 }
 
-function getDevInboxData(filters?: any): FetchInboxDataResult {
+function getDevInboxData(filters?: {
+  channelId?: string
+  clientId?: string
+  provider?: string
+  readStatus?: 'all' | 'read' | 'unread'
+  unmatchedOnly?: boolean
+  search?: string
+}): FetchInboxDataResult {
   let messages = [...DEV_SAMPLE_MESSAGES]
 
+  if (filters?.channelId) {
+    messages = messages.filter((m) => m.channel_id === filters.channelId)
+  }
+  if (filters?.clientId) {
+    messages = messages.filter((m) => m.client_id === filters.clientId)
+  }
   if (filters?.provider && filters.provider !== 'ALL') {
     messages = messages.filter((m) => m.channel?.provider === filters.provider)
   }
@@ -207,8 +247,15 @@ function getDevInboxData(filters?: any): FetchInboxDataResult {
         slack: 2,
         whatsapp: 1,
         email: 1,
-        discord: 0,
+        discord: 1,
         upwork: 1
+      },
+      unreadByProvider: {
+        slack: 1,
+        whatsapp: 1,
+        email: 1,
+        discord: 0,
+        upwork: 0
       }
     },
     clients: [
@@ -217,10 +264,11 @@ function getDevInboxData(filters?: any): FetchInboxDataResult {
       { id: 'cli-sample-3', name: 'Elena Rostova', company_name: 'Global Ventures', email: 'elena@globalventures.com' }
     ],
     channels: [
-      { id: 'chan-slack-1', provider: 'slack', channel_name: '#acme-redesign' },
-      { id: 'chan-whatsapp-1', provider: 'whatsapp', channel_name: 'WhatsApp Business (+1 555-019-2831)' },
-      { id: 'chan-email-1', provider: 'email', channel_name: 'support@agency.com' },
-      { id: 'chan-upwork-1', provider: 'upwork', channel_name: 'Upwork Direct Contracts' }
+      { id: 'chan-slack-1', provider: 'slack', channel_name: '#acme-redesign', status: 'active', connected_at: new Date(Date.now() - 86400000 * 5).toISOString(), external_account_id: 'T08DEMO_SLACK' },
+      { id: 'chan-whatsapp-1', provider: 'whatsapp', channel_name: 'WhatsApp Business (+1 555-019-2831)', status: 'active', connected_at: new Date(Date.now() - 86400000 * 3).toISOString(), external_account_id: 'whatsapp:+15550192831' },
+      { id: 'chan-email-1', provider: 'email', channel_name: 'support@agency.com', status: 'active', connected_at: new Date(Date.now() - 86400000 * 10).toISOString(), external_account_id: 'support@agency.com' },
+      { id: 'chan-discord-1', provider: 'discord', channel_name: 'Discord VIP Community', status: 'active', connected_at: new Date(Date.now() - 86400000 * 2).toISOString(), external_account_id: '123456789012345678' },
+      { id: 'chan-upwork-1', provider: 'upwork', channel_name: 'Upwork Direct Contracts', status: 'active', connected_at: new Date(Date.now() - 86400000 * 1).toISOString(), external_account_id: '~0198273645' }
     ]
   }
 }
