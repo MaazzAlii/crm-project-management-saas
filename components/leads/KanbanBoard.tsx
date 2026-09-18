@@ -1,16 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ClientRecord } from '@/components/clients/ClientsList'
 import { KanbanColumn } from '@/components/leads/KanbanColumn'
 import { LostReasonModal } from '@/components/leads/LostReasonModal'
 import { QuickLeadModal } from '@/components/leads/QuickLeadModal'
-import { updateLeadStageAction, PipelineStage } from '@/app/(dashboard)/leads/actions'
-import { Kanban, Plus, DollarSign, Trophy, Sparkles, Filter } from 'lucide-react'
+import { LeadScoreBreakdownModal } from '@/components/leads/LeadScoreBreakdownModal'
+import { updateLeadStageAction, batchScoreLeadsAction, PipelineStage } from '@/app/(dashboard)/leads/actions'
+import { Kanban, Plus, DollarSign, Trophy, Sparkles, Filter, Loader2 } from 'lucide-react'
 
 interface KanbanBoardProps {
   initialDeals: any[]
+  aiEnabled?: boolean
 }
 
 const COLUMNS: Array<{
@@ -27,12 +29,19 @@ const COLUMNS: Array<{
   { id: 'lost', title: 'Lost', badgeColor: 'bg-rose-400', borderColor: 'border-rose-500/30' },
 ]
 
-export function KanbanBoard({ initialDeals }: KanbanBoardProps) {
+export function KanbanBoard({ initialDeals, aiEnabled = true }: KanbanBoardProps) {
   const router = useRouter()
+  const [deals, setDeals] = useState<any[]>(initialDeals)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [pendingLostClientId, setPendingLostClientId] = useState<string | null>(null)
   const [pendingLostClientName, setPendingLostClientName] = useState('')
   const [quickAddStage, setQuickAddStage] = useState<PipelineStage | null>(null)
+  const [selectedScoreDeal, setSelectedScoreDeal] = useState<any | null>(null)
+  const [isBatchScoring, setIsBatchScoring] = useState(false)
+
+  useEffect(() => {
+    setDeals(initialDeals)
+  }, [initialDeals])
 
   // Calculate high-level pipeline stats
   const totalPipelineValue = initialDeals.reduce(
@@ -123,6 +132,19 @@ export function KanbanBoard({ initialDeals }: KanbanBoardProps) {
             </div>
           </div>
 
+          {/* AI Batch Re-Score Button - only visible if AI is enabled */}
+          {aiEnabled && (
+            <button
+              onClick={handleBatchScore}
+              disabled={isBatchScoring}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-500/30 bg-indigo-950/40 hover:bg-indigo-900/40 px-3.5 py-2.5 text-xs font-bold text-indigo-300 transition-all shadow-xs disabled:opacity-50"
+              title="Run multi-factor AI lead scoring across active pipeline deals"
+            >
+              <Sparkles className={`h-3.5 w-3.5 text-indigo-400 ${isBatchScoring ? 'animate-spin' : ''}`} />
+              <span>{isBatchScoring ? 'Scoring...' : 'AI Re-Score'}</span>
+            </button>
+          )}
+
           {/* Quick Create Deal Button */}
           <button
             onClick={() => setQuickAddStage('new')}
@@ -137,7 +159,7 @@ export function KanbanBoard({ initialDeals }: KanbanBoardProps) {
       {/* Horizontal Scrollable Kanban Columns */}
       <div className="flex gap-4 overflow-x-auto pb-4 pt-1">
         {COLUMNS.map((col) => {
-          const dealsInCol = initialDeals.filter(
+          const dealsInCol = deals.filter(
             (d) => (d.pipeline_stage || 'new') === col.id
           )
           return (
@@ -147,7 +169,9 @@ export function KanbanBoard({ initialDeals }: KanbanBoardProps) {
               deals={dealsInCol}
               onMoveStage={handleMoveStage}
               onQuickAdd={(stage) => setQuickAddStage(stage)}
+              onOpenScoreModal={(deal) => setSelectedScoreDeal(deal)}
               updatingId={updatingId}
+              aiEnabled={aiEnabled}
             />
           )
         })}
@@ -167,6 +191,55 @@ export function KanbanBoard({ initialDeals }: KanbanBoardProps) {
         defaultStage={quickAddStage || 'new'}
         onClose={() => setQuickAddStage(null)}
       />
+
+      {/* AI Lead Score Breakdown Modal */}
+      {selectedScoreDeal && (
+        <LeadScoreBreakdownModal
+          isOpen={!!selectedScoreDeal}
+          deal={selectedScoreDeal}
+          onClose={() => setSelectedScoreDeal(null)}
+          onScoreUpdated={handleScoreUpdated}
+        />
+      )}
     </div>
   )
+
+  async function handleBatchScore() {
+    setIsBatchScoring(true)
+    try {
+      const res = await batchScoreLeadsAction()
+      if (res.success) {
+        router.refresh()
+      } else if (res.error) {
+        alert(res.error)
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to score pipeline deals')
+    } finally {
+      setIsBatchScoring(false)
+    }
+  }
+
+  function handleScoreUpdated(clientId: string, newScore: number, breakdown: any) {
+    setDeals((prev) =>
+      prev.map((d) =>
+        d.id === clientId
+          ? {
+              ...d,
+              lead_score: newScore,
+              lead_score_breakdown: breakdown,
+              lead_score_updated_at: breakdown.calculatedAt,
+            }
+          : d
+      )
+    )
+    if (selectedScoreDeal && selectedScoreDeal.id === clientId) {
+      setSelectedScoreDeal((prev: any) => ({
+        ...prev,
+        lead_score: newScore,
+        lead_score_breakdown: breakdown,
+        lead_score_updated_at: breakdown.calculatedAt,
+      }))
+    }
+  }
 }

@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/server'
 import { checkClientLimit } from '@/lib/billing/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
+import { checkAIAccess } from '@/lib/ai/guard'
+import { scoreLead, LeadScoreBreakdown } from '@/lib/ai/features/lead-scoring'
 
 export const VALID_PIPELINE_STAGES = [
   'new',
@@ -221,5 +223,129 @@ export async function createLeadAction(formData: FormData) {
   } catch (error: any) {
     console.error('createLeadAction error:', error)
     return { error: error?.message || 'Internal server error occurred.' }
+  }
+}
+
+/**
+ * Server action to score a specific CRM deal using multi-factor AI analysis.
+ * Gated by dual-tier checks (Super Admin platform kill switch + subscription plan limit).
+ */
+export async function scoreLeadAction(clientId: string): Promise<{
+  success: boolean
+  score?: number
+  tier?: 'high' | 'medium' | 'low'
+  breakdown?: LeadScoreBreakdown
+  error?: string
+  errorCode?: string
+}> {
+  try {
+    const session = await getCurrentSessionContext()
+
+    if (!session || !session.user || !session.organization) {
+      return { success: false, error: 'Unauthorized session.' }
+    }
+
+    // 1. Dual-Tier Gating Check
+    const gateCheck = await checkAIAccess(session.organization.id, 'lead_scoring')
+    if (!gateCheck.allowed) {
+      return {
+        success: false,
+        error: gateCheck.reason || 'AI Lead Scoring is not enabled on your subscription plan.',
+        errorCode: gateCheck.code || 'PLAN_LIMIT_REACHED',
+      }
+    }
+
+    // 2. Execute Lead Scoring
+    const result = await scoreLead({
+      clientId,
+      organizationId: session.organization.id,
+      userId: session.user.id,
+    })
+
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error || 'Failed to calculate lead score.',
+        errorCode: result.errorCode,
+      }
+    }
+
+    revalidatePath('/leads')
+    revalidatePath('/clients')
+    revalidatePath(`/clients/${clientId}`)
+    revalidatePath(`/clients/${clientId}/pipeline`)
+
+    return {
+      success: true,
+      score: result.score,
+      tier: result.tier,
+      breakdown: result.breakdown,
+    }
+  } catch (err: any) {
+    console.error('scoreLeadAction error:', err)
+    return { success: false, error: err.message || 'Internal error scoring lead.' }
+  }
+}
+
+/**
+ * Server action to batch score all pipeline deals in an organization.
+ * Used by on-demand pipeline refresh and scheduled daily automation runs.
+ */
+export async function batchScoreLeadsAction(): Promise<{
+  success: boolean
+  scoredCount: number
+  totalCount: number
+  error?: string
+}> {
+  try {
+    const session = await getCurrentSessionContext()
+
+    if (!session || !session.user || !session.organization) {
+      return { success: false, scoredCount: 0, totalCount: 0, error: 'Unauthorized session.' }
+    }
+
+    // Dual-tier gating check
+    const gateCheck = await checkAIAccess(session.organization.id, 'lead_scoring')
+    if (!gateCheck.allowed) {
+      return {
+        success: false,
+        scoredCount: 0,
+        totalCount: 0,
+        error: gateCheck.reason || 'AI Lead Scoring is not enabled on your plan.',
+      }
+    }
+
+    const supabase = await createClient()
+
+    // Fetch all non-terminal deals
+    const { data: leads } = await supabase
+      .from('clients')
+      .select('id')
+      .eq('organization_id', session.organization.id)
+      .not('pipeline_stage', 'in', '("won","lost")')
+
+    const leadIds = leads ? leads.map((l: any) => l.id) : []
+
+    let scoredCount = 0
+    for (const id of leadIds) {
+      const res = await scoreLead({
+        clientId: id,
+        organizationId: session.organization.id,
+        userId: session.user.id,
+      })
+      if (res.success) scoredCount++
+    }
+
+    revalidatePath('/leads')
+    revalidatePath('/clients')
+
+    return {
+      success: true,
+      scoredCount,
+      totalCount: leadIds.length,
+    }
+  } catch (err: any) {
+    console.error('batchScoreLeadsAction error:', err)
+    return { success: false, scoredCount: 0, totalCount: 0, error: err.message || 'Batch scoring failed.' }
   }
 }

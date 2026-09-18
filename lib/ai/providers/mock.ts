@@ -74,16 +74,87 @@ export async function executeMockCompletion(
     }
 
     case 'lead_scoring': {
+      const dealValue = Number(request.metadata?.dealValue ?? 5000)
+      const messagesCount = Number(request.metadata?.totalMessages ?? 1)
+      const daysInStage = Number(request.metadata?.daysInCurrentStage ?? 3)
+      const completedProjects = Number(request.metadata?.completedProjects ?? 0)
+      const overdueProjects = Number(request.metadata?.overdueProjects ?? 0)
+
+      // Dynamic baseline scoring based on real dimensions
+      let calculatedScore = 50
+
+      // 1. Deal Value (Higher value = higher score multiplier)
+      if (dealValue >= 25000) calculatedScore += 16
+      else if (dealValue >= 10000) calculatedScore += 8
+      else if (dealValue >= 3000) calculatedScore += 2
+      else if (dealValue > 0) calculatedScore -= 6
+      else calculatedScore -= 14
+
+      // 2. Stage Progression Speed (Rapid progression = momentum)
+      if (daysInStage <= 3) calculatedScore += 12
+      else if (daysInStage <= 10) calculatedScore += 5
+      else if (daysInStage <= 20) calculatedScore += 0
+      else if (daysInStage <= 35) calculatedScore -= 10
+      else calculatedScore -= 18
+
+      // 3. Client Engagement (Message frequency and recency)
+      if (messagesCount >= 8) calculatedScore += 12
+      else if (messagesCount >= 3) calculatedScore += 5
+      else if (messagesCount >= 1) calculatedScore -= 2
+      else calculatedScore -= 12
+
+      // 4. Project History (Completed vs overdue)
+      if (completedProjects >= 2) calculatedScore += 10
+      else if (completedProjects === 1) calculatedScore += 5
+      if (overdueProjects > 0) calculatedScore -= 15
+
+      calculatedScore = Math.max(8, Math.min(96, Math.round(calculatedScore)))
+
+      let tier: 'high' | 'medium' | 'low' = 'medium'
+      if (calculatedScore >= 67) tier = 'high'
+      else if (calculatedScore <= 33) tier = 'low'
+
+      const factors = [
+        {
+          factor: 'Deal Value',
+          impact: dealValue >= 10000 ? 'positive' : dealValue >= 5000 ? 'neutral' : 'negative',
+          description: dealValue > 0 ? `Estimated contract value of $${dealValue.toLocaleString()}` : 'No deal value stated yet',
+        },
+        {
+          factor: 'Stage Progression Speed',
+          impact: daysInStage <= 7 ? 'positive' : daysInStage <= 20 ? 'neutral' : 'negative',
+          description: `${daysInStage} days in current pipeline stage`,
+        },
+        {
+          factor: 'Client Engagement',
+          impact: messagesCount >= 3 ? 'positive' : messagesCount >= 1 ? 'neutral' : 'negative',
+          description: `${messagesCount} recorded messages and interactions`,
+        },
+        {
+          factor: 'Project History',
+          impact: completedProjects > 0 ? 'positive' : overdueProjects > 0 ? 'negative' : 'neutral',
+          description: completedProjects > 0 ? `${completedProjects} successfully completed projects` : 'No delivery disputes on record',
+        },
+      ]
+
+      const summary = tier === 'high'
+        ? `High-quality prospect with strong deal value ($${dealValue.toLocaleString()}), rapid progression, and solid engagement.`
+        : tier === 'medium'
+        ? `Moderate potential lead. Maintain active outreach to confirm budget alignment and accelerate stage progression.`
+        : `Low quality lead. Interaction is minimal or deal value is unconfirmed. Recommend preliminary qualification check.`
+
+      const recommendedAction = tier === 'high'
+        ? 'Schedule executive discovery call within 24 hours to finalize proposal and lock in target start date.'
+        : tier === 'medium'
+        ? 'Send follow-up case study and request 15-minute alignment call regarding scope deliverables.'
+        : 'Send automated qualification questionnaire before allocating dedicated technical sales resources.'
+
       content = JSON.stringify({
-        score: 84,
-        tier: 'hot',
-        summary: 'High-intent lead with defined budget, active timeline, and direct executive sponsorship.',
-        factors: [
-          { factor: 'Budget Defined', impact: 'positive', description: 'Explicit budget range provided ($15k - $25k)' },
-          { factor: 'Urgency', impact: 'positive', description: 'Target start date within 14 days' },
-          { factor: 'Decision Maker', impact: 'positive', description: 'Contact is VP of Operations' },
-        ],
-        recommendedAction: 'Schedule technical discovery call within 24 hours and attach enterprise deck.',
+        score: calculatedScore,
+        tier,
+        summary,
+        factors,
+        recommendedAction,
       }, null, 2)
       break
     }

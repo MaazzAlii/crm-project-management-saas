@@ -17,7 +17,9 @@ interface KanbanColumnProps {
   deals: any[]
   onMoveStage: (clientId: string, newStage: PipelineStage) => void
   onQuickAdd: (stage: PipelineStage) => void
+  onOpenScoreModal?: (deal: any) => void
   updatingId: string | null
+  aiEnabled?: boolean
 }
 
 export function KanbanColumn({
@@ -25,7 +27,9 @@ export function KanbanColumn({
   deals,
   onMoveStage,
   onQuickAdd,
+  onOpenScoreModal,
   updatingId,
+  aiEnabled = true,
 }: KanbanColumnProps) {
   const totalValue = deals.reduce((sum, d) => sum + (parseFloat(d.deal_value || '0') || 0), 0)
 
@@ -71,7 +75,9 @@ export function KanbanColumn({
               key={deal.id}
               client={deal}
               onMoveStage={onMoveStage}
+              onOpenScoreModal={onOpenScoreModal}
               isUpdating={updatingId === deal.id}
+              aiEnabled={aiEnabled}
             />
           ))
         )}

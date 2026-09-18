@@ -2,6 +2,7 @@ import { getCurrentSessionContext } from '@/lib/auth/session'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { KanbanBoard } from '@/components/leads/KanbanBoard'
+import { isAIAccessible } from '@/lib/ai/client'
 
 export const metadata = {
   title: 'Sales Pipeline (Kanban) | INNOVENTIX Hub',
@@ -41,6 +42,15 @@ export default async function LeadsPage() {
     console.error('Error fetching leads:', err)
   }
 
+  // Dual-tier gating check for AI lead scoring
+  let aiEnabled = false
+  try {
+    const gateCheck = await isAIAccessible(session.organization.id, 'lead_scoring')
+    aiEnabled = gateCheck.allowed
+  } catch (e) {
+    console.warn('AI lead scoring access check error:', e)
+  }
+
   if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS && (global as any).__DEV_CLIENTS.length > 0) {
     const devDeals = (global as any).__DEV_CLIENTS.filter(
       (c: any) => c.organization_id === session.organization?.id
@@ -66,6 +76,9 @@ export default async function LeadsPage() {
     deal_value: c.deal_value || 5000,
     lost_reason: c.lost_reason || null,
     notes: c.notes,
+    lead_score: c.lead_score ?? null,
+    lead_score_updated_at: c.lead_score_updated_at ?? null,
+    lead_score_breakdown: c.lead_score_breakdown ?? null,
     created_at: c.created_at,
     updated_at: c.updated_at,
     stage_updated_at: c.stage_updated_at || c.created_at,
@@ -73,7 +86,7 @@ export default async function LeadsPage() {
 
   return (
     <div className="space-y-6">
-      <KanbanBoard initialDeals={deals} />
+      <KanbanBoard initialDeals={deals} aiEnabled={aiEnabled} />
     </div>
   )
 }

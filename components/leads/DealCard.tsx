@@ -12,12 +12,22 @@ import {
   AlertCircle,
   ExternalLink,
   Zap,
+  Sparkles,
 } from 'lucide-react'
 
 interface DealCardProps {
-  client: ClientRecord & { deal_value?: number; lost_reason?: string; pipeline_stage?: string }
+  client: ClientRecord & {
+    deal_value?: number
+    lost_reason?: string
+    pipeline_stage?: string
+    lead_score?: number | null
+    lead_score_updated_at?: string | null
+    lead_score_breakdown?: any | null
+  }
   onMoveStage: (clientId: string, newStage: PipelineStage) => void
+  onOpenScoreModal?: (deal: any) => void
   isUpdating?: boolean
+  aiEnabled?: boolean
 }
 
 const STAGE_ORDER: PipelineStage[] = [
@@ -29,7 +39,13 @@ const STAGE_ORDER: PipelineStage[] = [
   'lost',
 ]
 
-export function DealCard({ client, onMoveStage, isUpdating }: DealCardProps) {
+export function DealCard({
+  client,
+  onMoveStage,
+  onOpenScoreModal,
+  isUpdating,
+  aiEnabled = true,
+}: DealCardProps) {
   const currentStage = (client.pipeline_stage || 'new') as PipelineStage
   const currentIdx = STAGE_ORDER.indexOf(currentStage)
 
@@ -40,6 +56,33 @@ export function DealCard({ client, onMoveStage, isUpdating }: DealCardProps) {
   const nextStage = canMoveRight ? STAGE_ORDER[currentIdx + 1] : null
 
   const dealVal = client.deal_value || 0
+  const score = client.lead_score
+  const hasScore = score !== null && score !== undefined
+
+  // Color coding:
+  // 0-33: Red (Low quality lead)
+  // 34-66: Yellow (Medium potential)
+  // 67-100: Green (High-quality prospect)
+  const getScoreBadge = (s: number) => {
+    if (s >= 67) {
+      return {
+        label: `${s}% High`,
+        style: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20',
+      }
+    }
+    if (s >= 34) {
+      return {
+        label: `${s}% Med`,
+        style: 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20',
+      }
+    }
+    return {
+      label: `${s}% Low`,
+      style: 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20',
+    }
+  }
+
+  const scoreBadge = hasScore ? getScoreBadge(score) : null
 
   return (
     <div
@@ -52,7 +95,7 @@ export function DealCard({ client, onMoveStage, isUpdating }: DealCardProps) {
       } ${isUpdating ? 'opacity-50 pointer-events-none' : ''}`}
     >
       <div className="space-y-2.5">
-        {/* Header: Name & Link */}
+        {/* Header: Name & Link & AI Score Badge */}
         <div className="flex items-start justify-between gap-2">
           <Link
             href={`/clients/${client.id}`}
@@ -61,6 +104,33 @@ export function DealCard({ client, onMoveStage, isUpdating }: DealCardProps) {
             <span className="line-clamp-1">{client.name}</span>
             <ExternalLink className="h-3 w-3 text-slate-500 shrink-0 opacity-0 group-hover:opacity-100 transition" />
           </Link>
+
+          {/* AI Score Badge - only rendered if AI is enabled */}
+          {aiEnabled && (
+            <div>
+              {hasScore && scoreBadge ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenScoreModal && onOpenScoreModal(client)}
+                  className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-extrabold transition cursor-pointer shadow-xs ${scoreBadge.style}`}
+                  title="Click to view AI lead score factor breakdown"
+                >
+                  <Sparkles className="w-2.5 h-2.5" />
+                  <span>{scoreBadge.label}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenScoreModal && onOpenScoreModal(client)}
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800/80 px-2 py-0.5 text-[10px] font-semibold text-slate-400 hover:text-white hover:border-indigo-500/40 transition cursor-pointer"
+                  title="Click to calculate AI lead score"
+                >
+                  <Sparkles className="w-2.5 h-2.5 text-indigo-400" />
+                  <span>Score</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Company */}

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { KanbanBoard } from '@/components/leads/KanbanBoard'
+import { isAIAccessible } from '@/lib/ai/client'
 import { ArrowLeft, Kanban, Clock, ShieldCheck } from 'lucide-react'
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
@@ -25,6 +26,15 @@ export default async function ClientPipelinePage({ params }: { params: { id: str
         No active organization selected. Please choose or create an organization first.
       </div>
     )
+  }
+
+  // Dual-tier gating check for AI lead scoring
+  let aiEnabled = false
+  try {
+    const gateCheck = await isAIAccessible(session.organization.id, 'lead_scoring')
+    aiEnabled = gateCheck.allowed
+  } catch (e) {
+    console.warn('AI lead scoring access check error:', e)
   }
 
   const supabase = await createClient()
@@ -66,6 +76,9 @@ export default async function ClientPipelinePage({ params }: { params: { id: str
     deal_value: rawClient.deal_value || 5000,
     lost_reason: rawClient.lost_reason || null,
     notes: rawClient.notes,
+    lead_score: rawClient.lead_score ?? null,
+    lead_score_updated_at: rawClient.lead_score_updated_at ?? null,
+    lead_score_breakdown: rawClient.lead_score_breakdown ?? null,
     created_at: rawClient.created_at,
     updated_at: rawClient.updated_at,
     stage_updated_at: rawClient.stage_updated_at || rawClient.created_at,
@@ -97,7 +110,7 @@ export default async function ClientPipelinePage({ params }: { params: { id: str
         </div>
       </div>
 
-      <KanbanBoard initialDeals={[clientDeal]} />
+      <KanbanBoard initialDeals={[clientDeal]} aiEnabled={aiEnabled} />
     </div>
   )
 }
