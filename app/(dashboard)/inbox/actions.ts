@@ -157,8 +157,12 @@ export async function fetchInboxDataAction(filters?: {
   try {
     const session = await getCurrentSessionContext()
 
-    if (!session || !session.organization || session.organization.id === '00000000-0000-0000-0000-000000000001') {
+    if (process.env.NODE_ENV !== 'production' && (!session || !session.organization || session.organization.id === '00000000-0000-0000-0000-000000000001')) {
       return getDevInboxData(filters)
+    }
+
+    if (!session || !session.organization) {
+      throw new Error('Unauthorized: Valid session and organization required.')
     }
 
     const orgId = session.organization.id
@@ -204,7 +208,7 @@ export async function fetchInboxDataAction(filters?: {
       .eq('organization_id', orgId)
 
     let messages = messagesRes.data || []
-    if (messages.length === 0 && (!filters || Object.keys(filters).length === 0)) {
+    if (process.env.NODE_ENV !== 'production' && messages.length === 0 && (!filters || Object.keys(filters).length === 0)) {
       // If DB is empty, provide rich dev sample data
       return getDevInboxData(filters)
     }
@@ -219,7 +223,10 @@ export async function fetchInboxDataAction(filters?: {
     }
   } catch (err: any) {
     console.error('[CommunicationHub:Actions] Error fetching inbox data:', err)
-    return getDevInboxData(filters)
+    if (process.env.NODE_ENV !== 'production') {
+      return getDevInboxData(filters)
+    }
+    throw err
   }
 }
 

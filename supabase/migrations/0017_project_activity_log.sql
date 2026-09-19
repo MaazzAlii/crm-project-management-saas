@@ -20,12 +20,12 @@ DROP POLICY IF EXISTS "Org members can view project activity log" ON public.proj
 CREATE POLICY "Org members can view project activity log"
     ON public.project_activity_log FOR SELECT
     USING (organization_id IN (
-        SELECT organization_id FROM public.memberships WHERE user_id = auth.uid()
+        SELECT organization_id FROM public.organization_members WHERE user_id = auth.uid()
     ));
 
 DROP POLICY IF EXISTS "Org members can insert project activity log" ON public.project_activity_log;
 CREATE POLICY "Org members can insert project activity log"
     ON public.project_activity_log FOR INSERT
     WITH CHECK (organization_id IN (
-        SELECT organization_id FROM public.memberships WHERE user_id = auth.uid()
+        SELECT organization_id FROM public.organization_members WHERE user_id = auth.uid()
     ));

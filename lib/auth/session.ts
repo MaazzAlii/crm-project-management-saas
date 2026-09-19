@@ -38,13 +38,18 @@ export async function getCurrentSessionContext(): Promise<UserSessionContext | n
     // In dev environment when Supabase local server is offline
   }
 
-  let isDevAdmin = process.env.DEV_SUPER_ADMIN === 'true'
-  try {
-    const cookieStore = cookies()
-    if (cookieStore.get('dev_super_admin')?.value === 'true') {
+  let isDevAdmin = false
+  if (process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEV_AUTH_BYPASS === 'true') {
+    if (process.env.DEV_SUPER_ADMIN === 'true') {
       isDevAdmin = true
     }
-  } catch {}
+    try {
+      const cookieStore = cookies()
+      if (cookieStore.get('dev_super_admin')?.value === 'true') {
+        isDevAdmin = true
+      }
+    } catch {}
+  }
 
   if (!user) {
     if (isDevAdmin) {
@@ -91,7 +96,11 @@ export async function getCurrentSessionContext(): Promise<UserSessionContext | n
     .eq('user_id', user.id)
     .maybeSingle()
 
-  const isSuperAdmin = !!superAdmin || process.env.DEV_SUPER_ADMIN === 'true'
+  const isSuperAdmin =
+    !!superAdmin ||
+    (process.env.NODE_ENV !== 'production' &&
+      process.env.ALLOW_DEV_AUTH_BYPASS === 'true' &&
+      process.env.DEV_SUPER_ADMIN === 'true')
 
   // Fetch All Organization Memberships for this user
   const { data: allMemberships } = await supabase

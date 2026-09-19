@@ -22,19 +22,19 @@ DROP POLICY IF EXISTS "Users can view org notifications" ON public.in_app_notifi
 CREATE POLICY "Users can view org notifications"
     ON public.in_app_notifications FOR SELECT
     USING (organization_id IN (
-        SELECT organization_id FROM public.memberships WHERE user_id = auth.uid()
+        SELECT organization_id FROM public.organization_members WHERE user_id = auth.uid()
     ));
 
 DROP POLICY IF EXISTS "Users can insert org notifications" ON public.in_app_notifications;
 CREATE POLICY "Users can insert org notifications"
     ON public.in_app_notifications FOR INSERT
     WITH CHECK (organization_id IN (
-        SELECT organization_id FROM public.memberships WHERE user_id = auth.uid()
+        SELECT organization_id FROM public.organization_members WHERE user_id = auth.uid()
     ));
 
 DROP POLICY IF EXISTS "Users can update org notifications" ON public.in_app_notifications;
 CREATE POLICY "Users can update org notifications"
     ON public.in_app_notifications FOR UPDATE
     USING (organization_id IN (
-        SELECT organization_id FROM public.memberships WHERE user_id = auth.uid()
+        SELECT organization_id FROM public.organization_members WHERE user_id = auth.uid()
     ));

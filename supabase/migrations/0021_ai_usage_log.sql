@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS public.ai_usage_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     feature VARCHAR(50) NOT NULL,
     provider VARCHAR(50) NOT NULL,
     model VARCHAR(100),

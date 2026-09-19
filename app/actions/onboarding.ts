@@ -13,7 +13,7 @@ export interface CompleteOnboardingInput {
 export async function completeOnboarding(input: CompleteOnboardingInput) {
   const supabase = await createClient()
 
-  if (input.organizationId === '00000000-0000-0000-0000-000000000001') {
+  if (process.env.NODE_ENV !== 'production' && input.organizationId === '00000000-0000-0000-0000-000000000001') {
     return { success: true }
   }
 

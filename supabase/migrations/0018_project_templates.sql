@@ -34,26 +34,26 @@ DROP POLICY IF EXISTS "Org members can view project templates" ON public.project
 CREATE POLICY "Org members can view project templates"
     ON public.project_templates FOR SELECT
     USING (organization_id IN (
-        SELECT organization_id FROM public.memberships WHERE user_id = auth.uid()
+        SELECT organization_id FROM public.organization_members WHERE user_id = auth.uid()
     ));
 
 DROP POLICY IF EXISTS "Org members can manage project templates" ON public.project_templates;
 CREATE POLICY "Org members can manage project templates"
     ON public.project_templates FOR ALL
     USING (organization_id IN (
-        SELECT organization_id FROM public.memberships WHERE user_id = auth.uid()
+        SELECT organization_id FROM public.organization_members WHERE user_id = auth.uid()
     ));
 
 DROP POLICY IF EXISTS "Org members can view template tasks" ON public.project_template_tasks;
 CREATE POLICY "Org members can view template tasks"
     ON public.project_template_tasks FOR SELECT
     USING (organization_id IN (
-        SELECT organization_id FROM public.memberships WHERE user_id = auth.uid()
+        SELECT organization_id FROM public.organization_members WHERE user_id = auth.uid()
     ));
 
 DROP POLICY IF EXISTS "Org members can manage template tasks" ON public.project_template_tasks;
 CREATE POLICY "Org members can manage template tasks"
     ON public.project_template_tasks FOR ALL
     USING (organization_id IN (
-        SELECT organization_id FROM public.memberships WHERE user_id = auth.uid()
+        SELECT organization_id FROM public.organization_members WHERE user_id = auth.uid()
     ));

@@ -24,11 +24,15 @@ export interface WeeklyReportData {
 export async function fetchWeeklyReportMetricsAction(): Promise<WeeklyReportData> {
   const session = await getCurrentSessionContext()
 
-  if (!session || !session.organization || session.organization.id === '00000000-0000-0000-0000-000000000001') {
+  if (process.env.NODE_ENV !== 'production' && (!session || !session.organization || session.organization.id === '00000000-0000-0000-0000-000000000001')) {
     return {
       figures: getDevWeeklyFigures(session?.organization?.name || 'Acme Agency Workspace'),
       aiEnabled: true,
     }
+  }
+
+  if (!session || !session.organization) {
+    throw new Error('Unauthorized: Valid session and organization required.')
   }
 
   const org = session.organization
@@ -130,7 +134,7 @@ export async function fetchWeeklyReportMetricsAction(): Promise<WeeklyReportData
     newClientsCount > 0 ||
     communicationVolume > 0
 
-  const figures: WeeklyReportFigures = hasRealData
+  const figures: WeeklyReportFigures = (hasRealData || process.env.NODE_ENV === 'production')
     ? {
         organizationName: org.name,
         weekDateRange,

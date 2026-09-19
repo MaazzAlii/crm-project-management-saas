@@ -45,7 +45,7 @@ export default async function DashboardPage() {
   let recentActivities: ActivityItem[] = []
 
   try {
-    if (org.id === '00000000-0000-0000-0000-000000000001') {
+    if (process.env.NODE_ENV !== 'production' && org.id === '00000000-0000-0000-0000-000000000001') {
       activeProjectsCount = 3
       pendingTasksCount = 8
       overdueProjectsCount = 1

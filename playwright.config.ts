@@ -31,6 +31,7 @@ export default defineConfig({
       SUPABASE_SERVICE_ROLE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvY2FsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ.jh8w9WNdFpBjW6Cwx9ngZtcbJBcBDMJKFephRo60naU',
       NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
       DEV_SUPER_ADMIN: 'true',
+      ALLOW_DEV_AUTH_BYPASS: 'true',
     },
   },
 })

@@ -102,7 +102,10 @@ export async function middleware(request: NextRequest) {
   // Auth Routes (Login / Signup)
   const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signup')
 
-  const isDevSuperAdmin = request.cookies.get('dev_super_admin')?.value === 'true'
+  const isDevSuperAdmin =
+    process.env.NODE_ENV !== 'production' &&
+    process.env.ALLOW_DEV_AUTH_BYPASS === 'true' &&
+    request.cookies.get('dev_super_admin')?.value === 'true'
 
   if (isProtectedRoute && !user && !isDevSuperAdmin) {
     const url = request.nextUrl.clone()
