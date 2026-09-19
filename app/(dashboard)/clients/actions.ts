@@ -4,6 +4,8 @@ import { getCurrentSessionContext } from '@/lib/auth/session'
 import { createClient } from '@/lib/supabase/server'
 import { checkClientLimit } from '@/lib/billing/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
+import { validateAndSanitize } from '@/lib/validation/action-wrapper'
+import { CreateClientSchema, UpdateClientSchema } from '@/lib/validation/schemas'
 import { revalidatePath } from 'next/cache'
 
 export async function createClientAction(formData: FormData) {
@@ -14,35 +16,32 @@ export async function createClientAction(formData: FormData) {
       return { error: 'Unauthorized. Active session context not found.' }
     }
 
-    const name = formData.get('name')?.toString().trim()
-    const company = formData.get('company')?.toString().trim() || null
-    const email = formData.get('email')?.toString().trim() || null
-    const phone = formData.get('phone')?.toString().trim() || null
-    const platform = formData.get('platform')?.toString().trim() || 'WhatsApp'
-    const country = formData.get('country')?.toString().trim() || null
-    const currency = formData.get('currency')?.toString().trim() || 'USD'
-    const payment_schedule = formData.get('payment_schedule')?.toString().trim() || 'Per Project'
-    const status = formData.get('status')?.toString().trim() || 'active'
-    const rawMode = formData.get('communication_mode')?.toString().trim()
-    const communication_mode: 'manual' | 'connected' = (rawMode === 'manual' || rawMode === 'connected') ? rawMode : 'connected'
-    const notes = formData.get('notes')?.toString().trim() || null
+    const rawData = {
+      name: formData.get('name')?.toString(),
+      company: formData.get('company')?.toString() || null,
+      email: formData.get('email')?.toString() || null,
+      phone: formData.get('phone')?.toString() || null,
+      platform: formData.get('platform')?.toString() || 'WhatsApp',
+      country: formData.get('country')?.toString() || null,
+      currency: formData.get('currency')?.toString() || 'USD',
+      payment_schedule: formData.get('payment_schedule')?.toString() || 'Per Project',
+      status: formData.get('status')?.toString() || 'active',
+      communication_mode: formData.get('communication_mode')?.toString() || 'connected',
+      notes: formData.get('notes')?.toString() || null,
+    }
+
+    const validation = validateAndSanitize(CreateClientSchema, rawData)
+    if (!validation.success) {
+      return { error: validation.error }
+    }
+
+    const validatedData = validation.data
     const tagsRaw = formData.get('tags')?.toString().trim()
     let tags: string[] = []
     if (tagsRaw) {
       try {
         tags = JSON.parse(tagsRaw)
       } catch (e) {}
-    }
-
-    if (!name) {
-      return { error: 'Client name is required.' }
-    }
-
-    if (email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(email)) {
-        return { error: 'Invalid email address format.' }
-      }
     }
 
     // Server-side Plan Limit Check (CRITICAL SECURITY & BILLING REQUIREMENT)
@@ -63,21 +62,22 @@ export async function createClientAction(formData: FormData) {
         .from('clients')
         .insert({
           organization_id: session.organization.id,
-          name,
-          company,
-          email,
-          phone,
-          platform,
-          country,
-          currency,
-          payment_schedule,
-          status,
-          communication_mode,
-          notes,
+          name: validatedData.name,
+          company: validatedData.company,
+          email: validatedData.email,
+          phone: validatedData.phone,
+          platform: validatedData.platform,
+          country: validatedData.country,
+          currency: validatedData.currency,
+          payment_schedule: validatedData.payment_schedule,
+          status: rawData.status,
+          communication_mode: validatedData.communication_mode,
+          notes: validatedData.notes,
           tags,
         })
         .select('id')
         .single()
+
 
       newClient = data
       insertError = error
@@ -90,17 +90,17 @@ export async function createClientAction(formData: FormData) {
       const devRecord = {
         id: devClientId,
         organization_id: session.organization.id,
-        name,
-        company,
-        email,
-        phone,
-        platform,
-        country,
-        currency,
-        payment_schedule,
-        status,
-        communication_mode,
-        notes,
+        name: validatedData.name,
+        company: validatedData.company,
+        email: validatedData.email,
+        phone: validatedData.phone,
+        platform: validatedData.platform,
+        country: validatedData.country,
+        currency: validatedData.currency,
+        payment_schedule: validatedData.payment_schedule,
+        status: rawData.status,
+        communication_mode: validatedData.communication_mode,
+        notes: validatedData.notes,
         tags,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -125,13 +125,14 @@ export async function createClientAction(formData: FormData) {
         targetType: 'client',
         targetId: newClient.id,
         details: {
-          name,
-          communication_mode,
-          platform,
+          name: validatedData.name,
+          communication_mode: validatedData.communication_mode,
+          platform: validatedData.platform,
           organizationId: session.organization.id,
         },
       })
     } catch (e) {}
+
 
     revalidatePath('/clients')
     return { success: true, clientId: newClient.id }
@@ -195,34 +196,32 @@ export async function updateClientAction(clientId: string, formData: FormData) {
       return { error: 'Unauthorized session.' }
     }
 
-    const name = formData.get('name')?.toString().trim()
-    const company = formData.get('company')?.toString().trim() || null
-    const email = formData.get('email')?.toString().trim() || null
-    const phone = formData.get('phone')?.toString().trim() || null
-    const platform = formData.get('platform')?.toString().trim() || 'WhatsApp'
-    const country = formData.get('country')?.toString().trim() || null
-    const currency = formData.get('currency')?.toString().trim() || 'USD'
-    const payment_schedule = formData.get('payment_schedule')?.toString().trim() || 'Per Project'
-    const status = formData.get('status')?.toString().trim() || 'active'
-    const communication_mode = (formData.get('communication_mode')?.toString().trim() || 'manual') as 'manual' | 'connected'
-    const notes = formData.get('notes')?.toString().trim() || null
+    const rawData = {
+      name: formData.get('name')?.toString(),
+      company: formData.get('company')?.toString() || null,
+      email: formData.get('email')?.toString() || null,
+      phone: formData.get('phone')?.toString() || null,
+      platform: formData.get('platform')?.toString() || 'WhatsApp',
+      country: formData.get('country')?.toString() || null,
+      currency: formData.get('currency')?.toString() || 'USD',
+      payment_schedule: formData.get('payment_schedule')?.toString() || 'Per Project',
+      status: formData.get('status')?.toString() || 'active',
+      communication_mode: formData.get('communication_mode')?.toString() || 'manual',
+      notes: formData.get('notes')?.toString() || null,
+    }
+
+    const validation = validateAndSanitize(UpdateClientSchema, rawData)
+    if (!validation.success) {
+      return { error: validation.error }
+    }
+
+    const validatedData = validation.data
     const tagsRaw = formData.get('tags')?.toString().trim()
     let tags: string[] | undefined = undefined
     if (tagsRaw !== undefined && tagsRaw !== null) {
       try {
         tags = JSON.parse(tagsRaw)
       } catch (e) {}
-    }
-
-    if (!name) {
-      return { error: 'Client name is required.' }
-    }
-
-    if (email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(email)) {
-        return { error: 'Invalid email address format.' }
-      }
     }
 
     const supabase = await createClient()
@@ -236,25 +235,26 @@ export async function updateClientAction(clientId: string, formData: FormData) {
         .eq('organization_id', session.organization.id)
         .maybeSingle()
 
-      if (existingClient?.communication_mode === 'connected' && communication_mode === 'manual') {
+      if (existingClient?.communication_mode === 'connected' && validatedData.communication_mode === 'manual') {
         return { error: 'Connected mode is permanent and cannot be reverted to manual.' }
       }
     } catch (e) {}
 
     const updatePayload: any = {
-      name,
-      company,
-      email,
-      phone,
-      platform,
-      country,
-      currency,
-      payment_schedule,
-      status,
-      communication_mode,
-      notes,
+      name: validatedData.name,
+      company: validatedData.company,
+      email: validatedData.email,
+      phone: validatedData.phone,
+      platform: validatedData.platform,
+      country: validatedData.country,
+      currency: validatedData.currency,
+      payment_schedule: validatedData.payment_schedule,
+      status: validatedData.status || rawData.status,
+      communication_mode: validatedData.communication_mode,
+      notes: validatedData.notes,
       updated_at: new Date().toISOString(),
     }
+
 
     if (tags !== undefined) {
       updatePayload.tags = tags
@@ -290,12 +290,13 @@ export async function updateClientAction(clientId: string, formData: FormData) {
         targetType: 'client',
         targetId: clientId,
         details: {
-          name,
-          communication_mode,
+          name: validatedData.name,
+          communication_mode: validatedData.communication_mode,
           organizationId: session.organization.id,
         },
       })
     } catch (e) {}
+
 
     revalidatePath('/clients')
     revalidatePath(`/clients/${clientId}`)
