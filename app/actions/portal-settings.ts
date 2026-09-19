@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePortalSession } from '@/lib/portal/auth'
+import { logAuditEvent } from '@/lib/audit/logger'
 import type { ClientPortalSettings } from '@/lib/portal/settings'
 
 export interface UpdateProfileInput {
@@ -32,7 +33,7 @@ export interface UpdateNotificationsInput {
 
 export async function updatePortalProfileAction(input: UpdateProfileInput) {
   try {
-    const { clientId } = await requirePortalSession()
+    const { clientId, organizationId, clientUser } = await requirePortalSession()
     const supabase = await createClient()
 
     // Validation
@@ -79,6 +80,17 @@ export async function updatePortalProfileAction(input: UpdateProfileInput) {
       return { success: false, error: 'Failed to update profile. Please try again.' }
     }
 
+    try {
+      await logAuditEvent({
+        actorId: clientUser?.id,
+        organizationId,
+        action: 'PORTAL_SETTINGS_UPDATED',
+        targetType: 'client_portal',
+        targetId: clientId,
+        details: { type: 'profile', name, email: input.email },
+      })
+    } catch (e) {}
+
     revalidatePath('/client/settings')
     revalidatePath('/client/dashboard')
 
@@ -91,7 +103,7 @@ export async function updatePortalProfileAction(input: UpdateProfileInput) {
 
 export async function updatePortalBillingAction(input: UpdateBillingInput) {
   try {
-    const { clientId } = await requirePortalSession()
+    const { clientId, organizationId, clientUser } = await requirePortalSession()
     const supabase = await createClient()
 
     if (!input.billingEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.billingEmail.trim())) {
@@ -139,6 +151,17 @@ export async function updatePortalBillingAction(input: UpdateBillingInput) {
       return { success: false, error: 'Failed to save billing preferences.' }
     }
 
+    try {
+      await logAuditEvent({
+        actorId: clientUser?.id,
+        organizationId,
+        action: 'PORTAL_SETTINGS_UPDATED',
+        targetType: 'client_portal',
+        targetId: clientId,
+        details: { type: 'billing', billingEmail: input.billingEmail },
+      })
+    } catch (e) {}
+
     revalidatePath('/client/settings')
     revalidatePath('/client/invoices')
 
@@ -151,7 +174,7 @@ export async function updatePortalBillingAction(input: UpdateBillingInput) {
 
 export async function updatePortalNotificationsAction(input: UpdateNotificationsInput) {
   try {
-    const { clientId } = await requirePortalSession()
+    const { clientId, organizationId, clientUser } = await requirePortalSession()
     const supabase = await createClient()
 
     const { data: currentClient } = await supabase
@@ -184,6 +207,17 @@ export async function updatePortalNotificationsAction(input: UpdateNotifications
       console.error('[Portal:Settings] Notification preferences update failed:', error)
       return { success: false, error: 'Failed to update alert preferences.' }
     }
+
+    try {
+      await logAuditEvent({
+        actorId: clientUser?.id,
+        organizationId,
+        action: 'PORTAL_SETTINGS_UPDATED',
+        targetType: 'client_portal',
+        targetId: clientId,
+        details: { type: 'notifications' },
+      })
+    } catch (e) {}
 
     revalidatePath('/client/settings')
 

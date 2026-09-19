@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { logAuditEvent } from '@/lib/audit/logger'
 
 /**
  * Validates the current session is an active portal user with plan access.
@@ -165,6 +166,17 @@ export async function inviteClientToPortal(
     created_by: user.id,
   })
 
+  try {
+    await logAuditEvent({
+      actorId: user.id,
+      organizationId,
+      action: 'PORTAL_USER_INVITED',
+      targetType: 'client_portal',
+      targetId: clientId,
+      details: { invitedEmail: email, clientId },
+    })
+  } catch (e) {}
+
   return { success: true }
 }
 
@@ -198,5 +210,17 @@ export async function revokePortalAccess(
     .eq('organization_id', organizationId)
 
   if (error) return { success: false, error: error.message }
+
+  try {
+    await logAuditEvent({
+      actorId: user.id,
+      organizationId,
+      action: 'PORTAL_USER_REVOKED',
+      targetType: 'client_portal',
+      targetId: clientUserId,
+      details: { clientUserId, organizationId },
+    })
+  } catch (e) {}
+
   return { success: true }
 }

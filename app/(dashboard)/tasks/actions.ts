@@ -192,6 +192,17 @@ export async function updateGlobalTaskAction(taskId: string, formData: FormData)
       .eq('id', taskId)
       .eq('organization_id', session.organization.id)
 
+    try {
+      await logAuditEvent({
+        actorId: session.user.id,
+        organizationId: session.organization.id,
+        action: 'TASK_UPDATED',
+        targetType: 'task',
+        targetId: taskId,
+        details: { title, status, priority, due_date },
+      })
+    } catch (e) {}
+
     revalidatePath('/tasks')
     return { success: true }
   } catch (err: any) {
@@ -227,6 +238,17 @@ export async function toggleGlobalTaskStatusAction(taskId: string, newStatus: 't
       .eq('id', taskId)
       .eq('organization_id', session.organization.id)
 
+    try {
+      await logAuditEvent({
+        actorId: session.user.id,
+        organizationId: session.organization.id,
+        action: 'TASK_STATUS_CHANGED',
+        targetType: 'task',
+        targetId: taskId,
+        details: { newStatus },
+      })
+    } catch (e) {}
+
     revalidatePath('/tasks')
     return { success: true }
   } catch (err: any) {
@@ -250,6 +272,17 @@ export async function deleteGlobalTaskAction(taskId: string) {
       .delete()
       .eq('id', taskId)
       .eq('organization_id', session.organization.id)
+
+    try {
+      await logAuditEvent({
+        actorId: session.user.id,
+        organizationId: session.organization.id,
+        action: 'TASK_DELETED',
+        targetType: 'task',
+        targetId: taskId,
+        details: { organizationId: session.organization.id },
+      })
+    } catch (e) {}
 
     revalidatePath('/tasks')
     return { success: true }

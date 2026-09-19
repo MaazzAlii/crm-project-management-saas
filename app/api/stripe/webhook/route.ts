@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/client'
 import { createClient } from '@/lib/supabase/server'
 import { readValidatedBody } from '@/lib/security/payload'
+import { logAuditEvent } from '@/lib/audit/logger'
 import type Stripe from 'stripe'
 
 export const dynamic = 'force-dynamic'
@@ -67,6 +68,16 @@ export async function POST(req: NextRequest) {
             },
             { onConflict: 'organization_id' }
           )
+
+        try {
+          await logAuditEvent({
+            organizationId,
+            action: 'STRIPE_CHECKOUT_COMPLETED',
+            targetType: 'subscription',
+            targetId: subscriptionId,
+            details: { customerId: session.customer, status: subscription.status },
+          })
+        } catch (e) {}
       }
       break
     }
@@ -78,7 +89,7 @@ export async function POST(req: NextRequest) {
       const customerId = subscription.customer as string
 
       // Sync database subscription status with Stripe source of truth
-      await supabase
+      const { data: updatedSub } = await supabase
         .from('organization_subscriptions')
         .update({
           status: subscription.status,
@@ -92,6 +103,18 @@ export async function POST(req: NextRequest) {
           updated_at: new Date().toISOString(),
         })
         .eq('stripe_customer_id', customerId)
+        .select('organization_id')
+        .maybeSingle()
+
+      try {
+        await logAuditEvent({
+          organizationId: updatedSub?.organization_id,
+          action: event.type === 'customer.subscription.deleted' ? 'STRIPE_SUBSCRIPTION_CANCELED' : 'STRIPE_SUBSCRIPTION_UPDATED',
+          targetType: 'subscription',
+          targetId: subscription.id,
+          details: { customerId, status: subscription.status, cancelAtPeriodEnd: subscription.cancel_at_period_end },
+        })
+      } catch (e) {}
       break
     }
 
@@ -99,13 +122,25 @@ export async function POST(req: NextRequest) {
       const invoice = event.data.object as Stripe.Invoice
       const customerId = invoice.customer as string
 
-      await supabase
+      const { data: subOrg } = await supabase
         .from('organization_subscriptions')
         .update({
           status: 'past_due',
           updated_at: new Date().toISOString(),
         })
         .eq('stripe_customer_id', customerId)
+        .select('organization_id')
+        .maybeSingle()
+
+      try {
+        await logAuditEvent({
+          organizationId: subOrg?.organization_id,
+          action: 'STRIPE_PAYMENT_FAILED',
+          targetType: 'invoice',
+          targetId: invoice.id,
+          details: { customerId, amountDue: invoice.amount_due, currency: invoice.currency },
+        })
+      } catch (e) {}
       break
     }
   }

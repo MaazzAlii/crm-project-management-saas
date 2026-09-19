@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Building2, Users, CreditCard, Puzzle, Bot, Settings } from 'lucide-react'
+import { Building2, Users, CreditCard, Puzzle, Bot, Settings, ShieldCheck } from 'lucide-react'
 
 const settingsTabs = [
   { name: 'Organization', href: '/settings/organization', icon: Building2 },
@@ -10,6 +10,7 @@ const settingsTabs = [
   { name: 'Billing & Plans', href: '/settings/billing', icon: CreditCard },
   { name: 'Integrations', href: '/settings/integrations', icon: Puzzle },
   { name: 'AI Settings', href: '/settings/ai', icon: Bot },
+  { name: 'Audit Log', href: '/settings/audit-log', icon: ShieldCheck },
 ]
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {

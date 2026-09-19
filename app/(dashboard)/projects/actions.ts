@@ -792,6 +792,19 @@ export async function createDeliverableAction(projectId: string, formData: FormD
     }
 
     await logProjectActivity(projectId, 'DELIVERABLE_CREATED', { title })
+    try {
+      if (session?.user) {
+        await logAuditEvent({
+          actorId: session.user.id,
+          organizationId: session.organization.id,
+          action: 'DELIVERABLE_CREATED',
+          targetType: 'deliverable',
+          targetId: data.id,
+          details: { title, projectId },
+        })
+      }
+    } catch (e) {}
+
     revalidatePath(`/projects/${projectId}`)
     return { success: true, deliverableId: data.id }
   } catch (err: any) {
@@ -827,6 +840,20 @@ export async function updateDeliverableStatusAction(
       status,
       clientFeedback
     })
+
+    try {
+      if (session?.user) {
+        await logAuditEvent({
+          actorId: session.user.id,
+          organizationId: session.organization.id,
+          action: 'DELIVERABLE_STATUS_UPDATED',
+          targetType: 'deliverable',
+          targetId: deliverableId,
+          details: { status, projectId, clientFeedback },
+        })
+      }
+    } catch (e) {}
+
     revalidatePath(`/projects/${projectId}`)
     return { success: true }
   } catch (err: any) {
@@ -849,6 +876,20 @@ export async function deleteDeliverableAction(deliverableId: string, projectId: 
       .eq('organization_id', session.organization.id)
 
     await logProjectActivity(projectId, 'DELIVERABLE_DELETED', { deliverableId })
+
+    try {
+      if (session?.user) {
+        await logAuditEvent({
+          actorId: session.user.id,
+          organizationId: session.organization.id,
+          action: 'DELIVERABLE_DELETED',
+          targetType: 'deliverable',
+          targetId: deliverableId,
+          details: { projectId },
+        })
+      }
+    } catch (e) {}
+
     revalidatePath(`/projects/${projectId}`)
     return { success: true }
   } catch (err: any) {

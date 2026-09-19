@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
 import { setImpersonationCookie, clearImpersonationCookie } from '@/lib/auth/impersonation'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { logAuditEvent } from '@/lib/audit/logger'
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: Request) {
   try {
@@ -18,21 +19,25 @@ export async function POST(request: Request) {
 
     const expiresAt = await setImpersonationCookie(organizationId, organizationName)
 
-    // Audit Log Entry
-    console.log(
-      `[AUDIT_LOG] Super Admin started support impersonation session for organization ${organizationId} (${organizationName}). Expires at: ${expiresAt}`
-    )
-
+    let actorId: string | undefined
+    let actorEmail: string | undefined
     try {
-      const adminClient = createAdminClient()
-      await adminClient.from('audit_logs').insert({
-        action: 'SUPER_ADMIN_IMPERSONATION_START',
-        target_resource: `organization:${organizationId}`,
-        metadata: { organizationName, expiresAt },
-      })
-    } catch (auditErr) {
-      console.warn('[AUDIT_LOG_DB_WARN] Could not persist audit log to DB:', auditErr)
-    }
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      actorId = user?.id
+      actorEmail = user?.email
+    } catch {}
+
+    await logAuditEvent({
+      actorId,
+      actorEmail,
+      actorIsSuperAdmin: true,
+      organizationId,
+      action: 'SUPER_ADMIN_IMPERSONATION_START',
+      entityType: 'organization',
+      entityId: organizationId,
+      details: { organizationName, expiresAt },
+    })
 
     return NextResponse.json({
       success: true,
@@ -52,17 +57,24 @@ export async function DELETE() {
     await requireSuperAdmin()
     await clearImpersonationCookie()
 
-    console.log('[AUDIT_LOG] Super Admin ended support impersonation session.')
-
+    let actorId: string | undefined
+    let actorEmail: string | undefined
     try {
-      const adminClient = createAdminClient()
-      await adminClient.from('audit_logs').insert({
-        action: 'SUPER_ADMIN_IMPERSONATION_END',
-        target_resource: 'impersonation_session',
-      })
-    } catch (auditErr) {
-      console.warn('[AUDIT_LOG_DB_WARN] Could not persist audit log to DB:', auditErr)
-    }
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      actorId = user?.id
+      actorEmail = user?.email
+    } catch {}
+
+    await logAuditEvent({
+      actorId,
+      actorEmail,
+      actorIsSuperAdmin: true,
+      action: 'SUPER_ADMIN_IMPERSONATION_END',
+      entityType: 'impersonation_session',
+      entityId: 'support_mode',
+      details: { terminatedAt: new Date().toISOString() },
+    })
 
     return NextResponse.json({
       success: true,

@@ -3,6 +3,7 @@
 import { stripe } from '@/lib/stripe/client'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { logAuditEvent } from '@/lib/audit/logger'
 
 export async function createCheckoutSession(priceId: string) {
   const session = await getCurrentSessionContext()
@@ -38,6 +39,17 @@ export async function createCheckoutSession(priceId: string) {
       },
     })
 
+    try {
+      await logAuditEvent({
+        actorId: session.user.id,
+        organizationId: session.organization.id,
+        action: 'CHECKOUT_SESSION_INITIATED',
+        targetType: 'billing',
+        targetId: priceId,
+        details: { priceId, sessionId: checkoutSession.id },
+      })
+    } catch (e) {}
+
     return { url: checkoutSession.url }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Stripe checkout failed'
@@ -71,6 +83,17 @@ export async function createCustomerPortalSession() {
       customer: sub.stripe_customer_id,
       return_url: `${appUrl}/settings/billing`,
     })
+
+    try {
+      await logAuditEvent({
+        actorId: session.user.id,
+        organizationId: session.organization.id,
+        action: 'BILLING_PORTAL_OPENED',
+        targetType: 'billing',
+        targetId: sub.stripe_customer_id,
+        details: { customerId: sub.stripe_customer_id },
+      })
+    } catch (e) {}
 
     return { url: portalSession.url }
   } catch (err: unknown) {
