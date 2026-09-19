@@ -55,3 +55,17 @@ git push origin main
 - No "WIP" commits that skip pushing.
 - No cleanup commits that fix previous commits after the fact.
 - If a hotfix is needed, it still gets its own commit and push.
+
+## MANDATORY RULE — Plain-Text Task Completion Output
+
+Upon completing any task, ALWAYS provide an explicit, direct plain-text confirmation response in the message body (do NOT output empty document artifacts):
+
+1. **Status Header**: `✅ Task XX COMPLETE — pushed to origin/main (HEAD: <hash>)`
+2. **Verification Summary**:
+   - Routes live and built
+   - Database migrations applied
+   - Key functional capabilities built
+   - Build status: `0 errors` (TypeScript + Next.js build)
+   - Individual commit breakdown list
+3. **Current Progress Indicator**: `XX / 71 tasks complete (~YY%)`
+
