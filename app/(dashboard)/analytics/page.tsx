@@ -2,14 +2,17 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getCurrentSessionContext } from '@/lib/auth/session'
 import { fetchOrganizationAnalytics, AnalyticsDateRange } from '@/lib/analytics/data'
+import { getOrganizationPlanUsageDetails } from '@/lib/billing/plan-limits'
 import { isAIAccessible } from '@/lib/ai/client'
 import {
   AnalyticsHeader,
+  AnalyticsNav,
   RevenuePipelineCard,
   ProjectsByStatusChart,
   TeamWorkloadCard,
   DeadlinesAndOverdueCard,
   MonthlyCompletionRateCard,
+  PlanUsageCard,
 } from '@/components/analytics'
 
 export const metadata: Metadata = {
@@ -32,8 +35,11 @@ export default async function AnalyticsPage({
   const orgId = session.organization.id
   const range = (searchParams?.range || '30d') as AnalyticsDateRange
 
-  // Fetch aggregate analytics data (RLS-scoped to current tenant)
-  const analyticsData = await fetchOrganizationAnalytics(orgId, range)
+  // Fetch aggregate analytics data (RLS-scoped to current tenant) & plan usage concurrently
+  const [analyticsData, planUsage] = await Promise.all([
+    fetchOrganizationAnalytics(orgId, range),
+    getOrganizationPlanUsageDetails(orgId),
+  ])
 
   // Evaluate AI entitlement for the organization (zero-button rule enforced if disabled)
   let aiNarrativeEnabled = false
@@ -46,12 +52,20 @@ export default async function AnalyticsPage({
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      {/* Navigation Sub-Tabs */}
+      <div className="flex items-center justify-between">
+        <AnalyticsNav />
+      </div>
+
       {/* Analytics Header with Range Selector & AI Briefing */}
       <AnalyticsHeader
         currentRange={range}
         aiEnabled={aiNarrativeEnabled}
         organizationName={session.organization.name || 'Agency Hub'}
       />
+
+      {/* Plan Quotas & Proximity Card */}
+      <PlanUsageCard usage={planUsage} compact={false} />
 
       {/* Primary Row: Revenue Pipeline & Projects by Status */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -87,3 +101,4 @@ export default async function AnalyticsPage({
     </div>
   )
 }
+
