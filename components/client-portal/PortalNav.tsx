@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Building2, LayoutDashboard, FolderOpen, FileText, LogOut } from 'lucide-react'
+import { Building2, LayoutDashboard, FolderOpen, FileText, Settings, LogOut } from 'lucide-react'
 
 interface PortalNavProps {
   orgName: string
@@ -13,6 +13,7 @@ const navLinks = [
   { href: '/client/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/client/projects', label: 'Projects', icon: FolderOpen },
   { href: '/client/invoices', label: 'Invoices', icon: FileText },
+  { href: '/client/settings', label: 'Settings', icon: Settings },
 ]
 
 export function PortalNav({ orgName, orgLogoUrl }: PortalNavProps) {
