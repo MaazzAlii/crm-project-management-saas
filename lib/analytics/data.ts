@@ -62,6 +62,51 @@ export interface MonthlyVelocityItem {
   totalClosed: number
 }
 
+export interface RevenueByClientMetric {
+  clientId: string
+  clientName: string
+  company?: string | null
+  email?: string | null
+  totalBilled: number
+  paidAmount: number
+  invoicedAmount: number
+  activeAmount: number
+  projectsCount: number
+  activeProjectsCount: number
+  status: string
+}
+
+export interface RevenueByProjectTypeMetric {
+  projectType: string
+  totalRevenue: number
+  projectsCount: number
+  averageValue: number
+  percentage: number
+}
+
+export interface MonthlyTrendMetric {
+  month: string
+  monthShort: string
+  year: number
+  deliveredRevenue: number
+  invoicedRevenue: number
+  activeProjects: number
+  teamSize: number
+  closedTasks: number
+}
+
+export interface RevenueReportData {
+  range: AnalyticsDateRange
+  totalRevenue: number
+  paidRevenue: number
+  invoicedRevenue: number
+  pipelineRevenue: number
+  averageDealSize: number
+  clientsBreakdown: RevenueByClientMetric[]
+  typeBreakdown: RevenueByProjectTypeMetric[]
+  monthlyTrends: MonthlyTrendMetric[]
+}
+
 export interface OrganizationAnalyticsData {
   range: AnalyticsDateRange
   revenue: RevenuePipelineStats
@@ -439,3 +484,216 @@ export async function fetchOrganizationAnalytics(
     activeClientsCount: new Set(projects.map((p) => p.client_id).filter(Boolean)).size,
   }
 }
+
+export async function fetchRevenueReport(
+  organizationId: string,
+  range: AnalyticsDateRange = '30d'
+): Promise<RevenueReportData> {
+  const supabase = await createClient()
+
+  const now = new Date()
+  let rangeStart: Date | null = null
+
+  if (range === '30d') {
+    rangeStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+  } else if (range === '90d') {
+    rangeStart = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+  } else if (range === 'ytd') {
+    rangeStart = new Date(now.getFullYear(), 0, 1)
+  }
+
+  // 1. Fetch all clients
+  const { data: clientsData } = await supabase
+    .from('clients')
+    .select('id, name, company, email, status')
+    .eq('organization_id', organizationId)
+
+  const clients = clientsData || []
+  const clientMap = new Map<string, any>(clients.map((c) => [c.id, c]))
+
+  // 2. Fetch projects
+  let projectsQuery = supabase
+    .from('projects')
+    .select('id, name, client_id, budget, amount, status, type, created_at, delivered_at')
+    .eq('organization_id', organizationId)
+
+  if (rangeStart) {
+    projectsQuery = projectsQuery.gte('created_at', rangeStart.toISOString())
+  }
+
+  const { data: projectsData } = await projectsQuery
+  const projects = projectsData || []
+
+  // 3. Fetch team members count for monthly trends
+  const { count: teamCount } = await supabase
+    .from('organization_members')
+    .select('id', { count: 'exact', head: true })
+    .eq('organization_id', organizationId)
+
+  const currentTeamSize = teamCount || 1
+
+  // 4. Fetch closed tasks for velocity
+  const { data: tasksData } = await supabase
+    .from('tasks')
+    .select('id, status, completed_at')
+    .eq('organization_id', organizationId)
+    .eq('status', 'completed')
+
+  const tasks = tasksData || []
+
+  // Aggregate by Client
+  const clientAggregates: Record<string, RevenueByClientMetric> = {}
+
+  // Initialize for all clients
+  clients.forEach((c) => {
+    clientAggregates[c.id] = {
+      clientId: c.id,
+      clientName: c.name,
+      company: c.company,
+      email: c.email,
+      totalBilled: 0,
+      paidAmount: 0,
+      invoicedAmount: 0,
+      activeAmount: 0,
+      projectsCount: 0,
+      activeProjectsCount: 0,
+      status: c.status || 'active',
+    }
+  })
+
+  let totalRevenue = 0
+  let paidRevenue = 0
+  let invoicedRevenue = 0
+  let pipelineRevenue = 0
+
+  const typeAggregates: Record<string, { totalRevenue: number; projectsCount: number }> = {}
+
+  projects.forEach((p) => {
+    const val = Number(p.budget || p.amount || 0)
+    const status = p.status || 'planning'
+    const type = p.type || 'Standard Project'
+
+    totalRevenue += val
+
+    // Type aggregation
+    if (!typeAggregates[type]) {
+      typeAggregates[type] = { totalRevenue: 0, projectsCount: 0 }
+    }
+    typeAggregates[type].totalRevenue += val
+    typeAggregates[type].projectsCount += 1
+
+    // Client aggregation
+    if (p.client_id) {
+      if (!clientAggregates[p.client_id]) {
+        const clientInfo = clientMap.get(p.client_id)
+        clientAggregates[p.client_id] = {
+          clientId: p.client_id,
+          clientName: clientInfo?.name || 'Unknown Client',
+          company: clientInfo?.company,
+          email: clientInfo?.email,
+          totalBilled: 0,
+          paidAmount: 0,
+          invoicedAmount: 0,
+          activeAmount: 0,
+          projectsCount: 0,
+          activeProjectsCount: 0,
+          status: clientInfo?.status || 'active',
+        }
+      }
+
+      const c = clientAggregates[p.client_id]
+      c.projectsCount += 1
+      c.totalBilled += val
+
+      if (status === 'paid') {
+        c.paidAmount += val
+        paidRevenue += val
+      } else if (status === 'invoiced') {
+        c.invoicedAmount += val
+        invoicedRevenue += val
+      } else {
+        c.activeAmount += val
+        c.activeProjectsCount += 1
+        pipelineRevenue += val
+      }
+    }
+  })
+
+  const clientsBreakdown = Object.values(clientAggregates)
+    .filter((c) => c.projectsCount > 0 || c.totalBilled > 0)
+    .sort((a, b) => b.totalBilled - a.totalBilled)
+
+  const typeBreakdown: RevenueByProjectTypeMetric[] = Object.entries(typeAggregates)
+    .map(([projectType, item]) => ({
+      projectType,
+      totalRevenue: item.totalRevenue,
+      projectsCount: item.projectsCount,
+      averageValue: item.projectsCount > 0 ? Math.round(item.totalRevenue / item.projectsCount) : 0,
+      percentage: totalRevenue > 0 ? Math.round((item.totalRevenue / totalRevenue) * 100) : 0,
+    }))
+    .sort((a, b) => b.totalRevenue - a.totalRevenue)
+
+  // Monthly Trends (Trailing 6 Months)
+  const monthlyTrendsMap: Record<string, MonthlyTrendMetric> = {}
+
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    const monthShort = d.toLocaleString('default', { month: 'short' })
+    const monthFull = `${monthShort} ${d.getFullYear()}`
+
+    monthlyTrendsMap[key] = {
+      month: monthFull,
+      monthShort,
+      year: d.getFullYear(),
+      deliveredRevenue: 0,
+      invoicedRevenue: 0,
+      activeProjects: 0,
+      teamSize: currentTeamSize,
+      closedTasks: 0,
+    }
+  }
+
+  projects.forEach((p) => {
+    const dateStr = p.delivered_at || p.created_at
+    if (!dateStr) return
+    const d = new Date(dateStr)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    const val = Number(p.budget || p.amount || 0)
+
+    if (monthlyTrendsMap[key]) {
+      if (['delivered', 'paid'].includes(p.status)) {
+        monthlyTrendsMap[key].deliveredRevenue += val
+      } else if (p.status === 'invoiced') {
+        monthlyTrendsMap[key].invoicedRevenue += val
+      }
+      monthlyTrendsMap[key].activeProjects += 1
+    }
+  })
+
+  tasks.forEach((t) => {
+    if (!t.completed_at) return
+    const d = new Date(t.completed_at)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    if (monthlyTrendsMap[key]) {
+      monthlyTrendsMap[key].closedTasks += 1
+    }
+  })
+
+  const monthlyTrends = Object.values(monthlyTrendsMap)
+  const averageDealSize =
+    projects.length > 0 ? Math.round(totalRevenue / projects.length) : 0
+
+  return {
+    range,
+    totalRevenue,
+    paidRevenue,
+    invoicedRevenue,
+    pipelineRevenue,
+    averageDealSize,
+    clientsBreakdown,
+    typeBreakdown,
+    monthlyTrends,
+  }
+}
+
