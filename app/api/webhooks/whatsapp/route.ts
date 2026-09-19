@@ -4,9 +4,12 @@ import { decryptSecret } from '@/lib/security/encrypt'
 import {
   verifyTwilioSignature,
   normalizeWhatsAppEventToIngestPayload,
-  formatE164Phone
+  formatE164Phone,
 } from '@/lib/providers/whatsapp'
 import { ingestMessage } from '@/lib/inbox/ingest'
+import { readValidatedBody } from '@/lib/security/payload'
+
+export const dynamic = 'force-dynamic'
 
 // Handle GET for Webhook challenge verification (Meta / Twilio webhook setup)
 export async function GET(req: NextRequest) {
@@ -24,31 +27,33 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true, service: 'WhatsApp Webhook Engine' })
+  return NextResponse.json({ ok: true, service: 'WhatsApp Webhook Engine', timestamp: new Date().toISOString() })
 }
 
 // Handle POST for Inbound WhatsApp Messages (Twilio form-encoded or JSON payload)
 export async function POST(req: NextRequest) {
   try {
     const contentType = req.headers.get('content-type') || ''
+    const { body: rawBody, error: bodyError, status: bodyStatus } = await readValidatedBody(req)
+
+    if (bodyError || !rawBody) {
+      return NextResponse.json({ error: bodyError || 'Empty payload' }, { status: bodyStatus || 400 })
+    }
+
     let bodyParams: Record<string, any> = {}
-    let rawBody = ''
 
     if (contentType.includes('application/x-www-form-urlencoded')) {
-      rawBody = await req.text()
       const params = new URLSearchParams(rawBody)
       params.forEach((value, key) => {
         bodyParams[key] = value
       })
     } else if (contentType.includes('application/json')) {
-      rawBody = await req.text()
       try {
         bodyParams = JSON.parse(rawBody)
-      } catch (e) {
+      } catch {
         return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
       }
     } else {
-      rawBody = await req.text()
       const params = new URLSearchParams(rawBody)
       params.forEach((value, key) => {
         bodyParams[key] = value
@@ -57,7 +62,6 @@ export async function POST(req: NextRequest) {
 
     // Handle Meta payload format vs Twilio payload format
     if (bodyParams.object === 'whatsapp_business_account' && bodyParams.entry) {
-      // Meta WhatsApp Cloud API format mapping
       const entry = bodyParams.entry?.[0]
       const changes = entry?.changes?.[0]?.value
       const message = changes?.messages?.[0]
@@ -72,7 +76,7 @@ export async function POST(req: NextRequest) {
         Body: message.text?.body || message.caption || '',
         ProfileName: contact?.profile?.name || message.from,
         MessageSid: message.id,
-        AccountSid: changes?.metadata?.phone_number_id || null
+        AccountSid: changes?.metadata?.phone_number_id || null,
       }
     }
 
@@ -113,16 +117,21 @@ export async function POST(req: NextRequest) {
 
     const channelMeta = (matchingChannel.metadata as Record<string, any>) || {}
 
-    // Verify Twilio Signature if Auth Token is configured
+    // Verify Twilio Signature if Auth Token is configured or signature is present
     const twilioSignature = req.headers.get('x-twilio-signature')
     const encryptedAuthToken = channelMeta.auth_token || process.env.TWILIO_AUTH_TOKEN || ''
     const authToken = decryptSecret(encryptedAuthToken)
 
-    if (authToken && twilioSignature) {
+    if (authToken || twilioSignature) {
+      if (!twilioSignature) {
+        return NextResponse.json({ error: 'Missing X-Twilio-Signature header' }, { status: 401 })
+      }
+
       const fullUrl = req.url
       const isValid = verifyTwilioSignature(twilioSignature, fullUrl, bodyParams, authToken)
       if (!isValid) {
-        console.warn('[WhatsAppWebhook] Twilio signature verification failed.')
+        console.error('[WhatsAppWebhook] Twilio signature verification failed.')
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
       }
     }
 
@@ -139,14 +148,14 @@ export async function POST(req: NextRequest) {
     if (contentType.includes('application/x-www-form-urlencoded')) {
       return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><Response></Response>', {
         status: 200,
-        headers: { 'Content-Type': 'text/xml' }
+        headers: { 'Content-Type': 'text/xml' },
       })
     }
 
     return NextResponse.json({
       ok: true,
       message_id: ingestResult.messageId,
-      matched_client_id: ingestResult.clientId
+      matched_client_id: ingestResult.clientId,
     })
   } catch (err: any) {
     console.error('[WhatsAppWebhook] Unexpected webhook processing error:', err)

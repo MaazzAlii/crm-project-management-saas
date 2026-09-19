@@ -45,10 +45,14 @@ export function verifyTwilioSignature(
       .update(Buffer.from(data, 'utf-8'))
       .digest('base64')
 
-    return crypto.timingSafeEqual(
-      Buffer.from(hmac, 'utf8'),
-      Buffer.from(signature, 'utf8')
-    )
+    const hmacBuf = Buffer.from(hmac, 'utf8')
+    const sigBuf = Buffer.from(signature, 'utf8')
+
+    if (hmacBuf.length !== sigBuf.length) {
+      return false
+    }
+
+    return crypto.timingSafeEqual(hmacBuf, sigBuf)
   } catch (err) {
     console.error('[WhatsAppProvider] Twilio signature validation error:', err)
     return false

@@ -40,10 +40,14 @@ export function verifySlackSignature(
   const computedSignature = `v0=${hmac}`
 
   try {
-    return crypto.timingSafeEqual(
-      Buffer.from(computedSignature, 'utf8'),
-      Buffer.from(signature, 'utf8')
-    )
+    const computedBuf = Buffer.from(computedSignature, 'utf8')
+    const sigBuf = Buffer.from(signature, 'utf8')
+
+    if (computedBuf.length !== sigBuf.length) {
+      return false
+    }
+
+    return crypto.timingSafeEqual(computedBuf, sigBuf)
   } catch (err) {
     return false
   }

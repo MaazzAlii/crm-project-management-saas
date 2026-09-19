@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyAutomationSignature } from '@/lib/automation/emitter'
+import { readValidatedBody } from '@/lib/security/payload'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,26 +29,20 @@ export async function GET() {
  */
 export async function POST(req: NextRequest) {
   try {
-    const rawBody = await req.text()
+    const { body: rawBody, error: bodyError, status: bodyStatus } = await readValidatedBody(req)
+    if (bodyError || !rawBody) {
+      return NextResponse.json({ error: bodyError || 'Empty request body' }, { status: bodyStatus || 400 })
+    }
+
     const signature = req.headers.get('x-automation-signature') || ''
     const eventType = req.headers.get('x-automation-event')
     const deliveryId = req.headers.get('x-automation-delivery')
-
-    if (!rawBody) {
-      return NextResponse.json(
-        { error: 'Empty request body' },
-        { status: 400 }
-      )
-    }
 
     let payload: any
     try {
       payload = JSON.parse(rawBody)
     } catch {
-      return NextResponse.json(
-        { error: 'Malformed JSON payload' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Malformed JSON payload' }, { status: 400 })
     }
 
     const orgId = payload.organization_id
@@ -73,18 +68,12 @@ export async function POST(req: NextRequest) {
     // If a secret is configured either for org or globally, enforce signature validation
     if (secret) {
       if (!signature) {
-        return NextResponse.json(
-          { error: 'Missing X-Automation-Signature header' },
-          { status: 401 }
-        )
+        return NextResponse.json({ error: 'Missing X-Automation-Signature header' }, { status: 401 })
       }
 
       const isValid = verifyAutomationSignature(rawBody, signature, secret)
       if (!isValid) {
-        return NextResponse.json(
-          { error: 'Invalid HMAC signature' },
-          { status: 401 }
-        )
+        return NextResponse.json({ error: 'Invalid HMAC signature' }, { status: 401 })
       }
     }
 

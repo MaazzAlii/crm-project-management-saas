@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyAutomationSignature } from '@/lib/automation/emitter'
 import { logAuditEvent } from '@/lib/audit/logger'
+import { readValidatedBody } from '@/lib/security/payload'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,12 +13,12 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(req: NextRequest) {
   try {
-    const rawBody = await req.text()
-    const signature = req.headers.get('x-automation-signature') || ''
-
-    if (!rawBody) {
-      return NextResponse.json({ error: 'Empty request body' }, { status: 400 })
+    const { body: rawBody, error: bodyError, status: bodyStatus } = await readValidatedBody(req)
+    if (bodyError || !rawBody) {
+      return NextResponse.json({ error: bodyError || 'Empty request body' }, { status: bodyStatus || 400 })
     }
+
+    const signature = req.headers.get('x-automation-signature') || ''
 
     let payload: any
     try {
@@ -57,18 +58,12 @@ export async function POST(req: NextRequest) {
 
     if (secret) {
       if (!signature) {
-        return NextResponse.json(
-          { error: 'Missing X-Automation-Signature header' },
-          { status: 401 }
-        )
+        return NextResponse.json({ error: 'Missing X-Automation-Signature header' }, { status: 401 })
       }
 
       const isValid = verifyAutomationSignature(rawBody, signature, secret)
       if (!isValid) {
-        return NextResponse.json(
-          { error: 'Invalid HMAC signature' },
-          { status: 401 }
-        )
+        return NextResponse.json({ error: 'Invalid HMAC signature' }, { status: 401 })
       }
     }
 

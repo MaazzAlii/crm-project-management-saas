@@ -4,21 +4,32 @@ import { decryptSecret } from '@/lib/security/encrypt'
 import {
   verifySlackSignature,
   getSlackUserInfo,
-  normalizeSlackEventToIngestPayload
+  normalizeSlackEventToIngestPayload,
 } from '@/lib/providers/slack'
 import { ingestMessage } from '@/lib/inbox/ingest'
+import { readValidatedBody } from '@/lib/security/payload'
+
+export const dynamic = 'force-dynamic'
+
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    service: 'Slack Inbound Webhook Engine',
+    timestamp: new Date().toISOString(),
+  })
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const rawBody = await req.text()
-    if (!rawBody) {
-      return NextResponse.json({ error: 'Empty payload' }, { status: 400 })
+    const { body: rawBody, error: bodyError, status: bodyStatus } = await readValidatedBody(req)
+    if (bodyError || !rawBody) {
+      return NextResponse.json({ error: bodyError || 'Empty payload' }, { status: bodyStatus || 400 })
     }
 
     let payload: any
     try {
       payload = JSON.parse(rawBody)
-    } catch (e) {
+    } catch {
       return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
     }
 
@@ -61,7 +72,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, warning: 'No active channel found' })
     }
 
-    // Find channel matching external_account_id (slackChannelId or slackTeamId) or fallback to first active slack channel
+    // Find channel matching external_account_id or metadata
     const matchingChannel =
       channels.find(
         (c) =>
@@ -79,7 +90,14 @@ export async function POST(req: NextRequest) {
     const encryptedSecret = channelMeta.signing_secret || process.env.SLACK_SIGNING_SECRET || ''
     const signingSecret = decryptSecret(encryptedSecret)
 
-    if (signingSecret) {
+    if (signingSecret || signature) {
+      if (!signature || !timestamp) {
+        return NextResponse.json(
+          { error: 'Missing X-Slack-Signature or X-Slack-Request-Timestamp header' },
+          { status: 401 }
+        )
+      }
+
       const isValid = verifySlackSignature(signature, timestamp, rawBody, signingSecret)
       if (!isValid) {
         console.error('[SlackWebhook] Invalid Slack signature verification failed.')
@@ -98,7 +116,6 @@ export async function POST(req: NextRequest) {
 
     // 6. Normalize payload and Ingest into Communication Hub
     const normalizedPayload = normalizeSlackEventToIngestPayload(event, slackUserInfo)
-
     const ingestResult = await ingestMessage(matchingChannel.id, normalizedPayload)
 
     if (!ingestResult.success) {
@@ -109,7 +126,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       message_id: ingestResult.messageId,
-      matched_client_id: ingestResult.clientId
+      matched_client_id: ingestResult.clientId,
     })
   } catch (err: any) {
     console.error('[SlackWebhook] Unexpected webhook processing error:', err)

@@ -1,12 +1,43 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { applySecurityHeaders } from '@/lib/security/headers'
+import { handleCorsPreflight, applyCorsHeaders } from '@/lib/security/cors'
+import { handleRateLimiting } from '@/middleware/rate-limit'
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+
+  // 1. CORS Preflight Handling for API routes
+  if (pathname.startsWith('/api/')) {
+    const preflight = handleCorsPreflight(request)
+    if (preflight) {
+      return applySecurityHeaders(preflight)
+    }
+  }
+
+  // 2. Sliding Window Rate Limiting Enforcement
+  const rateLimitResponse = handleRateLimiting(request)
+  if (rateLimitResponse) {
+    applySecurityHeaders(rateLimitResponse)
+    if (pathname.startsWith('/api/')) {
+      applyCorsHeaders(rateLimitResponse, request)
+    }
+    return rateLimitResponse
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   })
+
+  // Apply Security Headers to Base Response
+  applySecurityHeaders(response)
+
+  // Apply CORS headers to API route responses
+  if (pathname.startsWith('/api/')) {
+    applyCorsHeaders(response, request)
+  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -27,6 +58,10 @@ export async function middleware(request: NextRequest) {
         response = NextResponse.next({
           request,
         })
+        applySecurityHeaders(response)
+        if (pathname.startsWith('/api/')) {
+          applyCorsHeaders(response, request)
+        }
         cookiesToSet.forEach(({ name, value, options }) =>
           response.cookies.set(name, value, options)
         )
@@ -35,8 +70,6 @@ export async function middleware(request: NextRequest) {
   })
 
   const { data: { user } } = await supabase.auth.getUser()
-
-  const pathname = request.nextUrl.pathname
 
   // Client Portal Routes — separate auth boundary
   const isPortalRoute = pathname.startsWith('/client')
@@ -47,7 +80,8 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/client/login'
     url.search = ''
-    return NextResponse.redirect(url)
+    const redirectRes = NextResponse.redirect(url)
+    return applySecurityHeaders(redirectRes)
   }
 
   // Protected Routes requiring Auth (org-member app)
@@ -68,7 +102,8 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     url.searchParams.set('redirectTo', pathname)
-    return NextResponse.redirect(url)
+    const redirectRes = NextResponse.redirect(url)
+    return applySecurityHeaders(redirectRes)
   }
 
   // Super Admin Guard — strictly isolated tier checking super_admins table
@@ -80,7 +115,8 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.searchParams.set('redirectTo', pathname)
-      return NextResponse.redirect(url)
+      const redirectRes = NextResponse.redirect(url)
+      return applySecurityHeaders(redirectRes)
     }
 
     try {
@@ -93,7 +129,8 @@ export async function middleware(request: NextRequest) {
       if (!superAdmin) {
         const url = request.nextUrl.clone()
         url.pathname = '/dashboard'
-        return NextResponse.redirect(url)
+        const redirectRes = NextResponse.redirect(url)
+        return applySecurityHeaders(redirectRes)
       }
     } catch {
       // In dev environment when local DB is offline
@@ -123,7 +160,8 @@ export async function middleware(request: NextRequest) {
       if (!superAdmin) {
         const url = request.nextUrl.clone()
         url.pathname = '/org-suspended'
-        return NextResponse.redirect(url)
+        const redirectRes = NextResponse.redirect(url)
+        return applySecurityHeaders(redirectRes)
       }
     }
   }
@@ -131,7 +169,8 @@ export async function middleware(request: NextRequest) {
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
+    const redirectRes = NextResponse.redirect(url)
+    return applySecurityHeaders(redirectRes)
   }
 
   return response
@@ -142,3 +181,4 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
+
