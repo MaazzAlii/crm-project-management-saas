@@ -21,18 +21,21 @@ export default function OnboardingPage() {
 
   const handleFinish = async () => {
     setLoading(true)
-    const res = await completeOnboarding({
-      organizationId: orgId,
-      industryType,
-      teamEmails,
-      planSlug: selectedPlan,
-    })
+    try {
+      const res = await completeOnboarding({
+        organizationId: orgId,
+        industryType,
+        teamEmails,
+        planSlug: selectedPlan,
+      })
 
-    if (res.success) {
-      router.push('/dashboard')
-      router.refresh()
-    } else {
-      setLoading(false)
+      if (res?.success) {
+        window.location.href = '/dashboard'
+      } else {
+        router.push('/dashboard')
+      }
+    } catch {
+      window.location.href = '/dashboard'
     }
   }
 

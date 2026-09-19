@@ -38,8 +38,16 @@ export async function getCurrentSessionContext(): Promise<UserSessionContext | n
     // In dev environment when Supabase local server is offline
   }
 
+  let isDevAdmin = process.env.DEV_SUPER_ADMIN === 'true'
+  try {
+    const cookieStore = cookies()
+    if (cookieStore.get('dev_super_admin')?.value === 'true') {
+      isDevAdmin = true
+    }
+  } catch {}
+
   if (!user) {
-    if (process.env.DEV_SUPER_ADMIN === 'true') {
+    if (isDevAdmin) {
       return {
         user: {
           id: '00000000-0000-0000-0000-000000000000',

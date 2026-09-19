@@ -9,7 +9,8 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.15.0",
@@ -25,6 +26,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^20.17.19",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",

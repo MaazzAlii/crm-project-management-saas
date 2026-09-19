@@ -24,9 +24,9 @@ export interface WeeklyReportData {
 export async function fetchWeeklyReportMetricsAction(): Promise<WeeklyReportData> {
   const session = await getCurrentSessionContext()
 
-  if (!session || !session.organization) {
+  if (!session || !session.organization || session.organization.id === '00000000-0000-0000-0000-000000000001') {
     return {
-      figures: getDevWeeklyFigures('Acme Agency Workspace'),
+      figures: getDevWeeklyFigures(session?.organization?.name || 'Acme Agency Workspace'),
       aiEnabled: true,
     }
   }

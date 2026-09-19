@@ -69,10 +69,16 @@ export async function middleware(request: NextRequest) {
     },
   })
 
-  const { data: { user } } = await supabase.auth.getUser()
+  let user: any = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data?.user || null
+  } catch {
+    user = null
+  }
 
   // Client Portal Routes — separate auth boundary
-  const isPortalRoute = pathname.startsWith('/client')
+  const isPortalRoute = pathname.startsWith('/client/') || pathname === '/client'
   const isPortalPublic = pathname.startsWith('/client/login') || pathname.startsWith('/client/auth')
 
   // Portal: require session for protected portal paths
@@ -96,7 +102,7 @@ export async function middleware(request: NextRequest) {
   // Auth Routes (Login / Signup)
   const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signup')
 
-  const isDevSuperAdmin = request.cookies.get('dev_super_admin')?.value === 'true' || process.env.DEV_SUPER_ADMIN === 'true'
+  const isDevSuperAdmin = request.cookies.get('dev_super_admin')?.value === 'true'
 
   if (isProtectedRoute && !user && !isDevSuperAdmin) {
     const url = request.nextUrl.clone()

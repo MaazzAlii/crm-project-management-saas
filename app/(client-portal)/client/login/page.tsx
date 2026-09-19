@@ -9,9 +9,17 @@ function ClientLoginForm() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const searchParams = useSearchParams()
   const orgSlug = searchParams.get('org') ?? ''
+  const urlError = searchParams.get('error')
+  const initialError = urlError === 'no_portal_access'
+    ? 'No active client portal account found for this email. Contact your account manager for access.'
+    : urlError === 'portal_not_available'
+    ? 'Client Portal is not available on this organization plan.'
+    : urlError === 'auth_failed'
+    ? 'Authentication failed or magic link expired.'
+    : null
+  const [error, setError] = useState<string | null>(initialError)
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault()
