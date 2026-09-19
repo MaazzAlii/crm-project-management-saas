@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.github
+*.log
+.env*
+scratch
+tests
+e2e
+playwright-report
+test-results
+coverage
+documentation

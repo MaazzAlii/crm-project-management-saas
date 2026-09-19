@@ -60,7 +60,7 @@ services:
       PGRST_JWT_SECRET: ${JWT_SECRET}
       PGRST_DB_USE_BATCHING: "true"
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:3002:3000"
 
   realtime:
     image: supabase/realtime:v2.28.32

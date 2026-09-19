@@ -1,0 +1,6 @@
+# robots.txt for Innoventix CRM
+User-agent: *
+Disallow: /api/
+Disallow: /super-admin/
+Disallow: /settings/
+Allow: /

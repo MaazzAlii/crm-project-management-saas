@@ -1,0 +1,220 @@
+name: CI/CD Pipeline - Build, Test & Deploy to Contabo VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: 'Deployment target environment (production or staging)'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # =========================================================================
+  # STEP 1 & 2: VALIDATE (Type Check, Tests, and Next.js Build)
+  # =========================================================================
+  validate:
+    name: Type-Check, Test & Build Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Type Check (Fail Fast)
+        run: npm run type-check
+
+      - name: Run Automated Test Suite (Vitest)
+        run: npm run test
+
+      - name: Build Application
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NODE_ENV: production
+          NEXT_PUBLIC_APP_URL: https://app.innoventixhub.com
+          NEXT_PUBLIC_SUPABASE_URL: https://api.innoventixhub.com
+
+  # =========================================================================
+  # STEP 3 & 4: BUILD DOCKER IMAGE & PUSH TO GHCR
+  # =========================================================================
+  build-and-push:
+    name: Build & Push Docker Image
+    needs: validate
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.version }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,prefix=sha-,format=short
+            type=raw,value=staging,enable=${{ github.event.inputs.target_env == 'staging' }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_APP_URL=https://app.innoventixhub.com
+            NEXT_PUBLIC_SUPABASE_URL=https://api.innoventixhub.com
+
+  # =========================================================================
+  # STEP 5, 6 & 7: DEPLOY TO CONTABO VPS WITH POST-DEPLOY HEALTHCHECK & ROLLBACK
+  # =========================================================================
+  deploy:
+    name: Deploy to Contabo VPS
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH Deploy to Contabo VPS
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          IMAGE_TAG: sha-${{ github.sha }}
+          TARGET_ENV: ${{ github.event.inputs.target_env || 'production' }}
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+        with:
+          host: ${{ secrets.CONTABO_HOST }}
+          username: ${{ secrets.CONTABO_USER }}
+          key: ${{ secrets.CONTABO_SSH_KEY }}
+          port: ${{ secrets.CONTABO_SSH_PORT || 22 }}
+          envs: IMAGE_TAG,TARGET_ENV,REGISTRY_USER,REGISTRY_PASSWORD,REPO_NAME
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            echo "================================================================="
+            echo " Starting Deployment on Contabo VPS"
+            echo " Repository:  ${REPO_NAME}"
+            echo " Image Tag:   ${IMAGE_TAG}"
+            echo " Environment: ${TARGET_ENV}"
+            echo " Timestamp:   $(date -u +'%Y-%m-%d %H:%M:%SZ')"
+            echo "================================================================="
+
+            # 1. Authenticate Docker with GHCR
+            echo "${REGISTRY_PASSWORD}" | docker login ghcr.io -u "${REGISTRY_USER}" --password-stdin
+
+            # 2. Navigate to application deployment directory
+            APP_DIR="/opt/innoventix/app"
+            if [ ! -d "${APP_DIR}" ]; then
+              echo "Error: Directory ${APP_DIR} does not exist on VPS!"
+              exit 1
+            fi
+            cd "${APP_DIR}"
+
+            FULL_IMAGE="ghcr.io/${REPO_NAME}:${IMAGE_TAG}"
+
+            echo "==> Pulling new container image: ${FULL_IMAGE}..."
+            docker pull "${FULL_IMAGE}"
+
+            # 3. Configure target container and port
+            if [ "${TARGET_ENV}" = "staging" ]; then
+              CONTAINER_NAME="innoventix-app-staging"
+              PORT=3005
+              COMPOSE_SERVICE="app-staging"
+              export APP_IMAGE_STAGING="${FULL_IMAGE}"
+              COMPOSE_CMD="docker compose --profile staging up -d ${COMPOSE_SERVICE}"
+            else
+              CONTAINER_NAME="innoventix-app"
+              PORT=3000
+              COMPOSE_SERVICE="app"
+              export APP_IMAGE="${FULL_IMAGE}"
+              COMPOSE_CMD="docker compose up -d ${COMPOSE_SERVICE}"
+            fi
+
+            # 4. Identify previously running image for automatic rollback
+            PREV_IMAGE=$(docker inspect --format='{{.Config.Image}}' "${CONTAINER_NAME}" 2>/dev/null || true)
+            echo "==> Previously running image: ${PREV_IMAGE:-None}"
+
+            # 5. Start new container
+            echo "==> Starting updated container (${COMPOSE_SERVICE})..."
+            eval "${COMPOSE_CMD}"
+
+            # 6. Post-deploy health check (verify /api/health)
+            echo "==> Verifying post-deploy health check on http://127.0.0.1:${PORT}/api/health..."
+            HEALTHY=0
+            for i in $(seq 1 15); do
+              echo "Attempt $i of 15: Probing /api/health..."
+              if curl -s -f "http://127.0.0.1:${PORT}/api/health" | grep -q '"status":"ok"'; then
+                echo "==> Health check passed successfully!"
+                HEALTHY=1
+                break
+              fi
+              sleep 3
+            done
+
+            # 7. Automatic rollback if health check fails
+            if [ "${HEALTHY}" -ne 1 ]; then
+              echo "================================================================="
+              echo " FATAL: Health check failed for ${FULL_IMAGE} on port ${PORT}!"
+              echo " Initiating automatic rollback..."
+              echo "================================================================="
+
+              if [ -n "${PREV_IMAGE}" ]; then
+                echo "==> Rolling back to previous image: ${PREV_IMAGE}..."
+                if [ "${TARGET_ENV}" = "staging" ]; then
+                  export APP_IMAGE_STAGING="${PREV_IMAGE}"
+                else
+                  export APP_IMAGE="${PREV_IMAGE}"
+                fi
+                eval "${COMPOSE_CMD}"
+                echo "==> Rollback container restored."
+              else
+                echo "==> No previous image available for rollback."
+              fi
+              exit 1
+            fi
+
+            # 8. Post-deploy cleanup of older dangling images
+            echo "==> Pruning dangling Docker images..."
+            docker image prune -f --filter "until=72h" || true
+
+            echo "================================================================="
+            echo " Deployment of ${FULL_IMAGE} to ${TARGET_ENV} completed successfully!"
+            echo "================================================================="

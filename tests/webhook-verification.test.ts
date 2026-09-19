@@ -69,7 +69,7 @@ describe('Webhook Signature Verification & Ingestion Normalization', () => {
       expect(normalized.sender_name).toBe('Alice Johnson')
       expect(normalized.sender_identifier).toBe('alice@example.com')
       expect(normalized.body).toBe('Project status update needed')
-      expect(normalized.metadata.slack_channel_id).toBe('C67890')
+      expect(normalized.metadata?.slack_channel_id).toBe('C67890')
     })
   })
 
@@ -194,7 +194,7 @@ describe('Webhook Signature Verification & Ingestion Normalization', () => {
       expect(normalized.sender_name).toBe('Charlie Brown')
       expect(normalized.sender_identifier).toBe('charlie@example.com')
       expect(normalized.body).toBe('Feedback submitted')
-      expect(normalized.metadata.discord_channel_id).toBe('chan_123')
+      expect(normalized.metadata?.discord_channel_id).toBe('chan_123')
     })
   })
 
@@ -287,7 +287,7 @@ describe('Webhook Signature Verification & Ingestion Normalization', () => {
       expect(normalized.sender_name).toBe('Elena Rostova')
       expect(normalized.sender_identifier).toBe('elena@contractor.com')
       expect(normalized.body).toBe('Draft milestone files submitted')
-      expect(normalized.metadata.upwork_contract_id).toBe('cnt_777')
+      expect(normalized.metadata?.upwork_contract_id).toBe('cnt_777')
     })
   })
 })
