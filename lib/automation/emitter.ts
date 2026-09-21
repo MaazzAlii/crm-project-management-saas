@@ -8,6 +8,19 @@ import {
 } from './types'
 
 /**
+ * Maps each canonical event name to its n8n webhook path segment.
+ * These paths correspond exactly to the `path` parameter in each
+ * n8n workflow's Webhook Trigger node.
+ */
+const EVENT_WEBHOOK_PATHS: Record<AutomationEventType, string> = {
+  'project.delivered': 'webhook/project-delivered',
+  'task.deadline_approaching': 'webhook/task-deadline-alert',
+  'project.overdue': 'webhook/project-overdue-alert',
+  'weekly.summary_ready': 'webhook/weekly-summary-receiver',
+  'ping': 'webhook/ping',
+}
+
+/**
  * Computes an HMAC-SHA256 signature for the given payload string and shared secret.
  */
 export function signPayload(payloadString: string, secret: string): string {
@@ -111,6 +124,16 @@ export async function emitAutomationEvent<T = any>(
     }
   }
 
+  // 1b. Resolve event-specific webhook path
+  // If targetUrl already contains a specific webhook path (e.g., ends with /webhook/project-delivered),
+  // use it directly. Otherwise, treat targetUrl as a base URL and append the event-specific path.
+  const eventPath = EVENT_WEBHOOK_PATHS[event]
+  let resolvedUrl = targetUrl
+  if (eventPath && !targetUrl.includes('/webhook/')) {
+    // targetUrl is a base URL like https://n8n.innoventixhub.com
+    resolvedUrl = `${targetUrl.replace(/\/+$/, '')}/${eventPath}`
+  }
+
   // 2. Build canonical payload
   const payload: AutomationEventPayload<T> = {
     id: deliveryId,
@@ -140,7 +163,7 @@ export async function emitAutomationEvent<T = any>(
   const timeoutTimer = setTimeout(() => controller.abort(), timeoutMs)
 
   try {
-    const response = await fetch(targetUrl, {
+    const response = await fetch(resolvedUrl, {
       method: 'POST',
       headers,
       body: payloadString,
@@ -152,7 +175,7 @@ export async function emitAutomationEvent<T = any>(
     console.log('[Automation:Emitter] Dispatched event:', {
       event,
       deliveryId,
-      targetUrl,
+      resolvedUrl,
       statusCode: response.status,
       timestamp,
     })
@@ -182,7 +205,7 @@ export async function emitAutomationEvent<T = any>(
     console.error('[Automation:Emitter] Delivery failed:', {
       event,
       deliveryId,
-      targetUrl,
+      resolvedUrl,
       error: errorMessage,
     })
 
