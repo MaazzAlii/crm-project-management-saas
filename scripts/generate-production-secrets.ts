@@ -122,7 +122,7 @@ if (require.main === module || process.argv[1]?.endsWith('generate-production-se
   console.log(`ENCRYPTION_SECRET=${secrets.encryptionSecret}`)
   console.log(`CRON_SECRET=${secrets.cronSecret}`)
   console.log(`N8N_WEBHOOK_SECRET=${secrets.n8nWebhookSecret}`)
-  console.log(`N8N_WEBHOOK_URL=https://n8n.innoventixhub.com/webhook/events`)
+  console.log(`N8N_WEBHOOK_URL=https://maaz.n8n.calara.agency/webhook/events`)
 
   console.log('\n3. THIRD-PARTY KEYS TO FILL MANUALLY IN .env.production:')
   console.log('────────────────────────────────────────────────────────────────────')

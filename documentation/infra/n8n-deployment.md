@@ -2,7 +2,7 @@
 
 ## 1. Overview & Architecture
 
-The self-hosted **n8n automation engine** is co-located with the Next.js application and Supabase stack on the **Contabo Cloud VPS**. It runs on internal port `5678` and is securely reverse-proxied by Nginx at `https://n8n.innoventixhub.com` with automatic Let's Encrypt SSL.
+The self-hosted **n8n automation engine** is co-located with the Next.js application and Supabase stack on the **Contabo Cloud VPS**. It runs on internal port `5678` and is securely reverse-proxied by Nginx at `https://maaz.n8n.calara.agency` with automatic Let's Encrypt SSL.
 
 ```
 +----------------------------------------------------------------------------------+
@@ -10,7 +10,7 @@ The self-hosted **n8n automation engine** is co-located with the Next.js applica
 |                                                                                  |
 |   +--------------------------+           +────────────────────────────────────+  |
 |   | Next.js SaaS Application |           |      n8n Automation Engine         |  |
-|   | (app.innoventixhub.com)  |           |     (n8n.innoventixhub.com)        |  |
+|   | (app.innoventixhub.com)  |           |     (maaz.n8n.calara.agency)        |  |
 |   |                          |           |                                    |  |
 |   | - lib/automation/emitter | ──HMAC──> | - Webhook Triggers                 |  |
 |   | - /api/automation/cron/* |   POST    | - Signature Verification (crypto)  |  |
@@ -26,12 +26,12 @@ The emitter (`lib/automation/emitter.ts`) automatically maps each event name to 
 
 | Event Name | n8n Webhook Path | Full Production URL |
 | :--- | :--- | :--- |
-| `project.delivered` | `/webhook/project-delivered` | `https://n8n.innoventixhub.com/webhook/project-delivered` |
-| `task.deadline_approaching` | `/webhook/task-deadline-alert` | `https://n8n.innoventixhub.com/webhook/task-deadline-alert` |
-| `project.overdue` | `/webhook/project-overdue-alert` | `https://n8n.innoventixhub.com/webhook/project-overdue-alert` |
-| `weekly.summary_ready` | `/webhook/weekly-summary-receiver` | `https://n8n.innoventixhub.com/webhook/weekly-summary-receiver` |
+| `project.delivered` | `/webhook/project-delivered` | `https://maaz.n8n.calara.agency/webhook/project-delivered` |
+| `task.deadline_approaching` | `/webhook/task-deadline-alert` | `https://maaz.n8n.calara.agency/webhook/task-deadline-alert` |
+| `project.overdue` | `/webhook/project-overdue-alert` | `https://maaz.n8n.calara.agency/webhook/project-overdue-alert` |
+| `weekly.summary_ready` | `/webhook/weekly-summary-receiver` | `https://maaz.n8n.calara.agency/webhook/weekly-summary-receiver` |
 
-The `N8N_WEBHOOK_URL` environment variable should be set to the **base URL** only (e.g., `https://n8n.innoventixhub.com`). The emitter appends the event-specific path automatically.
+The `N8N_WEBHOOK_URL` environment variable should be set to the **base URL** only (e.g., `https://maaz.n8n.calara.agency`). The emitter appends the event-specific path automatically.
 
 ---
 
@@ -43,10 +43,10 @@ In `/opt/innoventix/n8n/.env` (or in the docker compose service definition for n
 
 ```bash
 # General n8n Configuration
-N8N_HOST=n8n.innoventixhub.com
+N8N_HOST=maaz.n8n.calara.agency
 N8N_PORT=5678
 N8N_PROTOCOL=https
-WEBHOOK_URL=https://n8n.innoventixhub.com/
+WEBHOOK_URL=https://maaz.n8n.calara.agency/
 
 # Shared Webhook Secret (MUST match N8N_WEBHOOK_SECRET in /opt/innoventix/app/.env.production)
 AUTOMATION_WEBHOOK_SECRET=<COPIED_FROM_APP_ENV_PRODUCTION>
@@ -84,7 +84,7 @@ The 4 production workflows are located in the repository under `n8n/workflows/`:
 
 ### Method A: Import via n8n Web UI (Recommended)
 
-1. Open your browser and log in to `https://n8n.innoventixhub.com`.
+1. Open your browser and log in to `https://maaz.n8n.calara.agency`.
 2. Click **Workflows** in the left sidebar.
 3. Click the **`+ Add Workflow`** button (or click the three dots `...` in the top-right corner of the canvas) and select **Import from File**.
 4. Select the first JSON file from your local repository: `n8n/workflows/project-delivered-invoice.json`.
@@ -171,10 +171,10 @@ Each workflow's webhook trigger URL and payload contract exactly match what `lib
 
 | Flow # | Event Name (`X-Automation-Event`) | n8n Webhook Path | Full Production Webhook URL | App Source |
 | :--- | :--- | :--- | :--- | :--- |
-| **1** | `project.delivered` | `project-delivered` | `https://n8n.innoventixhub.com/webhook/project-delivered` | `app/(dashboard)/projects/actions.ts` → `deliverProject()` |
-| **2** | `task.deadline_approaching` | `task-deadline-alert` | `https://n8n.innoventixhub.com/webhook/task-deadline-alert` | `app/api/automation/cron/deadline-check/route.ts` |
-| **3** | `project.overdue` | `project-overdue-alert` | `https://n8n.innoventixhub.com/webhook/project-overdue-alert` | `app/api/automation/cron/deadline-check/route.ts` |
-| **4** | `weekly.summary_ready` | `weekly-summary-receiver` | `https://n8n.innoventixhub.com/webhook/weekly-summary-receiver` | `app/api/automation/cron/weekly-summary/route.ts` |
+| **1** | `project.delivered` | `project-delivered` | `https://maaz.n8n.calara.agency/webhook/project-delivered` | `app/(dashboard)/projects/actions.ts` → `deliverProject()` |
+| **2** | `task.deadline_approaching` | `task-deadline-alert` | `https://maaz.n8n.calara.agency/webhook/task-deadline-alert` | `app/api/automation/cron/deadline-check/route.ts` |
+| **3** | `project.overdue` | `project-overdue-alert` | `https://maaz.n8n.calara.agency/webhook/project-overdue-alert` | `app/api/automation/cron/deadline-check/route.ts` |
+| **4** | `weekly.summary_ready` | `weekly-summary-receiver` | `https://maaz.n8n.calara.agency/webhook/weekly-summary-receiver` | `app/api/automation/cron/weekly-summary/route.ts` |
 
 ### Standard Canonical Payload Structure
 
@@ -287,7 +287,7 @@ In the n8n web interface:
 
 > [!NOTE]
 > When a workflow is **Active**, n8n listens on the production webhook URL:
-> `https://n8n.innoventixhub.com/webhook/<path>`
+> `https://maaz.n8n.calara.agency/webhook/<path>`
 > If the workflow is inactive, n8n only listens on `/webhook-test/<path>` during manual canvas execution — production events will return 404.
 
 ---
@@ -313,7 +313,7 @@ SECRET="<YOUR_N8N_WEBHOOK_SECRET>"
 PAYLOAD='{"id":"test-001","event":"project.delivered","organization_id":"org-1","timestamp":"2026-09-21T12:00:00.000Z","data":{"project_id":"p-100","project_name":"Brand Identity Redesign","client_id":"c-100","client_name":"Acme Corp","client_email":"billing@acme.com","budget":15000,"delivered_at":"2026-09-21T12:00:00.000Z","completed_by_name":"Alex Lead"}}'
 SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')
 
-curl -X POST https://n8n.innoventixhub.com/webhook/project-delivered \
+curl -X POST https://maaz.n8n.calara.agency/webhook/project-delivered \
   -H "Content-Type: application/json" \
   -H "X-Automation-Event: project.delivered" \
   -H "X-Automation-Delivery: test-001" \
@@ -341,7 +341,7 @@ SECRET="<YOUR_N8N_WEBHOOK_SECRET>"
 PAYLOAD='{"id":"test-002","event":"task.deadline_approaching","organization_id":"org-1","timestamp":"2026-09-21T08:00:00.000Z","data":{"task_id":"t-200","task_title":"Finalize Q3 Audit Report","project_id":"p-100","project_name":"Security Compliance","due_date":"2026-09-22","priority":"high","assignee_name":"Sarah Connor"}}'
 SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')
 
-curl -X POST https://n8n.innoventixhub.com/webhook/task-deadline-alert \
+curl -X POST https://maaz.n8n.calara.agency/webhook/task-deadline-alert \
   -H "Content-Type: application/json" \
   -H "X-Automation-Event: task.deadline_approaching" \
   -H "X-Automation-Delivery: test-002" \
@@ -369,7 +369,7 @@ SECRET="<YOUR_N8N_WEBHOOK_SECRET>"
 PAYLOAD='{"id":"test-003","event":"project.overdue","organization_id":"org-1","timestamp":"2026-09-21T09:00:00.000Z","data":{"project_id":"p-300","project_name":"Mobile Banking UI Kit","client_id":"c-300","client_name":"Horizon Fintech","deadline":"2026-09-19","days_overdue":2,"status":"in_progress"}}'
 SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')
 
-curl -X POST https://n8n.innoventixhub.com/webhook/project-overdue-alert \
+curl -X POST https://maaz.n8n.calara.agency/webhook/project-overdue-alert \
   -H "Content-Type: application/json" \
   -H "X-Automation-Event: project.overdue" \
   -H "X-Automation-Delivery: test-003" \
@@ -397,7 +397,7 @@ curl -X POST https://app.innoventixhub.com/api/automation/cron/weekly-summary \
 #### What happens:
 1. The app aggregates 7-day metrics (completed tasks, active projects, new clients, delivered revenue, communication volume, overdue items) per organization.
 2. If AI narrative is enabled for the org, generates an executive summary narrative via `generateWeeklyReportNarrative`.
-3. Emits signed `weekly.summary_ready` event to `https://n8n.innoventixhub.com/webhook/weekly-summary-receiver`.
+3. Emits signed `weekly.summary_ready` event to `https://maaz.n8n.calara.agency/webhook/weekly-summary-receiver`.
 4. Creates an entry in `in_app_notifications`.
 
 #### Direct n8n Test:
@@ -406,7 +406,7 @@ SECRET="<YOUR_N8N_WEBHOOK_SECRET>"
 PAYLOAD='{"id":"test-004","event":"weekly.summary_ready","organization_id":"org-1","timestamp":"2026-09-21T09:00:00.000Z","data":{"period_start":"2026-09-14T00:00:00.000Z","period_end":"2026-09-20T23:59:59.000Z","metrics":{"tasks_completed":12,"active_projects":5,"new_clients":1,"revenue":18500,"communication_volume":42,"overdue_items":1},"narrative_summary":"Strong week: 12 tasks completed across 5 active projects with $18.5k revenue."}}'
 SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')
 
-curl -X POST https://n8n.innoventixhub.com/webhook/weekly-summary-receiver \
+curl -X POST https://maaz.n8n.calara.agency/webhook/weekly-summary-receiver \
   -H "Content-Type: application/json" \
   -H "X-Automation-Event: weekly.summary_ready" \
   -H "X-Automation-Delivery: test-004" \
@@ -469,5 +469,5 @@ After importing, configuring credentials, and activating all workflows:
 | `channel_not_found` in Slack node | Bot is not invited to the channel | In Slack, type `/invite @YourBotName` in each required channel. |
 | Cron endpoint returns HTTP 401 | Invalid or missing cron secret | Ensure `x-cron-secret` header matches `CRON_SECRET` in `.env.production`. |
 | Slack message formatting broken | Payload data keys don't match n8n template expressions | Verify the TypeScript payload shapes in `lib/automation/types.ts` match the template variable names in the n8n Slack node text fields. |
-| Events sent to wrong URL | `N8N_WEBHOOK_URL` still includes `/webhook/events` | Update to base URL only: `https://n8n.innoventixhub.com`. The emitter appends event-specific paths automatically. |
+| Events sent to wrong URL | `N8N_WEBHOOK_URL` still includes `/webhook/events` | Update to base URL only: `https://maaz.n8n.calara.agency`. The emitter appends event-specific paths automatically. |
 | Invoice callback fails | `APP_URL` not set in n8n environment | Set `APP_URL=https://app.innoventixhub.com` in the n8n container `.env`. |

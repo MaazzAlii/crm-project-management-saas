@@ -13,7 +13,7 @@ Point all required subdomains to your Contabo VPS Public IPv4 Address (`<VPS_PUB
 | :--- | :--- | :--- | :--- |
 | `app.innoventixhub.com` | `A` | `<VPS_PUBLIC_IP>` | Next.js Frontend Application Shell |
 | `api.innoventixhub.com` | `A` | `<VPS_PUBLIC_IP>` | Self-Hosted Supabase Gateway (Kong API) |
-| `n8n.innoventixhub.com` | `A` | `<VPS_PUBLIC_IP>` | n8n Automation Engine |
+| `maaz.n8n.calara.agency` | `A` | `<VPS_PUBLIC_IP>` | n8n Automation Engine |
 
 ---
 
@@ -29,7 +29,7 @@ sudo apt-get install -y certbot python3-certbot-nginx
 sudo certbot --nginx \
   -d app.innoventixhub.com \
   -d api.innoventixhub.com \
-  -d n8n.innoventixhub.com \
+  -d maaz.n8n.calara.agency \
   --non-interactive \
   --agree-tos \
   -m admin@innoventixhub.com

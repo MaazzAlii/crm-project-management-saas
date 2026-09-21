@@ -72,7 +72,7 @@ This generates:
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe Live Publishable Key | **YES** | Stripe Dashboard (`pk_live_...`) |
 | `AI_PROVIDER` | Active AI provider (`openai` / `gemini` / `anthropic`) | **YES** | `openai` |
 | `AI_API_KEY` | Production API key for AI features | **YES** | Provider Dashboard (`sk-proj-...`) |
-| `N8N_WEBHOOK_URL` | URL of n8n automation engine | **YES** | `https://n8n.innoventixhub.com/webhook/events` |
+| `N8N_WEBHOOK_URL` | URL of n8n automation engine | **YES** | `https://maaz.n8n.calara.agency/webhook/events` |
 | `N8N_WEBHOOK_SECRET` | Shared secret for n8n webhooks | **YES** | `generate-production-secrets.ts` |
 | `SLACK_SIGNING_SECRET` | Slack app signing secret | Optional | Slack API Dashboard |
 | `SLACK_BOT_TOKEN` | Slack bot OAuth token | Optional | Slack API Dashboard (`xoxb-...`) |
@@ -121,7 +121,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 AI_PROVIDER=openai
 AI_API_KEY=sk-proj-...
-N8N_WEBHOOK_URL=https://n8n.innoventixhub.com/webhook/events
+N8N_WEBHOOK_URL=https://maaz.n8n.calara.agency/webhook/events
 N8N_WEBHOOK_SECRET=<GENERATED_N8N_SECRET>
 EOF
 

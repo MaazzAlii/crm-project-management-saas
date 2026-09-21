@@ -130,7 +130,7 @@ export async function emitAutomationEvent<T = any>(
   const eventPath = EVENT_WEBHOOK_PATHS[event]
   let resolvedUrl = targetUrl
   if (eventPath && !targetUrl.includes('/webhook/')) {
-    // targetUrl is a base URL like https://n8n.innoventixhub.com
+    // targetUrl is a base URL like https://maaz.n8n.calara.agency
     resolvedUrl = `${targetUrl.replace(/\/+$/, '')}/${eventPath}`
   }
 
