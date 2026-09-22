@@ -24,6 +24,17 @@ export async function createClient() {
   }
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      fetch: (url: RequestInfo | URL, options?: RequestInit) => {
+        const timeoutMs = process.env.NODE_ENV === 'production' ? 15000 : 2500
+        const controller = new AbortController()
+        const timer = setTimeout(() => controller.abort(), timeoutMs)
+        return fetch(url, {
+          ...options,
+          signal: options?.signal || controller.signal,
+        }).finally(() => clearTimeout(timer))
+      },
+    },
     cookies: {
       getAll() {
         return cookieStore ? cookieStore.getAll() : []
