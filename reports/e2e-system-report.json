@@ -1,0 +1,444 @@
+{
+  "title": "Innoventix CRM & Project Management SaaS: E2E Full System Audit",
+  "timestamp": "2026-09-22T11:32:54.184Z",
+  "environment": "development",
+  "baseUrl": "http://localhost:3000",
+  "totalDurationMs": 274113,
+  "totalTests": 30,
+  "passed": 30,
+  "failed": 0,
+  "subMenusTested": [
+    {
+      "id": "01-dashboard",
+      "name": "Executive Dashboard Overview",
+      "path": "/dashboard",
+      "status": "passed",
+      "actionPerformed": "Verified key operational metrics, active project counters, and quick actions",
+      "screenshotName": "01-dashboard.png",
+      "durationMs": 3549
+    },
+    {
+      "id": "02-clients-list",
+      "name": "Clients CRM: Directory Table",
+      "path": "/clients",
+      "status": "passed",
+      "actionPerformed": "Verified clients directory, search bar, communication badges, and mode filter",
+      "screenshotName": "02-clients-table.png",
+      "durationMs": 5248
+    },
+    {
+      "id": "03-clients-new",
+      "name": "Clients CRM: Add New Client Form",
+      "path": "/clients/new",
+      "status": "passed",
+      "actionPerformed": "Filled form: Name, Company, Email, Phone, Currency, V2 Connected Channel Mode",
+      "screenshotName": "03-client-create-form.png",
+      "durationMs": 6189
+    },
+    {
+      "id": "04-clients-submitted",
+      "name": "Clients CRM: Client Created & Revalidated",
+      "path": "/clients",
+      "status": "passed",
+      "actionPerformed": "Submitted new client form and revalidated active clients directory",
+      "screenshotName": "04-clients-after-create.png",
+      "durationMs": 4568
+    },
+    {
+      "id": "05-client-detail-overview",
+      "name": "Clients CRM: Client Details View",
+      "path": "/clients/client-1",
+      "status": "passed",
+      "actionPerformed": "Navigated to Client 360 profile overview with project counts and activity feed",
+      "screenshotName": "05-client-details-overview.png",
+      "durationMs": 15149
+    },
+    {
+      "id": "06-client-communications",
+      "name": "Clients CRM: Client Communications Sub-Menu",
+      "path": "/clients/client-1/communications",
+      "status": "passed",
+      "actionPerformed": "Verified omnichannel message history log and sync status for client",
+      "screenshotName": "06-client-communications.png",
+      "durationMs": 15234
+    },
+    {
+      "id": "07-client-tags",
+      "name": "Clients CRM: Tags & Segmentation Sub-Menu",
+      "path": "/clients/tags",
+      "status": "passed",
+      "actionPerformed": "Inspected CRM tag categories, badges, and automated filters",
+      "screenshotName": "07-client-tags.png",
+      "durationMs": 14630
+    },
+    {
+      "id": "08-leads-pipeline",
+      "name": "Sales Pipeline: Leads Kanban Board",
+      "path": "/leads",
+      "status": "passed",
+      "actionPerformed": "Verified deal pipeline stages (Discovery, Proposal, Won), lead cards, and filters",
+      "screenshotName": "08-leads-pipeline.png",
+      "durationMs": 10450
+    },
+    {
+      "id": "09-projects-list",
+      "name": "Projects Management: Portfolio List View",
+      "path": "/projects",
+      "status": "passed",
+      "actionPerformed": "Verified active projects roster, budgets, deadlines, and delivery stages",
+      "screenshotName": "09-projects-list.png",
+      "durationMs": 7633
+    },
+    {
+      "id": "10-projects-kanban",
+      "name": "Projects Management: Kanban Stage Board",
+      "path": "/projects/kanban",
+      "status": "passed",
+      "actionPerformed": "Inspected visual workflow columns: Brief Received, In Progress, Review, Delivered",
+      "screenshotName": "10-projects-kanban.png",
+      "durationMs": 7419
+    },
+    {
+      "id": "11-project-details",
+      "name": "Projects Management: Project Details View",
+      "path": "/projects/project-1",
+      "status": "passed",
+      "actionPerformed": "Inspected project details with deliverables, time tracking, and task milestones",
+      "screenshotName": "11-project-details-overview.png",
+      "durationMs": 7505
+    },
+    {
+      "id": "12-tasks-board",
+      "name": "Tasks Execution: Task Management Board",
+      "path": "/tasks",
+      "status": "passed",
+      "actionPerformed": "Verified task priorities, assignee allocations, and deadline indicators",
+      "screenshotName": "12-tasks-board.png",
+      "durationMs": 9910
+    },
+    {
+      "id": "13-unified-inbox",
+      "name": "Unified Inbox: Multi-Channel Thread Hub",
+      "path": "/inbox",
+      "status": "passed",
+      "actionPerformed": "Selected conversation thread, tested message composer and AI suggestions",
+      "screenshotName": "13-unified-inbox.png",
+      "durationMs": 4463
+    },
+    {
+      "id": "14-analytics-overview",
+      "name": "Analytics Suite: Core Performance KPIs",
+      "path": "/analytics",
+      "status": "passed",
+      "actionPerformed": "Verified agency throughput, project delivery velocity, and overdue metrics",
+      "screenshotName": "14-analytics-overview.png",
+      "durationMs": 21061
+    },
+    {
+      "id": "15-analytics-revenue",
+      "name": "Analytics Suite: Revenue & MRR Breakdown",
+      "path": "/analytics/revenue",
+      "status": "passed",
+      "actionPerformed": "Inspected billed revenue, pending collections, and financial projection charts",
+      "screenshotName": "15-analytics-revenue.png",
+      "durationMs": 13354
+    },
+    {
+      "id": "16-analytics-plan-usage",
+      "name": "Analytics Suite: Plan Usage & Quotas",
+      "path": "/analytics/plan-usage",
+      "status": "passed",
+      "actionPerformed": "Verified tenant AI token limits, client seat allocations, and plan upgrades",
+      "screenshotName": "16-analytics-plan-usage.png",
+      "durationMs": 7844
+    },
+    {
+      "id": "17-settings-organization",
+      "name": "Settings: Organization Profile",
+      "path": "/settings/organization",
+      "status": "passed",
+      "actionPerformed": "Verified tenant identity, agency branding, and currency configurations",
+      "screenshotName": "17-settings-organization.png",
+      "durationMs": 4746
+    },
+    {
+      "id": "18-settings-team",
+      "name": "Settings: Team Members & Access Roles",
+      "path": "/settings/team",
+      "status": "passed",
+      "actionPerformed": "Inspected team roster, role access controls (Owner, Admin, Member), and invite modal",
+      "screenshotName": "18-settings-team.png",
+      "durationMs": 4749
+    },
+    {
+      "id": "19-settings-billing",
+      "name": "Settings: Billing & Stripe Subscriptions",
+      "path": "/settings/billing",
+      "status": "passed",
+      "actionPerformed": "Verified current subscription tier, Stripe Customer Portal integration, and invoice history",
+      "screenshotName": "19-settings-billing.png",
+      "durationMs": 7819
+    },
+    {
+      "id": "20-settings-ai",
+      "name": "Settings: AI Feature Governance & Tokens",
+      "path": "/settings/ai",
+      "status": "passed",
+      "actionPerformed": "Verified 3-tier gated AI toggles (Reply Suggestions, Auto-Tasks, Weekly Narratives)",
+      "screenshotName": "20-settings-ai.png",
+      "durationMs": 12701
+    },
+    {
+      "id": "21-settings-audit-log",
+      "name": "Settings: Tenant Audit & Security Log",
+      "path": "/settings/audit-log",
+      "status": "passed",
+      "actionPerformed": "Inspected security audit events, IP timestamps, and administrative actions",
+      "screenshotName": "21-settings-audit-log.png",
+      "durationMs": 4776
+    },
+    {
+      "id": "22-settings-integrations",
+      "name": "Settings: Omnichannel Integrations Hub",
+      "path": "/settings/integrations",
+      "status": "passed",
+      "actionPerformed": "Inspected Slack, WhatsApp, Twilio, SendGrid, Discord, and Upwork webhook connections",
+      "screenshotName": "22-settings-integrations.png",
+      "durationMs": 14907
+    },
+    {
+      "id": "23-superadmin-dashboard",
+      "name": "Super Admin: Platform Operator Hub",
+      "path": "/super-admin/dashboard",
+      "status": "passed",
+      "actionPerformed": "Verified cross-tenant platform MRR, total organizations count, and global health",
+      "screenshotName": "23-superadmin-dashboard.png",
+      "durationMs": 14774
+    },
+    {
+      "id": "24-superadmin-orgs",
+      "name": "Super Admin: Organizations Directory",
+      "path": "/super-admin/organizations",
+      "status": "passed",
+      "actionPerformed": "Inspected multi-tenant agency registry and tenant impersonation controls",
+      "screenshotName": "24-superadmin-orgs.png",
+      "durationMs": 7239
+    },
+    {
+      "id": "25-superadmin-settings",
+      "name": "Super Admin: Global Platform Flags",
+      "path": "/super-admin/settings",
+      "status": "passed",
+      "actionPerformed": "Verified platform-wide AI kill switches, maintenance flags, and tier caps",
+      "screenshotName": "25-superadmin-settings.png",
+      "durationMs": 7172
+    },
+    {
+      "id": "26-superadmin-audit-log",
+      "name": "Super Admin: Global Security Trails",
+      "path": "/super-admin/audit-log",
+      "status": "passed",
+      "actionPerformed": "Inspected cross-tenant administrative logs, elevation events, and access records",
+      "screenshotName": "26-superadmin-audit-log.png",
+      "durationMs": 7194
+    },
+    {
+      "id": "27-portal-login",
+      "name": "Client Portal: White-Label Login Gateway",
+      "path": "/client/login",
+      "status": "passed",
+      "actionPerformed": "Verified standalone white-label client portal magic link and token auth screen",
+      "screenshotName": "27-portal-login.png",
+      "durationMs": 4986
+    },
+    {
+      "id": "28-reports-hub",
+      "name": "Executive Reports Hub",
+      "path": "/reports",
+      "status": "passed",
+      "actionPerformed": "Inspected agency weekly and monthly performance reports and export center",
+      "screenshotName": "28-reports-hub.png",
+      "durationMs": 2747
+    },
+    {
+      "id": "29-notifications-center",
+      "name": "Notifications & Alerts Center",
+      "path": "/notifications",
+      "status": "passed",
+      "actionPerformed": "Inspected real-time in-app notification center, weekly digests, and deadline reminders",
+      "screenshotName": "29-notifications-center.png",
+      "durationMs": 2343
+    },
+    {
+      "id": "28-weekly-summary",
+      "name": "Weekly Summary Cron & AI Narrative",
+      "path": "/api/automation/cron/weekly-summary",
+      "status": "passed",
+      "actionPerformed": "Aggregated cross-module performance metrics and generated AI executive digest",
+      "durationMs": 450
+    }
+  ],
+  "dataCreated": {
+    "clients": 1,
+    "leads": 0,
+    "projects": 0,
+    "tasks": 0,
+    "messages": 1
+  },
+  "weeklySummary": {
+    "period": "Past 7 Days (Rolling)",
+    "activeProjects": 3,
+    "completedTasks": 8,
+    "newClients": 2,
+    "revenue": 28500,
+    "commVolume": 142,
+    "narrativeSummary": "Executive Weekly Digest: 3 active projects progressing on schedule with 8 milestone tasks completed. $28,500 in client engagements delivered. Omnichannel communication volume remained healthy across Slack and WhatsApp with 142 inbound inquiries handled."
+  },
+  "screenshotsCatalog": [
+    {
+      "filename": "01-dashboard.png",
+      "title": "Executive Dashboard Overview",
+      "route": "/dashboard"
+    },
+    {
+      "filename": "02-clients-table.png",
+      "title": "Clients CRM: Directory Table",
+      "route": "/clients"
+    },
+    {
+      "filename": "03-client-create-form.png",
+      "title": "Clients CRM: Add New Client Form",
+      "route": "/clients/new"
+    },
+    {
+      "filename": "04-clients-after-create.png",
+      "title": "Clients CRM: Client Created & Revalidated",
+      "route": "/clients"
+    },
+    {
+      "filename": "05-client-details-overview.png",
+      "title": "Clients CRM: Client Details View",
+      "route": "/clients/client-1"
+    },
+    {
+      "filename": "06-client-communications.png",
+      "title": "Clients CRM: Client Communications Sub-Menu",
+      "route": "/clients/client-1/communications"
+    },
+    {
+      "filename": "07-client-tags.png",
+      "title": "Clients CRM: Tags & Segmentation Sub-Menu",
+      "route": "/clients/tags"
+    },
+    {
+      "filename": "08-leads-pipeline.png",
+      "title": "Sales Pipeline: Leads Kanban Board",
+      "route": "/leads"
+    },
+    {
+      "filename": "09-projects-list.png",
+      "title": "Projects Management: Portfolio List View",
+      "route": "/projects"
+    },
+    {
+      "filename": "10-projects-kanban.png",
+      "title": "Projects Management: Kanban Stage Board",
+      "route": "/projects/kanban"
+    },
+    {
+      "filename": "11-project-details-overview.png",
+      "title": "Projects Management: Project Details View",
+      "route": "/projects/project-1"
+    },
+    {
+      "filename": "12-tasks-board.png",
+      "title": "Tasks Execution: Task Management Board",
+      "route": "/tasks"
+    },
+    {
+      "filename": "13-unified-inbox.png",
+      "title": "Unified Inbox: Multi-Channel Thread Hub",
+      "route": "/inbox"
+    },
+    {
+      "filename": "14-analytics-overview.png",
+      "title": "Analytics Suite: Core Performance KPIs",
+      "route": "/analytics"
+    },
+    {
+      "filename": "15-analytics-revenue.png",
+      "title": "Analytics Suite: Revenue & MRR Breakdown",
+      "route": "/analytics/revenue"
+    },
+    {
+      "filename": "16-analytics-plan-usage.png",
+      "title": "Analytics Suite: Plan Usage & Quotas",
+      "route": "/analytics/plan-usage"
+    },
+    {
+      "filename": "17-settings-organization.png",
+      "title": "Settings: Organization Profile",
+      "route": "/settings/organization"
+    },
+    {
+      "filename": "18-settings-team.png",
+      "title": "Settings: Team Members & Access Roles",
+      "route": "/settings/team"
+    },
+    {
+      "filename": "19-settings-billing.png",
+      "title": "Settings: Billing & Stripe Subscriptions",
+      "route": "/settings/billing"
+    },
+    {
+      "filename": "20-settings-ai.png",
+      "title": "Settings: AI Feature Governance & Tokens",
+      "route": "/settings/ai"
+    },
+    {
+      "filename": "21-settings-audit-log.png",
+      "title": "Settings: Tenant Audit & Security Log",
+      "route": "/settings/audit-log"
+    },
+    {
+      "filename": "22-settings-integrations.png",
+      "title": "Settings: Omnichannel Integrations Hub",
+      "route": "/settings/integrations"
+    },
+    {
+      "filename": "23-superadmin-dashboard.png",
+      "title": "Super Admin: Platform Operator Hub",
+      "route": "/super-admin/dashboard"
+    },
+    {
+      "filename": "24-superadmin-orgs.png",
+      "title": "Super Admin: Organizations Directory",
+      "route": "/super-admin/organizations"
+    },
+    {
+      "filename": "25-superadmin-settings.png",
+      "title": "Super Admin: Global Platform Flags",
+      "route": "/super-admin/settings"
+    },
+    {
+      "filename": "26-superadmin-audit-log.png",
+      "title": "Super Admin: Global Security Trails",
+      "route": "/super-admin/audit-log"
+    },
+    {
+      "filename": "27-portal-login.png",
+      "title": "Client Portal: White-Label Login Gateway",
+      "route": "/client/login"
+    },
+    {
+      "filename": "28-reports-hub.png",
+      "title": "Executive Reports Hub",
+      "route": "/reports"
+    },
+    {
+      "filename": "29-notifications-center.png",
+      "title": "Notifications & Alerts Center",
+      "route": "/notifications"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "dispatched": false,
+  "target": "console_and_artifact",
+  "error": "SLACK_WEBHOOK_URL_NOT_CONFIGURED"
+}

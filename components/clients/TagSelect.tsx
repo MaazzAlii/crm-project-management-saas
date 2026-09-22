@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TagRecord, fetchTagsAction, createTagAction, TAG_COLORS } from '@/app/(dashboard)/clients/tags/actions'
+import { fetchTagsAction, createTagAction } from '@/app/(dashboard)/clients/tags/actions'
+import { TAG_COLORS, type TagRecord } from '@/app/(dashboard)/clients/tags/types'
 import { TagBadge } from './TagBadge'
 import { Plus, Tag as TagIcon, Check, Loader2 } from 'lucide-react'
 

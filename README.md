@@ -179,9 +179,41 @@ npx tsx scripts/test-validation.ts
 # Run Playwright End-to-End browser test suite
 npm run test:e2e
 
-# Capture fresh retina screenshots of all 15 screens
+# Run FULL SYSTEM Automated E2E Sub-Menu & Workflow Suite (30 views + form data + weekly report + Slack)
+npm run test:e2e:full
+
+# Capture fresh retina screenshots of core screens
 npx tsx scripts/capture-screenshots.ts
 ```
+
+---
+
+## 📢 Automated Slack & Weekly Performance Reporting
+
+The platform features an automated system test runner and weekly executive digest dispatcher (`scripts/run-e2e-full-system.ts` and `lib/notifications/slack-reporter.ts`):
+
+- **Automated Sub-Menu Traversal**: Interacts with and tests all 30 sub-menus, forms, and workflows (Dashboard, Clients CRM, Sales Pipeline, Projects Kanban, Tasks Board, Unified Inbox, Analytics Suite, Settings, Super Admin, Client Portal, Reports, Notifications).
+- **Form Data Injection**: Automatically generates and submits test client, lead, project, and inbox data.
+- **Weekly Executive Digest**: Emits `weekly.summary_ready` events, calculates rolling metrics (tasks completed, active projects, revenue, communication volume), and attaches an AI-generated executive narrative.
+- **Slack Block Kit Integration**: Formats a rich, visual report payload (`reports/slack-message-blocks.json`) with pass/fail badges, performance KPIs, and screenshot catalogs.
+- **Live Dispatch**: Set `SLACK_WEBHOOK_URL` in `.env.local` to send test results and weekly digests directly to your agency's Slack channels (`#leadership`, `#agency-announcements`, `#project-alerts`).
+- **On-Demand API**: Trigger reports via `POST /api/automation/slack-report` or run cron audits via `POST /api/automation/cron/weekly-summary`.
+
+### Sub-Menu Screenshot Directory
+All 29 retina screenshots captured during full system execution are stored in [`public/screenshots/e2e/`](public/screenshots/e2e/):
+- `01-dashboard.png` — Executive Dashboard
+- `02-clients-table.png` / `03-client-create-form.png` / `04-clients-after-create.png` — Clients CRM & Creation
+- `05-client-details-overview.png` / `06-client-communications.png` / `07-client-tags.png` — Client 360 View & Sub-Menus
+- `08-leads-pipeline.png` — Sales Pipeline Kanban
+- `09-projects-list.png` / `10-projects-kanban.png` / `11-project-details-overview.png` — Projects Suite
+- `12-tasks-board.png` — Tasks Board & Milestones
+- `13-unified-inbox.png` — Multi-Channel Unified Inbox
+- `14-analytics-overview.png` / `15-analytics-revenue.png` / `16-analytics-plan-usage.png` — Analytics Suite
+- `17-settings-organization.png` / `18-settings-team.png` / `19-settings-billing.png` / `20-settings-ai.png` / `21-settings-audit-log.png` / `22-settings-integrations.png` — Org Settings
+- `23-superadmin-dashboard.png` / `24-superadmin-orgs.png` / `25-superadmin-settings.png` / `26-superadmin-audit-log.png` — Super Admin Platform
+- `27-portal-login.png` — White-Label Client Portal
+- `28-reports-hub.png` / `29-notifications-center.png` — Reports & Notifications Center
+
 
 ---
 

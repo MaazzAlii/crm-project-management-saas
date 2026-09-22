@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import {
-  TagRecord,
   fetchTagsAction,
   createTagAction,
   deleteTagAction,
-  TAG_COLORS,
 } from '@/app/(dashboard)/clients/tags/actions'
+import { TAG_COLORS, type TagRecord } from '@/app/(dashboard)/clients/tags/types'
 import { TagBadge } from './TagBadge'
 import { X, Tag as TagIcon, Plus, Trash2, Loader2 } from 'lucide-react'
 

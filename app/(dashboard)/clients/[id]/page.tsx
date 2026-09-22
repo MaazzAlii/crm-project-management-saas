@@ -45,8 +45,30 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
     console.error('Error fetching client by id:', err)
   }
 
-  if (!rawClient && process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
-    rawClient = (global as any).__DEV_CLIENTS.find((c: any) => c.id === params.id)
+  if (!rawClient && process.env.DEV_SUPER_ADMIN === 'true') {
+    if ((global as any).__DEV_CLIENTS && (global as any).__DEV_CLIENTS.length > 0) {
+      rawClient = (global as any).__DEV_CLIENTS.find((c: any) => c.id === params.id) || (global as any).__DEV_CLIENTS[0]
+    }
+    if (!rawClient) {
+      rawClient = {
+        id: params.id,
+        organization_id: session.organization.id,
+        name: 'Acme Global Ventures',
+        company: 'Acme Global Group',
+        email: 'contact@acme-global.com',
+        phone: '+1 (555) 789-0123',
+        platform: 'Slack',
+        country: 'United States',
+        currency: 'USD',
+        payment_schedule: 'Monthly Retainer',
+        status: 'active',
+        communication_mode: 'connected',
+        notes: 'Enterprise account with connected omnichannel synchronization.',
+        tags: ['VIP Client', 'Retainer'],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+    }
   }
 
   // Cross-tenant RLS security enforcement

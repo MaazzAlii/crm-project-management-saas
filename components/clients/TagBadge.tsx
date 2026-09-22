@@ -1,6 +1,6 @@
 'use client'
 
-import { TAG_COLORS } from '@/app/(dashboard)/clients/tags/actions'
+import { TAG_COLORS } from '@/app/(dashboard)/clients/tags/types'
 import { Tag as TagIcon, X } from 'lucide-react'
 
 interface TagBadgeProps {

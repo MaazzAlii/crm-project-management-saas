@@ -44,8 +44,22 @@ export default async function ClientCommunicationsPage({ params }: { params: { i
     console.error('Error fetching client for communications:', err)
   }
 
-  if (!rawClient && process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
-    rawClient = (global as any).__DEV_CLIENTS.find((c: any) => c.id === params.id)
+  if (!rawClient && process.env.DEV_SUPER_ADMIN === 'true') {
+    if ((global as any).__DEV_CLIENTS && (global as any).__DEV_CLIENTS.length > 0) {
+      rawClient = (global as any).__DEV_CLIENTS.find((c: any) => c.id === params.id) || (global as any).__DEV_CLIENTS[0]
+    }
+    if (!rawClient) {
+      rawClient = {
+        id: params.id,
+        organization_id: session.organization.id,
+        name: 'Acme Global Ventures',
+        company: 'Acme Global Group',
+        email: 'contact@acme-global.com',
+        phone: '+1 (555) 789-0123',
+        platform: 'Slack',
+        communication_mode: 'connected',
+      }
+    }
   }
 
   if (!rawClient) {

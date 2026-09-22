@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:full": "npx tsx scripts/run-e2e-full-system.ts"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.15.0",
