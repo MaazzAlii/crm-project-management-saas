@@ -111,6 +111,18 @@ function LoginForm() {
             )}
           </button>
         </div>
+
+        {process.env.NODE_ENV !== 'production' && (
+          <div className="pt-2">
+            <a
+              href={`/api/auth/dev-bypass?redirectTo=${encodeURIComponent(redirectTo)}`}
+              id="dev-bypass-btn"
+              className="w-full flex justify-center items-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all text-center"
+            >
+              ⚡ Dev Bypass: Enter as Super Admin
+            </a>
+          </div>
+        )}
       </form>
 
       <div className="mt-6 text-center text-sm text-slate-400">
