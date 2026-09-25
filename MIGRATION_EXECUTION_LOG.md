@@ -46,3 +46,42 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
 - **Status**: ✅ Phase 2 Completed & Pushed.
 
 ---
+
+### Step 4: Phase 3 — Custom Authentication System Implementation
+- **Date/Time**: 2026-09-25 19:23
+- **Task**: Phase 3 of Supabase → PostgreSQL migration (Files 19-30).
+- **Actions Performed**:
+  1. **Database Schema Migration** (`supabase/migrations/0001_init_auth_system.sql`):
+     - Created `users` table with bcrypt password storage, active flag, verification, and role checks.
+     - Created `refresh_tokens` table with token hashing and token-family rotation tracking to prevent token replay attacks.
+     - Created `sessions` table for audit and session tracking.
+     - Created performance indexes on `users.email`, `refresh_tokens.user_id`, `refresh_tokens.expires_at`, `refresh_tokens.token_hash`, and `sessions.user_id`.
+     - Applied schema directly to the local `innoventix` database.
+  2. **JWT Module** (`lib/auth/jwt.ts`):
+     - Implemented `generateAccessToken` (1-hour expiry) and `generateRefreshToken` (7-day expiry).
+     - Implemented `verifyAccessToken` and `verifyRefreshToken` with signature & expiration validation.
+     - Added debugging decoder `decodeToken`.
+  3. **Password Module** (`lib/auth/password.ts`):
+     - Implemented secure bcrypt hashing (`hashPassword`) with 10 salt rounds.
+     - Implemented secure comparison (`verifyPassword`).
+     - Implemented comprehensive password complexity validation (`validatePasswordStrength`).
+  4. **Session / Cookie Module** (`lib/auth/session.ts`):
+     - Implemented secure HTTP-only cookie handlers (`setRefreshTokenCookie`, `getRefreshTokenFromCookie`, `deleteRefreshTokenCookie`, `isSessionValid`).
+  5. **Auth Middleware & RBAC** (`lib/auth/middleware.ts`):
+     - Implemented Bearer token extraction and verification (`getAuthFromRequest`).
+     - Implemented route wrapper `withAuth` and role-based access controller `withRole`.
+  6. **PostgreSQL Database Client & Connection Pool** (`lib/db/index.ts`):
+     - Implemented singleton `pg.Pool` connection pooler with idle client timeout and error recovery.
+     - Implemented query helpers `query<T>`, `queryOne<T>`, and transactional wrapper `transaction<T>`.
+  7. **API Endpoints**:
+     - `POST /api/auth/signup`: Validates strength, checks uniqueness, hashes password, generates JWT pair, sets refresh cookie, returns access token.
+     - `POST /api/auth/login`: Verifies email and bcrypt password hash, updates `last_login_at`, rotates refresh token family, sets cookie, returns token.
+     - `POST /api/auth/refresh`: Validates refresh token from cookie, checks database revocation, issues new access token & rotated refresh token.
+     - `POST /api/auth/logout`: Revokes token in database and clears HTTP-only cookie.
+  8. **Verification**:
+     - Executed end-to-end integration tests verifying password hashing, JWT generation/verification, and live query execution against the `innoventix` database.
+  9. **Version Control**:
+     - Committed each step atomically (`d27b08f`, `6e9c4c2`, `6c81d3b`, `2fad611`, `fa37591`, `931e4f1`, `c08ba29`, `fb623c0`, `513eaec`, `cf5b439`) and pushed all commits immediately to `origin/main`.
+- **Status**: ✅ Phase 3 Complete. Custom PostgreSQL Authentication System fully operational.
+
+---
