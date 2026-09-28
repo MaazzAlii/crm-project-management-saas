@@ -15,13 +15,16 @@ export class AuditRepository {
    */
   async log(data: {
     organizationId?: string | null;
+    userId?: string | null;
     actorUserId?: string | null;
     actorIsSuperAdmin?: boolean;
     actorEmail?: string | null;
     actorName?: string | null;
     action: AuditAction | string;
     entityType?: string | null;
+    resourceType?: string | null;
     entityId?: string | null;
+    resourceId?: string | null;
     metadata?: Record<string, any>;
     ipAddress?: string | null;
     userAgent?: string | null;
@@ -29,13 +32,13 @@ export class AuditRepository {
     try {
       const insertData = {
         organization_id: data.organizationId || null,
-        actor_user_id: data.actorUserId || null,
+        actor_user_id: data.actorUserId || data.userId || null,
         actor_is_super_admin: data.actorIsSuperAdmin || false,
         actor_email: data.actorEmail || null,
         actor_name: data.actorName || null,
         action: data.action,
-        entity_type: data.entityType || null,
-        entity_id: data.entityId || null,
+        entity_type: data.entityType || data.resourceType || null,
+        entity_id: data.entityId || data.resourceId || null,
         metadata: JSON.stringify(data.metadata || {}),
         details: JSON.stringify(data.metadata || {}),
         ip_address: data.ipAddress || null,

@@ -1,5 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { query, queryOne } from '@/lib/db'
 
 export const AUDIT_ACTIONS = {
   // Auth
@@ -130,29 +129,22 @@ export async function logAuditEvent(event: AuditLogEvent): Promise<boolean> {
     let actorIsSuperAdmin = event.actorIsSuperAdmin ?? false
     let organizationId = event.organizationId ?? null
 
-    // If actor details are not supplied, attempt to resolve from current Supabase session
+    // If actor details are not supplied, attempt to resolve from current session
     if (!actorId || !actorEmail) {
       try {
-        const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          actorId = actorId || user.id
-          actorEmail = actorEmail || user.email || null
-          actorName = actorName || user.user_metadata?.full_name || user.email?.split('@')[0] || null
-
-          if (!actorIsSuperAdmin) {
-            const { data: sa } = await supabase
-              .from('super_admins')
-              .select('id')
-              .eq('user_id', user.id)
-              .maybeSingle()
-            if (sa) actorIsSuperAdmin = true
-          }
+        const { getCurrentSessionContext } = await import('@/lib/auth/session')
+        const session = await getCurrentSessionContext()
+        if (session?.user) {
+          actorId = actorId || session.user.id
+          actorEmail = actorEmail || session.user.email || null
+          actorName = actorName || session.user.full_name || session.user.email?.split('@')[0] || null
+          if (session.isSuperAdmin) actorIsSuperAdmin = true
         }
       } catch {
         // Fallback gracefully if request context is not standard
       }
     }
+
 
     const effectiveEntityType = event.entityType || event.targetType || 'unknown'
     const effectiveEntityId = event.entityId || event.targetId || null
@@ -185,31 +177,33 @@ export async function logAuditEvent(event: AuditLogEvent): Promise<boolean> {
       }
     }
 
-    // Persist to Supabase Database
+    // Persist to PostgreSQL Database
     try {
-      const adminClient = createAdminClient()
-      const { error } = await adminClient.from('audit_logs').insert({
-        id: record.id,
-        organization_id: record.organization_id,
-        actor_user_id: record.actor_user_id,
-        actor_is_super_admin: record.actor_is_super_admin,
-        actor_email: record.actor_email,
-        actor_name: record.actor_name,
-        action: record.action,
-        entity_type: record.entity_type,
-        entity_id: record.entity_id,
-        target_type: record.target_type,
-        target_id: record.target_id,
-        metadata: record.metadata,
-        details: record.details,
-        ip_address: record.ip_address,
-        user_agent: record.user_agent,
-        created_at: record.created_at,
-      })
-
-      if (error) {
-        console.warn('[AUDIT_LOG_INSERT_WARN] Supabase table insert skipped or error:', error.message)
-      }
+      await query(
+        `INSERT INTO audit_logs (
+          id, organization_id, actor_user_id, actor_is_super_admin,
+          actor_email, actor_name, action, entity_type, entity_id,
+          target_type, target_id, metadata, details, ip_address, user_agent, created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+        [
+          record.id,
+          record.organization_id,
+          record.actor_user_id,
+          record.actor_is_super_admin,
+          record.actor_email,
+          record.actor_name,
+          record.action,
+          record.entity_type,
+          record.entity_id,
+          record.target_type,
+          record.target_id,
+          JSON.stringify(record.metadata || {}),
+          JSON.stringify(record.details || {}),
+          record.ip_address,
+          record.user_agent,
+          record.created_at,
+        ]
+      )
     } catch (dbErr) {
       // Non-blocking in dev if DB is offline
       console.warn('[AUDIT_LOG_DB_FALLBACK]', (dbErr as Error)?.message || dbErr)

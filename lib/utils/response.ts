@@ -76,6 +76,25 @@ export function apiError(
 }
 
 /**
+ * Extract standard pagination parameters from URL search params
+ */
+export function extractPagination(searchParams: URLSearchParams): {
+  page: number;
+  limit: number;
+  offset: number;
+  orderBy?: string;
+  orderDirection?: 'ASC' | 'DESC';
+} {
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
+  const offset = (page - 1) * limit;
+  const orderBy = searchParams.get('orderBy') || searchParams.get('sortBy') || undefined;
+  const orderDirection = searchParams.get('orderDirection')?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+  return { page, limit, offset, orderBy, orderDirection };
+}
+
+/**
  * Centralized API error catcher
  */
 export function handleApiError(error: any): NextResponse<ApiResponse<null>> {
@@ -90,3 +109,5 @@ export function handleApiError(error: any): NextResponse<ApiResponse<null>> {
     'INTERNAL_SERVER_ERROR'
   );
 }
+
+

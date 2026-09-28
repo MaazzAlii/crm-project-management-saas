@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { createClient } from '@/lib/supabase/server'
+import { queryOne } from '@/lib/db'
 import {
   AutomationEventType,
   AutomationEventPayload,
@@ -86,14 +86,12 @@ export async function emitAutomationEvent<T = any>(
   // 1. Resolve webhook target URL and secret if not explicitly provided
   if (!targetUrl || !secret) {
     try {
-      const supabase = await createClient()
-      const { data: org, error } = await supabase
-        .from('organizations')
-        .select('automation_webhook_url, automation_webhook_secret')
-        .eq('id', organizationId)
-        .maybeSingle()
+      const org = await queryOne<{ automation_webhook_url: string; automation_webhook_secret: string }>(
+        'SELECT automation_webhook_url, automation_webhook_secret FROM organizations WHERE id = $1',
+        [organizationId]
+      )
 
-      if (!error && org) {
+      if (org) {
         if (!targetUrl && org.automation_webhook_url) {
           targetUrl = org.automation_webhook_url
         }

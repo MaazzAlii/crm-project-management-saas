@@ -107,6 +107,25 @@ export class ClientRepository {
   }
 
   /**
+   * Find a client by email or phone within an organization
+   */
+  async findByContact(orgId: string, identifier: string): Promise<Client | null> {
+    try {
+      const clean = identifier.trim().toLowerCase();
+      const sql = `
+        SELECT * FROM clients 
+        WHERE organization_id = $1 
+          AND (LOWER(email) = $2 OR phone = $3 OR LOWER(name) = $2)
+        LIMIT 1
+      `;
+      return await queryOne<Client>(sql, [orgId, clean, identifier.trim()]);
+    } catch (error) {
+      console.error(`[ClientRepository.findByContact] Error finding client for org ${orgId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * List clients for an organization with filtering & pagination
    */
   async list(
@@ -174,12 +193,17 @@ export class ClientRepository {
         negotiation: [],
         won: [],
         lost: [],
+        new: [],
+        contacted: [],
+        qualifying: [],
+        proposal: [],
       };
 
       for (const lead of res.rows) {
-        if (pipeline[lead.status]) {
-          pipeline[lead.status].push(lead);
+        if (!pipeline[lead.status]) {
+          pipeline[lead.status] = [];
         }
+        pipeline[lead.status].push(lead);
       }
 
       return pipeline;
@@ -210,6 +234,23 @@ export class ClientRepository {
       return await queryOne<Lead>(sql, [status, stageOrder || null, leadId, orgId]);
     } catch (error) {
       console.error(`[ClientRepository.updateLeadStage] Error updating lead ${leadId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a new lead
+   */
+  async createLead(orgId: string, data: Partial<Lead>): Promise<Lead> {
+    try {
+      const insert = buildInsertQuery('leads', {
+        ...data,
+        organization_id: orgId,
+      });
+      const res = await query<Lead>(insert.text, insert.values);
+      return res.rows[0];
+    } catch (error) {
+      console.error('[ClientRepository.createLead] Error creating lead:', error);
       throw error;
     }
   }

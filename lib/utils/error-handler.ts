@@ -43,8 +43,22 @@ export class ValidationError extends AppError {
   }
 }
 
+export class BadRequestError extends AppError {
+  constructor(message: string = 'Bad request', details?: any) {
+    super(message, 400, 'BAD_REQUEST', details);
+  }
+}
+
+export class RateLimitError extends AppError {
+  constructor(message: string = 'Too many requests', details?: any) {
+    super(message, 429, 'RATE_LIMIT_EXCEEDED', details);
+  }
+}
+
 export class ConflictError extends AppError {
   constructor(message: string = 'Resource already exists or state conflict', details?: any) {
     super(message, 409, 'CONFLICT', details);
   }
 }
+
+

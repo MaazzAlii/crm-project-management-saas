@@ -30,6 +30,13 @@ export interface QueryOptions {
   orderDirection?: "ASC" | "DESC";
 }
 
+export interface PaginationOptions {
+  page?: number;
+  limit?: number;
+  orderBy?: string;
+  orderDirection?: "ASC" | "DESC";
+}
+
 // -----------------------------------------------------------------------------
 // Authentication & User Models
 // -----------------------------------------------------------------------------
@@ -46,6 +53,7 @@ export interface User {
   is_active: boolean;
   email_verified: boolean;
   last_login_at: Timestamp | null;
+  preferences?: JSONObject | null;
   created_at: Timestamp;
   updated_at: Timestamp;
 }
@@ -94,6 +102,7 @@ export interface Organization {
   is_suspended: boolean;
   suspension_reason: string | null;
   onboarding_completed: boolean;
+  settings?: JSONObject | null;
   created_at: Timestamp;
   updated_at: Timestamp;
 }
@@ -107,6 +116,8 @@ export interface Membership {
   created_at: Timestamp;
   updated_at: Timestamp;
 }
+
+export type OrganizationMember = Membership;
 
 export interface Subscription {
   id: UUID;
@@ -122,12 +133,15 @@ export interface Subscription {
   updated_at: Timestamp;
 }
 
+export type OrganizationSubscription = Subscription;
+
 // -----------------------------------------------------------------------------
 // CRM: Clients, Leads & Communication Logs
 // -----------------------------------------------------------------------------
 
-export type LeadStatus = "new" | "contacted" | "qualifying" | "proposal" | "negotiation" | "won" | "lost";
-export type ClientStatus = "lead" | "active" | "churned" | "archived";
+export type LeadStatus = "discovery" | "proposal_sent" | "negotiation" | "won" | "lost" | "new" | "contacted" | "qualifying" | "proposal";
+export type ClientStatus = "lead" | "active" | "churned" | "archived" | "paused" | "completed";
+
 
 export interface Client {
   id: UUID;
@@ -139,6 +153,8 @@ export interface Client {
   website: string | null;
   address: string | null;
   status: ClientStatus;
+  communication_mode?: "manual" | "connected";
+  portal_enabled?: boolean;
   notes: string | null;
   assigned_to: UUID | null;
   custom_fields: JSONObject | null;
@@ -153,6 +169,9 @@ export interface ClientTag {
   color: string;
   created_at: Timestamp;
 }
+
+export type Tag = ClientTag;
+
 
 export interface ClientTagAssignment {
   client_id: UUID;
@@ -202,6 +221,7 @@ export interface Project {
   organization_id: UUID;
   client_id: UUID | null;
   name: string;
+  title?: string;
   description: string | null;
   status: ProjectStatus;
   budget: number | null;
@@ -270,6 +290,33 @@ export interface ProjectActivityLog {
 // -----------------------------------------------------------------------------
 
 export type ChannelType = "email" | "whatsapp" | "slack" | "discord" | "upwork";
+export type MessageDirection = "inbound" | "outbound";
+
+export interface CommunicationChannel {
+  id: UUID;
+  organization_id: UUID;
+  provider: ChannelType;
+  external_account_id: string;
+  channel_name: string;
+  status: string;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+}
+
+export interface CommunicationMessage {
+  id: UUID;
+  organization_id: UUID;
+  channel_id: UUID;
+  client_id: UUID | null;
+  direction: MessageDirection;
+  body: string;
+  sender_name: string | null;
+  sender_identifier: string | null;
+  external_message_id: string | null;
+  metadata: JSONObject | null;
+  sent_at: Timestamp;
+  created_at: Timestamp;
+}
 
 export interface MessageThread {
   id: UUID;
@@ -318,6 +365,9 @@ export interface Notification {
   created_at: Timestamp;
 }
 
+export type InAppNotification = Notification;
+
+
 export interface AiFeatureSettings {
   id: UUID;
   organization_id: UUID;
@@ -340,11 +390,13 @@ export interface AiUsageLog {
   created_at: Timestamp;
 }
 
+export type AuditAction = string;
+
 export interface AuditLog {
   id: UUID;
   organization_id: UUID | null;
   user_id: UUID | null;
-  action: string;
+  action: AuditAction;
   entity_type: string;
   entity_id: UUID | null;
   old_values: JSONObject | null;
@@ -353,6 +405,7 @@ export interface AuditLog {
   user_agent: string | null;
   created_at: Timestamp;
 }
+
 
 // -----------------------------------------------------------------------------
 // Client Portal Models

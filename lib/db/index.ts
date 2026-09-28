@@ -1,4 +1,4 @@
-import { Pool, QueryResult, PoolClient } from 'pg';
+import { Pool, QueryResult, QueryResultRow, PoolClient } from 'pg';
 import { dbMonitor } from './monitoring';
 
 let pool: Pool | null = null;
@@ -41,7 +41,7 @@ export function getPool(): Pool {
 /**
  * Execute a parameterized query with telemetry monitoring
  */
-export async function query<T = any>(
+export async function query<T extends QueryResultRow = any>(
   sql: string,
   params?: any[]
 ): Promise<QueryResult<T>> {
@@ -59,13 +59,14 @@ export async function query<T = any>(
 /**
  * Execute a query and return the first row or null
  */
-export async function queryOne<T = any>(
+export async function queryOne<T extends QueryResultRow = any>(
   sql: string,
   params?: any[]
 ): Promise<T | null> {
   const result = await query<T>(sql, params);
   return result.rows[0] || null;
 }
+
 
 /**
  * Execute a series of operations in a transaction

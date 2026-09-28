@@ -1,5 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { query, queryOne } from '@/lib/db'
 import type { AuditLogRecord } from './log'
 
 export interface AuditLogFilters {
@@ -30,47 +29,54 @@ export async function fetchOrgAuditLogs(
   const offset = filters.offset || 0
 
   try {
-    const supabase = await createClient()
-
-    let query = supabase
-      .from('audit_logs')
-      .select('*', { count: 'exact' })
-      .eq('organization_id', organizationId)
-      .order('created_at', { ascending: false })
+    const whereClauses: string[] = ['organization_id = $1']
+    const params: any[] = [organizationId]
+    let paramIndex = 2
 
     if (filters.action && filters.action !== 'all') {
-      query = query.eq('action', filters.action)
+      whereClauses.push(`action = $${paramIndex++}`)
+      params.push(filters.action)
     }
 
     if (filters.entityType && filters.entityType !== 'all') {
-      query = query.or(`entity_type.eq.${filters.entityType},target_type.eq.${filters.entityType}`)
+      whereClauses.push(`(entity_type = $${paramIndex} OR target_type = $${paramIndex})`)
+      params.push(filters.entityType)
+      paramIndex++
     }
 
     if (filters.actorId) {
-      query = query.eq('actor_user_id', filters.actorId)
+      whereClauses.push(`actor_user_id = $${paramIndex++}`)
+      params.push(filters.actorId)
     }
 
     if (filters.startDate) {
-      query = query.gte('created_at', filters.startDate)
+      whereClauses.push(`created_at >= $${paramIndex++}`)
+      params.push(filters.startDate)
     }
 
     if (filters.endDate) {
-      query = query.lte('created_at', filters.endDate)
+      whereClauses.push(`created_at <= $${paramIndex++}`)
+      params.push(filters.endDate)
     }
 
     if (filters.search) {
-      const s = filters.search.trim()
-      query = query.or(`action.ilike.%${s}%,actor_email.ilike.%${s}%,actor_name.ilike.%${s}%,entity_type.ilike.%${s}%,entity_id.ilike.%${s}%`)
+      const s = `%${filters.search.trim()}%`
+      whereClauses.push(`(action ILIKE $${paramIndex} OR actor_email ILIKE $${paramIndex} OR actor_name ILIKE $${paramIndex} OR entity_type ILIKE $${paramIndex} OR entity_id ILIKE $${paramIndex})`)
+      params.push(s)
+      paramIndex++
     }
 
-    query = query.range(offset, offset + limit - 1)
+    const whereSql = whereClauses.join(' AND ')
+    const countSql = `SELECT COUNT(*) as count FROM audit_logs WHERE ${whereSql}`
+    const dataSql = `SELECT * FROM audit_logs WHERE ${whereSql} ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`
 
-    const { data, count, error } = await query
+    const countRes = await queryOne<{ count: string }>(countSql, params)
+    const dataRes = await query<AuditLogRecord>(dataSql, [...params, limit, offset])
 
-    if (!error && data && data.length > 0) {
+    if (dataRes.rows.length > 0) {
       return {
-        logs: data as AuditLogRecord[],
-        totalCount: count ?? data.length,
+        logs: dataRes.rows,
+        totalCount: parseInt(countRes?.count || '0', 10),
       }
     }
   } catch (err) {
@@ -124,50 +130,58 @@ export async function fetchSuperAdminAuditLogs(
   const offset = filters.offset || 0
 
   try {
-    const adminClient = createAdminClient()
-
-    let query = adminClient
-      .from('audit_logs')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
+    const whereClauses: string[] = ['1=1']
+    const params: any[] = []
+    let paramIndex = 1
 
     if (filters.organizationId && filters.organizationId !== 'all') {
-      query = query.eq('organization_id', filters.organizationId)
+      whereClauses.push(`organization_id = $${paramIndex++}`)
+      params.push(filters.organizationId)
     }
 
     if (filters.isSuperAdminOnly) {
-      query = query.eq('actor_is_super_admin', true)
+      whereClauses.push(`actor_is_super_admin = TRUE`)
     }
 
     if (filters.action && filters.action !== 'all') {
-      query = query.eq('action', filters.action)
+      whereClauses.push(`action = $${paramIndex++}`)
+      params.push(filters.action)
     }
 
     if (filters.entityType && filters.entityType !== 'all') {
-      query = query.or(`entity_type.eq.${filters.entityType},target_type.eq.${filters.entityType}`)
+      whereClauses.push(`(entity_type = $${paramIndex} OR target_type = $${paramIndex})`)
+      params.push(filters.entityType)
+      paramIndex++
     }
 
     if (filters.startDate) {
-      query = query.gte('created_at', filters.startDate)
+      whereClauses.push(`created_at >= $${paramIndex++}`)
+      params.push(filters.startDate)
     }
 
     if (filters.endDate) {
-      query = query.lte('created_at', filters.endDate)
+      whereClauses.push(`created_at <= $${paramIndex++}`)
+      params.push(filters.endDate)
     }
 
     if (filters.search) {
-      const s = filters.search.trim()
-      query = query.or(`action.ilike.%${s}%,actor_email.ilike.%${s}%,actor_name.ilike.%${s}%,entity_type.ilike.%${s}%,entity_id.ilike.%${s}%`)
+      const s = `%${filters.search.trim()}%`
+      whereClauses.push(`(action ILIKE $${paramIndex} OR actor_email ILIKE $${paramIndex} OR actor_name ILIKE $${paramIndex} OR entity_type ILIKE $${paramIndex} OR entity_id ILIKE $${paramIndex})`)
+      params.push(s)
+      paramIndex++
     }
 
-    query = query.range(offset, offset + limit - 1)
+    const whereSql = whereClauses.join(' AND ')
+    const countSql = `SELECT COUNT(*) as count FROM audit_logs WHERE ${whereSql}`
+    const dataSql = `SELECT * FROM audit_logs WHERE ${whereSql} ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`
 
-    const { data, count, error } = await query
+    const countRes = await queryOne<{ count: string }>(countSql, params)
+    const dataRes = await query<AuditLogRecord>(dataSql, [...params, limit, offset])
 
-    if (!error && data && data.length > 0) {
+    if (dataRes.rows.length > 0) {
       return {
-        logs: data as AuditLogRecord[],
-        totalCount: count ?? data.length,
+        logs: dataRes.rows,
+        totalCount: parseInt(countRes?.count || '0', 10),
       }
     }
   } catch (err) {

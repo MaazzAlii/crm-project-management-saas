@@ -94,14 +94,15 @@ class QueryCache {
    */
   invalidateTag(tag: string): number {
     let count = 0;
-    for (const [key, entry] of this.cache.entries()) {
+    this.cache.forEach((entry, key) => {
       if (entry.tags.has(tag)) {
         this.cache.delete(key);
         count++;
       }
-    }
+    });
     return count;
   }
+
 
   /**
    * Invalidate all entries for a specific organization (tenant isolation)
