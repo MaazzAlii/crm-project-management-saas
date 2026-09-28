@@ -153,5 +153,35 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
      - `tests/phase5-api-services.test.ts`: 17 comprehensive unit & integration tests covering response envelopes, error handling, quota gating, one-way transitions, and HMAC signatures.
      - Full Vitest suite (`npm test`): **15 test files, 149/149 tests passing (100%)**.
      - Production Next.js build (`npm run build`): **Compiled and generated all 77 routes with 0 type errors**.
-- **Status**: ✅ Phase 5 Complete & Fully Verified.
+### Step 8: Phase 6 — Production Deployment, Infrastructure & Cutover (Files 51-60)
+- **Date/Time**: 2026-09-28 21:44
+- **Task**: Complete Phase 6 of Supabase → PostgreSQL migration (Files 51-60).
+- **Actions Performed**:
+  1. **Contabo PostgreSQL 16 & VPS Tuning Configuration** (`infra/postgres/postgresql.conf` & `infra/postgres/init-db.sh`):
+     - Configured memory management (`shared_buffers = 2GB`, `effective_cache_size = 6GB`, `work_mem = 32MB`, `maintenance_work_mem = 512MB`).
+     - Query planner cost tuning for NVMe VPS (`random_page_cost = 1.1`, `effective_io_concurrency = 200`).
+     - Enabled `pg_stat_statements`, `uuid-ossp`, `pgcrypto`, `btree_gin` extensions.
+  2. **Production Nginx Reverse Proxy with Rate Limiting & SSL** (`infra/nginx/nginx.conf` & `infra/nginx/conf.d/innoventix.conf`):
+     - Reverse proxy upstream to Next.js port 3000 with WebSocket support.
+     - HTTP/2, modern TLS 1.2/1.3 ciphers, and security headers (HSTS, CSP, X-Frame-Options, X-Content-Type-Options).
+     - Rate-limiting zones (`auth_limit: 15r/m`, `api_limit: 120r/m`, `general_limit: 60r/m`).
+     - Immutable asset caching for `/_next/static/` and public assets.
+  3. **Multi-Container Production Docker Stack** (`docker-compose.prod.yml` & `infra/coolify/docker-compose.coolify.yml`):
+     - Orchestrates `postgres` (with healthcheck), `redis` (cache and locks), `app` (Next.js standalone build), `nginx` (SSL termination), and `backup` (daily cron).
+     - Dedicated Coolify-native Docker Compose template for single-click VPS deployment.
+  4. **Backup Automation & Offsite S3 Sync** (`scripts/backup-db.sh` & `scripts/backup-s3.sh`):
+     - Automated compressed `pg_dump` with 7-day retention cleanup.
+     - Offsite synchronization script for AWS S3 and Cloudflare R2 object storage.
+  5. **Automated SSL Certificate Lifecycle** (`infra/certbot/init-ssl.sh`):
+     - Certbot webroot ACME challenge automation with automatic Nginx reload.
+  6. **Telemetry & Live Diagnostics** (`app/api/health/route.ts` & `scripts/tune-postgres.sql`):
+     - Enhanced `/api/health` with live PostgreSQL ping, connection pool stats, memory usage, and latency metrics.
+     - Diagnostic SQL queries for tracking slow queries via `pg_stat_statements`, buffer cache hit ratios, missing indexes, and dead tuple bloat.
+  7. **Deployment Automation & Production Runbook** (`scripts/deploy.sh` & `documentation/infra/production-runbook.md`):
+     - Automated zero-downtime deployment script with pre-flight checks, automatic migration execution, rolling restart, and health probes.
+     - Comprehensive operations runbook covering VPS provisioning, UFW firewalling, secrets management, backup restoration, and incident troubleshooting.
+  8. **Testing & Build Verification**:
+     - Vitest test suite (`npm test`): **15 test files, 149/149 tests passing (100%)**.
+     - Production Next.js build (`npm run build`): **77 routes generated with 0 errors**.
+- **Status**: ✅ Phase 6 Complete & All 60 Migration Files Delivered.
 
