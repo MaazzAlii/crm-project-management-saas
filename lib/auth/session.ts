@@ -26,16 +26,19 @@ export async function setRefreshTokenCookie(
   config: Partial<SessionConfig> = {}
 ): Promise<void> {
   const finalConfig = { ...defaultConfig, ...config };
-  const cookieStore = await cookies();
-
-  cookieStore.set(finalConfig.cookieName, token, {
-    httpOnly: finalConfig.cookieHttpOnly,
-    secure: finalConfig.cookieSecure,
-    sameSite: finalConfig.cookieSameSite,
-    maxAge: finalConfig.maxAge,
-    domain: finalConfig.cookieDomain,
-    path: '/',
-  });
+  try {
+    const cookieStore = await cookies();
+    cookieStore.set(finalConfig.cookieName, token, {
+      httpOnly: finalConfig.cookieHttpOnly,
+      secure: finalConfig.cookieSecure,
+      sameSite: finalConfig.cookieSameSite,
+      maxAge: finalConfig.maxAge,
+      domain: finalConfig.cookieDomain,
+      path: '/',
+    });
+  } catch (err) {
+    // Gracefully handle contexts where cookies() is not available (CLI, unit tests)
+  }
 }
 
 /**
@@ -44,8 +47,12 @@ export async function setRefreshTokenCookie(
 export async function getRefreshTokenFromCookie(
   cookieName: string = process.env.COOKIE_NAME || 'innoventix_session'
 ): Promise<string | undefined> {
-  const cookieStore = await cookies();
-  return cookieStore.get(cookieName)?.value;
+  try {
+    const cookieStore = await cookies();
+    return cookieStore.get(cookieName)?.value;
+  } catch (err) {
+    return undefined;
+  }
 }
 
 /**
@@ -54,8 +61,12 @@ export async function getRefreshTokenFromCookie(
 export async function deleteRefreshTokenCookie(
   cookieName: string = process.env.COOKIE_NAME || 'innoventix_session'
 ): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete(cookieName);
+  try {
+    const cookieStore = await cookies();
+    cookieStore.delete(cookieName);
+  } catch (err) {
+    // Gracefully handle contexts where cookies() is not available
+  }
 }
 
 /**
