@@ -33,12 +33,12 @@ export class ClientRepository {
     company?: string | null;
     email?: string | null;
     phone?: string | null;
-    status?: 'lead' | 'active' | 'inactive' | 'archived';
+    platform?: string | null;
+    country?: string | null;
+    status?: 'active' | 'paused' | 'completed' | 'archived';
     communicationMode?: 'manual' | 'connected';
-    primaryChannel?: 'email' | 'slack' | 'whatsapp' | 'discord' | 'upwork' | 'sms' | null;
     currency?: string;
-    hourlyRate?: number | null;
-    paymentSchedule?: 'per_project' | 'monthly_retainer' | 'milestone' | 'hourly';
+    paymentSchedule?: string;
     notes?: string | null;
   }): Promise<Client> {
     try {
@@ -48,12 +48,12 @@ export class ClientRepository {
         company: data.company || null,
         email: data.email ? data.email.toLowerCase().trim() : null,
         phone: data.phone || null,
-        status: data.status || 'lead',
+        platform: data.platform || 'Email',
+        country: data.country || null,
+        status: data.status || 'active',
         communication_mode: data.communicationMode || 'manual',
-        primary_channel: data.primaryChannel || null,
         currency: data.currency || 'USD',
-        hourly_rate: data.hourlyRate || null,
-        payment_schedule: data.paymentSchedule || 'per_project',
+        payment_schedule: data.paymentSchedule || 'Per Project',
         notes: data.notes || null,
       };
 

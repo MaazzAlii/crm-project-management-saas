@@ -5,7 +5,7 @@
  * Domain data access layer for Users, Roles, and Authentication persistence.
  */
 
-import { query, queryOne } from '../index';
+import { query, queryOne, transaction } from '../index';
 import { buildSelectQuery, buildInsertQuery, buildUpdateQuery, PaginationOptions } from '../query-builder';
 import { User, UserRole } from '../../types/database';
 
@@ -45,9 +45,10 @@ export class UserRepository {
     avatarUrl?: string | null;
     role?: UserRole;
   }): Promise<User> {
-    try {
+    return await transaction(async (client) => {
+      const normalizedEmail = data.email.toLowerCase().trim();
       const insertData: Record<string, any> = {
-        email: data.email.toLowerCase().trim(),
+        email: normalizedEmail,
         password_hash: data.passwordHash,
         full_name: data.fullName || null,
         avatar_url: data.avatarUrl || null,
@@ -57,12 +58,27 @@ export class UserRepository {
       };
 
       const q = buildInsertQuery('users', insertData);
-      const res = await query<User>(q.text, q.values);
-      return res.rows[0];
-    } catch (error) {
-      console.error('[UserRepository.create] Error creating user:', error);
-      throw error;
-    }
+      const res = await client.query<User>(q.text, q.values);
+      const user = res.rows[0];
+
+      // Mirror to auth.users and public.profiles for relational FK compatibility
+      try {
+        await client.query(
+          'INSERT INTO auth.users (id, email) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+          [user.id, normalizedEmail]
+        );
+        await client.query(
+          `INSERT INTO public.profiles (id, email, full_name, avatar_url)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (id) DO NOTHING`,
+          [user.id, normalizedEmail, user.full_name, user.avatar_url]
+        );
+      } catch {
+        // Safe fallback if compatibility schema is not in use
+      }
+
+      return user;
+    });
   }
 
   /**

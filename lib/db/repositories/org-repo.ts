@@ -52,13 +52,13 @@ export class OrganizationRepository {
     ownerUserId?: string;
   }): Promise<Organization> {
     return await transaction(async (client) => {
-      const insertData = {
+      const insertData: Record<string, any> = {
         name: data.name.trim(),
         slug: data.slug.toLowerCase().trim(),
+        plan_tier: 'free',
+        billing_status: 'active',
         logo_url: data.logoUrl || null,
-        billing_email: data.billingEmail || null,
         is_suspended: false,
-        onboarding_completed: false,
       };
 
       const q = buildInsertQuery('organizations', insertData);

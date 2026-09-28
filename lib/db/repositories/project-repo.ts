@@ -29,26 +29,30 @@ export class ProjectRepository {
    * Create a new project within an organization
    */
   async create(orgId: string, data: {
-    name: string;
+    title: string;
     clientId: string;
     description?: string | null;
-    status?: ProjectStatus;
-    startDate?: Date | string | null;
-    dueDate?: Date | string | null;
-    budget?: number | null;
+    type?: string | null;
+    amount?: number | null;
     currency?: string;
+    status?: string;
+    priority?: string;
+    startDate?: Date | string | null;
+    deadline?: Date | string | null;
   }): Promise<Project> {
     try {
       const insertData = {
         organization_id: orgId,
         client_id: data.clientId,
-        name: data.name.trim(),
+        title: data.title.trim(),
         description: data.description || null,
-        status: data.status || 'draft',
-        start_date: data.startDate || null,
-        due_date: data.dueDate || null,
-        budget: data.budget || null,
+        type: data.type || 'Combined',
+        amount: data.amount || 0.00,
         currency: data.currency || 'USD',
+        status: data.status || 'brief_received',
+        priority: data.priority || 'medium',
+        start_date: data.startDate || null,
+        deadline: data.deadline || null,
       };
 
       const q = buildInsertQuery('projects', insertData);
@@ -107,7 +111,7 @@ export class ProjectRepository {
     orgId: string,
     options?: PaginationOptions & {
       clientId?: string;
-      status?: ProjectStatus;
+      status?: string;
       search?: string;
     }
   ): Promise<{ projects: Project[]; total: number }> {
@@ -120,7 +124,7 @@ export class ProjectRepository {
         where.push({ field: 'status', operator: '=', value: options.status });
       }
       if (options?.search) {
-        where.push({ field: 'name', operator: 'ILIKE', value: `%${options.search}%` });
+        where.push({ field: 'title', operator: 'ILIKE', value: `%${options.search}%` });
       }
 
       const selectQ = buildSelectQuery({
@@ -250,18 +254,18 @@ export class ProjectRepository {
   async createDeliverable(orgId: string, data: {
     projectId: string;
     title: string;
-    description?: string | null;
-    status?: DeliverableStatus;
-    dueDate?: Date | string | null;
+    fileUrl?: string | null;
+    driveLink?: string | null;
+    status?: string;
   }): Promise<Deliverable> {
     try {
       const insertData = {
         organization_id: orgId,
         project_id: data.projectId,
         title: data.title.trim(),
-        description: data.description || null,
+        file_url: data.fileUrl || null,
+        drive_link: data.driveLink || null,
         status: data.status || 'pending',
-        due_date: data.dueDate || null,
       };
 
       const q = buildInsertQuery('deliverables', insertData);
@@ -298,9 +302,9 @@ export class ProjectRepository {
       const projectInsert = buildInsertQuery('projects', {
         organization_id: orgId,
         client_id: clientId,
-        name: projectName,
+        title: projectName,
         description: template.description,
-        status: 'draft',
+        status: 'brief_received',
         start_date: startDate,
       });
       const projectRes = await client.query<Project>(projectInsert.text, projectInsert.values);

@@ -15,10 +15,13 @@ export class AuditRepository {
    */
   async log(data: {
     organizationId?: string | null;
-    userId?: string | null;
+    actorUserId?: string | null;
+    actorIsSuperAdmin?: boolean;
+    actorEmail?: string | null;
+    actorName?: string | null;
     action: AuditAction | string;
-    resourceType: string;
-    resourceId?: string | null;
+    entityType?: string | null;
+    entityId?: string | null;
     metadata?: Record<string, any>;
     ipAddress?: string | null;
     userAgent?: string | null;
@@ -26,11 +29,15 @@ export class AuditRepository {
     try {
       const insertData = {
         organization_id: data.organizationId || null,
-        user_id: data.userId || null,
+        actor_user_id: data.actorUserId || null,
+        actor_is_super_admin: data.actorIsSuperAdmin || false,
+        actor_email: data.actorEmail || null,
+        actor_name: data.actorName || null,
         action: data.action,
-        resource_type: data.resourceType,
-        resource_id: data.resourceId || null,
+        entity_type: data.entityType || null,
+        entity_id: data.entityId || null,
         metadata: JSON.stringify(data.metadata || {}),
+        details: JSON.stringify(data.metadata || {}),
         ip_address: data.ipAddress || null,
         user_agent: data.userAgent || null,
       };
@@ -50,23 +57,23 @@ export class AuditRepository {
   async queryLogs(
     orgId?: string,
     options?: PaginationOptions & {
-      userId?: string;
+      actorUserId?: string;
       action?: string;
-      resourceType?: string;
+      entityType?: string;
       startDate?: Date;
       endDate?: Date;
     }
   ): Promise<{ logs: AuditLog[]; total: number }> {
     try {
       const where: any[] = [];
-      if (options?.userId) {
-        where.push({ field: 'user_id', operator: '=', value: options.userId });
+      if (options?.actorUserId) {
+        where.push({ field: 'actor_user_id', operator: '=', value: options.actorUserId });
       }
       if (options?.action) {
         where.push({ field: 'action', operator: '=', value: options.action });
       }
-      if (options?.resourceType) {
-        where.push({ field: 'resource_type', operator: '=', value: options.resourceType });
+      if (options?.entityType) {
+        where.push({ field: 'entity_type', operator: '=', value: options.entityType });
       }
       if (options?.startDate) {
         where.push({ field: 'created_at', operator: '>=', value: options.startDate });
@@ -108,20 +115,21 @@ export class AuditRepository {
   async createNotification(data: {
     organizationId: string;
     userId: string;
+    type?: string;
     title: string;
-    message: string;
-    type?: 'info' | 'success' | 'warning' | 'error';
-    link?: string | null;
+    body?: string | null;
+    relatedEntityType?: string | null;
+    relatedEntityId?: string | null;
   }): Promise<InAppNotification> {
     try {
       const insertData = {
         organization_id: data.organizationId,
         user_id: data.userId,
+        type: data.type || 'status_changed',
         title: data.title.trim(),
-        message: data.message.trim(),
-        type: data.type || 'info',
-        link: data.link || null,
-        is_read: false,
+        body: data.body || null,
+        related_entity_type: data.relatedEntityType || null,
+        related_entity_id: data.relatedEntityId || null,
       };
 
       const q = buildInsertQuery('in_app_notifications', insertData);
@@ -144,7 +152,7 @@ export class AuditRepository {
     try {
       const sql = `
         SELECT * FROM in_app_notifications 
-        WHERE user_id = $1 AND organization_id = $2 ${unreadOnly ? 'AND is_read = false' : ''}
+        WHERE user_id = $1 AND organization_id = $2 ${unreadOnly ? 'AND read_at IS NULL' : ''}
         ORDER BY created_at DESC 
         LIMIT 50
       `;
@@ -162,7 +170,7 @@ export class AuditRepository {
   async markNotificationRead(notificationId: string, userId: string): Promise<boolean> {
     try {
       const res = await query(
-        'UPDATE in_app_notifications SET is_read = true, updated_at = NOW() WHERE id = $1 AND user_id = $2',
+        'UPDATE in_app_notifications SET read_at = NOW() WHERE id = $1 AND user_id = $2',
         [notificationId, userId]
       );
       return (res.rowCount ?? 0) > 0;
