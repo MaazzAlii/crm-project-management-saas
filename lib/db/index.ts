@@ -1,4 +1,5 @@
 import { Pool, QueryResult, PoolClient } from 'pg';
+import { dbMonitor } from './monitoring';
 
 let pool: Pool | null = null;
 
@@ -38,19 +39,21 @@ export function getPool(): Pool {
 }
 
 /**
- * Execute a parameterized query
+ * Execute a parameterized query with telemetry monitoring
  */
 export async function query<T = any>(
   sql: string,
   params?: any[]
 ): Promise<QueryResult<T>> {
   const client = getPool();
-  try {
-    return await client.query<T>(sql, params);
-  } catch (error) {
-    console.error('Database query error:', error);
-    throw error;
-  }
+  return await dbMonitor.trackQuery(sql, async () => {
+    try {
+      return await client.query<T>(sql, params);
+    } catch (error) {
+      console.error('Database query error:', error);
+      throw error;
+    }
+  });
 }
 
 /**
@@ -93,3 +96,10 @@ export async function closePool(): Promise<void> {
     pool = null;
   }
 }
+
+// Re-export query builders, transactions, cache, and monitoring
+export * from './query-builder';
+export * from './transactions';
+export * from './cache';
+export * from './monitoring';
+
