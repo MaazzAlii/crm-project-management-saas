@@ -5,3 +5,4 @@ export * from './project-service';
 export * from './communication-service';
 export * from './billing-service';
 export * from './automation-service';
+export * from './audit-service';

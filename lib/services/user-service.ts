@@ -163,6 +163,34 @@ export class UserService {
 
     return await userRepo.list(pagination);
   }
+
+  /**
+   * Super Admin: Impersonate a user or support access for an organization
+   */
+  async impersonateUser(
+    targetUserId: string,
+    superAdminUserId: string,
+    orgId?: string
+  ): Promise<{ targetUser: User; impersonatorId: string; expiresAt: Date }> {
+    const targetUser = await this.getUserProfile(targetUserId);
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour session
+
+    await auditRepo.log({
+      userId: superAdminUserId,
+      actorIsSuperAdmin: true,
+      organizationId: orgId || null,
+      action: 'SUPER_ADMIN_IMPERSONATION_START',
+      resourceType: 'user',
+      resourceId: targetUserId,
+      metadata: { targetEmail: targetUser.email, expiresAt: expiresAt.toISOString() },
+    });
+
+    return {
+      targetUser,
+      impersonatorId: superAdminUserId,
+      expiresAt,
+    };
+  }
 }
 
 export const userService = new UserService();
