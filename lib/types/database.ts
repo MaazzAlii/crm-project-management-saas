@@ -351,7 +351,7 @@ export interface Message {
 // Notifications, AI & Audit Logs
 // -----------------------------------------------------------------------------
 
-export type NotificationType = "task_assigned" | "deliverable_submitted" | "deliverable_approved" | "invoice_paid" | "mention" | "system_alert";
+export type NotificationType = "task_assigned" | "deliverable_submitted" | "deliverable_approved" | "invoice_paid" | "mention" | "system_alert" | "deadline_approaching" | "project_overdue" | "status_changed" | "milestone_completed" | string;
 
 export interface Notification {
   id: UUID;
@@ -359,9 +359,12 @@ export interface Notification {
   user_id: UUID;
   type: NotificationType;
   title: string;
-  body: string;
-  link: string | null;
-  is_read: boolean;
+  body: string | null;
+  link?: string | null;
+  is_read?: boolean;
+  read_at?: Timestamp | null;
+  related_entity_type?: string | null;
+  related_entity_id?: UUID | null;
   created_at: Timestamp;
 }
 

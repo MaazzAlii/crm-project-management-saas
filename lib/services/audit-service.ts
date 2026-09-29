@@ -67,7 +67,13 @@ export class AuditService {
       throw new ValidationError('Notification title and message are required');
     }
 
-    return await auditRepo.createNotification(orgId, userId, data);
+    return await auditRepo.createNotification({
+      organizationId: orgId,
+      userId,
+      type: data.type,
+      title: data.title,
+      body: data.message,
+    });
   }
 
   /**
@@ -78,21 +84,34 @@ export class AuditService {
     orgId?: string,
     options?: PaginationOptions & { unreadOnly?: boolean }
   ): Promise<{ notifications: InAppNotification[]; total: number; unreadCount: number }> {
-    return await auditRepo.getUserNotifications(userId, orgId, options);
+    if (orgId) {
+      const notifications = await auditRepo.getNotifications(userId, orgId, options?.unreadOnly);
+      return {
+        notifications,
+        total: notifications.length,
+        unreadCount: notifications.filter((n) => !n.read_at).length,
+      };
+    }
+    return { notifications: [], total: 0, unreadCount: 0 };
   }
 
   /**
    * Mark a single notification as read
    */
   async markNotificationAsRead(notificationId: string, userId: string): Promise<boolean> {
-    return await auditRepo.markAsRead(notificationId, userId);
+    return await auditRepo.markNotificationRead(notificationId, userId);
   }
 
   /**
    * Mark all notifications as read for a user
    */
   async markAllNotificationsAsRead(userId: string, orgId?: string): Promise<number> {
-    return await auditRepo.markAllAsRead(userId, orgId);
+    if (!orgId) return 0;
+    const res = await query(
+      'UPDATE in_app_notifications SET read_at = NOW() WHERE user_id = $1 AND organization_id = $2 AND read_at IS NULL',
+      [userId, orgId]
+    );
+    return res.rowCount ?? 0;
   }
 }
 
