@@ -1,60 +1,53 @@
-# Multi-stage Dockerfile for Innoventix Next.js SaaS Application
-# Optimized for minimal image footprint using Next.js standalone output
-
-# Stage 1: Base image
-FROM node:20-alpine AS base
-RUN apk add --no-cache libc6-compat
+# ============================================
+# Stage 1: Dependencies
+# ============================================
+FROM node:18-alpine AS deps
 WORKDIR /app
 
-# Stage 2: Install production dependencies
-FROM base AS deps
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
+RUN npm ci --only=production
+
+# ============================================
+# Stage 2: Build
+# ============================================
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+COPY package.json package-lock.json ./
 RUN npm ci
 
-# Stage 3: Build application
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build-time arguments for baked client-side variables
-ARG NEXT_PUBLIC_APP_URL=https://app.innoventixhub.com
-ARG NEXT_PUBLIC_SUPABASE_URL=https://api.innoventixhub.com
-ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=""
-ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=""
-
-ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
-ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
-ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=production
-
+# Build application
 RUN npm run build
 
-# Stage 4: Production runner
-FROM node:20-alpine AS runner
+# ============================================
+# Stage 3: Runtime
+# ============================================
+FROM node:18-alpine AS runtime
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-ENV NEXT_TELEMETRY_DISABLED=1
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+# Copy production dependencies
+COPY --from=deps /app/node_modules ./node_modules
 
-# Copy static assets and standalone bundle
+# Copy built application
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/package.json ./package.json
+
+# Change ownership
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
 EXPOSE 3000
 
-# Health check probe
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
