@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { Menu, ChevronDown, LogOut } from 'lucide-react'
 import { OrgSwitcher } from './OrgSwitcher'
 import { type UserSessionContext, type UserOrganizationItem } from '@/lib/auth/session'
@@ -34,8 +33,7 @@ export function Topbar({ sessionContext, onOpenMobileMenu }: TopbarProps) {
   const handleSignOut = async () => {
     setSigningOut(true)
     try {
-      const supabase = createClient()
-      await supabase.auth.signOut()
+      await fetch('/api/auth/logout', { method: 'POST' })
       router.push('/login')
       router.refresh()
     } catch (err) {
