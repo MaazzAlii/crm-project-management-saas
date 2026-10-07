@@ -1,5 +1,5 @@
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import { ClientsList, ClientRecord } from '@/components/clients/ClientsList'
 
@@ -23,19 +23,14 @@ export default async function ClientsPage() {
     )
   }
 
-  const supabase = await createClient()
-
   let clientsDataRaw: any[] = []
   try {
-    const { data: clientsData, error } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('organization_id', session.organization.id)
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      console.error('Error fetching clients:', error)
-    }
+    const clientsData = await query<any>(
+      `SELECT * FROM clients
+       WHERE organization_id = $1
+       ORDER BY created_at DESC`,
+      [session.organization.id]
+    )
     clientsDataRaw = clientsData || []
   } catch (err) {
     console.error('Error in clients query:', err)
