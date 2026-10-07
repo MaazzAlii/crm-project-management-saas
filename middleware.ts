@@ -1,8 +1,8 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { applySecurityHeaders } from '@/lib/security/headers'
 import { handleCorsPreflight, applyCorsHeaders } from '@/lib/security/cors'
 import { handleRateLimiting } from '@/middleware/rate-limit'
+import { verifyTokenEdge, type EdgeTokenPayload } from '@/lib/auth/edge-jwt'
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
@@ -25,7 +25,7 @@ export async function middleware(request: NextRequest) {
     return rateLimitResponse
   }
 
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
@@ -39,50 +39,43 @@ export async function middleware(request: NextRequest) {
     applyCorsHeaders(response, request)
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  // 3. Public API Endpoints (Explicitly bypass auth checks)
+  // /api/health and /api/auth/* are public by specification
+  const isPublicApi =
+    pathname === '/api/health' ||
+    pathname.startsWith('/api/auth/') ||
+    pathname.startsWith('/api/webhooks/') ||
+    pathname.startsWith('/api/stripe/webhook') ||
+    pathname.startsWith('/api/automation/')
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY — copy .env.local.example to .env.local and fill in real values.'
-    )
+  if (isPublicApi) {
+    return response
   }
 
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll()
-      },
-      setAll(cookiesToSet: Array<{ name: string; value: string; options: CookieOptions }>) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-        response = NextResponse.next({
-          request,
-        })
-        applySecurityHeaders(response)
-        if (pathname.startsWith('/api/')) {
-          applyCorsHeaders(response, request)
-        }
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options)
-        )
-      },
-    },
-  })
+  // 4. Extract token from custom session cookie or Authorization header
+  const cookieName = process.env.COOKIE_NAME || 'innoventix_session'
+  const cookieToken = request.cookies.get(cookieName)?.value
+  const authHeader = request.headers.get('authorization')
+  const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null
+  const token = cookieToken || headerToken
 
-  let user: any = null
-  try {
-    const { data } = await supabase.auth.getUser()
-    user = data?.user || null
-  } catch {
-    user = null
+  let user: EdgeTokenPayload | null = null
+  if (token) {
+    user = await verifyTokenEdge(token)
   }
 
-  // Client Portal Routes — separate auth boundary
+  const isDevSuperAdmin =
+    process.env.NODE_ENV !== 'production' &&
+    process.env.ALLOW_DEV_AUTH_BYPASS === 'true' &&
+    request.cookies.get('dev_super_admin')?.value === 'true'
+
+  // 5. Client Portal Routes — separate auth boundary
   const isPortalRoute = pathname.startsWith('/client/') || pathname === '/client'
-  const isPortalPublic = pathname.startsWith('/client/login') || pathname.startsWith('/client/auth')
+  const isPortalPublic =
+    pathname.startsWith('/client/login') ||
+    pathname.startsWith('/client/auth')
 
-  // Portal: require session for protected portal paths
-  if (isPortalRoute && !isPortalPublic && !user) {
+  if (isPortalRoute && !isPortalPublic && !user && !isDevSuperAdmin) {
     const url = request.nextUrl.clone()
     url.pathname = '/client/login'
     url.search = ''
@@ -90,22 +83,23 @@ export async function middleware(request: NextRequest) {
     return applySecurityHeaders(redirectRes)
   }
 
-  // Protected Routes requiring Auth (org-member app)
-  const isProtectedRoute = pathname.startsWith('/dashboard') ||
+  // 6. Protected Routes requiring Auth (org-member app)
+  const isProtectedRoute =
+    pathname.startsWith('/dashboard') ||
     pathname.startsWith('/projects') ||
     pathname.startsWith('/clients') ||
     pathname.startsWith('/tasks') ||
     pathname.startsWith('/team') ||
     pathname.startsWith('/settings') ||
-    pathname.startsWith('/super-admin')
+    pathname.startsWith('/super-admin') ||
+    pathname.startsWith('/onboarding') ||
+    pathname.startsWith('/reports') ||
+    pathname.startsWith('/leads') ||
+    pathname.startsWith('/inbox') ||
+    pathname.startsWith('/analytics')
 
   // Auth Routes (Login / Signup)
   const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signup')
-
-  const isDevSuperAdmin =
-    process.env.NODE_ENV !== 'production' &&
-    process.env.ALLOW_DEV_AUTH_BYPASS === 'true' &&
-    request.cookies.get('dev_super_admin')?.value === 'true'
 
   if (isProtectedRoute && !user && !isDevSuperAdmin) {
     const url = request.nextUrl.clone()
@@ -115,7 +109,7 @@ export async function middleware(request: NextRequest) {
     return applySecurityHeaders(redirectRes)
   }
 
-  // Super Admin Guard — strictly isolated tier checking super_admins table
+  // 7. Super Admin Guard — strictly isolated tier
   if (pathname.startsWith('/super-admin')) {
     if (isDevSuperAdmin) {
       return response
@@ -128,54 +122,16 @@ export async function middleware(request: NextRequest) {
       return applySecurityHeaders(redirectRes)
     }
 
-    try {
-      const { data: superAdmin } = await supabase
-        .from('super_admins')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      if (!superAdmin) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/dashboard'
-        const redirectRes = NextResponse.redirect(url)
-        return applySecurityHeaders(redirectRes)
-      }
-    } catch {
-      // In dev environment when local DB is offline
-      if (process.env.NODE_ENV === 'development') {
-        return response
-      }
+    if (user.role !== 'super_admin') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      const redirectRes = NextResponse.redirect(url)
+      return applySecurityHeaders(redirectRes)
     }
   }
 
-  // Tenant Organization Suspension Guard — block suspended org access for non-super-admins
-  if (user && isProtectedRoute && !pathname.startsWith('/super-admin') && !pathname.startsWith('/org-suspended')) {
-    const { data: member } = await supabase
-      .from('organization_members')
-      .select('organization_id, organizations!inner(is_suspended)')
-      .eq('user_id', user.id)
-      .limit(1)
-      .maybeSingle()
-
-    if (member && (member.organizations as any)?.is_suspended) {
-      // Confirm user is not a super admin before blocking
-      const { data: superAdmin } = await supabase
-        .from('super_admins')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      if (!superAdmin) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/org-suspended'
-        const redirectRes = NextResponse.redirect(url)
-        return applySecurityHeaders(redirectRes)
-      }
-    }
-  }
-
-  if (isAuthRoute && user) {
+  // 8. Redirect authenticated users away from /login and /signup
+  if (isAuthRoute && (user || isDevSuperAdmin)) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     const redirectRes = NextResponse.redirect(url)
@@ -190,4 +146,3 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
-
