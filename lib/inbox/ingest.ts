@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 
 export type CommunicationProvider = 'slack' | 'whatsapp' | 'email' | 'discord' | 'upwork'
 export type MessageDirection = 'inbound' | 'outbound'
@@ -42,17 +42,20 @@ export async function ingestMessage(
   payload: InboundMessagePayload
 ): Promise<IngestMessageResult> {
   try {
-    const supabase = await createClient()
-
     // 1. Resolve channel and strictly derive organization_id from DB
-    const { data: channel, error: channelError } = await supabase
-      .from('communication_channels')
-      .select('id, organization_id, provider, status, metadata')
-      .eq('id', channelId)
-      .single()
+    const channel = await queryOne<{
+      id: string
+      organization_id: string
+      provider: string
+      status: string
+      metadata: any
+    }>(
+      'SELECT id, organization_id, provider, status, metadata FROM communication_channels WHERE id = $1',
+      [channelId]
+    )
 
-    if (channelError || !channel) {
-      console.error('[CommunicationHub:Ingest] Channel lookup failed:', channelError?.message || 'Channel not found')
+    if (!channel) {
+      console.error('[CommunicationHub:Ingest] Channel lookup failed: Channel not found')
       return { success: false, error: `Invalid channel ID: ${channelId}` }
     }
 
@@ -72,31 +75,26 @@ export async function ingestMessage(
     const searchPhone = normalizePhoneNumber(identifier.includes('@') ? metaPhone : identifier)
 
     if (searchEmail) {
-      const { data: emailMatch } = await supabase
-        .from('clients')
-        .select('id, communication_mode')
-        .eq('organization_id', orgId)
-        .ilike('email', searchEmail)
-        .limit(2)
+      const emailMatches = await query<{ id: string; communication_mode: string }>(
+        'SELECT id, communication_mode FROM clients WHERE organization_id = $1 AND LOWER(email) = $2 LIMIT 2',
+        [orgId, searchEmail]
+      )
 
-      if (emailMatch && emailMatch.length === 1) {
-        // Auto-matching applies exclusively to clients in 'connected' mode
-        if (emailMatch[0].communication_mode === 'connected') {
-          matchedClientId = emailMatch[0].id
+      if (emailMatches.rows.length === 1) {
+        if (emailMatches.rows[0].communication_mode === 'connected') {
+          matchedClientId = emailMatches.rows[0].id
         }
       }
     }
 
     if (!matchedClientId && searchPhone && searchPhone.length >= 7) {
-      // Fetch clients for org to compare normalized phone numbers
-      const { data: clients } = await supabase
-        .from('clients')
-        .select('id, phone, communication_mode')
-        .eq('organization_id', orgId)
-        .not('phone', 'is', null)
+      const clientPhones = await query<{ id: string; phone: string; communication_mode: string }>(
+        'SELECT id, phone, communication_mode FROM clients WHERE organization_id = $1 AND phone IS NOT NULL',
+        [orgId]
+      )
 
-      if (clients && clients.length > 0) {
-        const matches = clients.filter((c) => {
+      if (clientPhones.rows.length > 0) {
+        const matches = clientPhones.rows.filter((c) => {
           const norm = normalizePhoneNumber(c.phone)
           return norm && (norm === searchPhone || norm.endsWith(searchPhone) || searchPhone.endsWith(norm))
         })
@@ -109,7 +107,7 @@ export async function ingestMessage(
 
     // Fallback: Channel to client routing configured in channel metadata
     if (!matchedClientId && channel.metadata) {
-      const channelMeta = channel.metadata as Record<string, any>
+      const channelMeta = typeof channel.metadata === 'string' ? JSON.parse(channel.metadata) : channel.metadata
       if (channelMeta.client_id || channelMeta.default_client_id) {
         matchedClientId = channelMeta.client_id || channelMeta.default_client_id
       }
@@ -117,13 +115,10 @@ export async function ingestMessage(
 
     // 3. Deduplication check via external_message_id if present
     if (payload.external_message_id) {
-      const { data: existingMsg } = await supabase
-        .from('communication_messages')
-        .select('id, client_id, organization_id')
-        .eq('organization_id', orgId)
-        .eq('channel_id', channelId)
-        .eq('external_message_id', payload.external_message_id)
-        .maybeSingle()
+      const existingMsg = await queryOne<{ id: string; client_id: string | null; organization_id: string }>(
+        'SELECT id, client_id, organization_id FROM communication_messages WHERE organization_id = $1 AND channel_id = $2 AND external_message_id = $3',
+        [orgId, channelId, payload.external_message_id]
+      )
 
       if (existingMsg) {
         return {
@@ -131,7 +126,7 @@ export async function ingestMessage(
           messageId: existingMsg.id,
           clientId: existingMsg.client_id,
           organizationId: existingMsg.organization_id,
-          message: existingMsg
+          message: existingMsg,
         }
       }
     }
@@ -141,29 +136,30 @@ export async function ingestMessage(
     const validSentAt = isNaN(sentAtDate.getTime()) ? new Date().toISOString() : sentAtDate.toISOString()
     const direction = payload.direction || 'inbound'
 
-    const insertData = {
-      organization_id: orgId,
-      channel_id: channelId,
-      client_id: matchedClientId,
-      direction,
-      sender_name: payload.sender_name || payload.sender_identifier || 'Unknown Sender',
-      sender_identifier: payload.sender_identifier,
-      body: payload.body || '',
-      external_message_id: payload.external_message_id || null,
-      metadata: payload.metadata || {},
-      sent_at: validSentAt,
-      read_at: direction === 'outbound' ? new Date().toISOString() : null
-    }
+    const insertedMsg = await queryOne<{ id: string; client_id: string | null; organization_id: string }>(
+      `INSERT INTO communication_messages (
+        organization_id, channel_id, client_id, direction,
+        sender_name, sender_identifier, body, external_message_id,
+        metadata, sent_at, read_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING id, client_id, organization_id`,
+      [
+        orgId,
+        channelId,
+        matchedClientId,
+        direction,
+        payload.sender_name || payload.sender_identifier || 'Unknown Sender',
+        payload.sender_identifier,
+        payload.body || '',
+        payload.external_message_id || null,
+        JSON.stringify(payload.metadata || {}),
+        validSentAt,
+        direction === 'outbound' ? new Date().toISOString() : null,
+      ]
+    )
 
-    const { data: insertedMsg, error: insertError } = await supabase
-      .from('communication_messages')
-      .insert(insertData)
-      .select()
-      .single()
-
-    if (insertError) {
-      console.error('[CommunicationHub:Ingest] Message insert failed:', insertError.message)
-      return { success: false, error: insertError.message }
+    if (!insertedMsg) {
+      return { success: false, error: 'Failed to insert communication message' }
     }
 
     return {
@@ -171,7 +167,7 @@ export async function ingestMessage(
       messageId: insertedMsg.id,
       clientId: insertedMsg.client_id,
       organizationId: insertedMsg.organization_id,
-      message: insertedMsg
+      message: insertedMsg,
     }
   } catch (err: any) {
     console.error('[CommunicationHub:Ingest] Unexpected error:', err)
