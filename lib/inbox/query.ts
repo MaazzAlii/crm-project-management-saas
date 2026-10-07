@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { CommunicationProvider, MessageDirection } from './ingest'
 
 export interface InboxMessageRecord {
@@ -66,79 +66,95 @@ export async function fetchInboxMessages(options: FetchInboxMessagesOptions): Pr
   error?: string
 }> {
   try {
-    const supabase = await createClient()
-
-    let query = supabase
-      .from('communication_messages')
-      .select(
-        `
-        *,
-        channel:communication_channels (
-          id,
-          provider,
-          channel_name,
-          status,
-          connected_at,
-          updated_at,
-          external_account_id,
-          metadata
-        ),
-        client:clients (
-          id,
-          name,
-          company_name,
-          email,
-          communication_mode
-        )
-      `,
-        { count: 'exact' }
-      )
-      .eq('organization_id', options.orgId)
+    const conditions: string[] = ['m.organization_id = $1']
+    const params: any[] = [options.orgId]
+    let paramIdx = 2
 
     if (options.channelId) {
-      query = query.eq('channel_id', options.channelId)
+      conditions.push(`m.channel_id = $${paramIdx++}`)
+      params.push(options.channelId)
     }
 
     if (options.clientId) {
-      query = query.eq('client_id', options.clientId)
+      conditions.push(`m.client_id = $${paramIdx++}`)
+      params.push(options.clientId)
     }
 
     if (options.unmatchedOnly) {
-      query = query.is('client_id', null)
+      conditions.push('m.client_id IS NULL')
     }
 
     if (options.readStatus === 'unread') {
-      query = query.is('read_at', null).eq('direction', 'inbound')
+      conditions.push("m.read_at IS NULL AND m.direction = 'inbound'")
     } else if (options.readStatus === 'read') {
-      query = query.not('read_at', 'is', null)
+      conditions.push('m.read_at IS NOT NULL')
+    }
+
+    if (options.provider) {
+      conditions.push(`ch.provider = $${paramIdx++}`)
+      params.push(options.provider)
     }
 
     if (options.search) {
       const term = `%${options.search.trim()}%`
-      query = query.or(`body.ilike.${term},sender_name.ilike.${term},sender_identifier.ilike.${term}`)
+      conditions.push(`(m.body ILIKE $${paramIdx} OR m.sender_name ILIKE $${paramIdx} OR m.sender_identifier ILIKE $${paramIdx})`)
+      params.push(term)
+      paramIdx++
     }
+
+    const whereClause = conditions.join(' AND ')
+
+    const countSql = `
+      SELECT COUNT(*) as count
+      FROM communication_messages m
+      LEFT JOIN communication_channels ch ON ch.id = m.channel_id
+      WHERE ${whereClause}
+    `
+    const countRes = await queryOne<{ count: string }>(countSql, params)
+    const totalCount = parseInt(countRes?.count || '0', 10)
 
     const limit = options.limit || 50
     const offset = options.offset || 0
 
-    query = query.order('sent_at', { ascending: false }).range(offset, offset + limit - 1)
+    const dataSql = `
+      SELECT 
+        m.*,
+        row_to_json(ch.*) as channel,
+        row_to_json(cl.*) as client
+      FROM communication_messages m
+      LEFT JOIN communication_channels ch ON ch.id = m.channel_id
+      LEFT JOIN clients cl ON cl.id = m.client_id
+      WHERE ${whereClause}
+      ORDER BY m.sent_at DESC
+      LIMIT $${paramIdx++} OFFSET $${paramIdx++}
+    `
+    const dataParams = [...params, limit, offset]
+    const dataRes = await query<any>(dataSql, dataParams)
 
-    const { data, count, error } = await query
-
-    if (error) {
-      console.error('[CommunicationHub:Query] Error fetching inbox messages:', error.message)
-      return { data: [], totalCount: 0, error: error.message }
-    }
-
-    // Filter by provider if specified in options (since channel provider is in joined relation)
-    let filteredData = (data as unknown as InboxMessageRecord[]) || []
-    if (options.provider) {
-      filteredData = filteredData.filter((m) => m.channel?.provider === options.provider)
-    }
+    const formattedData: InboxMessageRecord[] = dataRes.rows.map((row) => ({
+      ...row,
+      channel: row.channel ? {
+        id: row.channel.id,
+        provider: row.channel.provider,
+        channel_name: row.channel.channel_name,
+        status: row.channel.status,
+        connected_at: row.channel.connected_at,
+        updated_at: row.channel.updated_at,
+        external_account_id: row.channel.external_account_id,
+        metadata: row.channel.metadata,
+      } : null,
+      client: row.client ? {
+        id: row.client.id,
+        name: row.client.name,
+        company_name: row.client.company || row.client.company_name,
+        email: row.client.email,
+        communication_mode: row.client.communication_mode,
+      } : null,
+    }))
 
     return {
-      data: filteredData,
-      totalCount: count || filteredData.length
+      data: formattedData,
+      totalCount,
     }
   } catch (err: any) {
     console.error('[CommunicationHub:Query] Unexpected error fetching inbox messages:', err)
@@ -159,53 +175,52 @@ export async function getInboxSummary(orgId: string): Promise<InboxSummary> {
       whatsapp: 0,
       email: 0,
       discord: 0,
-      upwork: 0
+      upwork: 0,
     },
     unreadByProvider: {
       slack: 0,
       whatsapp: 0,
       email: 0,
       discord: 0,
-      upwork: 0
-    }
+      upwork: 0,
+    },
   }
 
   try {
-    const supabase = await createClient()
-
-    // 1. Total count
-    const { count: totalMessages } = await supabase
-      .from('communication_messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-
-    // 2. Unread count (inbound & read_at is null)
-    const { count: unreadCount } = await supabase
-      .from('communication_messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .eq('direction', 'inbound')
-      .is('read_at', null)
-
-    // 3. Unmatched count (client_id is null)
-    const { count: unmatchedCount } = await supabase
-      .from('communication_messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .is('client_id', null)
-
-    // 4. Counts by provider and unread per provider
-    const { data: messages } = await supabase
-      .from('communication_messages')
-      .select('id, read_at, direction, channel:communication_channels ( provider )')
-      .eq('organization_id', orgId)
+    const [
+      totalRes,
+      unreadRes,
+      unmatchedRes,
+      providersRes,
+    ] = await Promise.all([
+      queryOne<{ count: string }>(
+        'SELECT COUNT(*) as count FROM communication_messages WHERE organization_id = $1',
+        [orgId]
+      ),
+      queryOne<{ count: string }>(
+        "SELECT COUNT(*) as count FROM communication_messages WHERE organization_id = $1 AND direction = 'inbound' AND read_at IS NULL",
+        [orgId]
+      ),
+      queryOne<{ count: string }>(
+        'SELECT COUNT(*) as count FROM communication_messages WHERE organization_id = $1 AND client_id IS NULL',
+        [orgId]
+      ),
+      query<{ provider: string; is_unread: boolean; count: string }>(
+        `SELECT ch.provider, (m.read_at IS NULL AND m.direction = 'inbound') as is_unread, COUNT(*) as count
+         FROM communication_messages m
+         JOIN communication_channels ch ON ch.id = m.channel_id
+         WHERE m.organization_id = $1
+         GROUP BY ch.provider, (m.read_at IS NULL AND m.direction = 'inbound')`,
+        [orgId]
+      ),
+    ])
 
     const byProvider: Record<string, number> = {
       slack: 0,
       whatsapp: 0,
       email: 0,
       discord: 0,
-      upwork: 0
+      upwork: 0,
     }
 
     const unreadByProvider: Record<string, number> = {
@@ -213,27 +228,26 @@ export async function getInboxSummary(orgId: string): Promise<InboxSummary> {
       whatsapp: 0,
       email: 0,
       discord: 0,
-      upwork: 0
+      upwork: 0,
     }
 
-    if (messages) {
-      messages.forEach((m: any) => {
-        const prov = m.channel?.provider
-        if (prov && byProvider[prov] !== undefined) {
-          byProvider[prov]++
-          if (!m.read_at && m.direction === 'inbound') {
-            unreadByProvider[prov]++
-          }
+    providersRes.rows.forEach((row) => {
+      const p = row.provider
+      const cnt = parseInt(row.count, 10)
+      if (byProvider[p] !== undefined) {
+        byProvider[p] += cnt
+        if (row.is_unread) {
+          unreadByProvider[p] += cnt
         }
-      })
-    }
+      }
+    })
 
     return {
-      totalMessages: totalMessages || 0,
-      unreadCount: unreadCount || 0,
-      unmatchedCount: unmatchedCount || 0,
+      totalMessages: parseInt(totalRes?.count || '0', 10),
+      unreadCount: parseInt(unreadRes?.count || '0', 10),
+      unmatchedCount: parseInt(unmatchedRes?.count || '0', 10),
       byProvider,
-      unreadByProvider
+      unreadByProvider,
     }
   } catch (err: any) {
     console.error('[CommunicationHub:Query] Error getting inbox summary:', err)
@@ -246,18 +260,11 @@ export async function getInboxSummary(orgId: string): Promise<InboxSummary> {
  */
 export async function markMessageRead(messageId: string, orgId: string): Promise<boolean> {
   try {
-    const supabase = await createClient()
-    const { error } = await supabase
-      .from('communication_messages')
-      .update({ read_at: new Date().toISOString() })
-      .eq('id', messageId)
-      .eq('organization_id', orgId)
-
-    if (error) {
-      console.error('[CommunicationHub:Query] Error marking message read:', error.message)
-      return false
-    }
-    return true
+    const res = await query(
+      'UPDATE communication_messages SET read_at = NOW() WHERE id = $1 AND organization_id = $2',
+      [messageId, orgId]
+    )
+    return (res.rowCount ?? 0) > 0
   } catch (err) {
     return false
   }
@@ -268,25 +275,16 @@ export async function markMessageRead(messageId: string, orgId: string): Promise
  */
 export async function markAllMessagesRead(orgId: string, channelId?: string): Promise<boolean> {
   try {
-    const supabase = await createClient()
-
-    let query = supabase
-      .from('communication_messages')
-      .update({ read_at: new Date().toISOString() })
-      .eq('organization_id', orgId)
-      .is('read_at', null)
+    let sql = 'UPDATE communication_messages SET read_at = NOW() WHERE organization_id = $1 AND read_at IS NULL'
+    const params: any[] = [orgId]
 
     if (channelId) {
-      query = query.eq('channel_id', channelId)
+      sql += ' AND channel_id = $2'
+      params.push(channelId)
     }
 
-    const { error } = await query
-
-    if (error) {
-      console.error('[CommunicationHub:Query] Error marking all read:', error.message)
-      return false
-    }
-    return true
+    const res = await query(sql, params)
+    return (res.rowCount ?? 0) > 0
   } catch (err) {
     return false
   }
@@ -301,29 +299,23 @@ export async function assignMessageClient(
   orgId: string
 ): Promise<boolean> {
   try {
-    const supabase = await createClient()
-    const { error } = await supabase
-      .from('communication_messages')
-      .update({ client_id: clientId })
-      .eq('id', messageId)
-      .eq('organization_id', orgId)
+    const res = await query(
+      'UPDATE communication_messages SET client_id = $1 WHERE id = $2 AND organization_id = $3',
+      [clientId, messageId, orgId]
+    )
 
-    if (error) {
-      console.error('[CommunicationHub:Query] Error assigning message client:', error.message)
+    if ((res.rowCount ?? 0) === 0) {
       return false
     }
 
     // Manual triage: linking an unmatched message flips the client to connected mode
     try {
-      await supabase
-        .from('clients')
-        .update({
-          communication_mode: 'connected',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', clientId)
-        .eq('organization_id', orgId)
-        .eq('communication_mode', 'manual')
+      await query(
+        `UPDATE clients
+         SET communication_mode = 'connected', updated_at = NOW()
+         WHERE id = $1 AND organization_id = $2 AND communication_mode = 'manual'`,
+        [clientId, orgId]
+      )
     } catch (e) {}
 
     return true
