@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { queryOne } from '@/lib/db'
 
 export type CommunicationMode = 'manual' | 'connected'
 
@@ -8,15 +8,13 @@ export type CommunicationMode = 'manual' | 'connected'
  */
 export async function hasActiveChannels(organizationId: string): Promise<boolean> {
   try {
-    const supabase = await createClient()
-    const { count, error } = await supabase
-      .from('communication_channels')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', organizationId)
-      .eq('status', 'active')
+    const row = await queryOne<{ count: string }>(
+      "SELECT COUNT(*) as count FROM communication_channels WHERE organization_id = $1 AND (status = 'active' OR is_active = true)",
+      [organizationId]
+    )
 
-    if (!error && typeof count === 'number') {
-      return count > 0
+    if (row && typeof row.count !== 'undefined') {
+      return parseInt(row.count, 10) > 0
     }
   } catch (err) {
     console.error('[CommunicationMode] Error checking active channels:', err)
