@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { queryOne } from '@/lib/db'
 import { getOrganizationPlanLimits } from '@/lib/billing/plan-limits'
 import { AIFeatureType, AIGateCheckResult } from './types'
 
@@ -34,18 +34,16 @@ export async function checkAIAccess(
     return { allowed: true }
   }
 
-  const supabase = await createClient()
-
   // 1. Check Platform-Wide Super Admin Kill Switch & Feature Flags
   try {
-    const { data: settingsData, error: settingsError } = await supabase
-      .from('platform_settings')
-      .select('value')
-      .eq('key', 'global_feature_flags')
-      .maybeSingle()
+    const settingsData = await queryOne<{ value: any }>(
+      "SELECT value FROM platform_settings WHERE key = 'global_feature_flags'"
+    )
 
-    if (!settingsError && settingsData && settingsData.value) {
-      const flags = settingsData.value as GlobalFeatureFlags
+    if (settingsData && settingsData.value) {
+      const flags = (typeof settingsData.value === 'string'
+        ? JSON.parse(settingsData.value)
+        : settingsData.value) as GlobalFeatureFlags
 
       // Emergency Platform Kill Switch
       if (flags.ai_kill_switch === true) {
@@ -122,14 +120,16 @@ export async function checkAIAccess(
 
   // 3. Check Organization-Level Feature Settings (Tenant Admin Controls)
   try {
-    const { data: orgData, error: orgError } = await supabase
-      .from('organizations')
-      .select('ai_feature_settings')
-      .eq('id', organizationId)
-      .maybeSingle()
+    const orgData = await queryOne<{ ai_feature_settings: any }>(
+      'SELECT ai_feature_settings FROM organizations WHERE id = $1',
+      [organizationId]
+    )
 
-    if (!orgError && orgData && orgData.ai_feature_settings) {
-      const orgSettings = orgData.ai_feature_settings as Record<string, boolean>
+    if (orgData && orgData.ai_feature_settings) {
+      const orgSettings = (typeof orgData.ai_feature_settings === 'string'
+        ? JSON.parse(orgData.ai_feature_settings)
+        : orgData.ai_feature_settings) as Record<string, boolean>
+
       if (orgSettings[feature] === false) {
         return {
           allowed: false,
