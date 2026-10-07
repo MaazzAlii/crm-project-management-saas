@@ -1,5 +1,5 @@
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { queryOne } from '@/lib/db'
 import { redirect, notFound } from 'next/navigation'
 import { fetchClientCommunicationsAction } from './actions'
 import { ClientCommunicationsView } from '@/components/communications/ClientCommunicationsView'
@@ -27,19 +27,15 @@ export default async function ClientCommunicationsPage({ params }: { params: { i
     )
   }
 
-  const supabase = await createClient()
-
   let rawClient: any = null
 
   try {
-    const { data } = await supabase
-      .from('clients')
-      .select('id, name, company, email, phone, communication_mode, organization_id')
-      .eq('id', params.id)
-      .eq('organization_id', session.organization.id)
-      .maybeSingle()
-
-    rawClient = data
+    rawClient = await queryOne<any>(
+      `SELECT id, name, company, email, phone, communication_mode, organization_id
+       FROM clients
+       WHERE id = $1 AND organization_id = $2`,
+      [params.id, session.organization.id]
+    )
   } catch (err) {
     console.error('Error fetching client for communications:', err)
   }
