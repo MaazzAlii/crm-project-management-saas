@@ -1,6 +1,7 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
+import { getCurrentSessionContext } from '@/lib/auth/session'
 import { revalidatePath } from 'next/cache'
 
 export interface CompleteOnboardingInput {
@@ -11,41 +12,37 @@ export interface CompleteOnboardingInput {
 }
 
 export async function completeOnboarding(input: CompleteOnboardingInput) {
-  const supabase = await createClient()
-
   if (process.env.NODE_ENV !== 'production' && input.organizationId === '00000000-0000-0000-0000-000000000001') {
     return { success: true }
   }
 
-  // 1. Verify User Authentication & Permission
-  let user = null
-  try {
-    const { data } = await supabase.auth.getUser()
-    user = data?.user
-  } catch {}
-
-  if (!user) {
+  const session = await getCurrentSessionContext()
+  if (!session || !session.user) {
     return { success: false, error: 'Unauthorized' }
   }
 
-  // 2. Update Organization Onboarding Status
-  const { error: orgError } = await supabase
-    .from('organizations')
-    .update({
-      industry_type: input.industryType,
-      onboarding_completed: true,
-    })
-    .eq('id', input.organizationId)
+  const orgId = input.organizationId && input.organizationId !== '00000000-0000-0000-0000-000000000001'
+    ? input.organizationId
+    : session.orgId
 
-  if (orgError) {
-    return { success: false, error: orgError.message }
+  if (!orgId) {
+    return { success: false, error: 'Organization not found' }
   }
 
-  // 3. Process Optional Team Invites
-  if (input.teamEmails && input.teamEmails.length > 0) {
-    // In production, send invitation emails via GoTrue Auth / Resend
-  }
+  try {
+    await query(
+      `UPDATE organizations
+       SET industry_type = $1,
+           onboarding_completed = true,
+           updated_at = NOW()
+       WHERE id = $2`,
+      [input.industryType, orgId]
+    )
 
-  revalidatePath('/dashboard')
-  return { success: true }
+    revalidatePath('/dashboard')
+    return { success: true }
+  } catch (err: any) {
+    console.error('[ONBOARDING_ERROR]', err)
+    return { success: false, error: err.message || 'Failed to complete onboarding' }
+  }
 }
