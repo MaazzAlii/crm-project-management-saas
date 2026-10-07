@@ -1,13 +1,12 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
 import type { TagRecord } from './types'
 
 export type { TagRecord }
-
 
 export async function fetchTagsAction(): Promise<TagRecord[]> {
   try {
@@ -17,19 +16,16 @@ export async function fetchTagsAction(): Promise<TagRecord[]> {
       return getDevTags()
     }
 
-    const supabase = await createClient()
-
     let tags: TagRecord[] = []
 
     try {
-      const { data, error } = await supabase
-        .from('tags')
-        .select('*')
-        .eq('organization_id', session.organization.id)
-        .order('name', { ascending: true })
+      const data = await query<TagRecord>(
+        `SELECT * FROM tags WHERE organization_id = $1 ORDER BY name ASC`,
+        [session.organization.id]
+      )
 
-      if (!error && data) {
-        tags = data as TagRecord[]
+      if (data) {
+        tags = data
       }
     } catch (err) {}
 
@@ -57,24 +53,16 @@ export async function createTagAction(name: string, color: string = 'sky') {
       return { error: 'Tag name is required.' }
     }
 
-    const supabase = await createClient()
-
     let newTag: TagRecord | null = null
     let insertError: any = null
 
     try {
-      const { data, error } = await supabase
-        .from('tags')
-        .insert({
-          organization_id: session.organization.id,
-          name: trimmedName,
-          color,
-        })
-        .select('*')
-        .single()
-
-      newTag = data as TagRecord
-      insertError = error
+      newTag = await queryOne<TagRecord>(
+        `INSERT INTO tags (organization_id, name, color)
+         VALUES ($1, $2, $3)
+         RETURNING *`,
+        [session.organization.id, trimmedName, color]
+      )
     } catch (err) {
       insertError = err
     }
@@ -119,14 +107,11 @@ export async function deleteTagAction(tagId: string) {
       return { error: 'Unauthorized.' }
     }
 
-    const supabase = await createClient()
-
     try {
-      await supabase
-        .from('tags')
-        .delete()
-        .eq('id', tagId)
-        .eq('organization_id', session.organization.id)
+      await query(
+        `DELETE FROM tags WHERE id = $1 AND organization_id = $2`,
+        [tagId, session.organization.id]
+      )
     } catch (err) {}
 
     if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_TAGS) {
@@ -148,14 +133,11 @@ export async function updateClientTagsAction(clientId: string, tags: string[]) {
       return { error: 'Unauthorized.' }
     }
 
-    const supabase = await createClient()
-
     try {
-      await supabase
-        .from('clients')
-        .update({ tags, updated_at: new Date().toISOString() })
-        .eq('id', clientId)
-        .eq('organization_id', session.organization.id)
+      await query(
+        `UPDATE clients SET tags = $1, updated_at = NOW() WHERE id = $2 AND organization_id = $3`,
+        [tags, clientId, session.organization.id]
+      )
     } catch (err) {}
 
     // Dev fallback
