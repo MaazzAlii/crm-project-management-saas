@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { getCurrentSessionContext } from '@/lib/auth/session'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
@@ -48,40 +48,44 @@ export async function updateOrganizationProfile(input: UpdateOrgProfileInput) {
     return { success: false, error: 'Forbidden: Only owners and admins can edit organization profile.' }
   }
 
-  const supabase = await createClient()
+  try {
+    await query(
+      `UPDATE organizations
+       SET name = $1,
+           industry_type = $2,
+           logo_url = $3,
+           timezone = $4,
+           updated_at = NOW()
+       WHERE id = $5`,
+      [
+        input.name,
+        input.industryType,
+        input.logoUrl || null,
+        input.timezone || 'UTC',
+        input.organizationId,
+      ]
+    )
 
-  const { error } = await supabase
-    .from('organizations')
-    .update({
-      name: input.name,
-      industry_type: input.industryType,
-      logo_url: input.logoUrl || null,
-      timezone: input.timezone || 'UTC',
-      updated_at: new Date().toISOString(),
+    await logAuditEvent({
+      actorId: session.user.id,
+      action: 'ORGANIZATION_PROFILE_UPDATE',
+      targetType: 'organization',
+      targetId: input.organizationId,
+      details: {
+        name: input.name,
+        industryType: input.industryType,
+        logoUrl: input.logoUrl,
+        timezone: input.timezone,
+      },
     })
-    .eq('id', input.organizationId)
 
-  if (error) {
+    revalidatePath('/settings/organization')
+    revalidatePath('/dashboard')
+    return { success: true }
+  } catch (error: any) {
     console.error('Error updating organization profile:', error)
-    return { success: false, error: error.message }
+    return { success: false, error: error.message || 'Update failed' }
   }
-
-  await logAuditEvent({
-    actorId: session.user.id,
-    action: 'ORGANIZATION_PROFILE_UPDATE',
-    targetType: 'organization',
-    targetId: input.organizationId,
-    details: {
-      name: input.name,
-      industryType: input.industryType,
-      logoUrl: input.logoUrl,
-      timezone: input.timezone,
-    },
-  })
-
-  revalidatePath('/settings/organization')
-  revalidatePath('/dashboard')
-  return { success: true }
 }
 
 /**
@@ -105,57 +109,51 @@ export async function inviteTeamMember(input: InviteMemberInput) {
     return { success: false, error: 'Valid email address is required.' }
   }
 
-  const supabase = await createClient()
+  try {
+    // 1. Check if user already exists with this email
+    const existingUser = await queryOne<{ id: string; email: string }>(
+      'SELECT id, email FROM users WHERE email = $1',
+      [cleanEmail]
+    )
 
-  // 1. Check if user profile already exists with this email
-  const { data: existingProfile } = await supabase
-    .from('profiles')
-    .select('id, email')
-    .eq('email', cleanEmail)
-    .maybeSingle()
+    if (existingUser) {
+      // Check if user is already a member of this organization
+      const existingMember = await queryOne<{ id: string }>(
+        'SELECT id FROM organization_members WHERE organization_id = $1 AND user_id = $2',
+        [session.organization.id, existingUser.id]
+      )
 
-  if (existingProfile) {
-    // Check if user is already a member of this organization
-    const { data: existingMember } = await supabase
-      .from('organization_members')
-      .select('id')
-      .eq('organization_id', session.organization.id)
-      .eq('user_id', existingProfile.id)
-      .maybeSingle()
+      if (existingMember) {
+        return { success: false, error: 'This user is already a member of your organization.' }
+      }
 
-    if (existingMember) {
-      return { success: false, error: 'This user is already a member of your organization.' }
+      // Add existing user as an org member
+      await query(
+        `INSERT INTO organization_members (organization_id, user_id, role, invited_by)
+         VALUES ($1, $2, $3, $4)`,
+        [session.organization.id, existingUser.id, input.role, session.user.id]
+      )
+    } else {
+      console.log(`[TEAM_INVITE_STUB] Invitation dispatched to ${cleanEmail} for role ${input.role} in org ${session.organization.name}`)
     }
 
-    // Add existing profile user as an org member
-    const { error: insertError } = await supabase
-      .from('organization_members')
-      .insert({
-        organization_id: session.organization.id,
-        user_id: existingProfile.id,
-        role: input.role,
-        invited_by: session.user.id,
-      })
+    await logAuditEvent({
+      actorId: session.user.id,
+      action: 'TEAM_MEMBER_INVITED',
+      targetType: 'organization_member',
+      targetId: session.organization.id,
+      details: { email: cleanEmail, role: input.role },
+    })
 
-    if (insertError) {
-      console.error('Error inserting org member:', insertError)
-      return { success: false, error: insertError.message }
+    revalidatePath('/settings/team')
+    return {
+      success: true,
+      message: existingUser ? 'Member added successfully!' : `Invitation email stubbed for ${cleanEmail}`,
     }
-  } else {
-    // Stub invite logging for user not yet registered
-    console.log(`[TEAM_INVITE_STUB] Invitation dispatched to ${cleanEmail} for role ${input.role} in org ${session.organization.name}`)
+  } catch (err: any) {
+    console.error('Error inviting team member:', err)
+    return { success: false, error: err.message || 'Invitation failed' }
   }
-
-  await logAuditEvent({
-    actorId: session.user.id,
-    action: 'TEAM_MEMBER_INVITED',
-    targetType: 'organization_member',
-    targetId: session.organization.id,
-    details: { email: cleanEmail, role: input.role },
-  })
-
-  revalidatePath('/settings/team')
-  return { success: true, message: existingProfile ? 'Member added successfully!' : `Invitation email stubbed for ${cleanEmail}` }
 }
 
 /**
@@ -174,58 +172,52 @@ export async function updateMemberRole(input: UpdateRoleInput) {
     return { success: false, error: 'Forbidden: Only owners and admins can update member roles.' }
   }
 
-  const supabase = await createClient()
+  try {
+    // Fetch the target member record
+    const targetMember = await queryOne<{ id: string; organization_id: string; user_id: string; role: string }>(
+      'SELECT id, organization_id, user_id, role FROM organization_members WHERE id = $1 AND organization_id = $2',
+      [input.memberId, session.organization.id]
+    )
 
-  // Fetch the target member record
-  const { data: targetMember } = await supabase
-    .from('organization_members')
-    .select('id, organization_id, user_id, role')
-    .eq('id', input.memberId)
-    .eq('organization_id', session.organization.id)
-    .maybeSingle()
-
-  if (!targetMember) {
-    return { success: false, error: 'Target member record not found.' }
-  }
-
-  // Prevent demoting the last owner of the organization
-  if (targetMember.role === 'owner' && input.newRole !== 'owner') {
-    const { count: ownerCount } = await supabase
-      .from('organization_members')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', session.organization.id)
-      .eq('role', 'owner')
-
-    if (ownerCount !== null && ownerCount <= 1) {
-      return { success: false, error: 'Cannot demote the last owner of an organization.' }
+    if (!targetMember) {
+      return { success: false, error: 'Target member record not found.' }
     }
-  }
 
-  // Update member role
-  const { error: updateError } = await supabase
-    .from('organization_members')
-    .update({
-      role: input.newRole,
-      updated_at: new Date().toISOString(),
+    // Prevent demoting the last owner of the organization
+    if (targetMember.role === 'owner' && input.newRole !== 'owner') {
+      const ownerCountRes = await queryOne<{ count: string }>(
+        "SELECT COUNT(*) as count FROM organization_members WHERE organization_id = $1 AND role = 'owner'",
+        [session.organization.id]
+      )
+      const ownerCount = parseInt(ownerCountRes?.count || '0', 10)
+
+      if (ownerCount <= 1) {
+        return { success: false, error: 'Cannot demote the last owner of an organization.' }
+      }
+    }
+
+    // Update member role
+    await query(
+      `UPDATE organization_members
+       SET role = $1, updated_at = NOW()
+       WHERE id = $2 AND organization_id = $3`,
+      [input.newRole, input.memberId, session.organization.id]
+    )
+
+    await logAuditEvent({
+      actorId: session.user.id,
+      action: 'TEAM_MEMBER_ROLE_UPDATED',
+      targetType: 'organization_member',
+      targetId: input.memberId,
+      details: { oldRole: targetMember.role, newRole: input.newRole },
     })
-    .eq('id', input.memberId)
-    .eq('organization_id', session.organization.id)
 
-  if (updateError) {
-    console.error('Error updating member role:', updateError)
-    return { success: false, error: updateError.message }
+    revalidatePath('/settings/team')
+    return { success: true }
+  } catch (err: any) {
+    console.error('Error updating member role:', err)
+    return { success: false, error: err.message || 'Role update failed' }
   }
-
-  await logAuditEvent({
-    actorId: session.user.id,
-    action: 'TEAM_MEMBER_ROLE_UPDATED',
-    targetType: 'organization_member',
-    targetId: input.memberId,
-    details: { oldRole: targetMember.role, newRole: input.newRole },
-  })
-
-  revalidatePath('/settings/team')
-  return { success: true }
 }
 
 /**
@@ -244,53 +236,48 @@ export async function removeMember(input: RemoveMemberInput) {
     return { success: false, error: 'Forbidden: Only owners and admins can remove team members.' }
   }
 
-  const supabase = await createClient()
+  try {
+    // Fetch the target member record
+    const targetMember = await queryOne<{ id: string; organization_id: string; user_id: string; role: string }>(
+      'SELECT id, organization_id, user_id, role FROM organization_members WHERE id = $1 AND organization_id = $2',
+      [input.memberId, session.organization.id]
+    )
 
-  // Fetch the target member record
-  const { data: targetMember } = await supabase
-    .from('organization_members')
-    .select('id, organization_id, user_id, role')
-    .eq('id', input.memberId)
-    .eq('organization_id', session.organization.id)
-    .maybeSingle()
-
-  if (!targetMember) {
-    return { success: false, error: 'Target member record not found.' }
-  }
-
-  // Prevent removing the last owner of the organization
-  if (targetMember.role === 'owner') {
-    const { count: ownerCount } = await supabase
-      .from('organization_members')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', session.organization.id)
-      .eq('role', 'owner')
-
-    if (ownerCount !== null && ownerCount <= 1) {
-      return { success: false, error: 'Cannot remove the last owner of an organization.' }
+    if (!targetMember) {
+      return { success: false, error: 'Target member record not found.' }
     }
+
+    // Prevent removing the last owner of the organization
+    if (targetMember.role === 'owner') {
+      const ownerCountRes = await queryOne<{ count: string }>(
+        "SELECT COUNT(*) as count FROM organization_members WHERE organization_id = $1 AND role = 'owner'",
+        [session.organization.id]
+      )
+      const ownerCount = parseInt(ownerCountRes?.count || '0', 10)
+
+      if (ownerCount <= 1) {
+        return { success: false, error: 'Cannot remove the last owner of an organization.' }
+      }
+    }
+
+    // Delete member record
+    await query(
+      'DELETE FROM organization_members WHERE id = $1 AND organization_id = $2',
+      [input.memberId, session.organization.id]
+    )
+
+    await logAuditEvent({
+      actorId: session.user.id,
+      action: 'TEAM_MEMBER_REMOVED',
+      targetType: 'organization_member',
+      targetId: input.memberId,
+      details: { removedUserId: targetMember.user_id, role: targetMember.role },
+    })
+
+    revalidatePath('/settings/team')
+    return { success: true }
+  } catch (err: any) {
+    console.error('Error removing org member:', err)
+    return { success: false, error: err.message || 'Remove member failed' }
   }
-
-  // Delete member record
-  const { error: deleteError } = await supabase
-    .from('organization_members')
-    .delete()
-    .eq('id', input.memberId)
-    .eq('organization_id', session.organization.id)
-
-  if (deleteError) {
-    console.error('Error removing org member:', deleteError)
-    return { success: false, error: deleteError.message }
-  }
-
-  await logAuditEvent({
-    actorId: session.user.id,
-    action: 'TEAM_MEMBER_REMOVED',
-    targetType: 'organization_member',
-    targetId: input.memberId,
-    details: { removedUserId: targetMember.user_id, role: targetMember.role },
-  })
-
-  revalidatePath('/settings/team')
-  return { success: true }
 }
