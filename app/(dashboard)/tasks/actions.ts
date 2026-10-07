@@ -1,7 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
 
@@ -43,19 +43,17 @@ export async function fetchAllTasksAction(): Promise<GlobalTaskRecord[]> {
       return getDevGlobalTasks()
     }
 
-    const supabase = await createClient()
+    const data = await query<any>(
+      `SELECT t.*, p.title AS project_title, u.full_name AS assigned_name, u.email AS assigned_email
+       FROM tasks t
+       LEFT JOIN projects p ON p.id = t.project_id
+       LEFT JOIN users u ON u.id = t.assigned_to
+       WHERE t.organization_id = $1
+       ORDER BY t.due_date ASC NULLS LAST`,
+      [session.organization.id]
+    )
 
-    const { data, error } = await supabase
-      .from('tasks')
-      .select(`
-        *,
-        projects ( title ),
-        profiles ( full_name, email )
-      `)
-      .eq('organization_id', session.organization.id)
-      .order('due_date', { ascending: true, nullsFirst: false })
-
-    if (error || !data || data.length === 0) {
+    if (!data || data.length === 0) {
       return getDevGlobalTasks()
     }
 
@@ -63,11 +61,11 @@ export async function fetchAllTasksAction(): Promise<GlobalTaskRecord[]> {
       id: t.id,
       organization_id: t.organization_id,
       project_id: t.project_id,
-      project_title: t.projects?.title || 'Agency Project',
+      project_title: t.project_title || 'Agency Project',
       title: t.title,
       description: t.description,
       assigned_to: t.assigned_to,
-      assigned_name: t.profiles?.full_name || t.profiles?.email || null,
+      assigned_name: t.assigned_name || t.assigned_email || null,
       status: t.status,
       priority: t.priority,
       due_date: t.due_date,
@@ -106,28 +104,27 @@ export async function createGlobalTaskAction(formData: FormData) {
       return { error: 'Please select a target project.' }
     }
 
-    const supabase = await createClient()
+    const data = await queryOne<{ id: string }>(
+      `INSERT INTO tasks (
+        organization_id, project_id, title, description, assigned_to,
+        priority, status, due_date, created_at, updated_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW()
+      ) RETURNING id`,
+      [
+        session.organization.id,
+        project_id,
+        title,
+        description,
+        assigned_to || null,
+        priority,
+        status,
+        due_date
+      ]
+    )
 
-    const payload = {
-      organization_id: session.organization.id,
-      project_id,
-      title,
-      description,
-      assigned_to: assigned_to || null,
-      priority,
-      status,
-      due_date
-    }
-
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert(payload)
-      .select('id')
-      .single()
-
-    if (error) {
-      console.error('Failed to create task:', error)
-      return { error: error.message || 'Database error creating task.' }
+    if (!data) {
+      return { error: 'Database error creating task.' }
     }
 
     try {
@@ -168,29 +165,25 @@ export async function updateGlobalTaskAction(taskId: string, formData: FormData)
       return { error: 'Task title is required.' }
     }
 
-    const supabase = await createClient()
+    const completedAt = status === 'done' ? new Date().toISOString() : null
 
-    const updatePayload: any = {
-      title,
-      description,
-      assigned_to: assigned_to || null,
-      priority,
-      status,
-      due_date,
-      updated_at: new Date().toISOString()
-    }
-
-    if (status === 'done') {
-      updatePayload.completed_at = new Date().toISOString()
-    } else {
-      updatePayload.completed_at = null
-    }
-
-    await supabase
-      .from('tasks')
-      .update(updatePayload)
-      .eq('id', taskId)
-      .eq('organization_id', session.organization.id)
+    await query(
+      `UPDATE tasks
+       SET title = $1, description = $2, assigned_to = $3, priority = $4, status = $5,
+           due_date = $6, updated_at = NOW(), completed_at = $7
+       WHERE id = $8 AND organization_id = $9`,
+      [
+        title,
+        description,
+        assigned_to || null,
+        priority,
+        status,
+        due_date,
+        completedAt,
+        taskId,
+        session.organization.id
+      ]
+    )
 
     try {
       await logAuditEvent({
@@ -219,24 +212,14 @@ export async function toggleGlobalTaskStatusAction(taskId: string, newStatus: 't
       return { error: 'Unauthorized.' }
     }
 
-    const supabase = await createClient()
+    const completedAt = newStatus === 'done' ? new Date().toISOString() : null
 
-    const updatePayload: any = {
-      status: newStatus,
-      updated_at: new Date().toISOString()
-    }
-
-    if (newStatus === 'done') {
-      updatePayload.completed_at = new Date().toISOString()
-    } else {
-      updatePayload.completed_at = null
-    }
-
-    await supabase
-      .from('tasks')
-      .update(updatePayload)
-      .eq('id', taskId)
-      .eq('organization_id', session.organization.id)
+    await query(
+      `UPDATE tasks
+       SET status = $1, updated_at = NOW(), completed_at = $2
+       WHERE id = $3 AND organization_id = $4`,
+      [newStatus, completedAt, taskId, session.organization.id]
+    )
 
     try {
       await logAuditEvent({
@@ -265,13 +248,10 @@ export async function deleteGlobalTaskAction(taskId: string) {
       return { error: 'Unauthorized.' }
     }
 
-    const supabase = await createClient()
-
-    await supabase
-      .from('tasks')
-      .delete()
-      .eq('id', taskId)
-      .eq('organization_id', session.organization.id)
+    await query(
+      `DELETE FROM tasks WHERE id = $1 AND organization_id = $2`,
+      [taskId, session.organization.id]
+    )
 
     try {
       await logAuditEvent({
@@ -298,8 +278,13 @@ export async function fetchTeamWorkloadAction(): Promise<TeamWorkloadRecord[]> {
 
     let profiles: { id: string; full_name: string; email?: string | null }[] = []
     if (session && session.organization) {
-      const supabase = await createClient()
-      const { data } = await supabase.from('profiles').select('id, full_name, email')
+      const data = await query<{ id: string; full_name: string | null; email: string }>(
+        `SELECT u.id, u.full_name, u.email
+         FROM users u
+         JOIN organization_members om ON om.user_id = u.id
+         WHERE om.organization_id = $1`,
+        [session.organization.id]
+      )
       if (data) profiles = data.map((p) => ({ id: p.id, full_name: p.full_name || p.email || 'Team Member', email: p.email }))
     }
 
