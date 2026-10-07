@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
 import { setImpersonationCookie, clearImpersonationCookie } from '@/lib/auth/impersonation'
 import { logAuditEvent } from '@/lib/audit/logger'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentSessionContext } from '@/lib/auth/session'
 
 export async function POST(request: Request) {
   try {
@@ -22,10 +22,9 @@ export async function POST(request: Request) {
     let actorId: string | undefined
     let actorEmail: string | undefined
     try {
-      const supabase = await createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      actorId = user?.id
-      actorEmail = user?.email
+      const session = await getCurrentSessionContext()
+      actorId = session?.user?.id
+      actorEmail = session?.user?.email
     } catch {}
 
     await logAuditEvent({
@@ -60,10 +59,9 @@ export async function DELETE() {
     let actorId: string | undefined
     let actorEmail: string | undefined
     try {
-      const supabase = await createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      actorId = user?.id
-      actorEmail = user?.email
+      const session = await getCurrentSessionContext()
+      actorId = session?.user?.id
+      actorEmail = session?.user?.email
     } catch {}
 
     await logAuditEvent({
