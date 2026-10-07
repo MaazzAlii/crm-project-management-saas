@@ -2,7 +2,6 @@
 
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { Mail, ArrowRight, CheckCircle, AlertCircle, Loader2, Shield, Building2 } from 'lucide-react'
 
 function ClientLoginForm() {
@@ -26,33 +25,29 @@ function ClientLoginForm() {
     setLoading(true)
     setError(null)
 
-    const supabase = createClient()
+    try {
+      const res = await fetch('/api/auth/magic-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
 
-    // Redirect after OTP confirmation → portal auth callback
-    const redirectTo =
-      typeof window !== 'undefined'
-        ? `${window.location.origin}/client/auth/callback${orgSlug ? `?org=${orgSlug}` : ''}`
-        : '/client/auth/callback'
+      const data = await res.json()
 
-    const { error: authError } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: false, // Portal users must be pre-created by the org
-        emailRedirectTo: redirectTo,
-      },
-    })
-
-    if (authError) {
-      // Friendly message — avoid leaking "user not found"
-      setError(
-        authError.message.toLowerCase().includes('not found') ||
-          authError.message.toLowerCase().includes('invalid')
-          ? 'No portal account found for this email. Contact your account manager for access.'
-          : authError.message
-      )
-      setLoading(false)
-    } else {
-      setSent(true)
+      if (!res.ok) {
+        setError(
+          data.error?.toLowerCase().includes('not found') ||
+            data.error?.toLowerCase().includes('invalid')
+            ? 'No portal account found for this email. Contact your account manager for access.'
+            : data.error || 'Failed to send magic link'
+        )
+        setLoading(false)
+      } else {
+        setSent(true)
+        setLoading(false)
+      }
+    } catch {
+      setError('An unexpected error occurred. Please try again.')
       setLoading(false)
     }
   }
@@ -161,7 +156,7 @@ export default function ClientLoginPage() {
         {/* Security badge */}
         <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-600">
           <Shield className="h-3.5 w-3.5" />
-          <span>Secured by Supabase Auth — your data is encrypted end-to-end</span>
+          <span>Secured by Innoventix Auth — your data is encrypted end-to-end</span>
         </div>
       </div>
     </div>
