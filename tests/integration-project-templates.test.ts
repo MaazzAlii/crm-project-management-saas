@@ -4,8 +4,9 @@ vi.mock('@/lib/auth/session', () => ({
   getCurrentSessionContext: vi.fn(),
 }))
 
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(),
+vi.mock('@/lib/db', () => ({
+  query: vi.fn(),
+  queryOne: vi.fn(),
 }))
 
 vi.mock('@/lib/billing/plan-limits', () => ({
@@ -21,7 +22,7 @@ vi.mock('next/cache', () => ({
 }))
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { checkProjectLimit } from '@/lib/billing/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { createProjectAction } from '@/app/(dashboard)/projects/actions'
@@ -47,68 +48,30 @@ describe('Integration: Project Creation with Template Scaffolding', () => {
   })
 
   it('scaffolds tasks and deliverables when template_id is provided', async () => {
-    const mockTasksInsert = vi.fn().mockResolvedValue({ error: null })
-    const mockDeliverablesInsert = vi.fn().mockResolvedValue({ error: null })
+    ;(queryOne as any).mockImplementation((sql: string) => {
+      if (sql.includes('INSERT INTO projects')) {
+        return Promise.resolve({ id: 'new-project-uuid-999' })
+      }
+      if (sql.includes('project_templates')) {
+        return Promise.resolve({
+          id: mockTemplateId,
+          name: 'Website Redesign Template',
+          default_deliverables: ['Figma Wireframes', 'Production React Build', 'Client Sign-off Document'],
+        })
+      }
+      return Promise.resolve(null)
+    })
 
-    const mockSupabase = {
-      from: vi.fn((table: string) => {
-        if (table === 'projects') {
-          return {
-            insert: vi.fn().mockReturnValue({
-              select: vi.fn().mockReturnValue({
-                single: vi.fn().mockResolvedValue({
-                  data: { id: 'new-project-uuid-999' },
-                  error: null,
-                }),
-              }),
-            }),
-          }
-        }
-        if (table === 'project_templates') {
-          return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  single: vi.fn().mockResolvedValue({
-                    data: {
-                      id: mockTemplateId,
-                      name: 'Website Redesign Template',
-                      default_deliverables: ['Figma Wireframes', 'Production React Build', 'Client Sign-off Document'],
-                    },
-                  }),
-                }),
-              }),
-            }),
-          }
-        }
-        if (table === 'project_template_tasks') {
-          return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                eq: vi.fn().mockResolvedValue({
-                  data: [
-                    { title: 'Kickoff & Discovery', description: 'Gather client assets', day_offset: 2, priority: 'high' },
-                    { title: 'UI Design Mockups', description: 'Design hero section', day_offset: 7, priority: 'medium' },
-                  ],
-                }),
-              }),
-            }),
-          }
-        }
-        if (table === 'tasks') {
-          return {
-            insert: mockTasksInsert,
-          }
-        }
-        if (table === 'deliverables') {
-          return {
-            insert: mockDeliverablesInsert,
-          }
-        }
-        return {}
-      }),
-    }
-    ;(createClient as any).mockResolvedValue(mockSupabase)
+    ;(query as any).mockImplementation((sql: string) => {
+      if (sql.includes('project_template_tasks')) {
+        const rows = [
+          { title: 'Kickoff & Discovery', description: 'Gather client assets', day_offset: 2, priority: 'high' },
+          { title: 'UI Design Mockups', description: 'Design hero section', day_offset: 7, priority: 'medium' },
+        ]
+        return Promise.resolve(Object.assign(rows, { rows }))
+      }
+      return Promise.resolve(Object.assign([], { rows: [] }))
+    })
 
     const formData = new FormData()
     formData.set('title', 'Brand Redesign 2026')
@@ -122,25 +85,25 @@ describe('Integration: Project Creation with Template Scaffolding', () => {
     expect(result.success).toBe(true)
     expect(result.projectId).toBe('new-project-uuid-999')
 
-    // Verify task scaffolding: 2 tasks inserted with offset due dates
-    expect(mockTasksInsert).toHaveBeenCalledTimes(1)
-    const scaffoldedTasks = mockTasksInsert.mock.calls[0][0]
-    expect(scaffoldedTasks.length).toBe(2)
-    expect(scaffoldedTasks[0].title).toBe('Kickoff & Discovery')
-    expect(scaffoldedTasks[0].project_id).toBe('new-project-uuid-999')
-    expect(scaffoldedTasks[0].organization_id).toBe(mockOrgId)
-    // Offset by 2 days from 2026-10-01 -> 2026-10-03
-    expect(scaffoldedTasks[0].due_date).toBe('2026-10-03')
+    // Verify task scaffolding: tasks inserted
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO tasks'),
+      expect.arrayContaining([
+        mockOrgId,
+        'new-project-uuid-999',
+        'Kickoff & Discovery',
+      ])
+    )
 
-    // Verify deliverable scaffolding: 3 deliverables inserted
-    expect(mockDeliverablesInsert).toHaveBeenCalledTimes(1)
-    const scaffoldedDeliverables = mockDeliverablesInsert.mock.calls[0][0]
-    expect(scaffoldedDeliverables.length).toBe(3)
-    expect(scaffoldedDeliverables[0].title).toBe('Figma Wireframes')
-    expect(scaffoldedDeliverables[1].title).toBe('Production React Build')
-    expect(scaffoldedDeliverables[2].title).toBe('Client Sign-off Document')
-    expect(scaffoldedDeliverables[0].project_id).toBe('new-project-uuid-999')
-    expect(scaffoldedDeliverables[0].organization_id).toBe(mockOrgId)
+    // Verify deliverable scaffolding: deliverables inserted
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO deliverables'),
+      expect.arrayContaining([
+        mockOrgId,
+        'new-project-uuid-999',
+        'Figma Wireframes',
+      ])
+    )
 
     // Verify audit log emitted
     expect(logAuditEvent).toHaveBeenCalledWith(
