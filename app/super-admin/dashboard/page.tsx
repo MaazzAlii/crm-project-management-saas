@@ -1,14 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
 import { PlatformMetricsCards, type PlatformMetrics } from '@/components/super-admin/platform-metrics-cards'
 import { RecentActivityTables } from '@/components/super-admin/recent-activity-tables'
-import { ShieldCheck, RefreshCw } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SuperAdminDashboardPage() {
   await requireSuperAdmin()
-  const supabase = await createClient()
 
   let orgs: any[] = []
   let totalMrr = 0
@@ -18,53 +17,42 @@ export default async function SuperAdminDashboardPage() {
 
   try {
     // 1. Fetch Organizations
-    const { data: orgsData } = await supabase
-      .from('organizations')
-      .select('id, name, slug, plan_tier, billing_status, is_suspended, created_at')
-      .order('created_at', { ascending: false })
-
-    if (orgsData && orgsData.length > 0) {
-      orgs = orgsData
+    const orgsRes = await query<any>(
+      `SELECT id, name, slug, plan_tier, billing_status, is_suspended, created_at
+       FROM organizations
+       ORDER BY created_at DESC`
+    )
+    if (orgsRes.rows && orgsRes.rows.length > 0) {
+      orgs = orgsRes.rows
     }
 
     // 2. Fetch Subscriptions & Plan Prices for MRR Calculation
-    const { data: subsData } = await supabase
-      .from('organization_subscriptions')
-      .select(`
-        id,
-        status,
-        plan_id,
-        subscription_plans (
-          price_monthly,
-          price_yearly
-        )
-      `)
+    const subsRes = await query<any>(
+      `SELECT os.id, os.status, os.plan_id, sp.price_monthly, sp.price_yearly
+       FROM organization_subscriptions os
+       LEFT JOIN subscription_plans sp ON sp.id = os.plan_id`
+    )
 
-    if (subsData) {
-      subsData.forEach((sub: any) => {
-        if (sub.status === 'active' && sub.subscription_plans) {
-          const monthly = Number(sub.subscription_plans.price_monthly) || 0
+    if (subsRes.rows) {
+      subsRes.rows.forEach((sub: any) => {
+        if (sub.status === 'active' && sub.price_monthly) {
+          const monthly = Number(sub.price_monthly) || 0
           totalMrr += monthly
         }
       })
     }
 
     // 3. Aggregate Counts across Platform
-    const { count: cCount } = await supabase
-      .from('clients')
-      .select('*', { count: 'exact', head: true })
+    const cCount = await queryOne<{ count: number }>(`SELECT COUNT(*)::int as count FROM clients`)
+    const pCount = await queryOne<{ count: number }>(`SELECT COUNT(*)::int as count FROM projects`)
+    let mCount: { count: number } | null = null
+    try {
+      mCount = await queryOne<{ count: number }>(`SELECT COUNT(*)::int as count FROM communication_messages`)
+    } catch {}
 
-    const { count: pCount } = await supabase
-      .from('projects')
-      .select('*', { count: 'exact', head: true })
-
-    const { count: mCount } = await supabase
-      .from('communication_messages')
-      .select('*', { count: 'exact', head: true })
-
-    clientsCount = cCount || 0
-    projectsCount = pCount || 0
-    messagesCount = mCount || 0
+    clientsCount = cCount?.count || 0
+    projectsCount = pCount?.count || 0
+    messagesCount = mCount?.count || 0
   } catch (err) {
     console.warn('[SUPER_ADMIN_DASHBOARD] Using fallback seed data:', err)
   }
