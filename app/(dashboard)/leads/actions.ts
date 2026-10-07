@@ -1,7 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { checkClientLimit } from '@/lib/billing/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
@@ -35,33 +35,23 @@ export async function updateLeadStageAction(
       return { error: 'Invalid pipeline stage value.' }
     }
 
-    const supabase = await createClient()
+    const statusUpdate = newStage === 'won' ? 'active' : undefined
+    const lostReasonValue = newStage === 'lost' ? (lostReason || 'No reason specified') : null
 
-    const updatePayload: any = {
-      pipeline_stage: newStage,
-      stage_updated_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-
-    if (newStage === 'won') {
-      updatePayload.status = 'active'
-    } else if (newStage === 'lost') {
-      updatePayload.lost_reason = lostReason || 'No reason specified'
+    if (statusUpdate) {
+      await query(
+        `UPDATE clients
+         SET pipeline_stage = $1, status = $2, lost_reason = $3, stage_updated_at = NOW(), updated_at = NOW()
+         WHERE id = $4 AND organization_id = $5`,
+        [newStage, statusUpdate, lostReasonValue, clientId, session.organization.id]
+      )
     } else {
-      updatePayload.lost_reason = null
-    }
-
-    let updateError: any = null
-    try {
-      const { error } = await supabase
-        .from('clients')
-        .update(updatePayload)
-        .eq('id', clientId)
-        .eq('organization_id', session.organization.id)
-
-      updateError = error
-    } catch (err) {
-      updateError = err
+      await query(
+        `UPDATE clients
+         SET pipeline_stage = $1, lost_reason = $2, stage_updated_at = NOW(), updated_at = NOW()
+         WHERE id = $3 AND organization_id = $4`,
+        [newStage, lostReasonValue, clientId, session.organization.id]
+      )
     }
 
     // Dev mode fallback
@@ -70,7 +60,11 @@ export async function updateLeadStageAction(
       if (idx !== -1) {
         ;(global as any).__DEV_CLIENTS[idx] = {
           ...(global as any).__DEV_CLIENTS[idx],
-          ...updatePayload,
+          pipeline_stage: newStage,
+          ...(statusUpdate ? { status: statusUpdate } : {}),
+          lost_reason: lostReasonValue,
+          stage_updated_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         }
       }
     }
@@ -135,16 +129,20 @@ export async function createLeadAction(formData: FormData) {
 
     const status = pipeline_stage === 'won' ? 'active' : 'lead'
 
-    const supabase = await createClient()
-
     let newLead: { id: string } | null = null
     let insertError: any = null
 
     try {
-      const { data, error } = await supabase
-        .from('clients')
-        .insert({
-          organization_id: session.organization.id,
+      newLead = await queryOne<{ id: string }>(
+        `INSERT INTO clients (
+          organization_id, name, company, email, phone, platform, country,
+          currency, deal_value, pipeline_stage, status, communication_mode, notes,
+          stage_updated_at, created_at, updated_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW(), NOW()
+        ) RETURNING id`,
+        [
+          session.organization.id,
           name,
           company,
           email,
@@ -157,13 +155,8 @@ export async function createLeadAction(formData: FormData) {
           status,
           communication_mode,
           notes,
-          stage_updated_at: new Date().toISOString(),
-        })
-        .select('id')
-        .single()
-
-      newLead = data
-      insertError = error
+        ]
+      )
     } catch (err: any) {
       insertError = err
     }
@@ -315,16 +308,14 @@ export async function batchScoreLeadsAction(): Promise<{
       }
     }
 
-    const supabase = await createClient()
-
     // Fetch all non-terminal deals
-    const { data: leads } = await supabase
-      .from('clients')
-      .select('id')
-      .eq('organization_id', session.organization.id)
-      .not('pipeline_stage', 'in', '("won","lost")')
+    const leads = await query<{ id: string }>(
+      `SELECT id FROM clients
+       WHERE organization_id = $1 AND pipeline_stage NOT IN ('won', 'lost')`,
+      [session.organization.id]
+    )
 
-    const leadIds = leads ? leads.map((l: any) => l.id) : []
+    const leadIds = leads ? leads.map((l) => l.id) : []
 
     let scoredCount = 0
     for (const id of leadIds) {
