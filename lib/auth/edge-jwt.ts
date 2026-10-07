@@ -17,7 +17,7 @@ function getJwtSecret(): Uint8Array {
 
 function getRefreshSecret(): Uint8Array {
   return new TextEncoder().encode(
-    process.env.REFRESH_TOKEN_SECRET || 'refresh-secret-32-chars-minimum-required'
+    process.env.REFRESH_TOKEN_SECRET || process.env.REFRESH_SECRET || 'refresh-secret-32-chars-minimum-required'
   )
 }
 
