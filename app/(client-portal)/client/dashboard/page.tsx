@@ -1,5 +1,5 @@
 import { requirePortalSession } from '@/lib/portal/auth'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { PortalNav } from '@/components/client-portal/PortalNav'
 import { PortalProjectCard } from '@/components/client-portal/PortalProjectCard'
 import { PortalDeliverableRow } from '@/components/client-portal/PortalDeliverableRow'
@@ -12,65 +12,93 @@ export const metadata = {
 
 export default async function PortalDashboardPage() {
   const { clientId, organizationId } = await requirePortalSession()
-  const supabase = await createClient()
 
-  // Parallel data fetch — all scoped by client_id via RLS
+  // Parallel data fetch — all scoped by client_id
   const [
-    { data: client },
-    { data: org },
-    { data: projects },
-    { data: pendingDeliverables },
-    { data: invoicedProjects },
+    client,
+    org,
+    projectsRes,
+    pendingDeliverablesRes,
+    invoicedProjectsRes,
   ] = await Promise.all([
-    supabase
-      .from('clients')
-      .select('name, company_name, email')
-      .eq('id', clientId)
-      .maybeSingle(),
+    queryOne<{ name: string; company: string | null; email: string | null }>(
+      'SELECT name, company, email FROM clients WHERE id = $1',
+      [clientId]
+    ),
 
-    supabase
-      .from('organizations')
-      .select('name, logo_url')
-      .eq('id', organizationId)
-      .maybeSingle(),
+    queryOne<{ name: string; logo_url: string | null }>(
+      'SELECT name, logo_url FROM organizations WHERE id = $1',
+      [organizationId]
+    ),
 
-    supabase
-      .from('projects')
-      .select(`
-        id, title, status, deadline, amount, currency,
-        deliverables(id, status)
-      `)
-      .eq('client_id', clientId)
-      .not('status', 'in', '("paid")')
-      .order('created_at', { ascending: false }),
+    query<{
+      id: string
+      title: string
+      status: string
+      deadline: string | null
+      amount: string | number
+      currency: string | null
+      deliverables: Array<{ id: string; status: string }>
+    }>(
+      `SELECT p.id, p.title, p.status, p.deadline, p.amount, p.currency,
+              COALESCE(
+                json_agg(json_build_object('id', d.id, 'status', d.status)) FILTER (WHERE d.id IS NOT NULL),
+                '[]'
+              ) as deliverables
+       FROM projects p
+       LEFT JOIN deliverables d ON d.project_id = p.id
+       WHERE p.client_id = $1 AND p.status != 'paid'
+       GROUP BY p.id
+       ORDER BY p.created_at DESC`,
+      [clientId]
+    ),
 
-    supabase
-      .from('deliverables')
-      .select(`
-        id, title, status, file_url, drive_link, submitted_at,
-        projects!inner(id, title, client_id)
-      `)
-      .eq('status', 'pending')
-      .eq('projects.client_id', clientId)
-      .order('submitted_at', { ascending: false })
-      .limit(5),
+    query<{
+      id: string
+      title: string
+      status: string
+      file_url: string | null
+      drive_link: string | null
+      submitted_at: string
+      project_id: string
+      project_title: string
+    }>(
+      `SELECT d.id, d.title, d.status, d.file_url, d.drive_link, d.submitted_at,
+              p.id as project_id, p.title as project_title
+       FROM deliverables d
+       JOIN projects p ON p.id = d.project_id
+       WHERE d.status = 'pending' AND p.client_id = $1
+       ORDER BY d.submitted_at DESC
+       LIMIT 5`,
+      [clientId]
+    ),
 
-    supabase
-      .from('projects')
-      .select('id, amount, currency, status')
-      .eq('client_id', clientId)
-      .in('status', ['invoiced', 'paid']),
+    query<{
+      id: string
+      amount: string | number
+      currency: string | null
+      status: string
+    }>(
+      `SELECT id, amount, currency, status
+       FROM projects
+       WHERE client_id = $1 AND status IN ('invoiced', 'paid')`,
+      [clientId]
+    ),
   ])
 
-  const displayName = client?.company_name || client?.name || 'Client'
-  const orgName = (org as any)?.name ?? 'Your Agency'
-  const orgLogoUrl = (org as any)?.logo_url ?? null
+  const projects = projectsRes.rows
+  const pendingDeliverables = pendingDeliverablesRes.rows
+  const invoicedProjects = invoicedProjectsRes.rows
+
+  const displayName = client?.company || client?.name || 'Client'
+  const orgName = org?.name ?? 'Your Agency'
+  const orgLogoUrl = org?.logo_url ?? null
 
   // Stats
-  const activeProjectCount = projects?.length ?? 0
-  const pendingReviewCount = pendingDeliverables?.length ?? 0
-  const totalInvoiced = invoicedProjects?.reduce((acc, p) => acc + Number(p.amount), 0) ?? 0
-  const paidTotal = invoicedProjects?.filter(p => p.status === 'paid').reduce((acc, p) => acc + Number(p.amount), 0) ?? 0
+  const activeProjectCount = projects.length
+  const pendingReviewCount = pendingDeliverables.length
+  const totalInvoiced = invoicedProjects.reduce((acc, p) => acc + Number(p.amount), 0)
+  const paidTotal = invoicedProjects.filter(p => p.status === 'paid').reduce((acc, p) => acc + Number(p.amount), 0)
 
   return (
     <div className="portal-bg min-h-screen">
@@ -150,7 +178,7 @@ export default async function PortalDashboardPage() {
               </span>
             </div>
             <div className="space-y-3">
-              {pendingDeliverables?.map((d) => (
+              {pendingDeliverables.map((d) => (
                 <PortalDeliverableRow
                   key={d.id}
                   id={d.id}
@@ -158,8 +186,8 @@ export default async function PortalDashboardPage() {
                   status={d.status as 'pending' | 'approved' | 'revision_required'}
                   fileUrl={d.file_url}
                   driveLink={d.drive_link}
-                  projectId={(d.projects as any).id}
-                  projectTitle={(d.projects as any).title}
+                  projectId={d.project_id}
+                  projectTitle={d.project_title}
                   submittedAt={d.submitted_at}
                 />
               ))}
@@ -188,8 +216,8 @@ export default async function PortalDashboardPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {projects?.map((project) => {
-                const deliverables = (project.deliverables as any[]) ?? []
+              {projects.map((project) => {
+                const deliverables = project.deliverables ?? []
                 const pendingCount = deliverables.filter((d) => d.status === 'pending').length
                 return (
                   <PortalProjectCard
