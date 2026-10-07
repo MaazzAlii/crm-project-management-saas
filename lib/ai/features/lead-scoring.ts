@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { generateAICompletion } from '@/lib/ai/client'
 import { buildLeadScoringPrompt, LeadScoringInput } from '@/lib/ai/prompts/lead-scoring'
 
@@ -96,29 +96,17 @@ function parseLeadScoreResponse(content: string, fallbackScore: number = 50): Le
 
 /**
  * Computes an objective 0-100 AI lead score for a CRM client deal.
- * Integrates 4 data sources:
- * 1. Deal value from client record
- * 2. Stage velocity (days in current stage vs total pipeline time)
- * 3. Client communication engagement from communication_messages
- * 4. Project history from projects table
- *
- * Persists the resulting lead_score, lead_score_updated_at, and lead_score_breakdown
- * to the clients table and records usage in ai_usage_log.
  */
 export async function scoreLead(params: ScoreLeadParams): Promise<ScoreLeadResult> {
   const { clientId, organizationId, userId } = params
-  const supabase = await createClient()
 
   // 1. Fetch Client Deal Record
   let clientRecord: any = null
   try {
-    const { data } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('id', clientId)
-      .eq('organization_id', organizationId)
-      .maybeSingle()
-    clientRecord = data
+    clientRecord = await queryOne(
+      'SELECT * FROM clients WHERE id = $1 AND organization_id = $2',
+      [clientId, organizationId]
+    )
   } catch (err) {}
 
   if (!clientRecord && process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
@@ -141,24 +129,32 @@ export async function scoreLead(params: ScoreLeadParams): Promise<ScoreLeadResul
   const recentInteractions: Array<{ date: string; channel: string; summary: string }> = []
 
   try {
-    const { data: messages } = await supabase
-      .from('communication_messages')
-      .select('direction, sent_at, body, channel:communication_channels(provider)')
-      .eq('client_id', clientId)
-      .eq('organization_id', organizationId)
-      .order('sent_at', { ascending: false })
-      .limit(10)
+    const messagesRes = await query<{
+      direction: string
+      sent_at: string
+      body: string
+      provider: string | null
+    }>(
+      `SELECT m.direction, m.sent_at, m.body, ch.provider
+       FROM communication_messages m
+       LEFT JOIN communication_channels ch ON ch.id = m.channel_id
+       WHERE m.client_id = $1 AND m.organization_id = $2
+       ORDER BY m.sent_at DESC
+       LIMIT 10`,
+      [clientId, organizationId]
+    )
+    const messages = messagesRes.rows
 
     if (messages && messages.length > 0) {
       totalMessages = messages.length
-      inboundMessages = messages.filter((m: any) => m.direction === 'inbound').length
-      outboundMessages = messages.filter((m: any) => m.direction === 'outbound').length
+      inboundMessages = messages.filter((m) => m.direction === 'inbound').length
+      outboundMessages = messages.filter((m) => m.direction === 'outbound').length
 
       const latestSent = new Date(messages[0].sent_at)
       lastContactDaysAgo = Math.max(0, Math.floor((Date.now() - latestSent.getTime()) / (1000 * 60 * 60 * 24)))
 
-      messages.slice(0, 3).forEach((m: any) => {
-        const prov = (m.channel && m.channel.provider) || 'email'
+      messages.slice(0, 3).forEach((m) => {
+        const prov = m.provider || 'email'
         recentInteractions.push({
           date: new Date(m.sent_at).toLocaleDateString(),
           channel: prov,
@@ -175,16 +171,16 @@ export async function scoreLead(params: ScoreLeadParams): Promise<ScoreLeadResul
   let overdueProjects = 0
 
   try {
-    const { data: projects } = await supabase
-      .from('projects')
-      .select('status, deadline')
-      .eq('client_id', clientId)
-      .eq('organization_id', organizationId)
+    const projectsRes = await query<{ status: string; deadline: string | null }>(
+      'SELECT status, deadline FROM projects WHERE client_id = $1 AND organization_id = $2',
+      [clientId, organizationId]
+    )
+    const projects = projectsRes.rows
 
     if (projects) {
       totalProjects = projects.length
       const now = new Date()
-      projects.forEach((p: any) => {
+      projects.forEach((p) => {
         if (p.status === 'completed') {
           completedProjects++
         } else if (p.status === 'active' || p.status === 'in_progress') {
@@ -269,15 +265,15 @@ export async function scoreLead(params: ScoreLeadParams): Promise<ScoreLeadResul
 
   // 8. Persist Score & Breakdown to Database
   try {
-    await supabase
-      .from('clients')
-      .update({
-        lead_score: breakdown.score,
-        lead_score_updated_at: breakdown.calculatedAt,
-        lead_score_breakdown: breakdown,
-      })
-      .eq('id', clientId)
-      .eq('organization_id', organizationId)
+    await query(
+      `UPDATE clients
+       SET lead_score = $1,
+           lead_score_updated_at = $2,
+           lead_score_breakdown = $3,
+           updated_at = NOW()
+       WHERE id = $4 AND organization_id = $5`,
+      [breakdown.score, breakdown.calculatedAt, JSON.stringify(breakdown), clientId, organizationId]
+    )
   } catch (dbErr) {
     console.warn('[AI:LeadScoring] Failed to persist score to database:', dbErr)
   }
