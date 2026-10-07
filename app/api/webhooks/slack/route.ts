@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 import { decryptSecret } from '@/lib/security/encrypt'
 import {
   verifySlackSignature,
@@ -58,16 +58,13 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Resolve matching organization channel from database
-    const supabase = await createClient()
+    const { rows: channels } = await query<any>(
+      `SELECT id, organization_id, external_account_id, metadata, status
+       FROM communication_channels
+       WHERE provider = 'slack' AND status = 'active'`
+    )
 
-    // Try finding by Slack Channel ID or Team ID
-    const { data: channels, error: channelError } = await supabase
-      .from('communication_channels')
-      .select('id, organization_id, external_account_id, metadata, status')
-      .eq('provider', 'slack')
-      .eq('status', 'active')
-
-    if (channelError || !channels || channels.length === 0) {
+    if (!channels || channels.length === 0) {
       console.warn('[SlackWebhook] No active Slack channel registered in platform.')
       return NextResponse.json({ ok: true, warning: 'No active channel found' })
     }
