@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
 import { SuspendOrgModal, OverridePlanModal } from '@/components/super-admin/org-management-actions'
 import { StartImpersonationButton } from '@/components/super-admin/start-impersonation-button'
@@ -29,8 +29,6 @@ interface OrgDetailPageProps {
 
 export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageProps) {
   await requireSuperAdmin()
-  const supabase = await createClient()
-
   let org: any = null
   let subscription: any = null
   let membersData: any[] = []
@@ -39,63 +37,52 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
 
   try {
     // 1. Fetch Organization Details
-    const { data: orgRecord } = await supabase
-      .from('organizations')
-      .select('*')
-      .eq('id', params.id)
-      .maybeSingle()
-
-    org = orgRecord
+    org = await queryOne<any>(`SELECT * FROM organizations WHERE id = $1`, [params.id])
 
     if (org) {
       // 2. Fetch Subscription Details
-      const { data: subRecord } = await supabase
-        .from('organization_subscriptions')
-        .select(`
-          *,
-          subscription_plans (
-            name,
-            price_monthly,
-            feature_limits
-          )
-        `)
-        .eq('organization_id', org.id)
-        .maybeSingle()
-
-      subscription = subRecord
+      subscription = await queryOne<any>(
+        `SELECT os.*, sp.name as plan_name, sp.price_monthly, sp.feature_limits
+         FROM organization_subscriptions os
+         LEFT JOIN subscription_plans sp ON sp.id = os.plan_id
+         WHERE os.organization_id = $1`,
+        [org.id]
+      )
 
       // 3. Fetch Organization Members with Profiles
-      const { data: mData } = await supabase
-        .from('organization_members')
-        .select(`
-          id,
-          role,
-          joined_at,
-          profiles (
-            id,
-            email,
-            full_name,
-            avatar_url
-          )
-        `)
-        .eq('organization_id', org.id)
-        .order('joined_at', { ascending: true })
+      const mRes = await query<any>(
+        `SELECT om.id, om.role, om.joined_at, u.id as user_id, u.email, u.full_name, u.avatar_url
+         FROM organization_members om
+         LEFT JOIN users u ON u.id = om.user_id
+         WHERE om.organization_id = $1
+         ORDER BY om.joined_at ASC`,
+        [org.id]
+      )
 
-      membersData = mData || []
+      membersData = (mRes.rows || []).map((row) => ({
+        id: row.id,
+        role: row.role,
+        joined_at: row.joined_at,
+        profiles: {
+          id: row.user_id,
+          email: row.email,
+          full_name: row.full_name,
+          avatar_url: row.avatar_url,
+        },
+      }))
 
       // 4. Fetch Usage Metrics
-      const { count: cCount } = await supabase
-        .from('clients')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', org.id)
+      const cRes = await queryOne<{ count: number }>(
+        `SELECT COUNT(*)::int as count FROM clients WHERE organization_id = $1`,
+        [org.id]
+      )
+      const pRes = await queryOne<{ count: number }>(
+        `SELECT COUNT(*)::int as count FROM projects WHERE organization_id = $1`,
+        [org.id]
+      )
 
-      const { count: pCount } = await supabase
-        .from('projects')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', org.id)
-
-      clientsCount = cCount || 0
-      projectsCount = pCount || 0
+      clientsCount = cRes?.count || 0
+      projectsCount = pRes?.count || 0
     }
   } catch (err) {
     console.warn('[SUPER_ADMIN_ORG_DETAIL] Using fallback sample data:', err)
