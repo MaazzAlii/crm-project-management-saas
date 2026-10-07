@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { verifyAutomationSignature } from '@/lib/automation/emitter'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { readValidatedBody } from '@/lib/security/payload'
@@ -40,16 +40,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing project_id in payload' }, { status: 400 })
     }
 
-    const supabase = await createClient()
-
     // 1. Authenticate callback via signature
     let secret = process.env.N8N_WEBHOOK_SECRET || process.env.AUTOMATION_WEBHOOK_SECRET || ''
     if (organization_id) {
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('automation_webhook_secret')
-        .eq('id', organization_id)
-        .maybeSingle()
+      const org = await queryOne<{ automation_webhook_secret: string }>(
+        `SELECT automation_webhook_secret FROM organizations WHERE id = $1`,
+        [organization_id]
+      )
 
       if (org?.automation_webhook_secret) {
         secret = org.automation_webhook_secret
@@ -67,26 +64,23 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Fetch project and client details
-    const { data: project } = await supabase
-      .from('projects')
-      .select('id, title, organization_id, client:clients(id, name, email)')
-      .eq('id', project_id)
-      .maybeSingle()
+    // 2. Fetch project details
+    const project = await queryOne<{ id: string; title: string; organization_id: string }>(
+      `SELECT id, title, organization_id FROM projects WHERE id = $1`,
+      [project_id]
+    )
 
     const orgId = organization_id || project?.organization_id
 
     // 3. Update project status to 'invoiced'
-    const { error: updateError } = await supabase
-      .from('projects')
-      .update({
-        status: 'invoiced',
-        invoice_triggered: true,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', project_id)
-
-    if (updateError) {
+    try {
+      await query(
+        `UPDATE projects
+         SET status = 'invoiced', invoice_triggered = true, updated_at = NOW()
+         WHERE id = $1`,
+        [project_id]
+      )
+    } catch (updateError) {
       console.error('[Automation:Callback] Database update failed:', updateError)
       return NextResponse.json(
         { error: 'Failed to update project status in database' },
