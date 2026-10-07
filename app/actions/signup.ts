@@ -1,7 +1,12 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import crypto from 'crypto'
+import { hashPassword, validatePasswordStrength } from '@/lib/auth/password'
+import { generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt'
+import { setRefreshTokenCookie } from '@/lib/auth/session'
+import { userRepo } from '@/lib/db/repositories/user-repo'
+import { orgRepo } from '@/lib/db/repositories/org-repo'
+import { query } from '@/lib/db'
 
 export interface SignUpInput {
   fullName: string
@@ -17,97 +22,70 @@ export async function handleSignUpAction(input: SignUpInput) {
     return { error: 'All fields are required.' }
   }
 
+  const passwordValidation = validatePasswordStrength(password)
+  if (!passwordValidation.isValid) {
+    return { error: passwordValidation.errors.join('. ') }
+  }
+
   try {
-    const supabase = await createClient()
+    const cleanEmail = email.toLowerCase().trim()
+    const existing = await userRepo.findByEmail(cleanEmail)
+    if (existing) {
+      return { error: 'User with this email already exists.' }
+    }
 
-    // 1. Sign up user via Supabase GoTrue Auth
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          org_name: orgName,
-        },
-      },
+    // 1. Hash password & create user
+    const passwordHash = await hashPassword(password)
+    const user = await userRepo.create({
+      email: cleanEmail,
+      passwordHash,
+      fullName: fullName.trim(),
+      role: 'user',
     })
 
-    if (signUpError) {
-      return { error: signUpError.message }
-    }
-
-    const user = authData.user
-    if (!user) {
-      return { error: 'Failed to create user authentication record.' }
-    }
-
-    // 2. Obtain database client (use admin client for initial provisioning to prevent RLS execution failures)
-    let dbClient
-    try {
-      dbClient = createAdminClient()
-    } catch {
-      dbClient = supabase
-    }
-
-    // 3. Upsert Profile
-    const { error: profileError } = await dbClient.from('profiles').upsert({
-      id: user.id,
-      email: email,
-      full_name: fullName,
-    })
-
-    if (profileError) {
-      console.error('[SIGNUP_ACTION] Profile creation error:', profileError)
-      return { error: `Profile creation failed: ${profileError.message}` }
-    }
-
-    // 4. Create Organization
-    const slugBase = orgName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || 'my-workspace'
+    // 2. Create organization and assign user as owner
+    const slugBase =
+      orgName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '') || 'my-workspace'
     const uniqueSlug = `${slugBase}-${Math.floor(1000 + Math.random() * 9000)}`
 
-    const { data: orgData, error: orgError } = await dbClient
-      .from('organizations')
-      .insert({
-        name: orgName,
-        slug: uniqueSlug,
-        plan_tier: 'free',
-        billing_status: 'active',
-        onboarding_completed: false,
-      })
-      .select()
-      .single()
-
-    if (orgError || !orgData) {
-      console.error('[SIGNUP_ACTION] Organization creation error:', orgError)
-      return { error: `Organization creation failed: ${orgError?.message || 'Unknown database error'}` }
-    }
-
-    // 5. Link User as Owner of Organization
-    const { error: memberError } = await dbClient.from('organization_members').insert({
-      organization_id: orgData.id,
-      user_id: user.id,
-      role: 'owner',
+    await orgRepo.create({
+      name: orgName.trim(),
+      slug: uniqueSlug,
+      ownerUserId: user.id,
     })
 
-    if (memberError) {
-      console.error('[SIGNUP_ACTION] Org member link error:', memberError)
-      return { error: `Organization membership assignment failed: ${memberError.message}` }
-    }
+    // 3. Issue JWT & Session Cookie
+    const tokenFamily = crypto.randomUUID()
+    const accessToken = generateAccessToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    })
+
+    const refreshToken = generateRefreshToken({
+      userId: user.id,
+      tokenFamily,
+    })
+
+    const refreshTokenHash = crypto
+      .createHash('sha256')
+      .update(refreshToken)
+      .digest('hex')
+
+    await query(
+      `INSERT INTO refresh_tokens (user_id, token_hash, token_family, expires_at)
+       VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
+      [user.id, refreshTokenHash, tokenFamily]
+    )
+
+    await setRefreshTokenCookie(refreshToken)
 
     return { success: true, redirectUrl: '/onboarding' }
   } catch (err: any) {
     console.error('[SIGNUP_ACTION_EXCEPTION]', err)
-    if (err.cause?.code === 'ECONNREFUSED' || err.message?.includes('fetch failed')) {
-      if (process.env.NODE_ENV === 'development') {
-        const { cookies } = await import('next/headers')
-        cookies().set('dev_super_admin', 'true', { path: '/', maxAge: 86400 })
-        return { success: true, redirectUrl: '/super-admin/dashboard' }
-      }
-      return {
-        error:
-          'Unable to connect to local Supabase Auth server (http://localhost:54321). Please verify your Docker Supabase container is running.',
-      }
-    }
     return { error: err.message || 'An unexpected error occurred during signup.' }
   }
 }
