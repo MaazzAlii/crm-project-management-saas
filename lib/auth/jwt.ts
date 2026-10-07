@@ -1,7 +1,7 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-32-chars-minimum-required';
-const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET || 'refresh-secret-32-chars-minimum-required';
+const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET || process.env.REFRESH_SECRET || 'refresh-secret-32-chars-minimum-required';
 
 export interface TokenPayload {
   userId: string;
