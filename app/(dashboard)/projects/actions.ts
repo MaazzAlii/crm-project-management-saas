@@ -1,7 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { emitAutomationEvent } from '@/lib/automation/emitter'
 import { revalidatePath } from 'next/cache'
@@ -37,28 +37,28 @@ export async function fetchProjectsAction(): Promise<ProjectRecord[]> {
       return getDevProjects()
     }
 
-    const supabase = await createClient()
-
     let projects: ProjectRecord[] = []
 
     try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          clients ( name, company ),
-          profiles ( full_name, email )
-        `)
-        .eq('organization_id', session.organization.id)
-        .order('created_at', { ascending: false })
+      const res = await query<any>(
+        `SELECT p.*,
+                c.name as client_name, c.company as client_company,
+                u.full_name as assigned_name, u.email as assigned_email
+         FROM projects p
+         LEFT JOIN clients c ON c.id = p.client_id
+         LEFT JOIN users u ON u.id = p.assigned_to
+         WHERE p.organization_id = $1
+         ORDER BY p.created_at DESC`,
+        [session.organization.id]
+      )
 
-      if (!error && data) {
-        projects = data.map((item: any) => ({
+      if (res.rows) {
+        projects = res.rows.map((item: any) => ({
           id: item.id,
           organization_id: item.organization_id,
           client_id: item.client_id,
-          client_name: item.clients?.name || 'Unknown Client',
-          client_company: item.clients?.company || null,
+          client_name: item.client_name || 'Unknown Client',
+          client_company: item.client_company || null,
           title: item.title,
           description: item.description,
           type: item.type,
@@ -70,7 +70,7 @@ export async function fetchProjectsAction(): Promise<ProjectRecord[]> {
           start_date: item.start_date,
           deadline: item.deadline,
           assigned_to: item.assigned_to,
-          assigned_name: item.profiles?.full_name || item.profiles?.email || null,
+          assigned_name: item.assigned_name || item.assigned_email || null,
           notes: item.notes,
           created_at: item.created_at,
           updated_at: item.updated_at,
@@ -122,17 +122,19 @@ export async function createProjectAction(formData: FormData) {
       return { error: 'Project title is required.' }
     }
 
-    const supabase = await createClient()
-
     let newProject: { id: string } | null = null
     let insertError: any = null
 
     try {
-      const { data, error } = await supabase
-        .from('projects')
-        .insert({
-          organization_id: session.organization.id,
-          client_id: clientId,
+      newProject = await queryOne<{ id: string }>(
+        `INSERT INTO projects (
+           organization_id, client_id, title, description, type, brief_source,
+           amount, currency, status, priority, start_date, deadline, assigned_to, notes
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+         RETURNING id`,
+        [
+          session.organization.id,
+          clientId,
           title,
           description,
           type,
@@ -143,66 +145,65 @@ export async function createProjectAction(formData: FormData) {
           priority,
           start_date,
           deadline,
-          assigned_to: assigned_to || null,
+          assigned_to || null,
           notes,
-        })
-        .select('id')
-        .single()
-
-      newProject = data
-      insertError = error
+        ]
+      )
 
       // Scaffold tasks and deliverables if template_id is provided
       if (newProject && template_id) {
         try {
           const orgId = session.organization.id
-          const [{ data: template }, { data: templateTasks }] = await Promise.all([
-            supabase
-              .from('project_templates')
-              .select('*')
-              .eq('id', template_id)
-              .eq('organization_id', orgId)
-              .single(),
-            supabase
-              .from('project_template_tasks')
-              .select('*')
-              .eq('template_id', template_id)
-              .eq('organization_id', orgId)
-          ])
+          const template = await queryOne<any>(
+            `SELECT * FROM project_templates WHERE id = $1 AND organization_id = $2`,
+            [template_id, orgId]
+          )
+          const templateTasksRes = await query<any>(
+            `SELECT * FROM project_template_tasks WHERE template_id = $1 AND organization_id = $2`,
+            [template_id, orgId]
+          )
+          const templateTasks = templateTasksRes.rows || []
 
           const baseStartDate = start_date ? new Date(start_date) : new Date()
 
           // Scaffold Tasks
           if (templateTasks && templateTasks.length > 0) {
-            const taskInserts = templateTasks.map((tt) => {
+            for (const tt of templateTasks) {
               const taskDueDate = new Date(baseStartDate)
               taskDueDate.setDate(taskDueDate.getDate() + (tt.day_offset || 0))
 
-              return {
-                organization_id: orgId,
-                project_id: newProject!.id,
-                title: tt.title,
-                description: tt.description || null,
-                priority: tt.priority || 'medium',
-                status: 'todo',
-                due_date: taskDueDate.toISOString().slice(0, 10),
-                assigned_to: assigned_to || null
-              }
-            })
-            await supabase.from('tasks').insert(taskInserts)
+              await query(
+                `INSERT INTO tasks (
+                   organization_id, project_id, title, description, priority, status, due_date, assigned_to
+                 ) VALUES ($1, $2, $3, $4, $5, 'todo', $6, $7)`,
+                [
+                  orgId,
+                  newProject.id,
+                  tt.title,
+                  tt.description || null,
+                  tt.priority || 'medium',
+                  taskDueDate.toISOString().slice(0, 10),
+                  assigned_to || null,
+                ]
+              )
+            }
           }
 
           // Scaffold Deliverables
-          if (template && Array.isArray(template.default_deliverables)) {
-            const deliverableInserts = template.default_deliverables.map((delTitle: string) => ({
-              organization_id: orgId,
-              project_id: newProject!.id,
-              title: delTitle,
-              status: 'pending',
-              submitted_at: new Date().toISOString()
-            }))
-            if (deliverableInserts.length > 0) {
-              await supabase.from('deliverables').insert(deliverableInserts)
+          const deliverablesList: string[] = Array.isArray(template?.default_deliverables)
+            ? template.default_deliverables
+            : typeof template?.default_deliverables === 'string'
+            ? JSON.parse(template.default_deliverables || '[]')
+            : []
+
+          if (deliverablesList.length > 0) {
+            for (const delTitle of deliverablesList) {
+              await query(
+                `INSERT INTO deliverables (
+                   organization_id, project_id, title, status, submitted_at
+                 ) VALUES ($1, $2, $3, 'pending', NOW())`,
+                [orgId, newProject.id, delTitle]
+              )
             }
           }
         } catch (scaffoldErr) {
@@ -298,8 +299,6 @@ export async function updateProjectAction(projectId: string, formData: FormData)
       return { error: 'Project title is required.' }
     }
 
-    const supabase = await createClient()
-
     const updatePayload = {
       title,
       description,
@@ -316,11 +315,28 @@ export async function updateProjectAction(projectId: string, formData: FormData)
     }
 
     try {
-      await supabase
-        .from('projects')
-        .update(updatePayload)
-        .eq('id', projectId)
-        .eq('organization_id', session.organization.id)
+      await query(
+        `UPDATE projects
+         SET title = $1, description = $2, type = $3, amount = $4, currency = $5,
+             status = $6, priority = $7, start_date = $8, deadline = $9,
+             assigned_to = $10, notes = $11, updated_at = NOW()
+         WHERE id = $12 AND organization_id = $13`,
+        [
+          title,
+          description,
+          type,
+          amount,
+          currency,
+          status,
+          priority,
+          start_date,
+          deadline,
+          assigned_to || null,
+          notes,
+          projectId,
+          session.organization.id,
+        ]
+      )
     } catch (err) {}
 
     if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_PROJECTS) {
@@ -358,18 +374,18 @@ export async function updateProjectStatusAction(projectId: string, newStatus: st
       return { error: 'Unauthorized.' }
     }
 
-    const supabase = await createClient()
-
     // 1. Fetch current project and client info
     let project: any = null
     try {
-      const { data } = await supabase
-        .from('projects')
-        .select('*, client:clients(id, name, email, payment_schedule, currency)')
-        .eq('id', projectId)
-        .eq('organization_id', session.organization.id)
-        .maybeSingle()
-      project = data
+      project = await queryOne<any>(
+        `SELECT p.*,
+                c.id as client_id, c.name as client_name, c.email as client_email,
+                c.payment_schedule, c.currency as client_currency
+         FROM projects p
+         LEFT JOIN clients c ON c.id = p.client_id
+         WHERE p.id = $1 AND p.organization_id = $2`,
+        [projectId, session.organization.id]
+      )
     } catch (err) {}
 
     if (!project && process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_PROJECTS) {
@@ -387,7 +403,7 @@ export async function updateProjectStatusAction(projectId: string, newStatus: st
       updatePayload.delivered_at = new Date().toISOString()
 
       // Decision branch per spec: check payment_schedule (per_project vs recurring)
-      const schedule = (project?.client?.payment_schedule || 'Per Project').toLowerCase()
+      const schedule = (project?.client_payment_schedule || project?.payment_schedule || 'Per Project').toLowerCase()
       const isPerProject = schedule.includes('per project') || schedule.includes('per_project')
 
       if (isPerProject) {
@@ -402,9 +418,9 @@ export async function updateProjectStatusAction(projectId: string, newStatus: st
             data: {
               project_id: projectId,
               project_name: project?.title || 'Project',
-              client_id: project?.client_id || project?.client?.id,
-              client_name: project?.client?.name || project?.client_name || 'Client',
-              client_email: project?.client?.email || null,
+              client_id: project?.client_id,
+              client_name: project?.client_name || 'Client',
+              client_email: project?.client_email || null,
               budget: Number(project?.amount) || 0,
               delivered_at: updatePayload.delivered_at,
               completed_by_id: session.user.id,
@@ -425,7 +441,7 @@ export async function updateProjectStatusAction(projectId: string, newStatus: st
             details: {
               organizationId: session.organization.id,
               amount: project?.amount,
-              paymentSchedule: project?.client?.payment_schedule || 'Per Project',
+              paymentSchedule: project?.client_payment_schedule || project?.payment_schedule || 'Per Project',
             },
           })
         } catch (auditErr) {}
@@ -433,11 +449,18 @@ export async function updateProjectStatusAction(projectId: string, newStatus: st
     }
 
     try {
-      await supabase
-        .from('projects')
-        .update(updatePayload)
-        .eq('id', projectId)
-        .eq('organization_id', session.organization.id)
+      await query(
+        `UPDATE projects
+         SET status = $1, invoice_triggered = $2, delivered_at = $3, updated_at = NOW()
+         WHERE id = $4 AND organization_id = $5`,
+        [
+          newStatus,
+          updatePayload.invoice_triggered || false,
+          updatePayload.delivered_at || null,
+          projectId,
+          session.organization.id,
+        ]
+      )
     } catch (err) {}
 
     if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_PROJECTS) {
@@ -482,14 +505,11 @@ export async function deleteProjectAction(projectId: string) {
       return { error: 'Forbidden. Only organization owners and admins can delete projects.' }
     }
 
-    const supabase = await createClient()
-
     try {
-      await supabase
-        .from('projects')
-        .delete()
-        .eq('id', projectId)
-        .eq('organization_id', session.organization.id)
+      await query(
+        `DELETE FROM projects WHERE id = $1 AND organization_id = $2`,
+        [projectId, session.organization.id]
+      )
     } catch (err) {}
 
     if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_PROJECTS) {
@@ -665,17 +685,18 @@ export async function logProjectActivity(
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) return
 
-    const supabase = await createClient()
-
-    await supabase.from('project_activity_log').insert({
-      organization_id: session.organization.id,
-      project_id: projectId,
-      actor_id: session.user?.id || null,
-      actor_name: session.user?.full_name || session.user?.email || 'System User',
-      action,
-      details,
-      created_at: new Date().toISOString()
-    })
+    await query(
+      `INSERT INTO project_activity_log (organization_id, project_id, actor_id, actor_name, action, details, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+      [
+        session.organization.id,
+        projectId,
+        session.user?.id || null,
+        session.user?.full_name || session.user?.email || 'System User',
+        action,
+        JSON.stringify(details)
+      ]
+    )
   } catch (e) {}
 }
 
@@ -683,27 +704,28 @@ export async function logProjectActivity(
 export async function fetchProjectDetailAction(projectId: string): Promise<ProjectRecord | null> {
   try {
     const session = await getCurrentSessionContext()
-    const supabase = await createClient()
 
     if (session && session.organization) {
-      const { data } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          clients ( name, company ),
-          profiles!projects_assigned_to_fkey ( full_name, email )
-        `)
-        .eq('id', projectId)
-        .eq('organization_id', session.organization.id)
-        .maybeSingle()
+      const data = await queryOne<any>(
+        `SELECT p.*,
+                c.name AS client_name,
+                c.company AS client_company,
+                u.full_name AS assigned_name,
+                u.email AS assigned_email
+         FROM projects p
+         LEFT JOIN clients c ON c.id = p.client_id
+         LEFT JOIN users u ON u.id = p.assigned_to
+         WHERE p.id = $1 AND p.organization_id = $2`,
+        [projectId, session.organization.id]
+      )
 
       if (data) {
         return {
           id: data.id,
           organization_id: data.organization_id,
           client_id: data.client_id,
-          client_name: data.clients?.name || 'Client',
-          client_company: data.clients?.company || null,
+          client_name: data.client_name || 'Client',
+          client_company: data.client_company || null,
           title: data.title,
           description: data.description,
           type: data.type,
@@ -715,7 +737,7 @@ export async function fetchProjectDetailAction(projectId: string): Promise<Proje
           start_date: data.start_date,
           deadline: data.deadline,
           assigned_to: data.assigned_to,
-          assigned_name: data.profiles?.full_name || data.profiles?.email || null,
+          assigned_name: data.assigned_name || data.assigned_email || null,
           notes: data.notes,
           created_at: data.created_at,
           updated_at: data.updated_at
@@ -739,16 +761,12 @@ export async function fetchProjectDeliverablesAction(projectId: string): Promise
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) return getDevDeliverables(projectId)
 
-    const supabase = await createClient()
+    const data = await query<DeliverableRecord>(
+      `SELECT * FROM deliverables WHERE project_id = $1 AND organization_id = $2 ORDER BY created_at DESC`,
+      [projectId, session.organization.id]
+    )
 
-    const { data } = await supabase
-      .from('deliverables')
-      .select('*')
-      .eq('project_id', projectId)
-      .eq('organization_id', session.organization.id)
-      .order('created_at', { ascending: false })
-
-    if (data && data.length > 0) return data as DeliverableRecord[]
+    if (data && data.length > 0) return data
     return getDevDeliverables(projectId)
   } catch (err) {
     return getDevDeliverables(projectId)
@@ -769,26 +787,15 @@ export async function createDeliverableAction(projectId: string, formData: FormD
 
     if (!title) return { error: 'Deliverable title is required.' }
 
-    const supabase = await createClient()
-    const payload = {
-      organization_id: session.organization.id,
-      project_id: projectId,
-      title,
-      file_url,
-      drive_link,
-      status: 'pending',
-      submitted_at: new Date().toISOString()
-    }
+    const data = await queryOne<{ id: string }>(
+      `INSERT INTO deliverables (organization_id, project_id, title, file_url, drive_link, status, submitted_at)
+       VALUES ($1, $2, $3, $4, $5, 'pending', NOW())
+       RETURNING id`,
+      [session.organization.id, projectId, title, file_url, drive_link]
+    )
 
-    const { data, error } = await supabase
-      .from('deliverables')
-      .insert(payload)
-      .select('id')
-      .single()
-
-    if (error) {
-      console.error('Failed to create deliverable:', error)
-      return { error: error.message || 'Failed to create deliverable.' }
+    if (!data) {
+      return { error: 'Failed to create deliverable.' }
     }
 
     await logProjectActivity(projectId, 'DELIVERABLE_CREATED', { title })
@@ -823,17 +830,12 @@ export async function updateDeliverableStatusAction(
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) return { error: 'Unauthorized.' }
 
-    const supabase = await createClient()
-
-    await supabase
-      .from('deliverables')
-      .update({
-        status,
-        client_feedback: clientFeedback || null,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', deliverableId)
-      .eq('organization_id', session.organization.id)
+    await query(
+      `UPDATE deliverables
+       SET status = $1, client_feedback = $2, updated_at = NOW()
+       WHERE id = $3 AND organization_id = $4`,
+      [status, clientFeedback || null, deliverableId, session.organization.id]
+    )
 
     await logProjectActivity(projectId, 'DELIVERABLE_STATUS_UPDATED', {
       deliverableId,
@@ -867,13 +869,10 @@ export async function deleteDeliverableAction(deliverableId: string, projectId: 
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) return { error: 'Unauthorized.' }
 
-    const supabase = await createClient()
-
-    await supabase
-      .from('deliverables')
-      .delete()
-      .eq('id', deliverableId)
-      .eq('organization_id', session.organization.id)
+    await query(
+      `DELETE FROM deliverables WHERE id = $1 AND organization_id = $2`,
+      [deliverableId, session.organization.id]
+    )
 
     await logProjectActivity(projectId, 'DELIVERABLE_DELETED', { deliverableId })
 
@@ -903,17 +902,14 @@ export async function fetchProjectTasksAction(projectId: string): Promise<TaskRe
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) return getDevTasks(projectId)
 
-    const supabase = await createClient()
-
-    const { data } = await supabase
-      .from('tasks')
-      .select(`
-        *,
-        profiles ( full_name, email )
-      `)
-      .eq('project_id', projectId)
-      .eq('organization_id', session.organization.id)
-      .order('created_at', { ascending: true })
+    const data = await query<any>(
+      `SELECT t.*, u.full_name AS assigned_name, u.email AS assigned_email
+       FROM tasks t
+       LEFT JOIN users u ON u.id = t.assigned_to
+       WHERE t.project_id = $1 AND t.organization_id = $2
+       ORDER BY t.created_at ASC`,
+      [projectId, session.organization.id]
+    )
 
     if (data && data.length > 0) {
       return data.map((t) => ({
@@ -923,7 +919,7 @@ export async function fetchProjectTasksAction(projectId: string): Promise<TaskRe
         title: t.title,
         description: t.description,
         assigned_to: t.assigned_to,
-        assigned_name: t.profiles?.full_name || t.profiles?.email || null,
+        assigned_name: t.assigned_name || t.assigned_email || null,
         status: t.status,
         priority: t.priority,
         due_date: t.due_date,
@@ -952,21 +948,14 @@ export async function createProjectTaskAction(projectId: string, formData: FormD
 
     if (!title) return { error: 'Task title is required.' }
 
-    const supabase = await createClient()
-    const payload = {
-      organization_id: session.organization.id,
-      project_id: projectId,
-      title,
-      description,
-      priority,
-      status: 'todo',
-      due_date,
-      assigned_to: assigned_to || null
-    }
+    const data = await queryOne<{ id: string }>(
+      `INSERT INTO tasks (organization_id, project_id, title, description, priority, status, due_date, assigned_to)
+       VALUES ($1, $2, $3, $4, $5, 'todo', $6, $7)
+       RETURNING id`,
+      [session.organization.id, projectId, title, description, priority, due_date, assigned_to || null]
+    )
 
-    const { data, error } = await supabase.from('tasks').insert(payload).select('id').single()
-
-    if (error) return { error: error.message || 'Failed to create task.' }
+    if (!data) return { error: 'Failed to create task.' }
 
     await logProjectActivity(projectId, 'TASK_CREATED', { title })
     revalidatePath(`/projects/${projectId}`)
@@ -986,21 +975,19 @@ export async function updateTaskStatusAction(
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) return { error: 'Unauthorized.' }
 
-    const supabase = await createClient()
-
-    const updatePayload: any = {
-      status: newStatus,
-      updated_at: new Date().toISOString()
-    }
     if (newStatus === 'done') {
-      updatePayload.completed_at = new Date().toISOString()
+      await query(
+        `UPDATE tasks SET status = $1, completed_at = NOW(), updated_at = NOW()
+         WHERE id = $2 AND organization_id = $3`,
+        [newStatus, taskId, session.organization.id]
+      )
+    } else {
+      await query(
+        `UPDATE tasks SET status = $1, updated_at = NOW()
+         WHERE id = $2 AND organization_id = $3`,
+        [newStatus, taskId, session.organization.id]
+      )
     }
-
-    await supabase
-      .from('tasks')
-      .update(updatePayload)
-      .eq('id', taskId)
-      .eq('organization_id', session.organization.id)
 
     await logProjectActivity(projectId, 'TASK_STATUS_UPDATED', { taskId, newStatus })
     revalidatePath(`/projects/${projectId}`)
@@ -1016,13 +1003,10 @@ export async function updateProjectTeamAssigneeAction(projectId: string, assigne
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) return { error: 'Unauthorized.' }
 
-    const supabase = await createClient()
-
-    await supabase
-      .from('projects')
-      .update({ assigned_to: assignedToId || null, updated_at: new Date().toISOString() })
-      .eq('id', projectId)
-      .eq('organization_id', session.organization.id)
+    await query(
+      `UPDATE projects SET assigned_to = $1, updated_at = NOW() WHERE id = $2 AND organization_id = $3`,
+      [assignedToId || null, projectId, session.organization.id]
+    )
 
     await logProjectActivity(projectId, 'PROJECT_ASSIGNEE_UPDATED', { assignedToId })
     revalidatePath(`/projects/${projectId}`)
@@ -1038,16 +1022,12 @@ export async function fetchProjectActivityLogAction(projectId: string): Promise<
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) return getDevActivityLogs(projectId)
 
-    const supabase = await createClient()
+    const data = await query<ProjectActivityLogRecord>(
+      `SELECT * FROM project_activity_log WHERE project_id = $1 AND organization_id = $2 ORDER BY created_at DESC`,
+      [projectId, session.organization.id]
+    )
 
-    const { data } = await supabase
-      .from('project_activity_log')
-      .select('*')
-      .eq('project_id', projectId)
-      .eq('organization_id', session.organization.id)
-      .order('created_at', { ascending: false })
-
-    if (data && data.length > 0) return data as ProjectActivityLogRecord[]
+    if (data && data.length > 0) return data
     return getDevActivityLogs(projectId)
   } catch (err) {
     return getDevActivityLogs(projectId)
