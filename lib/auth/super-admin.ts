@@ -1,40 +1,35 @@
-import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
+import { queryOne } from '@/lib/db'
+import { getCurrentSessionContext } from '@/lib/auth/session'
 
 export async function isSuperAdmin(userId?: string): Promise<boolean> {
   const isDevAllowed =
     process.env.NODE_ENV !== 'production' &&
     process.env.ALLOW_DEV_AUTH_BYPASS === 'true'
-  const cookieStore = cookies()
-  const devSuperAdminCookie = cookieStore.get('dev_super_admin')
-  if (isDevAllowed && (devSuperAdminCookie?.value === 'true' || process.env.DEV_SUPER_ADMIN === 'true')) {
-    return true
-  }
+  try {
+    const cookieStore = cookies()
+    const devSuperAdminCookie = cookieStore.get('dev_super_admin')
+    if (isDevAllowed && (devSuperAdminCookie?.value === 'true' || process.env.DEV_SUPER_ADMIN === 'true')) {
+      return true
+    }
+  } catch {}
 
   try {
-    const supabase = await createClient()
-
     let targetUserId = userId
-
     if (!targetUserId) {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return false
-      targetUserId = user.id
+      const session = await getCurrentSessionContext()
+      if (!session || !session.user) return false
+      if (session.isSuperAdmin) return true
+      targetUserId = session.user.id
     }
 
-    // Query strictly against the super_admins table — never joined through organization_members
-    const { data: superAdminRecord } = await supabase
-      .from('super_admins')
-      .select('id')
-      .eq('user_id', targetUserId)
-      .maybeSingle()
+    const superAdminRecord = await queryOne<{ id: string }>(
+      'SELECT id FROM super_admins WHERE user_id = $1',
+      [targetUserId]
+    )
 
     return !!superAdminRecord
   } catch {
-    // In dev environment when DB is offline, check dev cookie
-    if (isDevAllowed) {
-      return devSuperAdminCookie?.value === 'true' || process.env.DEV_SUPER_ADMIN === 'true'
-    }
     return false
   }
 }
