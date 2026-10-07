@@ -1,7 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { fetchInboxMessages, getInboxSummary, markMessageRead, markAllMessagesRead, assignMessageClient, InboxMessageRecord, InboxSummary } from '@/lib/inbox/query'
 import { ingestMessage, CommunicationProvider } from '@/lib/inbox/ingest'
@@ -166,7 +166,6 @@ export async function fetchInboxDataAction(filters?: {
     }
 
     const orgId = session.organization.id
-    const supabase = await createClient()
 
     // Fetch messages from DB
     const messagesRes = await fetchInboxMessages({
@@ -195,17 +194,21 @@ export async function fetchInboxDataAction(filters?: {
     }
 
     // Fetch clients for dropdown
-    const { data: clientsData } = await supabase
-      .from('clients')
-      .select('id, name, company_name, email, communication_mode')
-      .eq('organization_id', orgId)
-      .order('name', { ascending: true })
+    const clientsRes = await query<ClientSelectItem>(
+      `SELECT id, name, company_name, email, communication_mode
+       FROM clients
+       WHERE organization_id = $1
+       ORDER BY name ASC`,
+      [orgId]
+    )
 
     // Fetch channels for org
-    const { data: channelsData } = await supabase
-      .from('communication_channels')
-      .select('id, provider, channel_name, status, connected_at, updated_at, external_account_id, metadata')
-      .eq('organization_id', orgId)
+    const channelsRes = await query<ChannelInfo>(
+      `SELECT id, provider, channel_name, status, connected_at, updated_at, external_account_id, metadata
+       FROM communication_channels
+       WHERE organization_id = $1`,
+      [orgId]
+    )
 
     let messages = messagesRes.data || []
     if (process.env.NODE_ENV !== 'production' && messages.length === 0 && (!filters || Object.keys(filters).length === 0)) {
@@ -216,8 +219,8 @@ export async function fetchInboxDataAction(filters?: {
     return {
       messages,
       summary,
-      clients: (clientsData as ClientSelectItem[]) || [],
-      channels: (channelsData as ChannelInfo[]) || [],
+      clients: clientsRes.rows || [],
+      channels: channelsRes.rows || [],
       aiEnabled,
       aiTaskExtractionEnabled
     }
@@ -365,15 +368,13 @@ export async function sendOutboundMessageAction(formData: FormData) {
       return { error: 'Channel and message content are required.' }
     }
 
-    const supabase = await createClient()
-
     // 1. Verify channel belongs to org
-    const { data: channel } = await supabase
-      .from('communication_channels')
-      .select('id, organization_id, provider, external_account_id, metadata')
-      .eq('id', channelId)
-      .eq('organization_id', session.organization.id)
-      .single()
+    const channel = await queryOne<any>(
+      `SELECT id, organization_id, provider, external_account_id, metadata
+       FROM communication_channels
+       WHERE id = $1 AND organization_id = $2`,
+      [channelId, session.organization.id]
+    )
 
     if (!channel) {
       // In dev fallback scenario, return success with simulated message
@@ -476,26 +477,22 @@ export async function sendOutboundMessageAction(formData: FormData) {
     }
 
     // Insert outbound message row into communication_messages
-    const { data: insertedMsg, error: insertError } = await supabase
-      .from('communication_messages')
-      .insert({
-        organization_id: session.organization.id,
-        channel_id: channel.id,
-        client_id: clientId,
-        direction: 'outbound',
-        sender_name: session.user.full_name || session.user.email,
-        sender_identifier: session.user.email,
+    const insertedMsg = await queryOne<any>(
+      `INSERT INTO communication_messages (
+         organization_id, channel_id, client_id, direction, sender_name,
+         sender_identifier, body, external_message_id, sent_at, read_at
+       ) VALUES ($1, $2, $3, 'outbound', $4, $5, $6, $7, NOW(), NOW())
+       RETURNING *`,
+      [
+        session.organization.id,
+        channel.id,
+        clientId,
+        session.user.full_name || session.user.email,
+        session.user.email,
         body,
-        external_message_id: externalMessageId,
-        sent_at: new Date().toISOString(),
-        read_at: new Date().toISOString()
-      })
-      .select()
-      .single()
-
-    if (insertError) {
-      return { error: insertError.message }
-    }
+        externalMessageId,
+      ]
+    )
 
     revalidatePath('/inbox')
     return { success: true, newMessage: insertedMsg }
@@ -569,20 +566,18 @@ export async function generateReplySuggestionsAction(
       }
     }
 
-    const supabase = await createClient()
-
     // 2. Fetch authoritative client info if clientId is provided
     let effectiveMode = params.communicationMode || 'connected'
     let effectiveClientName = params.clientName
     let effectiveClientCompany = params.clientCompany
 
     if (params.clientId) {
-      const { data: clientRecord } = await supabase
-        .from('clients')
-        .select('name, company_name, communication_mode')
-        .eq('id', params.clientId)
-        .eq('organization_id', orgId)
-        .maybeSingle()
+      const clientRecord = await queryOne<{ name: string; company_name: string; communication_mode: string }>(
+        `SELECT name, company_name, communication_mode
+         FROM clients
+         WHERE id = $1 AND organization_id = $2`,
+        [params.clientId, orgId]
+      )
 
       if (clientRecord) {
         effectiveMode = (clientRecord.communication_mode as any) || effectiveMode
@@ -594,12 +589,10 @@ export async function generateReplySuggestionsAction(
     // 3. Resolve channel provider
     let providerName = params.channelProvider || 'email'
     if (params.channelId) {
-      const { data: channelRecord } = await supabase
-        .from('communication_channels')
-        .select('provider')
-        .eq('id', params.channelId)
-        .eq('organization_id', orgId)
-        .maybeSingle()
+      const channelRecord = await queryOne<{ provider: string }>(
+        `SELECT provider FROM communication_channels WHERE id = $1 AND organization_id = $2`,
+        [params.channelId, orgId]
+      )
 
       if (channelRecord && channelRecord.provider) {
         providerName = channelRecord.provider
@@ -700,19 +693,16 @@ export async function extractTasksFromThreadAction(
       }
     }
 
-    const supabase = await createClient()
-
     // 1. Fetch Projects for org
     let projects: TaskCandidateProject[] = []
     try {
-      const { data: projData } = await supabase
-        .from('projects')
-        .select('id, title, client_id, status')
-        .eq('organization_id', orgId)
-        .order('created_at', { ascending: false })
+      const projData = await query<any>(
+        `SELECT id, title, client_id, status FROM projects WHERE organization_id = $1 ORDER BY created_at DESC`,
+        [orgId]
+      )
 
-      if (projData && projData.length > 0) {
-        projects = projData.map((p) => ({
+      if (projData.rows && projData.rows.length > 0) {
+        projects = projData.rows.map((p: any) => ({
           id: p.id,
           title: p.title,
           client_id: p.client_id,
@@ -730,26 +720,20 @@ export async function extractTasksFromThreadAction(
     // 2. Fetch Team Members
     let teamMembers: TaskCandidateAssignee[] = []
     try {
-      const { data: memberData } = await supabase
-        .from('organization_members')
-        .select(`
-          user_id,
-          profiles!organization_members_user_id_fkey (
-            id,
-            full_name,
-            email
-          )
-        `)
-        .eq('organization_id', orgId)
+      const memberData = await query<any>(
+        `SELECT u.id, u.full_name, u.email
+         FROM organization_members om
+         JOIN users u ON u.id = om.user_id
+         WHERE om.organization_id = $1`,
+        [orgId]
+      )
 
-      if (memberData && memberData.length > 0) {
-        teamMembers = memberData
-          .filter((m: any) => m.profiles)
-          .map((m: any) => ({
-            id: m.profiles.id,
-            name: m.profiles.full_name || m.profiles.email || 'Team Member',
-            email: m.profiles.email,
-          }))
+      if (memberData.rows && memberData.rows.length > 0) {
+        teamMembers = memberData.rows.map((m: any) => ({
+          id: m.id,
+          name: m.full_name || m.email || 'Team Member',
+          email: m.email,
+        }))
       }
     } catch (e) {}
 
@@ -843,8 +827,6 @@ export async function createExtractedTaskAction(
       return { success: false, error: 'Please select a target project.' }
     }
 
-    const supabase = await createClient()
-
     let fullDescription = description.trim()
     if (sourceSnippet) {
       fullDescription += `\n\n> "${sourceSnippet}"\n— Extracted via AI from client communication`
@@ -852,26 +834,25 @@ export async function createExtractedTaskAction(
       fullDescription += `\n\n— Extracted via AI from client communication`
     }
 
-    const payload = {
-      organization_id: session.organization.id,
-      project_id: projectId,
-      title: title.trim(),
-      description: fullDescription.trim(),
-      assigned_to: assignedTo || null,
-      priority,
-      status: 'todo',
-      due_date: dueDate || null,
-    }
+    const data = await queryOne<{ id: string }>(
+      `INSERT INTO tasks (
+         organization_id, project_id, title, description, assigned_to, priority, status, due_date
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id`,
+      [
+        session.organization.id,
+        projectId,
+        title.trim(),
+        fullDescription.trim(),
+        assignedTo || null,
+        priority,
+        'todo',
+        dueDate || null,
+      ]
+    )
 
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert(payload)
-      .select('id')
-      .single()
-
-    if (error) {
-      console.error('[CommunicationHub:Actions] Error creating extracted task:', error)
-      return { success: false, error: error.message || 'Failed to insert task.' }
+    if (!data) {
+      return { success: false, error: 'Failed to insert task.' }
     }
 
     try {
