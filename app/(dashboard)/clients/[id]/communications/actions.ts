@@ -1,7 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
 
@@ -49,35 +49,31 @@ export async function logCommunicationAction(formData: FormData) {
       return { error: 'Communication log must include a message body or subject.' }
     }
 
-    const supabase = await createClient()
-
-    const payload = {
-      organization_id: session.organization.id,
-      client_id: clientId,
-      channel_id: null,
-      channel_type: channelType,
-      direction,
-      sender_name: senderName,
-      sender_identifier: senderIdentifier,
-      subject,
-      body: body || subject || '',
-      is_manual: true,
-      metadata: { logged_by_user_id: session.user.id, logged_by_name: session.user.full_name },
-      sent_at: sentAt,
-    }
-
     let insertedMessage: any = null
     let insertError: any = null
 
     try {
-      const { data, error } = await supabase
-        .from('communication_messages')
-        .insert(payload)
-        .select('*')
-        .single()
-
-      insertedMessage = data
-      insertError = error
+      insertedMessage = await queryOne<CommunicationItem>(
+        `INSERT INTO communication_messages (
+          organization_id, client_id, channel_id, channel_type, direction,
+          sender_name, sender_identifier, subject, body, is_manual,
+          metadata, sent_at, created_at
+        ) VALUES (
+          $1, $2, null, $3, $4, $5, $6, $7, $8, true, $9, $10, NOW()
+        ) RETURNING *`,
+        [
+          session.organization.id,
+          clientId,
+          channelType,
+          direction,
+          senderName,
+          senderIdentifier,
+          subject,
+          body || subject || '',
+          JSON.stringify({ logged_by_user_id: session.user.id, logged_by_name: session.user.full_name }),
+          sentAt,
+        ]
+      )
     } catch (err: any) {
       insertError = err
     }
@@ -147,16 +143,12 @@ export async function fetchClientCommunicationsAction(clientId: string): Promise
       return getDevCommunications(clientId)
     }
 
-    const supabase = await createClient()
-
     let isManualMode = false
     try {
-      const { data: clientData } = await supabase
-        .from('clients')
-        .select('communication_mode')
-        .eq('id', clientId)
-        .eq('organization_id', session.organization.id)
-        .single()
+      const clientData = await queryOne<{ communication_mode: string }>(
+        `SELECT communication_mode FROM clients WHERE id = $1 AND organization_id = $2`,
+        [clientId, session.organization.id]
+      )
       if (clientData?.communication_mode === 'manual') {
         isManualMode = true
       }
@@ -165,20 +157,25 @@ export async function fetchClientCommunicationsAction(clientId: string): Promise
     let items: CommunicationItem[] = []
 
     try {
-      let query = supabase
-        .from('communication_messages')
-        .select('*')
-        .eq('client_id', clientId)
-        .eq('organization_id', session.organization.id)
-
+      let data: CommunicationItem[]
       if (isManualMode) {
-        query = query.eq('is_manual', true)
+        data = await query<CommunicationItem>(
+          `SELECT * FROM communication_messages
+           WHERE client_id = $1 AND organization_id = $2 AND is_manual = true
+           ORDER BY sent_at DESC`,
+          [clientId, session.organization.id]
+        )
+      } else {
+        data = await query<CommunicationItem>(
+          `SELECT * FROM communication_messages
+           WHERE client_id = $1 AND organization_id = $2
+           ORDER BY sent_at DESC`,
+          [clientId, session.organization.id]
+        )
       }
 
-      const { data, error } = await query.order('sent_at', { ascending: false })
-
-      if (!error && data) {
-        items = data as CommunicationItem[]
+      if (data) {
+        items = data
       }
     } catch (err) {}
 
