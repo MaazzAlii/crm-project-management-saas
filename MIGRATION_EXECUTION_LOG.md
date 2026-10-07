@@ -202,7 +202,30 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - [x] Monitoring dashboard configuration
 - **Files Created**: 12 critical deployment files
 - **Infrastructure**: Ready for production on Contabo
-- **Status**: ✅ MIGRATION COMPLETE - READY FOR PRODUCTION DEPLOYMENT
-
 ---
+
+### Step 9: Coolify Deployment Fix — Complete Supabase Elimination & Edge JWT Auth
+- **Date/Time**: 2026-10-07 11:48
+- **Task**: Fix Coolify runtime 500 error on `/api/health` caused by missing Supabase credentials in middleware. Completely eliminate Supabase from codebase and transition to self-hosted PostgreSQL and custom JWT authentication.
+- **Why Performed**: The application was failing with "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY" in `middleware.js` during deployment. Supabase was obsolete following the PostgreSQL migration roadmap.
+- **Actions Performed**:
+  1. **Edge-Compatible JWT Middleware** (`lib/auth/edge-jwt.ts` & `middleware.ts`):
+     - Created `lib/auth/edge-jwt.ts` utilizing `jose` for Web Crypto API compatibility under Next.js Edge runtime.
+     - Rewrote `middleware.ts` to verify authentication via HTTP-only session cookies without any Supabase client or env dependencies.
+     - Whitelisted `/api/health`, `/api/auth/*`, and webhooks as public endpoints.
+  2. **Refactored Server Actions, Pages & API Routes to PostgreSQL**:
+     - Updated all dashboard server actions, client portal pages, and webhooks to query PostgreSQL directly (`query`, `queryOne` from `@/lib/db`).
+     - Maintained strict multi-tenancy and organization data isolation (`organization_id`).
+  3. **Package & Module Cleanup**:
+     - Deleted `lib/supabase/` directory (`admin.ts`, `client.ts`, `server.ts`).
+     - Removed `@supabase/ssr` and `@supabase/supabase-js` from `package.json` and synchronized `package-lock.json` via `npm install`.
+  4. **Updated Vitest Test Suite**:
+     - Updated all test suites mocking Supabase (`tests/*.test.ts`) to mock `@/lib/db` and session context.
+- **Verification / Test Result**:
+  - `npm run type-check`: 0 TypeScript errors.
+  - `npm test`: **15 test files, 149/149 tests passed (100%)**.
+  - `npm run build`: Compiled successfully with standalone output.
+  - Runtime verification: `PORT=3099 NODE_ENV=production npm start` & `PORT=3098 node .next/standalone/server.js` both served `GET /api/health` with `HTTP/1.1 200 OK` and zero Supabase environment variables configured.
+- **Status**: ✅ Supabase Completely Removed & Coolify Deployment Verified.
+
 
