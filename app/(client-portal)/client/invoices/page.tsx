@@ -1,5 +1,5 @@
 import { requirePortalSession } from '@/lib/portal/auth'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { PortalNav } from '@/components/client-portal/PortalNav'
 import { FileText, CheckCircle, Clock, AlertTriangle, DollarSign, TrendingUp } from 'lucide-react'
 
@@ -46,7 +46,6 @@ const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle; c
 function deriveStatus(project: { status: string; deadline: string | null; delivered_at: string | null }): InvoiceStatus {
   if (project.status === 'paid') return 'paid'
   if (project.status === 'invoiced') {
-    // Check if past deadline → overdue
     if (project.deadline && new Date(project.deadline) < new Date()) return 'overdue'
     return 'invoiced'
   }
@@ -55,26 +54,35 @@ function deriveStatus(project: { status: string; deadline: string | null; delive
 
 export default async function PortalInvoicesPage() {
   const { clientId, organizationId } = await requirePortalSession()
-  const supabase = await createClient()
 
-  const [{ data: projects }, { data: org }] = await Promise.all([
-    supabase
-      .from('projects')
-      .select('id, title, amount, currency, status, deadline, delivered_at, invoice_triggered')
-      .eq('client_id', clientId)
-      .in('status', ['delivered', 'invoiced', 'paid'])
-      .or('invoice_triggered.eq.true')
-      .order('delivered_at', { ascending: false }),
+  const [projectsRes, org] = await Promise.all([
+    query<{
+      id: string
+      title: string
+      amount: string | number
+      currency: string | null
+      status: string
+      deadline: string | null
+      delivered_at: string | null
+      invoice_triggered: boolean
+    }>(
+      `SELECT id, title, amount, currency, status, deadline, delivered_at, invoice_triggered
+       FROM projects
+       WHERE client_id = $1 AND (status IN ('delivered', 'invoiced', 'paid') OR invoice_triggered = true)
+       ORDER BY delivered_at DESC NULLS LAST`,
+      [clientId]
+    ),
 
-    supabase
-      .from('organizations')
-      .select('name, logo_url')
-      .eq('id', organizationId)
-      .maybeSingle(),
+    queryOne<{ name: string; logo_url: string | null }>(
+      'SELECT name, logo_url FROM organizations WHERE id = $1',
+      [organizationId]
+    ),
   ])
 
+  const projects = projectsRes.rows
+
   // Map projects → derived invoice objects
-  const invoices: DerivedInvoice[] = (projects ?? []).map((p) => ({
+  const invoices: DerivedInvoice[] = projects.map((p) => ({
     id: p.id,
     title: p.title,
     amount: Number(p.amount),
@@ -89,8 +97,8 @@ export default async function PortalInvoicesPage() {
   const totalOutstanding = totalInvoiced - totalPaid
   const overdueCount = invoices.filter((i) => i.status === 'overdue').length
 
-  const orgName = (org as any)?.name ?? 'Client Portal'
-  const orgLogoUrl = (org as any)?.logo_url ?? null
+  const orgName = org?.name ?? 'Client Portal'
+  const orgLogoUrl = org?.logo_url ?? null
 
   return (
     <div className="portal-bg min-h-screen">
