@@ -4,8 +4,9 @@ vi.mock('@/lib/auth/session', () => ({
   getCurrentSessionContext: vi.fn(),
 }))
 
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(),
+vi.mock('@/lib/db', () => ({
+  query: vi.fn(),
+  queryOne: vi.fn(),
 }))
 
 vi.mock('@/lib/billing/plan-limits', () => ({
@@ -21,7 +22,7 @@ vi.mock('next/cache', () => ({
 }))
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { checkClientLimit } from '@/lib/billing/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { createClientAction, deleteClientAction } from '@/app/(dashboard)/clients/actions'
@@ -47,21 +48,7 @@ describe('Integration: Client CRUD Server Actions with RLS & Audit', () => {
 
   describe('createClientAction', () => {
     it('successfully creates client with sanitization, tenant scoping, and audit logging', async () => {
-      const mockInsert = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: { id: 'new-client-uuid-123' },
-            error: null,
-          }),
-        }),
-      })
-
-      const mockSupabase = {
-        from: vi.fn().mockReturnValue({
-          insert: mockInsert,
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(queryOne as any).mockResolvedValue({ id: 'new-client-uuid-123' })
 
       const formData = new FormData()
       formData.set('name', 'Acme Innovations <script>alert(1)</script>')
@@ -76,13 +63,14 @@ describe('Integration: Client CRUD Server Actions with RLS & Audit', () => {
       expect(result.clientId).toBe('new-client-uuid-123')
 
       // Verifies sanitization (no <script> tags) and org scoping
-      expect(mockInsert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          organization_id: mockOrgId,
-          name: 'Acme Innovations', // Script tag stripped by sanitizeString
-          email: 'contact@acme.com',
-          communication_mode: 'connected',
-        })
+      expect(queryOne).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO clients'),
+        expect.arrayContaining([
+          mockOrgId,
+          'Acme Innovations', // Script tag stripped by sanitizeString
+          'contact@acme.com',
+          'connected',
+        ])
       )
 
       // Verifies audit logging
@@ -125,21 +113,14 @@ describe('Integration: Client CRUD Server Actions with RLS & Audit', () => {
 
   describe('deleteClientAction', () => {
     it('allows org admin to delete client and logs audit event', async () => {
-      const mockDelete = vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ error: null }),
-        }),
-      })
-
-      const mockSupabase = {
-        from: vi.fn().mockReturnValue({
-          delete: mockDelete,
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(query as any).mockResolvedValue([])
 
       const result = await deleteClientAction('client-to-delete')
       expect(result.success).toBe(true)
+      expect(query).toHaveBeenCalledWith(
+        expect.stringContaining('DELETE FROM clients'),
+        expect.arrayContaining(['client-to-delete', mockOrgId])
+      )
       expect(logAuditEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           action: 'CLIENT_DELETED',
