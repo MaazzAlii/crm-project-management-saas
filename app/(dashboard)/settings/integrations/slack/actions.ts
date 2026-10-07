@@ -1,7 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { encryptSecret, decryptSecret } from '@/lib/security/encrypt'
 import { sendSlackOutboundMessage } from '@/lib/providers/slack'
 import { revalidatePath } from 'next/cache'
@@ -27,18 +27,12 @@ export async function getSlackIntegrationStatusAction(): Promise<{
       return { channel: null, error: 'Unauthorized session' }
     }
 
-    const supabase = await createClient()
-
-    const { data: channel, error } = await supabase
-      .from('communication_channels')
-      .select('id, organization_id, external_account_id, channel_name, status, connected_at, metadata')
-      .eq('organization_id', session.organization.id)
-      .eq('provider', 'slack')
-      .maybeSingle()
-
-    if (error) {
-      return { channel: null, error: error.message }
-    }
+    const channel = await queryOne<any>(
+      `SELECT id, organization_id, external_account_id, channel_name, status, connected_at, metadata
+       FROM communication_channels
+       WHERE organization_id = $1 AND provider = 'slack'`,
+      [session.organization.id]
+    )
 
     if (!channel) {
       return { channel: null }
@@ -60,8 +54,8 @@ export async function getSlackIntegrationStatusAction(): Promise<{
         status: channel.status as any,
         connected_at: channel.connected_at,
         bot_access_token_masked: maskedBotToken,
-        signing_secret_masked: maskedSigningSecret
-      }
+        signing_secret_masked: maskedSigningSecret,
+      },
     }
   } catch (err: any) {
     return { channel: null, error: err.message || 'Failed to load Slack status' }
@@ -84,15 +78,11 @@ export async function saveSlackIntegrationAction(formData: FormData) {
       return { error: 'Slack Workspace or Channel ID is required (e.g. C01234567 or T01234567)' }
     }
 
-    const supabase = await createClient()
-
     // Fetch existing channel if any
-    const { data: existingChannel } = await supabase
-      .from('communication_channels')
-      .select('id, metadata')
-      .eq('organization_id', session.organization.id)
-      .eq('provider', 'slack')
-      .maybeSingle()
+    const existingChannel = await queryOne<any>(
+      `SELECT id, metadata FROM communication_channels WHERE organization_id = $1 AND provider = 'slack'`,
+      [session.organization.id]
+    )
 
     const existingMeta = (existingChannel?.metadata as Record<string, any>) || {}
 
@@ -109,36 +99,24 @@ export async function saveSlackIntegrationAction(formData: FormData) {
       bot_access_token: encryptedBotToken,
       signing_secret: encryptedSigningSecret,
       slack_channel_id: externalAccountId,
-      updated_by_user_id: session.user.id
+      updated_by_user_id: session.user.id,
     }
 
     if (existingChannel) {
-      const { error: updateError } = await supabase
-        .from('communication_channels')
-        .update({
-          external_account_id: externalAccountId,
-          channel_name: channelName,
-          status: 'active',
-          connected_at: new Date().toISOString(),
-          metadata: metadataPayload
-        })
-        .eq('id', existingChannel.id)
-
-      if (updateError) return { error: updateError.message }
+      await query(
+        `UPDATE communication_channels
+         SET external_account_id = $1, channel_name = $2, status = 'active',
+             connected_at = NOW(), metadata = $3, updated_at = NOW()
+         WHERE id = $4`,
+        [externalAccountId, channelName, JSON.stringify(metadataPayload), existingChannel.id]
+      )
     } else {
-      const { error: insertError } = await supabase
-        .from('communication_channels')
-        .insert({
-          organization_id: session.organization.id,
-          provider: 'slack',
-          external_account_id: externalAccountId,
-          channel_name: channelName,
-          status: 'active',
-          connected_at: new Date().toISOString(),
-          metadata: metadataPayload
-        })
-
-      if (insertError) return { error: insertError.message }
+      await query(
+        `INSERT INTO communication_channels (
+           organization_id, provider, external_account_id, channel_name, status, connected_at, metadata
+         ) VALUES ($1, 'slack', $2, $3, 'active', NOW(), $4)`,
+        [session.organization.id, externalAccountId, channelName, JSON.stringify(metadataPayload)]
+      )
     }
 
     revalidatePath('/settings/integrations')
@@ -157,15 +135,12 @@ export async function disconnectSlackIntegrationAction(channelId: string) {
       return { error: 'Unauthorized' }
     }
 
-    const supabase = await createClient()
-
-    const { error } = await supabase
-      .from('communication_channels')
-      .update({ status: 'disconnected' })
-      .eq('id', channelId)
-      .eq('organization_id', session.organization.id)
-
-    if (error) return { error: error.message }
+    await query(
+      `UPDATE communication_channels
+       SET status = 'disconnected', updated_at = NOW()
+       WHERE id = $1 AND organization_id = $2`,
+      [channelId, session.organization.id]
+    )
 
     revalidatePath('/settings/integrations')
     revalidatePath('/settings/integrations/slack')
@@ -183,14 +158,12 @@ export async function testSlackConnectionAction(channelId: string) {
       return { error: 'Unauthorized' }
     }
 
-    const supabase = await createClient()
-
-    const { data: channel } = await supabase
-      .from('communication_channels')
-      .select('id, external_account_id, metadata')
-      .eq('id', channelId)
-      .eq('organization_id', session.organization.id)
-      .single()
+    const channel = await queryOne<any>(
+      `SELECT id, external_account_id, metadata
+       FROM communication_channels
+       WHERE id = $1 AND organization_id = $2`,
+      [channelId, session.organization.id]
+    )
 
     if (!channel) {
       return { error: 'Channel not found' }
