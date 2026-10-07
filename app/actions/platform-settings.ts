@@ -1,7 +1,7 @@
 'use server'
 
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { query } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 
 export interface PlanUpdateInput {
@@ -73,21 +73,12 @@ export async function updatePlanLimitsAction(input: PlanUpdateInput) {
   }
 
   try {
-    const adminClient = createAdminClient()
-
-    const { error: updateError } = await adminClient
-      .from('subscription_plans')
-      .update({
-        price_monthly: priceMonthly,
-        feature_limits: parsedLimits,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', planId)
-
-    if (updateError) {
-      console.error('[PLATFORM_SETTINGS_ACTION] Plan update error:', updateError)
-      return { error: `Failed to update plan: ${updateError.message}` }
-    }
+    await query(
+      `UPDATE subscription_plans
+       SET price_monthly = $1, feature_limits = $2, updated_at = NOW()
+       WHERE id = $3`,
+      [priceMonthly, JSON.stringify(parsedLimits), planId]
+    )
 
     revalidatePath('/super-admin/settings')
     revalidatePath('/super-admin/organizations')
@@ -101,20 +92,14 @@ export async function updateGlobalFeatureFlagsAction(flags: FeatureFlagsInput) {
   await requireSuperAdmin()
 
   try {
-    const adminClient = createAdminClient()
-
-    // Store in platform_settings key-value store or system metadata
-    const { error } = await adminClient
-      .from('platform_settings')
-      .upsert({
-        key: 'global_feature_flags',
-        value: flags,
-        updated_at: new Date().toISOString(),
-      })
-
-    if (error) {
-      console.warn('[PLATFORM_SETTINGS_ACTION] DB platform_settings warning:', error.message)
-    }
+    await query(
+      `INSERT INTO platform_settings (key, value, updated_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (key) DO UPDATE SET
+         value = EXCLUDED.value,
+         updated_at = NOW()`,
+      ['global_feature_flags', JSON.stringify(flags)]
+    )
 
     revalidatePath('/super-admin/settings')
     return { success: true, message: 'Global feature flags updated successfully.' }
@@ -127,19 +112,14 @@ export async function updateGlobalOnboardingDefaultsAction(defaults: OnboardingD
   await requireSuperAdmin()
 
   try {
-    const adminClient = createAdminClient()
-
-    const { error } = await adminClient
-      .from('platform_settings')
-      .upsert({
-        key: 'global_onboarding_defaults',
-        value: defaults,
-        updated_at: new Date().toISOString(),
-      })
-
-    if (error) {
-      console.warn('[PLATFORM_SETTINGS_ACTION] DB onboarding defaults warning:', error.message)
-    }
+    await query(
+      `INSERT INTO platform_settings (key, value, updated_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (key) DO UPDATE SET
+         value = EXCLUDED.value,
+         updated_at = NOW()`,
+      ['global_onboarding_defaults', JSON.stringify(defaults)]
+    )
 
     revalidatePath('/super-admin/settings')
     return { success: true, message: 'Global onboarding defaults updated successfully.' }
