@@ -7,7 +7,7 @@ import {
 import { ProjectHeader } from '@/components/projects/ProjectHeader'
 import { DeliverablesList } from '@/components/projects/DeliverablesList'
 import { ProjectTimeline } from '@/components/projects/ProjectTimeline'
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
@@ -35,10 +35,9 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   // Fetch team members list
   let membersList: { id: string; name: string }[] = []
   try {
-    const supabase = await createClient()
-    const { data } = await supabase.from('profiles').select('id, full_name, email').order('full_name')
-    if (data) {
-      membersList = data.map((p) => ({
+    const { rows } = await query<any>(`SELECT id, full_name, email FROM users ORDER BY full_name`)
+    if (rows) {
+      membersList = rows.map((p) => ({
         id: p.id,
         name: p.full_name || p.email || 'Team Member'
       }))
