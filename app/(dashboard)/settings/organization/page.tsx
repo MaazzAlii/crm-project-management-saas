@@ -1,5 +1,5 @@
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { queryOne } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import { OrgProfileForm } from '@/components/settings/OrgProfileForm'
 
@@ -16,14 +16,13 @@ export default async function OrganizationSettingsPage() {
     redirect('/onboarding')
   }
 
-  const supabase = await createClient()
-
   // Fetch full organization details
-  const { data: orgData } = await supabase
-    .from('organizations')
-    .select('id, name, slug, plan_tier, billing_status, industry_type, logo_url, timezone')
-    .eq('id', session.organization.id)
-    .single()
+  const orgData = await queryOne<any>(
+    `SELECT id, name, slug, plan_tier, billing_status, industry_type, logo_url, timezone
+     FROM organizations
+     WHERE id = $1`,
+    [session.organization.id]
+  )
 
   const org = orgData || {
     id: session.organization.id,
