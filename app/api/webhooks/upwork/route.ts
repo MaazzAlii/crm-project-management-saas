@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 import { decryptSecret } from '@/lib/security/encrypt'
 import { normalizeUpworkEventToIngestPayload } from '@/lib/providers/upwork'
 import { ingestMessage } from '@/lib/inbox/ingest'
@@ -34,15 +34,13 @@ export async function POST(req: NextRequest) {
     const upworkContractId = payload.contract_id || payload.room_id || payload.event?.contract_id
 
     // Resolve matching active Upwork channel from database
-    const supabase = await createClient()
+    const { rows: channels } = await query<any>(
+      `SELECT id, organization_id, external_account_id, metadata, status
+       FROM communication_channels
+       WHERE provider = 'upwork' AND status = 'active'`
+    )
 
-    const { data: channels, error: channelError } = await supabase
-      .from('communication_channels')
-      .select('id, organization_id, external_account_id, metadata, status')
-      .eq('provider', 'upwork')
-      .eq('status', 'active')
-
-    if (channelError || !channels || channels.length === 0) {
+    if (!channels || channels.length === 0) {
       console.warn('[UpworkWebhook] No active Upwork channel registered in platform.')
       return NextResponse.json({ ok: true, warning: 'No active Upwork channel found' })
     }
