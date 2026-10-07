@@ -1,5 +1,5 @@
 import { requirePortalSession } from '@/lib/portal/auth'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { PortalNav } from '@/components/client-portal/PortalNav'
 import { ApprovalForm } from '@/components/client-portal/ApprovalForm'
 import { notFound } from 'next/navigation'
@@ -32,29 +32,53 @@ const DELIVERABLE_STATUS = {
 
 export default async function PortalProjectDetailPage({ params }: { params: { id: string } }) {
   const { clientId, organizationId } = await requirePortalSession()
-  const supabase = await createClient()
 
-  // Fetch project — RLS enforces client_id automatically
-  const { data: project } = await supabase
-    .from('projects')
-    .select('id, title, description, type, status, priority, start_date, deadline, amount, currency, delivered_at, notes')
-    .eq('id', params.id)
-    .eq('client_id', clientId)   // explicit client_id guard (defense in depth)
-    .maybeSingle()
+  const [project, deliverablesRes, org] = await Promise.all([
+    queryOne<{
+      id: string
+      title: string
+      description: string | null
+      type: string | null
+      status: string
+      priority: string | null
+      start_date: string | null
+      deadline: string | null
+      amount: string | number
+      currency: string | null
+      delivered_at: string | null
+      notes: string | null
+    }>(
+      `SELECT id, title, description, type, status, priority, start_date, deadline, amount, currency, delivered_at, notes
+       FROM projects
+       WHERE id = $1 AND client_id = $2`,
+      [params.id, clientId]
+    ),
+
+    query<{
+      id: string
+      title: string
+      status: string
+      file_url: string | null
+      drive_link: string | null
+      client_feedback: string | null
+      submitted_at: string
+    }>(
+      `SELECT id, title, status, file_url, drive_link, client_feedback, submitted_at
+       FROM deliverables
+       WHERE project_id = $1
+       ORDER BY submitted_at DESC`,
+      [params.id]
+    ),
+
+    queryOne<{ name: string; logo_url: string | null }>(
+      'SELECT name, logo_url FROM organizations WHERE id = $1',
+      [organizationId]
+    ),
+  ])
 
   if (!project) notFound()
 
-  const { data: deliverables } = await supabase
-    .from('deliverables')
-    .select('id, title, status, file_url, drive_link, client_feedback, submitted_at')
-    .eq('project_id', params.id)
-    .order('submitted_at', { ascending: false })
-
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('name, logo_url')
-    .eq('id', organizationId)
-    .maybeSingle()
+  const deliverables = deliverablesRes.rows
 
   const s = STATUS_MAP[project.status] ?? STATUS_MAP.in_progress
   const deadlineDate = project.deadline ? new Date(project.deadline) : null
@@ -66,7 +90,7 @@ export default async function PortalProjectDetailPage({ params }: { params: { id
         <div className="absolute -top-60 left-1/2 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-violet-600/8 blur-3xl" />
       </div>
 
-      <PortalNav orgName={(org as any)?.name ?? 'Client Portal'} orgLogoUrl={(org as any)?.logo_url} />
+      <PortalNav orgName={org?.name ?? 'Client Portal'} orgLogoUrl={org?.logo_url} />
 
       <main className="relative z-10 mx-auto max-w-5xl px-6 py-10">
         {/* Back */}
@@ -116,7 +140,7 @@ export default async function PortalProjectDetailPage({ params }: { params: { id
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Package className="h-4 w-4 text-slate-500" />
-              <span className="text-slate-300">{deliverables?.length ?? 0} deliverable{(deliverables?.length ?? 0) !== 1 ? 's' : ''}</span>
+              <span className="text-slate-300">{deliverables.length} deliverable{deliverables.length !== 1 ? 's' : ''}</span>
             </div>
           </div>
         </div>
@@ -128,7 +152,7 @@ export default async function PortalProjectDetailPage({ params }: { params: { id
             Deliverables
           </h2>
 
-          {!deliverables || deliverables.length === 0 ? (
+          {deliverables.length === 0 ? (
             <div className="portal-card text-center py-12">
               <Package className="mx-auto h-10 w-10 text-slate-600 mb-3" />
               <p className="text-sm text-slate-400">No deliverables yet — the team will upload them here when ready.</p>
