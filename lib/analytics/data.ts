@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 
 export type AnalyticsDateRange = '30d' | '90d' | 'ytd' | 'all'
 
@@ -49,7 +49,7 @@ export interface DeadlineItem {
   deadline: string
   status: string
   isOverdue: boolean
-  daysDiff: number // Negative if overdue, positive if upcoming
+  daysDiff: number
 }
 
 export interface MonthlyVelocityItem {
@@ -123,23 +123,20 @@ export interface OrganizationAnalyticsData {
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  planning: { label: 'Planning', color: '#818CF8' }, // Indigo
-  in_progress: { label: 'In Progress', color: '#38BDF8' }, // Sky
-  review: { label: 'In Review', color: '#FBBF24' }, // Amber
-  delivered: { label: 'Delivered', color: '#34D399' }, // Emerald
-  invoiced: { label: 'Invoiced', color: '#2DD4BF' }, // Teal
-  paid: { label: 'Paid', color: '#10B981' }, // Green
-  blocked: { label: 'Blocked', color: '#F87171' }, // Rose
-  on_hold: { label: 'On Hold', color: '#94A3B8' }, // Slate
+  planning: { label: 'Planning', color: '#818CF8' },
+  in_progress: { label: 'In Progress', color: '#38BDF8' },
+  review: { label: 'In Review', color: '#FBBF24' },
+  delivered: { label: 'Delivered', color: '#34D399' },
+  invoiced: { label: 'Invoiced', color: '#2DD4BF' },
+  paid: { label: 'Paid', color: '#10B981' },
+  blocked: { label: 'Blocked', color: '#F87171' },
+  on_hold: { label: 'On Hold', color: '#94A3B8' },
 }
 
 export async function fetchOrganizationAnalytics(
   organizationId: string,
   range: AnalyticsDateRange = '30d'
 ): Promise<OrganizationAnalyticsData> {
-  const supabase = await createClient()
-
-  // Calculate cutoff timestamp based on selected date range
   const now = new Date()
   let rangeStart: Date | null = null
 
@@ -151,52 +148,97 @@ export async function fetchOrganizationAnalytics(
     rangeStart = new Date(now.getFullYear(), 0, 1)
   }
 
-  // 1. Fetch Projects with clients
-  let projectsQuery = supabase
-    .from('projects')
-    .select('id, name, status, budget, deadline, created_at, delivered_at, client_id, clients(name)')
-    .eq('organization_id', organizationId)
+  const projectsSql = rangeStart
+    ? `SELECT p.id, COALESCE(p.title, p.name) as name, p.status, COALESCE(p.amount, p.budget, 0) as budget, p.deadline, p.created_at, p.delivered_at, p.client_id, c.name as client_name
+       FROM projects p
+       LEFT JOIN clients c ON c.id = p.client_id
+       WHERE p.organization_id = $1 AND p.created_at >= $2`
+    : `SELECT p.id, COALESCE(p.title, p.name) as name, p.status, COALESCE(p.amount, p.budget, 0) as budget, p.deadline, p.created_at, p.delivered_at, p.client_id, c.name as client_name
+       FROM projects p
+       LEFT JOIN clients c ON c.id = p.client_id
+       WHERE p.organization_id = $1`
 
-  if (rangeStart) {
-    projectsQuery = projectsQuery.gte('created_at', rangeStart.toISOString())
-  }
+  const projectsParams = rangeStart ? [organizationId, rangeStart.toISOString()] : [organizationId]
 
-  const { data: rawProjects } = await projectsQuery
-  const projects = rawProjects || []
+  const [
+    projectsRes,
+    tasksRes,
+    deliverablesRes,
+    membersRes,
+    clientsCountRes,
+  ] = await Promise.all([
+    query<{
+      id: string
+      name: string
+      status: string
+      budget: string | number
+      deadline: string | null
+      created_at: string
+      delivered_at: string | null
+      client_id: string | null
+      client_name: string | null
+    }>(projectsSql, projectsParams),
 
-  // 2. Fetch Tasks with projects
-  const { data: rawTasks } = await supabase
-    .from('tasks')
-    .select('id, title, status, priority, due_date, assigned_to, project_id, created_at, completed_at, projects(name)')
-    .eq('organization_id', organizationId)
+    query<{
+      id: string
+      title: string
+      status: string
+      priority: string
+      due_date: string | null
+      assigned_to: string | null
+      project_id: string | null
+      created_at: string
+      completed_at: string | null
+      project_name: string | null
+    }>(
+      `SELECT t.id, t.title, t.status, t.priority, t.due_date, t.assigned_to, t.project_id, t.created_at, t.completed_at,
+              COALESCE(p.title, p.name) as project_name
+       FROM tasks t
+       LEFT JOIN projects p ON p.id = t.project_id
+       WHERE t.organization_id = $1`,
+      [organizationId]
+    ),
 
-  const tasks = rawTasks || []
+    query<{
+      id: string
+      title: string
+      status: string
+      created_at: string
+      updated_at: string | null
+      project_id: string | null
+    }>(
+      'SELECT id, title, status, created_at, updated_at, project_id FROM deliverables WHERE organization_id = $1',
+      [organizationId]
+    ),
 
-  // 3. Fetch Deliverables
-  const { data: rawDeliverables } = await supabase
-    .from('deliverables')
-    .select('id, title, status, created_at, updated_at, project_id')
-    .eq('organization_id', organizationId)
+    query<{
+      id: string
+      user_id: string
+      role: string
+      full_name: string | null
+      email: string | null
+      avatar_url: string | null
+    }>(
+      `SELECT m.id, m.user_id, m.role, u.full_name, u.email, u.avatar_url
+       FROM organization_members m
+       LEFT JOIN users u ON u.id = m.user_id
+       WHERE m.organization_id = $1`,
+      [organizationId]
+    ),
 
-  const deliverables = rawDeliverables || []
+    queryOne<{ count: string }>(
+      'SELECT COUNT(*) as count FROM clients WHERE organization_id = $1',
+      [organizationId]
+    ),
+  ])
 
-  // 4. Fetch Team Members
-  const { data: rawMembers } = await supabase
-    .from('organization_members')
-    .select('id, user_id, role, users(id, full_name, email, avatar_url)')
-    .eq('organization_id', organizationId)
+  const projects = projectsRes.rows
+  const tasks = tasksRes.rows
+  const deliverables = deliverablesRes.rows
+  const members = membersRes.rows
+  const clientsCount = parseInt(clientsCountRes?.count || '0', 10)
 
-  const members = rawMembers || []
-
-  // 5. Fetch Clients count
-  const { count: clientsCount } = await supabase
-    .from('clients')
-    .select('id', { count: 'exact', head: true })
-    .eq('organization_id', organizationId)
-
-  // ==========================================
   // METRIC A: Projects by Status
-  // ==========================================
   const totalProjects = projects.length
   const statusCounts: Record<string, number> = {}
 
@@ -205,8 +247,8 @@ export async function fetchOrganizationAnalytics(
     statusCounts[s] = (statusCounts[s] || 0) + 1
   })
 
-  const projectStatuses: ProjectStatusMetric[] = Object.entries(statusCounts).map(
-    ([status, count]) => {
+  const projectStatuses: ProjectStatusMetric[] = Object.entries(statusCounts)
+    .map(([status, count]) => {
       const config = STATUS_LABELS[status] || { label: status, color: '#64748B' }
       return {
         status,
@@ -215,12 +257,10 @@ export async function fetchOrganizationAnalytics(
         percentage: totalProjects > 0 ? Math.round((count / totalProjects) * 100) : 0,
         color: config.color,
       }
-    }
-  ).sort((a, b) => b.count - a.count)
+    })
+    .sort((a, b) => b.count - a.count)
 
-  // ==========================================
   // METRIC B: Revenue Pipeline
-  // ==========================================
   let totalActiveValue = 0
   let totalInvoicedValue = 0
   let totalPaidValue = 0
@@ -258,8 +298,8 @@ export async function fetchOrganizationAnalytics(
       ? Math.round(totalHistoricalValue / totalProjects)
       : 0
 
-  const byStage: RevenueStageMetric[] = Object.entries(stageValues).map(
-    ([stage, val]) => {
+  const byStage: RevenueStageMetric[] = Object.entries(stageValues)
+    .map(([stage, val]) => {
       const config = STATUS_LABELS[stage] || { label: stage, color: '#64748B' }
       return {
         stage,
@@ -268,8 +308,8 @@ export async function fetchOrganizationAnalytics(
         totalValue: val.totalValue,
         color: config.color,
       }
-    }
-  ).sort((a, b) => b.totalValue - a.totalValue)
+    })
+    .sort((a, b) => b.totalValue - a.totalValue)
 
   const revenue: RevenuePipelineStats = {
     totalActiveValue,
@@ -281,9 +321,7 @@ export async function fetchOrganizationAnalytics(
     byStage,
   }
 
-  // ==========================================
   // METRIC C: Team Workload
-  // ==========================================
   const taskCountsByUser: Record<string, { active: number; completed: number }> = {}
 
   tasks.forEach((t) => {
@@ -298,54 +336,47 @@ export async function fetchOrganizationAnalytics(
     }
   })
 
-  const teamWorkload: TeamWorkloadMember[] = members.map((m: any) => {
-    const user = Array.isArray(m.users) ? m.users[0] : m.users
-    const userId = m.user_id || user?.id || m.id
-    const userName = user?.full_name || user?.email?.split('@')[0] || 'Team Member'
-    const counts = taskCountsByUser[userId] || { active: 0, completed: 0 }
+  const teamWorkload: TeamWorkloadMember[] = members
+    .map((m) => {
+      const userId = m.user_id || m.id
+      const userName = m.full_name || m.email?.split('@')[0] || 'Team Member'
+      const counts = taskCountsByUser[userId] || { active: 0, completed: 0 }
 
-    const activeTasksCount = counts.active
-    const completedTasksCount = counts.completed
-    const totalAssignedCount = activeTasksCount + completedTasksCount
+      const activeTasksCount = counts.active
+      const completedTasksCount = counts.completed
+      const totalAssignedCount = activeTasksCount + completedTasksCount
+      const capacityPercentage = Math.min(Math.round((activeTasksCount / 5) * 100), 100)
 
-    // Capacity reference: 5 active tasks = 100% capacity
-    const capacityPercentage = Math.min(Math.round((activeTasksCount / 5) * 100), 100)
+      let loadStatus: 'optimal' | 'heavy' | 'light' = 'optimal'
+      if (activeTasksCount >= 6) {
+        loadStatus = 'heavy'
+      } else if (activeTasksCount <= 1) {
+        loadStatus = 'light'
+      }
 
-    let loadStatus: 'optimal' | 'heavy' | 'light' = 'optimal'
-    if (activeTasksCount >= 6) {
-      loadStatus = 'heavy'
-    } else if (activeTasksCount <= 1) {
-      loadStatus = 'light'
-    }
+      return {
+        userId,
+        name: userName,
+        email: m.email || '',
+        role: m.role || 'member',
+        avatarUrl: m.avatar_url,
+        activeTasksCount,
+        completedTasksCount,
+        totalAssignedCount,
+        capacityPercentage,
+        loadStatus,
+      }
+    })
+    .sort((a, b) => b.activeTasksCount - a.activeTasksCount)
 
-    return {
-      userId,
-      name: userName,
-      email: user?.email || '',
-      role: m.role || 'member',
-      avatarUrl: user?.avatar_url,
-      activeTasksCount,
-      completedTasksCount,
-      totalAssignedCount,
-      capacityPercentage,
-      loadStatus,
-    }
-  }).sort((a, b) => b.activeTasksCount - a.activeTasksCount)
-
-  // ==========================================
   // METRIC D: Deadlines & Overdue Items
-  // ==========================================
   const upcomingDeadlines: DeadlineItem[] = []
   const overdueItems: DeadlineItem[] = []
 
   const todayMidnight = new Date()
   todayMidnight.setHours(0, 0, 0, 0)
 
-  const in7Days = new Date(todayMidnight.getTime() + 7 * 24 * 60 * 60 * 1000)
-  in7Days.setHours(23, 59, 59, 999)
-
-  // Check projects deadlines
-  projects.forEach((p: any) => {
+  projects.forEach((p) => {
     if (!p.deadline) return
     if (['paid', 'delivered'].includes(p.status)) return
 
@@ -356,7 +387,7 @@ export async function fetchOrganizationAnalytics(
       id: p.id,
       type: 'project',
       title: p.name,
-      relatedName: p.clients?.name || 'Project',
+      relatedName: p.client_name || 'Project',
       deadline: p.deadline,
       status: p.status,
       isOverdue: diffDays < 0,
@@ -370,8 +401,7 @@ export async function fetchOrganizationAnalytics(
     }
   })
 
-  // Check tasks deadlines
-  tasks.forEach((t: any) => {
+  tasks.forEach((t) => {
     if (!t.due_date) return
     if (t.status === 'completed') return
 
@@ -382,7 +412,7 @@ export async function fetchOrganizationAnalytics(
       id: t.id,
       type: 'task',
       title: t.title,
-      relatedName: t.projects?.name || 'Task',
+      relatedName: t.project_name || 'Task',
       deadline: t.due_date,
       status: t.status,
       isOverdue: diffDays < 0,
@@ -396,13 +426,10 @@ export async function fetchOrganizationAnalytics(
     }
   })
 
-  // Sort upcoming chronologically ascending, overdue by severity (most overdue first)
   upcomingDeadlines.sort((a, b) => a.daysDiff - b.daysDiff)
   overdueItems.sort((a, b) => a.daysDiff - b.daysDiff)
 
-  // ==========================================
   // METRIC E: Monthly Completion Rate (Trailing 6 Months)
-  // ==========================================
   const monthsMap: Record<string, MonthlyVelocityItem> = {}
 
   for (let i = 5; i >= 0; i--) {
@@ -422,8 +449,7 @@ export async function fetchOrganizationAnalytics(
     }
   }
 
-  // Aggregate deliverables by completed month
-  deliverables.forEach((del: any) => {
+  deliverables.forEach((del) => {
     if (del.status !== 'approved' && del.status !== 'completed') return
     const dateStr = del.updated_at || del.created_at
     if (!dateStr) return
@@ -435,8 +461,7 @@ export async function fetchOrganizationAnalytics(
     }
   })
 
-  // Aggregate projects delivered by month
-  projects.forEach((p: any) => {
+  projects.forEach((p) => {
     if (!['delivered', 'invoiced', 'paid'].includes(p.status)) return
     const dateStr = p.delivered_at || p.created_at
     if (!dateStr) return
@@ -448,8 +473,7 @@ export async function fetchOrganizationAnalytics(
     }
   })
 
-  // Aggregate tasks completed by month
-  tasks.forEach((t: any) => {
+  tasks.forEach((t) => {
     if (t.status !== 'completed' || !t.completed_at) return
     const d = new Date(t.completed_at)
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
@@ -460,8 +484,6 @@ export async function fetchOrganizationAnalytics(
   })
 
   const monthlyVelocity = Object.values(monthsMap)
-
-  // Overall completion rate: percentage of all non-blocked projects that reached completion
   const completedProjectsCount = projects.filter((p) =>
     ['delivered', 'invoiced', 'paid'].includes(p.status)
   ).length
@@ -480,7 +502,7 @@ export async function fetchOrganizationAnalytics(
     overdueItems,
     monthlyVelocity,
     monthlyCompletionRate,
-    totalClientsCount: clientsCount || 0,
+    totalClientsCount: clientsCount,
     activeClientsCount: new Set(projects.map((p) => p.client_id).filter(Boolean)).size,
   }
 }
@@ -489,8 +511,6 @@ export async function fetchRevenueReport(
   organizationId: string,
   range: AnalyticsDateRange = '30d'
 ): Promise<RevenueReportData> {
-  const supabase = await createClient()
-
   const now = new Date()
   let rangeStart: Date | null = null
 
@@ -502,49 +522,54 @@ export async function fetchRevenueReport(
     rangeStart = new Date(now.getFullYear(), 0, 1)
   }
 
-  // 1. Fetch all clients
-  const { data: clientsData } = await supabase
-    .from('clients')
-    .select('id, name, company, email, status')
-    .eq('organization_id', organizationId)
+  const projectsSql = rangeStart
+    ? `SELECT id, COALESCE(title, name) as name, client_id, COALESCE(amount, budget, 0) as budget, amount, status, type, created_at, delivered_at
+       FROM projects
+       WHERE organization_id = $1 AND created_at >= $2`
+    : `SELECT id, COALESCE(title, name) as name, client_id, COALESCE(amount, budget, 0) as budget, amount, status, type, created_at, delivered_at
+       FROM projects
+       WHERE organization_id = $1`
 
-  const clients = clientsData || []
+  const projectsParams = rangeStart ? [organizationId, rangeStart.toISOString()] : [organizationId]
+
+  const [clientsRes, projectsRes, teamCountRes, tasksRes] = await Promise.all([
+    query<{ id: string; name: string; company: string | null; email: string | null; status: string }>(
+      'SELECT id, name, company, email, status FROM clients WHERE organization_id = $1',
+      [organizationId]
+    ),
+
+    query<{
+      id: string
+      name: string
+      client_id: string | null
+      budget: string | number
+      amount: string | number
+      status: string
+      type: string | null
+      created_at: string
+      delivered_at: string | null
+    }>(projectsSql, projectsParams),
+
+    queryOne<{ count: string }>(
+      'SELECT COUNT(*) as count FROM organization_members WHERE organization_id = $1',
+      [organizationId]
+    ),
+
+    query<{ id: string; status: string; completed_at: string | null }>(
+      "SELECT id, status, completed_at FROM tasks WHERE organization_id = $1 AND status = 'completed'",
+      [organizationId]
+    ),
+  ])
+
+  const clients = clientsRes.rows
+  const projects = projectsRes.rows
+  const currentTeamSize = parseInt(teamCountRes?.count || '1', 10)
+  const tasks = tasksRes.rows
+
   const clientMap = new Map<string, any>(clients.map((c) => [c.id, c]))
 
-  // 2. Fetch projects
-  let projectsQuery = supabase
-    .from('projects')
-    .select('id, name, client_id, budget, amount, status, type, created_at, delivered_at')
-    .eq('organization_id', organizationId)
-
-  if (rangeStart) {
-    projectsQuery = projectsQuery.gte('created_at', rangeStart.toISOString())
-  }
-
-  const { data: projectsData } = await projectsQuery
-  const projects = projectsData || []
-
-  // 3. Fetch team members count for monthly trends
-  const { count: teamCount } = await supabase
-    .from('organization_members')
-    .select('id', { count: 'exact', head: true })
-    .eq('organization_id', organizationId)
-
-  const currentTeamSize = teamCount || 1
-
-  // 4. Fetch closed tasks for velocity
-  const { data: tasksData } = await supabase
-    .from('tasks')
-    .select('id, status, completed_at')
-    .eq('organization_id', organizationId)
-    .eq('status', 'completed')
-
-  const tasks = tasksData || []
-
-  // Aggregate by Client
   const clientAggregates: Record<string, RevenueByClientMetric> = {}
 
-  // Initialize for all clients
   clients.forEach((c) => {
     clientAggregates[c.id] = {
       clientId: c.id,
@@ -575,14 +600,12 @@ export async function fetchRevenueReport(
 
     totalRevenue += val
 
-    // Type aggregation
     if (!typeAggregates[type]) {
       typeAggregates[type] = { totalRevenue: 0, projectsCount: 0 }
     }
     typeAggregates[type].totalRevenue += val
     typeAggregates[type].projectsCount += 1
 
-    // Client aggregation
     if (p.client_id) {
       if (!clientAggregates[p.client_id]) {
         const clientInfo = clientMap.get(p.client_id)
@@ -633,7 +656,6 @@ export async function fetchRevenueReport(
     }))
     .sort((a, b) => b.totalRevenue - a.totalRevenue)
 
-  // Monthly Trends (Trailing 6 Months)
   const monthlyTrendsMap: Record<string, MonthlyTrendMetric> = {}
 
   for (let i = 5; i >= 0; i--) {
@@ -681,8 +703,7 @@ export async function fetchRevenueReport(
   })
 
   const monthlyTrends = Object.values(monthlyTrendsMap)
-  const averageDealSize =
-    projects.length > 0 ? Math.round(totalRevenue / projects.length) : 0
+  const averageDealSize = projects.length > 0 ? Math.round(totalRevenue / projects.length) : 0
 
   return {
     range,
@@ -696,4 +717,3 @@ export async function fetchRevenueReport(
     monthlyTrends,
   }
 }
-
