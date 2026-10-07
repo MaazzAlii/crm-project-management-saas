@@ -11,18 +11,29 @@ export function initializePool(): Pool {
 
   const poolSize = parseInt(process.env.DB_POOL_MAX || '10', 10);
   const minSize = parseInt(process.env.DB_POOL_MIN || '2', 10);
+  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 
-  pool = new Pool({
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '54322', 10),
-    database: process.env.DB_NAME || 'innoventix',
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres_dev_password',
-    max: poolSize,
-    min: minSize,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
-  });
+  if (connectionString) {
+    pool = new Pool({
+      connectionString,
+      max: poolSize,
+      min: minSize,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    });
+  } else {
+    pool = new Pool({
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '54322', 10),
+      database: process.env.DB_NAME || 'innoventix',
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD || 'postgres_dev_password',
+      max: poolSize,
+      min: minSize,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    });
+  }
 
   pool.on('error', (err) => {
     console.error('Unexpected error on idle PostgreSQL client', err);
@@ -39,16 +50,23 @@ export function getPool(): Pool {
 }
 
 /**
- * Execute a parameterized query with telemetry monitoring
+ * Execute a parameterized query with telemetry monitoring.
+ * Returns an array of rows with attached QueryResult metadata for maximum compatibility.
  */
 export async function query<T extends QueryResultRow = any>(
   sql: string,
   params?: any[]
-): Promise<QueryResult<T>> {
+): Promise<T[] & QueryResult<T>> {
   const client = getPool();
   return await dbMonitor.trackQuery(sql, async () => {
     try {
-      return await client.query<T>(sql, params);
+      const res = await client.query<T>(sql, params);
+      const rows = res.rows as any;
+      rows.rows = res.rows;
+      rows.rowCount = res.rowCount;
+      rows.command = res.command;
+      rows.fields = res.fields;
+      return rows;
     } catch (error) {
       console.error('Database query error:', error);
       throw error;
@@ -64,9 +82,8 @@ export async function queryOne<T extends QueryResultRow = any>(
   params?: any[]
 ): Promise<T | null> {
   const result = await query<T>(sql, params);
-  return result.rows[0] || null;
+  return (result.rows && result.rows[0]) || (result as any)[0] || null;
 }
-
 
 /**
  * Execute a series of operations in a transaction
@@ -103,4 +120,3 @@ export * from './query-builder';
 export * from './transactions';
 export * from './cache';
 export * from './monitoring';
-
