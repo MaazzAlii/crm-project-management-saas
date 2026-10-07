@@ -1,5 +1,5 @@
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { redirect, notFound } from 'next/navigation'
 import { ClientRecord } from '@/components/clients/ClientsList'
 import { ClientDetailHeader } from '@/components/clients/ClientDetailHeader'
@@ -28,19 +28,13 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
     )
   }
 
-  const supabase = await createClient()
-
   let rawClient: any = null
 
   try {
-    const { data } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('id', params.id)
-      .eq('organization_id', session.organization.id)
-      .maybeSingle()
-
-    rawClient = data
+    rawClient = await queryOne<any>(
+      `SELECT * FROM clients WHERE id = $1 AND organization_id = $2`,
+      [params.id, session.organization.id]
+    )
   } catch (err) {
     console.error('Error fetching client by id:', err)
   }
@@ -98,24 +92,25 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
   // Fetch linked projects
   let projects: any[] = []
   try {
-    const { data: projectsData } = await supabase
-      .from('projects')
-      .select('id, name, status, budget, created_at')
-      .eq('client_id', client.id)
-      .eq('organization_id', session.organization.id)
-
+    const projectsData = await query<any>(
+      `SELECT id, title AS name, status, amount AS budget, created_at
+       FROM projects
+       WHERE client_id = $1 AND organization_id = $2`,
+      [client.id, session.organization.id]
+    )
     projects = projectsData || []
   } catch (err) {}
 
   // Fetch audit logs
   let auditLogs: any[] = []
   try {
-    const { data: auditData } = await supabase
-      .from('audit_logs')
-      .select('id, action, created_at, details')
-      .eq('target_id', client.id)
-      .order('created_at', { ascending: false })
-
+    const auditData = await query<any>(
+      `SELECT id, action, created_at, details
+       FROM audit_logs
+       WHERE target_id = $1 AND organization_id = $2
+       ORDER BY created_at DESC`,
+      [client.id, session.organization.id]
+    )
     auditLogs = auditData || []
   } catch (err) {}
 
