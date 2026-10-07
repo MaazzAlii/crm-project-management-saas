@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/client'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { readValidatedBody } from '@/lib/security/payload'
 import { logAuditEvent } from '@/lib/audit/logger'
 import type Stripe from 'stripe'
@@ -38,8 +38,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Webhook Error: ${errorMessage}` }, { status: 401 })
   }
 
-  const supabase = await createClient()
-
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
@@ -50,24 +48,27 @@ export async function POST(req: NextRequest) {
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
         const subData = subscription as unknown as { current_period_start: number; current_period_end: number }
 
-        await supabase
-          .from('organization_subscriptions')
-          .upsert(
-            {
-              organization_id: organizationId,
-              stripe_customer_id: session.customer as string,
-              stripe_subscription_id: subscriptionId,
-              status: subscription.status,
-              current_period_start: new Date(
-                (subData.current_period_start || Date.now() / 1000) * 1000
-              ).toISOString(),
-              current_period_end: new Date(
-                (subData.current_period_end || Date.now() / 1000) * 1000
-              ).toISOString(),
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: 'organization_id' }
-          )
+        await query(
+          `INSERT INTO organization_subscriptions (
+             organization_id, stripe_customer_id, stripe_subscription_id, status,
+             current_period_start, current_period_end, updated_at
+           ) VALUES ($1, $2, $3, $4, $5, $6, NOW())
+           ON CONFLICT (organization_id) DO UPDATE SET
+             stripe_customer_id = EXCLUDED.stripe_customer_id,
+             stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+             status = EXCLUDED.status,
+             current_period_start = EXCLUDED.current_period_start,
+             current_period_end = EXCLUDED.current_period_end,
+             updated_at = NOW()`,
+          [
+            organizationId,
+            session.customer as string,
+            subscriptionId,
+            subscription.status,
+            new Date((subData.current_period_start || Date.now() / 1000) * 1000).toISOString(),
+            new Date((subData.current_period_end || Date.now() / 1000) * 1000).toISOString(),
+          ]
+        )
 
         try {
           await logAuditEvent({
@@ -89,22 +90,23 @@ export async function POST(req: NextRequest) {
       const customerId = subscription.customer as string
 
       // Sync database subscription status with Stripe source of truth
-      const { data: updatedSub } = await supabase
-        .from('organization_subscriptions')
-        .update({
-          status: subscription.status,
-          current_period_start: new Date(
-            (subData.current_period_start || Date.now() / 1000) * 1000
-          ).toISOString(),
-          current_period_end: new Date(
-            (subData.current_period_end || Date.now() / 1000) * 1000
-          ).toISOString(),
-          cancel_at_period_end: subscription.cancel_at_period_end,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('stripe_customer_id', customerId)
-        .select('organization_id')
-        .maybeSingle()
+      const updatedSub = await queryOne<{ organization_id: string }>(
+        `UPDATE organization_subscriptions
+         SET status = $1,
+             current_period_start = $2,
+             current_period_end = $3,
+             cancel_at_period_end = $4,
+             updated_at = NOW()
+         WHERE stripe_customer_id = $5
+         RETURNING organization_id`,
+        [
+          subscription.status,
+          new Date((subData.current_period_start || Date.now() / 1000) * 1000).toISOString(),
+          new Date((subData.current_period_end || Date.now() / 1000) * 1000).toISOString(),
+          subscription.cancel_at_period_end,
+          customerId,
+        ]
+      )
 
       try {
         await logAuditEvent({
@@ -122,15 +124,14 @@ export async function POST(req: NextRequest) {
       const invoice = event.data.object as Stripe.Invoice
       const customerId = invoice.customer as string
 
-      const { data: subOrg } = await supabase
-        .from('organization_subscriptions')
-        .update({
-          status: 'past_due',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('stripe_customer_id', customerId)
-        .select('organization_id')
-        .maybeSingle()
+      const subOrg = await queryOne<{ organization_id: string }>(
+        `UPDATE organization_subscriptions
+         SET status = 'past_due',
+             updated_at = NOW()
+         WHERE stripe_customer_id = $1
+         RETURNING organization_id`,
+        [customerId]
+      )
 
       try {
         await logAuditEvent({
