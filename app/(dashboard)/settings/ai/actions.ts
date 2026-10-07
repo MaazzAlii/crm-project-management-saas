@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { getCurrentSessionContext } from '@/lib/auth/session'
 import { getOrganizationPlanLimits } from '@/lib/billing/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
@@ -81,14 +81,11 @@ export async function fetchAIFeatureSettingsAction(): Promise<{
     const canEdit =
       session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin === true
 
-    const supabase = await createClient()
-
     // 1. Fetch organization AI feature settings
-    const { data: orgData } = await supabase
-      .from('organizations')
-      .select('ai_feature_settings')
-      .eq('id', orgId)
-      .maybeSingle()
+    const orgData = await queryOne<{ ai_feature_settings: any }>(
+      `SELECT ai_feature_settings FROM organizations WHERE id = $1`,
+      [orgId]
+    )
 
     const rawSettings = (orgData?.ai_feature_settings as Partial<AIFeatureSettings>) || {}
     const settings: AIFeatureSettings = {
@@ -103,11 +100,10 @@ export async function fetchAIFeatureSettingsAction(): Promise<{
     const platformFeatureFlags: Record<string, boolean> = {}
 
     try {
-      const { data: settingsData } = await supabase
-        .from('platform_settings')
-        .select('value')
-        .eq('key', 'global_feature_flags')
-        .maybeSingle()
+      const settingsData = await queryOne<{ value: any }>(
+        `SELECT value FROM platform_settings WHERE key = 'global_feature_flags'`,
+        []
+      )
 
       if (settingsData && settingsData.value) {
         const flags = settingsData.value as Record<string, boolean>
@@ -140,13 +136,18 @@ export async function fetchAIFeatureSettingsAction(): Promise<{
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const periodLabel = startOfMonth.toLocaleString('default', { month: 'long', year: 'numeric' })
 
-    const { data: logsData, error: logsError } = await supabase
-      .from('ai_usage_log')
-      .select('feature, tokens_used, estimated_cost, status, created_at')
-      .eq('organization_id', orgId)
-      .gte('created_at', startOfMonth.toISOString())
-
-    const logs = (!logsError && logsData) ? logsData : []
+    let logs: any[] = []
+    try {
+      const logsRes = await query<any>(
+        `SELECT feature, tokens_used, estimated_cost, status, created_at
+         FROM ai_usage_log
+         WHERE organization_id = $1 AND created_at >= $2`,
+        [orgId, startOfMonth.toISOString()]
+      )
+      logs = logsRes.rows || []
+    } catch (err) {
+      console.warn('[AI Settings] Failed to load usage log:', err)
+    }
 
     let totalCalls = logs.length
     let totalTokens = 0
@@ -261,18 +262,12 @@ export async function updateAIFeatureToggleAction(
     }
 
     const orgId = session.organization.id
-    const supabase = await createClient()
 
     // 1. Fetch current settings
-    const { data: orgData, error: fetchError } = await supabase
-      .from('organizations')
-      .select('ai_feature_settings')
-      .eq('id', orgId)
-      .single()
-
-    if (fetchError) {
-      return { success: false, error: 'Failed to retrieve current organization settings.' }
-    }
+    const orgData = await queryOne<{ ai_feature_settings: any }>(
+      `SELECT ai_feature_settings FROM organizations WHERE id = $1`,
+      [orgId]
+    )
 
     const currentSettings = (orgData?.ai_feature_settings as Partial<AIFeatureSettings>) || {
       ...DEFAULT_SETTINGS,
@@ -285,18 +280,12 @@ export async function updateAIFeatureToggleAction(
     }
 
     // 2. Persist updated settings to organization
-    const { error: updateError } = await supabase
-      .from('organizations')
-      .update({
-        ai_feature_settings: updatedSettings,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orgId)
-
-    if (updateError) {
-      console.error('[AI Settings] Update error:', updateError)
-      return { success: false, error: 'Failed to persist feature toggle changes.' }
-    }
+    await query(
+      `UPDATE organizations
+       SET ai_feature_settings = $1, updated_at = NOW()
+       WHERE id = $2`,
+      [JSON.stringify(updatedSettings), orgId]
+    )
 
     // 3. Log audit event
     await logAuditEvent({
