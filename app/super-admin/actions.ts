@@ -1,8 +1,9 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
+import { getCurrentSessionContext } from '@/lib/auth/session'
 import { logAuditEvent } from '@/lib/audit/logger'
 
 export async function toggleSuspendOrganization(
@@ -12,29 +13,24 @@ export async function toggleSuspendOrganization(
 ) {
   try {
     await requireSuperAdmin()
-    const supabase = await createClient()
+    const session = await getCurrentSessionContext()
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const suspendedReason = suspend ? (reason || 'Administrative suspension by platform operator.') : null
+    const suspendedAt = suspend ? new Date().toISOString() : null
 
-    const updatePayload = {
-      is_suspended: suspend,
-      suspended_reason: suspend ? (reason || 'Administrative suspension by platform operator.') : null,
-      suspended_at: suspend ? new Date().toISOString() : null,
-    }
-
-    const { error } = await supabase
-      .from('organizations')
-      .update(updatePayload)
-      .eq('id', orgId)
-
-    if (error) throw new Error(error.message)
+    await query(
+      `UPDATE organizations
+       SET is_suspended = $1, suspended_reason = $2, suspended_at = $3, updated_at = NOW()
+       WHERE id = $4`,
+      [suspend, suspendedReason, suspendedAt, orgId]
+    )
 
     await logAuditEvent({
-      actorId: user?.id,
+      actorId: session?.user?.id,
       action: suspend ? 'ORGANIZATION_SUSPENDED' : 'ORGANIZATION_RESUMED',
       targetType: 'ORGANIZATION',
       targetId: orgId,
-      details: { reason: updatePayload.suspended_reason },
+      details: { reason: suspendedReason },
     })
 
     revalidatePath('/super-admin/organizations')
@@ -54,41 +50,34 @@ export async function overrideOrganizationPlan(
 ) {
   try {
     await requireSuperAdmin()
-    const supabase = await createClient()
-
-    const { data: { user } } = await supabase.auth.getUser()
+    const session = await getCurrentSessionContext()
 
     // 1. Update organization plan tier
-    const { error: orgError } = await supabase
-      .from('organizations')
-      .update({ plan_tier: newPlanTier })
-      .eq('id', orgId)
-
-    if (orgError) throw new Error(orgError.message)
+    await query(
+      `UPDATE organizations SET plan_tier = $1, updated_at = NOW() WHERE id = $2`,
+      [newPlanTier, orgId]
+    )
 
     // 2. Fetch corresponding subscription_plans record for newPlanTier
-    const { data: planRecord } = await supabase
-      .from('subscription_plans')
-      .select('id')
-      .eq('slug', newPlanTier)
-      .maybeSingle()
+    const planRecord = await queryOne<{ id: string }>(
+      `SELECT id FROM subscription_plans WHERE slug = $1`,
+      [newPlanTier]
+    )
 
     if (planRecord) {
-      await supabase
-        .from('organization_subscriptions')
-        .upsert(
-          {
-            organization_id: orgId,
-            plan_id: planRecord.id,
-            status: 'active',
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'organization_id' }
-        )
+      await query(
+        `INSERT INTO organization_subscriptions (organization_id, plan_id, status, updated_at)
+         VALUES ($1, $2, 'active', NOW())
+         ON CONFLICT (organization_id) DO UPDATE SET
+           plan_id = EXCLUDED.plan_id,
+           status = 'active',
+           updated_at = NOW()`,
+        [orgId, planRecord.id]
+      )
     }
 
     await logAuditEvent({
-      actorId: user?.id,
+      actorId: session?.user?.id,
       action: 'ORGANIZATION_PLAN_OVERRIDDEN',
       targetType: 'ORGANIZATION',
       targetId: orgId,
