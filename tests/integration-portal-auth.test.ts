@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(),
+vi.mock('@/lib/auth/session', () => ({
+  getCurrentSessionContext: vi.fn(),
+  deleteRefreshTokenCookie: vi.fn(),
+}))
+
+vi.mock('@/lib/db', () => ({
+  query: vi.fn(),
+  queryOne: vi.fn(),
 }))
 
 vi.mock('@/lib/audit/logger', () => ({
@@ -14,8 +20,8 @@ vi.mock('next/navigation', () => ({
   }),
 }))
 
-import { createClient } from '@/lib/supabase/server'
-import { logAuditEvent } from '@/lib/audit/logger'
+import { getCurrentSessionContext } from '@/lib/auth/session'
+import { queryOne } from '@/lib/db'
 import { requirePortalSession, inviteClientToPortal } from '@/lib/portal/auth'
 
 describe('Integration: Client Portal Authentication & Session Scoping', () => {
@@ -29,52 +35,26 @@ describe('Integration: Client Portal Authentication & Session Scoping', () => {
 
   describe('requirePortalSession', () => {
     it('successfully validates active portal user with plan access', async () => {
-      const mockSupabase = {
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: { user: { id: mockUserId, email: 'client@domain.com' } },
-          }),
-        },
-        from: vi.fn((table: string) => {
-          if (table === 'client_users') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  eq: vi.fn().mockReturnValue({
-                    maybeSingle: vi.fn().mockResolvedValue({
-                      data: {
-                        id: 'cu-1',
-                        client_id: mockClientId,
-                        organization_id: mockOrgId,
-                        is_active: true,
-                      },
-                    }),
-                  }),
-                }),
-              }),
-            }
-          }
-          if (table === 'organization_subscriptions') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  in: vi.fn().mockReturnValue({
-                    maybeSingle: vi.fn().mockResolvedValue({
-                      data: {
-                        subscription_plans: {
-                          feature_limits: { client_portal_enabled: true },
-                        },
-                      },
-                    }),
-                  }),
-                }),
-              }),
-            }
-          }
-          return {}
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(getCurrentSessionContext as any).mockResolvedValue({
+        user: { id: mockUserId, email: 'client@domain.com' },
+      })
+
+      ;(queryOne as any).mockImplementation((sql: string) => {
+        if (sql.includes('client_users')) {
+          return Promise.resolve({
+            id: 'cu-1',
+            client_id: mockClientId,
+            organization_id: mockOrgId,
+            is_active: true,
+          })
+        }
+        if (sql.includes('organization_subscriptions')) {
+          return Promise.resolve({
+            feature_limits: { client_portal_enabled: true },
+          })
+        }
+        return Promise.resolve(null)
+      })
 
       const session = await requirePortalSession()
       expect(session.clientId).toBe(mockClientId)
@@ -83,86 +63,41 @@ describe('Integration: Client Portal Authentication & Session Scoping', () => {
     })
 
     it('redirects to /client/login when no authenticated user session exists', async () => {
-      const mockSupabase = {
-        auth: {
-          getUser: vi.fn().mockResolvedValue({ data: { user: null } }),
-        },
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(getCurrentSessionContext as any).mockResolvedValue(null)
 
       await expect(requirePortalSession()).rejects.toThrow('NEXT_REDIRECT:/client/login')
     })
 
     it('redirects to /client/login?error=no_portal_access when user has no client_users record', async () => {
-      const mockSupabase = {
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: { user: { id: 'unauthorized-user' } },
-          }),
-          signOut: vi.fn().mockResolvedValue({}),
-        },
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                maybeSingle: vi.fn().mockResolvedValue({ data: null }),
-              }),
-            }),
-          }),
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(getCurrentSessionContext as any).mockResolvedValue({
+        user: { id: 'unauthorized-user' },
+      })
+      ;(queryOne as any).mockResolvedValue(null)
 
       await expect(requirePortalSession()).rejects.toThrow('NEXT_REDIRECT:/client/login?error=no_portal_access')
     })
 
     it('redirects when organization plan does not permit client portal', async () => {
-      const mockSupabase = {
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: { user: { id: mockUserId } },
-          }),
-        },
-        from: vi.fn((table: string) => {
-          if (table === 'client_users') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  eq: vi.fn().mockReturnValue({
-                    maybeSingle: vi.fn().mockResolvedValue({
-                      data: {
-                        id: 'cu-1',
-                        client_id: mockClientId,
-                        organization_id: mockOrgId,
-                        is_active: true,
-                      },
-                    }),
-                  }),
-                }),
-              }),
-            }
-          }
-          if (table === 'organization_subscriptions') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  in: vi.fn().mockReturnValue({
-                    maybeSingle: vi.fn().mockResolvedValue({
-                      data: {
-                        subscription_plans: {
-                          feature_limits: { client_portal_enabled: false },
-                        },
-                      },
-                    }),
-                  }),
-                }),
-              }),
-            }
-          }
-          return {}
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(getCurrentSessionContext as any).mockResolvedValue({
+        user: { id: mockUserId },
+      })
+
+      ;(queryOne as any).mockImplementation((sql: string) => {
+        if (sql.includes('client_users')) {
+          return Promise.resolve({
+            id: 'cu-1',
+            client_id: mockClientId,
+            organization_id: mockOrgId,
+            is_active: true,
+          })
+        }
+        if (sql.includes('organization_subscriptions')) {
+          return Promise.resolve({
+            feature_limits: { client_portal_enabled: false },
+          })
+        }
+        return Promise.resolve(null)
+      })
 
       await expect(requirePortalSession()).rejects.toThrow('NEXT_REDIRECT:/client/login?error=portal_not_available')
     })
@@ -170,30 +105,16 @@ describe('Integration: Client Portal Authentication & Session Scoping', () => {
 
   describe('inviteClientToPortal', () => {
     it('blocks invitation if calling member is not an org owner or admin', async () => {
-      const mockSupabase = {
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: { user: { id: 'usr-member' } },
-          }),
-        },
-        from: vi.fn((table: string) => {
-          if (table === 'organization_members') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  eq: vi.fn().mockReturnValue({
-                    maybeSingle: vi.fn().mockResolvedValue({
-                      data: { role: 'member' }, // regular member, not owner/admin
-                    }),
-                  }),
-                }),
-              }),
-            }
-          }
-          return {}
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(getCurrentSessionContext as any).mockResolvedValue({
+        user: { id: 'usr-member' },
+      })
+
+      ;(queryOne as any).mockImplementation((sql: string) => {
+        if (sql.includes('organization_members')) {
+          return Promise.resolve({ role: 'member' })
+        }
+        return Promise.resolve(null)
+      })
 
       const result = await inviteClientToPortal(mockClientId, 'client@acme.com', mockOrgId)
       expect(result.success).toBe(false)
@@ -201,47 +122,21 @@ describe('Integration: Client Portal Authentication & Session Scoping', () => {
     })
 
     it('blocks invitation when client portal is not included in the plan', async () => {
-      const mockSupabase = {
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: { user: { id: 'usr-admin' } },
-          }),
-        },
-        from: vi.fn((table: string) => {
-          if (table === 'organization_members') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  eq: vi.fn().mockReturnValue({
-                    maybeSingle: vi.fn().mockResolvedValue({
-                      data: { role: 'admin' },
-                    }),
-                  }),
-                }),
-              }),
-            }
-          }
-          if (table === 'organization_subscriptions') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  in: vi.fn().mockReturnValue({
-                    maybeSingle: vi.fn().mockResolvedValue({
-                      data: {
-                        subscription_plans: {
-                          feature_limits: { client_portal_enabled: false },
-                        },
-                      },
-                    }),
-                  }),
-                }),
-              }),
-            }
-          }
-          return {}
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(getCurrentSessionContext as any).mockResolvedValue({
+        user: { id: 'usr-admin' },
+      })
+
+      ;(queryOne as any).mockImplementation((sql: string) => {
+        if (sql.includes('organization_members')) {
+          return Promise.resolve({ role: 'admin' })
+        }
+        if (sql.includes('organization_subscriptions')) {
+          return Promise.resolve({
+            feature_limits: { client_portal_enabled: false },
+          })
+        }
+        return Promise.resolve(null)
+      })
 
       const result = await inviteClientToPortal(mockClientId, 'client@acme.com', mockOrgId)
       expect(result.success).toBe(false)
