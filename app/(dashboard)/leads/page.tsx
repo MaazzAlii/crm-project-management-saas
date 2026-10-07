@@ -1,5 +1,5 @@
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import { KanbanBoard } from '@/components/leads/KanbanBoard'
 import { isAIAccessible } from '@/lib/ai/client'
@@ -24,19 +24,14 @@ export default async function LeadsPage() {
     )
   }
 
-  const supabase = await createClient()
-
   let rawDeals: any[] = []
   try {
-    const { data: clientsData, error } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('organization_id', session.organization.id)
-      .order('stage_updated_at', { ascending: false })
-
-    if (error) {
-      console.error('Error fetching pipeline deals:', error)
-    }
+    const clientsData = await query<any>(
+      `SELECT * FROM clients
+       WHERE organization_id = $1
+       ORDER BY stage_updated_at DESC NULLS LAST, created_at DESC`,
+      [session.organization.id]
+    )
     rawDeals = clientsData || []
   } catch (err) {
     console.error('Error fetching leads:', err)
