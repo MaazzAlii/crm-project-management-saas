@@ -1,7 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { checkClientLimit } from '@/lib/billing/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { validateAndSanitize } from '@/lib/validation/action-wrapper'
@@ -52,35 +52,34 @@ export async function createClientAction(formData: FormData) {
       }
     }
 
-    const supabase = await createClient()
-
     let newClient: { id: string } | null = null
     let insertError: any = null
 
     try {
-      const { data, error } = await supabase
-        .from('clients')
-        .insert({
-          organization_id: session.organization.id,
-          name: validatedData.name,
-          company: validatedData.company,
-          email: validatedData.email,
-          phone: validatedData.phone,
-          platform: validatedData.platform,
-          country: validatedData.country,
-          currency: validatedData.currency,
-          payment_schedule: validatedData.payment_schedule,
-          status: rawData.status,
-          communication_mode: validatedData.communication_mode,
-          notes: validatedData.notes,
+      newClient = await queryOne<{ id: string }>(
+        `INSERT INTO clients (
+          organization_id, name, company, email, phone, platform, country,
+          currency, payment_schedule, status, communication_mode, notes, tags,
+          created_at, updated_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW()
+        ) RETURNING id`,
+        [
+          session.organization.id,
+          validatedData.name,
+          validatedData.company,
+          validatedData.email,
+          validatedData.phone,
+          validatedData.platform,
+          validatedData.country,
+          validatedData.currency,
+          validatedData.payment_schedule,
+          rawData.status,
+          validatedData.communication_mode,
+          validatedData.notes,
           tags,
-        })
-        .select('id')
-        .single()
-
-
-      newClient = data
-      insertError = error
+        ]
+      )
     } catch (err: any) {
       insertError = err
     }
@@ -133,7 +132,6 @@ export async function createClientAction(formData: FormData) {
       })
     } catch (e) {}
 
-
     revalidatePath('/clients')
     return { success: true, clientId: newClient.id }
   } catch (error: any) {
@@ -157,15 +155,12 @@ export async function deleteClientAction(clientId: string) {
       return { error: 'Forbidden. Only organization owners and admins can delete clients.' }
     }
 
-    const supabase = await createClient()
-
-    const { error: deleteError } = await supabase
-      .from('clients')
-      .delete()
-      .eq('id', clientId)
-      .eq('organization_id', session.organization.id)
-
-    if (deleteError) {
+    try {
+      await query(
+        `DELETE FROM clients WHERE id = $1 AND organization_id = $2`,
+        [clientId, session.organization.id]
+      )
+    } catch (deleteError: any) {
       console.error('Failed to delete client:', deleteError)
       return { error: deleteError.message }
     }
@@ -224,51 +219,68 @@ export async function updateClientAction(clientId: string, formData: FormData) {
       } catch (e) {}
     }
 
-    const supabase = await createClient()
-
     // Enforce strict one-way transition rule: connected -> manual is blocked
     try {
-      const { data: existingClient } = await supabase
-        .from('clients')
-        .select('communication_mode')
-        .eq('id', clientId)
-        .eq('organization_id', session.organization.id)
-        .maybeSingle()
+      const existingClient = await queryOne<{ communication_mode: string }>(
+        `SELECT communication_mode FROM clients WHERE id = $1 AND organization_id = $2`,
+        [clientId, session.organization.id]
+      )
 
       if (existingClient?.communication_mode === 'connected' && validatedData.communication_mode === 'manual') {
         return { error: 'Connected mode is permanent and cannot be reverted to manual.' }
       }
     } catch (e) {}
 
-    const updatePayload: any = {
-      name: validatedData.name,
-      company: validatedData.company,
-      email: validatedData.email,
-      phone: validatedData.phone,
-      platform: validatedData.platform,
-      country: validatedData.country,
-      currency: validatedData.currency,
-      payment_schedule: validatedData.payment_schedule,
-      status: validatedData.status || rawData.status,
-      communication_mode: validatedData.communication_mode,
-      notes: validatedData.notes,
-      updated_at: new Date().toISOString(),
-    }
-
-
-    if (tags !== undefined) {
-      updatePayload.tags = tags
-    }
-
     let updateError: any = null
     try {
-      const { error } = await supabase
-        .from('clients')
-        .update(updatePayload)
-        .eq('id', clientId)
-        .eq('organization_id', session.organization.id)
-
-      updateError = error
+      if (tags !== undefined) {
+        await query(
+          `UPDATE clients
+           SET name = $1, company = $2, email = $3, phone = $4, platform = $5,
+               country = $6, currency = $7, payment_schedule = $8, status = $9,
+               communication_mode = $10, notes = $11, tags = $12, updated_at = NOW()
+           WHERE id = $13 AND organization_id = $14`,
+          [
+            validatedData.name,
+            validatedData.company,
+            validatedData.email,
+            validatedData.phone,
+            validatedData.platform,
+            validatedData.country,
+            validatedData.currency,
+            validatedData.payment_schedule,
+            validatedData.status || rawData.status,
+            validatedData.communication_mode,
+            validatedData.notes,
+            tags,
+            clientId,
+            session.organization.id,
+          ]
+        )
+      } else {
+        await query(
+          `UPDATE clients
+           SET name = $1, company = $2, email = $3, phone = $4, platform = $5,
+               country = $6, currency = $7, payment_schedule = $8, status = $9,
+               communication_mode = $10, notes = $11, updated_at = NOW()
+           WHERE id = $12 AND organization_id = $13`,
+          [
+            validatedData.name,
+            validatedData.company,
+            validatedData.email,
+            validatedData.phone,
+            validatedData.platform,
+            validatedData.country,
+            validatedData.currency,
+            validatedData.payment_schedule,
+            validatedData.status || rawData.status,
+            validatedData.communication_mode,
+            validatedData.notes,
+            clientId,
+            session.organization.id,
+          ]
+        )
+      }
     } catch (err) {
       updateError = err
     }
@@ -278,7 +290,19 @@ export async function updateClientAction(clientId: string, formData: FormData) {
       if (idx !== -1) {
         ;(global as any).__DEV_CLIENTS[idx] = {
           ...(global as any).__DEV_CLIENTS[idx],
-          ...updatePayload,
+          name: validatedData.name,
+          company: validatedData.company,
+          email: validatedData.email,
+          phone: validatedData.phone,
+          platform: validatedData.platform,
+          country: validatedData.country,
+          currency: validatedData.currency,
+          payment_schedule: validatedData.payment_schedule,
+          status: validatedData.status || rawData.status,
+          communication_mode: validatedData.communication_mode,
+          notes: validatedData.notes,
+          ...(tags !== undefined ? { tags } : {}),
+          updated_at: new Date().toISOString(),
         }
       }
     }
@@ -297,7 +321,6 @@ export async function updateClientAction(clientId: string, formData: FormData) {
       })
     } catch (e) {}
 
-
     revalidatePath('/clients')
     revalidatePath(`/clients/${clientId}`)
     return { success: true }
@@ -315,17 +338,11 @@ export async function updateClientNotesAction(clientId: string, notes: string) {
       return { error: 'Unauthorized session.' }
     }
 
-    const supabase = await createClient()
-
     try {
-      await supabase
-        .from('clients')
-        .update({
-          notes,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', clientId)
-        .eq('organization_id', session.organization.id)
+      await query(
+        `UPDATE clients SET notes = $1, updated_at = NOW() WHERE id = $2 AND organization_id = $3`,
+        [notes, clientId, session.organization.id]
+      )
     } catch (e) {}
 
     if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
@@ -366,19 +383,14 @@ export async function switchClientToConnectedModeAction(clientId: string) {
 
     const orgId = session.organization.id
 
-    const supabase = await createClient()
-
     // Query client to check current mode and organization ownership
     let currentClient: any = null
     try {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('id, name, communication_mode, organization_id')
-        .eq('id', clientId)
-        .eq('organization_id', orgId)
-        .maybeSingle()
-
-      if (!error && data) {
+      const data = await queryOne<any>(
+        `SELECT id, name, communication_mode, organization_id FROM clients WHERE id = $1 AND organization_id = $2`,
+        [clientId, orgId]
+      )
+      if (data) {
         currentClient = data
       }
     } catch (e) {}
@@ -398,25 +410,14 @@ export async function switchClientToConnectedModeAction(clientId: string) {
       return { success: true, message: 'Client is already in Connected mode.' }
     }
 
-    // Perform update
-    const updatePayload = {
-      communication_mode: 'connected',
-      updated_at: new Date().toISOString(),
-    }
-
     try {
-      const { error: updateError } = await supabase
-        .from('clients')
-        .update(updatePayload)
-        .eq('id', clientId)
-        .eq('organization_id', orgId)
-
-      if (updateError) {
-        console.error('Failed to update client to connected mode:', updateError)
-        return { error: updateError.message }
-      }
+      await query(
+        `UPDATE clients SET communication_mode = 'connected', updated_at = NOW() WHERE id = $1 AND organization_id = $2`,
+        [clientId, orgId]
+      )
     } catch (err: any) {
-      console.error('Supabase update error:', err)
+      console.error('PostgreSQL update error:', err)
+      return { error: err.message }
     }
 
     // In-memory dev fallback
@@ -455,4 +456,3 @@ export async function switchClientToConnectedModeAction(clientId: string) {
     return { error: error?.message || 'Internal server error occurred.' }
   }
 }
-
