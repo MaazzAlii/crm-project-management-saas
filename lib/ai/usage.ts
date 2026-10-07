@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 import { AIUsageRecord } from './types'
 
 /**
@@ -44,8 +44,6 @@ export function calculateEstimatedCost(
  */
 export async function logAIUsage(record: AIUsageRecord): Promise<boolean> {
   try {
-    const supabase = await createClient()
-
     const cost = record.estimatedCost !== undefined
       ? record.estimatedCost
       : calculateEstimatedCost(
@@ -60,24 +58,25 @@ export async function logAIUsage(record: AIUsageRecord): Promise<boolean> {
       return true
     }
 
-    const { error } = await supabase.from('ai_usage_log').insert({
-      organization_id: record.organizationId,
-      user_id: record.userId || null,
-      feature: record.feature,
-      provider: record.provider,
-      model: record.model || 'default',
-      prompt_tokens: record.promptTokens || 0,
-      completion_tokens: record.completionTokens || 0,
-      tokens_used: record.tokensUsed || 0,
-      estimated_cost: cost,
-      status: record.status,
-      metadata: record.metadata || {},
-    })
-
-    if (error) {
-      console.warn('[AI:Usage] Failed to log usage in database:', error.message)
-      return false
-    }
+    await query(
+      `INSERT INTO ai_usage_log (
+        organization_id, user_id, feature, provider, model,
+        prompt_tokens, completion_tokens, tokens_used, estimated_cost, status, metadata
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [
+        record.organizationId,
+        record.userId || null,
+        record.feature,
+        record.provider,
+        record.model || 'default',
+        record.promptTokens || 0,
+        record.completionTokens || 0,
+        record.tokensUsed || 0,
+        cost,
+        record.status,
+        JSON.stringify(record.metadata || {}),
+      ]
+    )
 
     return true
   } catch (err) {
@@ -108,18 +107,21 @@ export async function getOrganizationAIUsageSummary(
   }
 
   try {
-    const supabase = await createClient()
     const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
 
-    const { data, error } = await supabase
-      .from('ai_usage_log')
-      .select('feature, tokens_used, estimated_cost, status')
-      .eq('organization_id', organizationId)
-      .gte('created_at', cutoffDate)
+    const res = await query<{
+      feature: string
+      tokens_used: number
+      estimated_cost: number | string
+      status: string
+    }>(
+      `SELECT feature, tokens_used, estimated_cost, status
+       FROM ai_usage_log
+       WHERE organization_id = $1 AND created_at >= $2`,
+      [organizationId, cutoffDate]
+    )
 
-    if (error || !data) return summary
-
-    data.forEach((row: any) => {
+    res.rows.forEach((row) => {
       summary.totalRequests += 1
       const tokens = row.tokens_used || 0
       const cost = Number(row.estimated_cost) || 0
