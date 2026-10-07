@@ -1,7 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 
 export interface InAppNotificationRecord {
@@ -57,20 +57,19 @@ export async function fetchInAppNotificationsAction(): Promise<InAppNotification
       return getDevNotifications()
     }
 
-    const supabase = await createClient()
+    const { rows } = await query<InAppNotificationRecord>(
+      `SELECT * FROM in_app_notifications
+       WHERE organization_id = $1
+       ORDER BY created_at DESC
+       LIMIT 30`,
+      [session.organization.id]
+    )
 
-    const { data, error } = await supabase
-      .from('in_app_notifications')
-      .select('*')
-      .eq('organization_id', session.organization.id)
-      .order('created_at', { ascending: false })
-      .limit(30)
-
-    if (error || !data || data.length === 0) {
+    if (!rows || rows.length === 0) {
       return getDevNotifications()
     }
 
-    return data as InAppNotificationRecord[]
+    return rows
   } catch (err) {
     return getDevNotifications()
   }
@@ -83,13 +82,12 @@ export async function markNotificationAsReadAction(notificationId: string) {
 
     if (!session || !session.organization) return { success: true }
 
-    const supabase = await createClient()
-
-    await supabase
-      .from('in_app_notifications')
-      .update({ read_at: new Date().toISOString() })
-      .eq('id', notificationId)
-      .eq('organization_id', session.organization.id)
+    await query(
+      `UPDATE in_app_notifications
+       SET read_at = NOW()
+       WHERE id = $1 AND organization_id = $2`,
+      [notificationId, session.organization.id]
+    )
 
     revalidatePath('/')
     return { success: true }
@@ -105,13 +103,12 @@ export async function markAllNotificationsAsReadAction() {
 
     if (!session || !session.organization) return { success: true }
 
-    const supabase = await createClient()
-
-    await supabase
-      .from('in_app_notifications')
-      .update({ read_at: new Date().toISOString() })
-      .eq('organization_id', session.organization.id)
-      .is('read_at', null)
+    await query(
+      `UPDATE in_app_notifications
+       SET read_at = NOW()
+       WHERE organization_id = $1 AND read_at IS NULL`,
+      [session.organization.id]
+    )
 
     revalidatePath('/')
     return { success: true }
@@ -132,17 +129,19 @@ export async function createInAppNotificationAction(
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) return
 
-    const supabase = await createClient()
-
-    await supabase.from('in_app_notifications').insert({
-      organization_id: session.organization.id,
-      user_id: session.user?.id || null,
-      type,
-      title,
-      body: body || null,
-      related_entity_type: related_entity_type || null,
-      related_entity_id: related_entity_id || null
-    })
+    await query(
+      `INSERT INTO in_app_notifications (organization_id, user_id, type, title, body, related_entity_type, related_entity_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        session.organization.id,
+        session.user?.id || null,
+        type,
+        title,
+        body || null,
+        related_entity_type || null,
+        related_entity_id || null,
+      ]
+    )
   } catch (e) {}
 }
 
@@ -160,7 +159,7 @@ function getDevNotifications(): InAppNotificationRecord[] {
       read_at: null,
       related_entity_type: 'project',
       related_entity_id: 'proj-1',
-      created_at: new Date(now.getTime() - 3600000 * 2).toISOString()
+      created_at: new Date(now.getTime() - 3600000 * 2).toISOString(),
     },
     {
       id: 'notif-2',
@@ -171,7 +170,7 @@ function getDevNotifications(): InAppNotificationRecord[] {
       read_at: new Date(now.getTime() - 3600000 * 12).toISOString(),
       related_entity_type: 'project',
       related_entity_id: 'proj-1',
-      created_at: new Date(now.getTime() - 3600000 * 24).toISOString()
+      created_at: new Date(now.getTime() - 3600000 * 24).toISOString(),
     },
     {
       id: 'notif-3',
@@ -182,7 +181,7 @@ function getDevNotifications(): InAppNotificationRecord[] {
       read_at: null,
       related_entity_type: 'task',
       related_entity_id: 'tsk-101',
-      created_at: new Date(now.getTime() - 3600000 * 36).toISOString()
-    }
+      created_at: new Date(now.getTime() - 3600000 * 36).toISOString(),
+    },
   ]
 }
