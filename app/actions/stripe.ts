@@ -1,7 +1,7 @@
 'use server'
 
 import { stripe } from '@/lib/stripe/client'
-import { createClient } from '@/lib/supabase/server'
+import { queryOne } from '@/lib/db'
 import { getCurrentSessionContext } from '@/lib/auth/session'
 import { logAuditEvent } from '@/lib/audit/logger'
 
@@ -64,13 +64,10 @@ export async function createCustomerPortalSession() {
     return { error: 'Unauthorized' }
   }
 
-  const supabase = await createClient()
-
-  const { data: sub } = await supabase
-    .from('organization_subscriptions')
-    .select('stripe_customer_id')
-    .eq('organization_id', session.organization.id)
-    .single()
+  const sub = await queryOne<{ stripe_customer_id: string }>(
+    `SELECT stripe_customer_id FROM organization_subscriptions WHERE organization_id = $1`,
+    [session.organization.id]
+  )
 
   if (!sub || !sub.stripe_customer_id) {
     return { error: 'No active Stripe customer found for this organization.' }
