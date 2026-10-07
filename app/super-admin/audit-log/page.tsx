@@ -1,5 +1,5 @@
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { query } from '@/lib/db'
 import { fetchSuperAdminAuditLogs } from '@/lib/audit/query'
 import { AuditLogAdminView } from './AuditLogAdminView'
 
@@ -10,15 +10,10 @@ export default async function SuperAdminAuditLogPage() {
 
   let organizations: { id: string; name: string }[] = []
   try {
-    const adminClient = createAdminClient()
-    const { data } = await adminClient
-      .from('organizations')
-      .select('id, name')
-      .order('name', { ascending: true })
-
-    if (data) {
-      organizations = data
-    }
+    const { rows } = await query<{ id: string; name: string }>(
+      `SELECT id, name FROM organizations ORDER BY name ASC`
+    )
+    organizations = rows
   } catch (err) {
     console.warn('[SUPER_ADMIN_ORGS_QUERY_WARN]', err)
   }
