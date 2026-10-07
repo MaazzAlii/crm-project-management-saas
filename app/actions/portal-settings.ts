@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { requirePortalSession } from '@/lib/portal/auth'
 import { logAuditEvent } from '@/lib/audit/logger'
 import type { ClientPortalSettings } from '@/lib/portal/settings'
@@ -34,7 +34,6 @@ export interface UpdateNotificationsInput {
 export async function updatePortalProfileAction(input: UpdateProfileInput) {
   try {
     const { clientId, organizationId, clientUser } = await requirePortalSession()
-    const supabase = await createClient()
 
     // Validation
     const name = input.name?.trim()
@@ -47,11 +46,10 @@ export async function updatePortalProfileAction(input: UpdateProfileInput) {
     }
 
     // Fetch existing settings to preserve nested preferences
-    const { data: currentClient } = await supabase
-      .from('clients')
-      .select('portal_settings')
-      .eq('id', clientId)
-      .single()
+    const currentClient = await queryOne<{ portal_settings: any }>(
+      'SELECT portal_settings FROM clients WHERE id = $1',
+      [clientId]
+    )
 
     const currentSettings: ClientPortalSettings = currentClient?.portal_settings || {
       invoicing_preferences: { require_po: false, auto_receipt: true, preferred_method: 'stripe_card' },
@@ -63,22 +61,26 @@ export async function updatePortalProfileAction(input: UpdateProfileInput) {
       logo_url: input.logoUrl?.trim() || currentSettings.logo_url || null,
     }
 
-    const { error } = await supabase
-      .from('clients')
-      .update({
+    await query(
+      `UPDATE clients
+       SET name = $1,
+           company = $2,
+           email = $3,
+           phone = $4,
+           country = $5,
+           portal_settings = $6,
+           updated_at = NOW()
+       WHERE id = $7`,
+      [
         name,
-        company: input.company?.trim() || null,
-        email: input.email?.trim() || null,
-        phone: input.phone?.trim() || null,
-        country: input.country?.trim() || null,
-        portal_settings: updatedSettings,
-      })
-      .eq('id', clientId)
-
-    if (error) {
-      console.error('[Portal:Settings] Profile update failed:', error)
-      return { success: false, error: 'Failed to update profile. Please try again.' }
-    }
+        input.company?.trim() || null,
+        input.email?.trim() || null,
+        input.phone?.trim() || null,
+        input.country?.trim() || null,
+        JSON.stringify(updatedSettings),
+        clientId,
+      ]
+    )
 
     try {
       await logAuditEvent({
@@ -104,18 +106,15 @@ export async function updatePortalProfileAction(input: UpdateProfileInput) {
 export async function updatePortalBillingAction(input: UpdateBillingInput) {
   try {
     const { clientId, organizationId, clientUser } = await requirePortalSession()
-    const supabase = await createClient()
 
     if (!input.billingEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.billingEmail.trim())) {
       return { success: false, error: 'A valid billing contact email address is required.' }
     }
 
-    // Fetch current settings to merge
-    const { data: currentClient } = await supabase
-      .from('clients')
-      .select('portal_settings, currency')
-      .eq('id', clientId)
-      .single()
+    const currentClient = await queryOne<{ portal_settings: any; currency: string }>(
+      'SELECT portal_settings, currency FROM clients WHERE id = $1',
+      [clientId]
+    )
 
     const currentSettings: ClientPortalSettings = currentClient?.portal_settings || {
       invoicing_preferences: { require_po: false, auto_receipt: true, preferred_method: 'stripe_card' },
@@ -133,22 +132,20 @@ export async function updatePortalBillingAction(input: UpdateBillingInput) {
       },
     }
 
-    const updatePayload: any = {
-      portal_settings: updatedSettings,
-    }
-
     if (input.currency) {
-      updatePayload.currency = input.currency
-    }
-
-    const { error } = await supabase
-      .from('clients')
-      .update(updatePayload)
-      .eq('id', clientId)
-
-    if (error) {
-      console.error('[Portal:Settings] Billing update failed:', error)
-      return { success: false, error: 'Failed to save billing preferences.' }
+      await query(
+        `UPDATE clients
+         SET portal_settings = $1, currency = $2, updated_at = NOW()
+         WHERE id = $3`,
+        [JSON.stringify(updatedSettings), input.currency, clientId]
+      )
+    } else {
+      await query(
+        `UPDATE clients
+         SET portal_settings = $1, updated_at = NOW()
+         WHERE id = $2`,
+        [JSON.stringify(updatedSettings), clientId]
+      )
     }
 
     try {
@@ -175,13 +172,11 @@ export async function updatePortalBillingAction(input: UpdateBillingInput) {
 export async function updatePortalNotificationsAction(input: UpdateNotificationsInput) {
   try {
     const { clientId, organizationId, clientUser } = await requirePortalSession()
-    const supabase = await createClient()
 
-    const { data: currentClient } = await supabase
-      .from('clients')
-      .select('portal_settings')
-      .eq('id', clientId)
-      .single()
+    const currentClient = await queryOne<{ portal_settings: any }>(
+      'SELECT portal_settings FROM clients WHERE id = $1',
+      [clientId]
+    )
 
     const currentSettings: ClientPortalSettings = currentClient?.portal_settings || {
       invoicing_preferences: { require_po: false, auto_receipt: true, preferred_method: 'stripe_card' },
@@ -198,15 +193,12 @@ export async function updatePortalNotificationsAction(input: UpdateNotifications
       },
     }
 
-    const { error } = await supabase
-      .from('clients')
-      .update({ portal_settings: updatedSettings })
-      .eq('id', clientId)
-
-    if (error) {
-      console.error('[Portal:Settings] Notification preferences update failed:', error)
-      return { success: false, error: 'Failed to update alert preferences.' }
-    }
+    await query(
+      `UPDATE clients
+       SET portal_settings = $1, updated_at = NOW()
+       WHERE id = $2`,
+      [JSON.stringify(updatedSettings), clientId]
+    )
 
     try {
       await logAuditEvent({
