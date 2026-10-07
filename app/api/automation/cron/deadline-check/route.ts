@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { emitAutomationEvent } from '@/lib/automation/emitter'
 
 export const dynamic = 'force-dynamic'
@@ -45,21 +45,20 @@ async function processDeadlineChecks(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const supabase = await createClient()
-
-    let orgQuery = supabase.from('organizations').select('id, name')
+    let orgs: Array<{ id: string; name: string }> = []
     if (queryOrgId) {
-      orgQuery = orgQuery.eq('id', queryOrgId)
+      const res = await query<{ id: string; name: string }>(
+        `SELECT id, name FROM organizations WHERE id = $1`,
+        [queryOrgId]
+      )
+      orgs = res.rows
+    } else {
+      const res = await query<{ id: string; name: string }>(
+        `SELECT id, name FROM organizations`
+      )
+      orgs = res.rows
     }
 
-    const { data: organizations, error: orgError } = await orgQuery
-
-    if (orgError) {
-      console.error('[Automation:Cron] Error fetching organizations:', orgError)
-      return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 })
-    }
-
-    const orgs = organizations || []
     summary.organizations_processed = orgs.length
 
     // Today & Tomorrow date bounds (UTC)
@@ -74,11 +73,11 @@ async function processDeadlineChecks(req: NextRequest): Promise<NextResponse> {
     for (const org of orgs) {
       try {
         // A. Query existing notifications sent today for deduplication
-        const { data: existingNotifs } = await supabase
-          .from('in_app_notifications')
-          .select('related_entity_id, type')
-          .eq('organization_id', org.id)
-          .gte('created_at', startOfDay)
+        const { rows: existingNotifs } = await query<{ related_entity_id: string; type: string }>(
+          `SELECT related_entity_id, type FROM in_app_notifications
+           WHERE organization_id = $1 AND created_at >= $2`,
+          [org.id, startOfDay]
+        )
 
         const alertedTaskIds = new Set(
           (existingNotifs || [])
@@ -93,21 +92,22 @@ async function processDeadlineChecks(req: NextRequest): Promise<NextResponse> {
         )
 
         // B. N8N Flow 2: Tasks Due Tomorrow
-        const { data: dueTasks, error: tasksError } = await supabase
-          .from('tasks')
-          .select('id, title, due_date, priority, project_id, assigned_to, project:projects(id, title)')
-          .eq('organization_id', org.id)
-          .eq('due_date', tomorrowStr)
-          .neq('status', 'done')
+        const { rows: dueTasks } = await query<any>(
+          `SELECT t.id, t.title, t.due_date, t.priority, t.project_id, t.assigned_to, p.title as project_name
+           FROM tasks t
+           LEFT JOIN projects p ON p.id = t.project_id
+           WHERE t.organization_id = $1 AND t.due_date = $2 AND t.status != 'done'`,
+          [org.id, tomorrowStr]
+        )
 
-        if (!tasksError && dueTasks) {
+        if (dueTasks) {
           for (const task of dueTasks) {
             if (alertedTaskIds.has(task.id)) {
               summary.duplicate_alerts_prevented += 1
               continue
             }
 
-            const projectName = (task.project as any)?.title || 'Project'
+            const projectName = task.project_name || 'Project'
 
             // Emit signed event to n8n
             await emitAutomationEvent({
@@ -127,15 +127,19 @@ async function processDeadlineChecks(req: NextRequest): Promise<NextResponse> {
             })
 
             // Record in in_app_notifications for deduping & user center
-            await supabase.from('in_app_notifications').insert({
-              organization_id: org.id,
-              user_id: task.assigned_to || null,
-              type: 'deadline_approaching',
-              title: `Task due tomorrow: ${task.title}`,
-              body: `Your task "${task.title}" in project "${projectName}" is scheduled for delivery tomorrow.`,
-              related_entity_type: 'task',
-              related_entity_id: task.id,
-            })
+            await query(
+              `INSERT INTO in_app_notifications (organization_id, user_id, type, title, body, related_entity_type, related_entity_id)
+               VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+              [
+                org.id,
+                task.assigned_to || null,
+                'deadline_approaching',
+                `Task due tomorrow: ${task.title}`,
+                `Your task "${task.title}" in project "${projectName}" is scheduled for delivery tomorrow.`,
+                'task',
+                task.id,
+              ]
+            )
 
             alertedTaskIds.add(task.id)
             summary.tasks_due_tomorrow_alerted += 1
@@ -143,14 +147,16 @@ async function processDeadlineChecks(req: NextRequest): Promise<NextResponse> {
         }
 
         // C. N8N Flow 3: Projects Past Deadline (Overdue)
-        const { data: overdueProjects, error: projectsError } = await supabase
-          .from('projects')
-          .select('id, title, deadline, status, client_id, assigned_to, client:clients(id, name)')
-          .eq('organization_id', org.id)
-          .lt('deadline', todayStr)
-          .not('status', 'in', '("delivered","invoiced","paid","completed","on_hold","archived")')
+        const { rows: overdueProjects } = await query<any>(
+          `SELECT p.id, p.title, p.deadline, p.status, p.client_id, p.assigned_to, c.name as client_name
+           FROM projects p
+           LEFT JOIN clients c ON c.id = p.client_id
+           WHERE p.organization_id = $1 AND p.deadline < $2
+             AND p.status NOT IN ('delivered','invoiced','paid','completed','on_hold','archived')`,
+          [org.id, todayStr]
+        )
 
-        if (!projectsError && overdueProjects) {
+        if (overdueProjects) {
           for (const project of overdueProjects) {
             if (alertedProjectIds.has(project.id)) {
               summary.duplicate_alerts_prevented += 1
@@ -162,7 +168,7 @@ async function processDeadlineChecks(req: NextRequest): Promise<NextResponse> {
               1,
               Math.floor((now.getTime() - deadlineDate.getTime()) / (1000 * 60 * 60 * 24))
             )
-            const clientName = (project.client as any)?.name || 'Client'
+            const clientName = project.client_name || 'Client'
 
             // Emit signed event to n8n
             await emitAutomationEvent({
@@ -183,15 +189,19 @@ async function processDeadlineChecks(req: NextRequest): Promise<NextResponse> {
             })
 
             // Record in in_app_notifications for deduping & user center
-            await supabase.from('in_app_notifications').insert({
-              organization_id: org.id,
-              user_id: project.assigned_to || null,
-              type: 'project_overdue',
-              title: `⚠️ Project overdue: ${project.title}`,
-              body: `Project "${project.title}" for ${clientName} is ${daysOverdue} day(s) past target deadline.`,
-              related_entity_type: 'project',
-              related_entity_id: project.id,
-            })
+            await query(
+              `INSERT INTO in_app_notifications (organization_id, user_id, type, title, body, related_entity_type, related_entity_id)
+               VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+              [
+                org.id,
+                project.assigned_to || null,
+                'project_overdue',
+                `⚠️ Project overdue: ${project.title}`,
+                `Project "${project.title}" for ${clientName} is ${daysOverdue} day(s) past target deadline.`,
+                'project',
+                project.id,
+              ]
+            )
 
             alertedProjectIds.add(project.id)
             summary.projects_overdue_alerted += 1
