@@ -1,7 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { encryptSecret, decryptSecret } from '@/lib/security/encrypt'
 import { sendDiscordOutboundMessage } from '@/lib/providers/discord'
 import { revalidatePath } from 'next/cache'
@@ -27,18 +27,12 @@ export async function getDiscordIntegrationStatusAction(): Promise<{
       return { channel: null, error: 'Unauthorized session' }
     }
 
-    const supabase = await createClient()
-
-    const { data: channel, error } = await supabase
-      .from('communication_channels')
-      .select('id, organization_id, external_account_id, channel_name, status, connected_at, metadata')
-      .eq('organization_id', session.organization.id)
-      .eq('provider', 'discord')
-      .maybeSingle()
-
-    if (error) {
-      return { channel: null, error: error.message }
-    }
+    const channel = await queryOne<any>(
+      `SELECT id, organization_id, external_account_id, channel_name, status, connected_at, metadata
+       FROM communication_channels
+       WHERE organization_id = $1 AND provider = 'discord'`,
+      [session.organization.id]
+    )
 
     if (!channel) {
       return { channel: null }
@@ -60,8 +54,8 @@ export async function getDiscordIntegrationStatusAction(): Promise<{
         status: channel.status as any,
         connected_at: channel.connected_at,
         bot_token_masked: maskedToken,
-        public_key_masked: maskedPubKey
-      }
+        public_key_masked: maskedPubKey,
+      },
     }
   } catch (err: any) {
     return { channel: null, error: err.message || 'Failed to load Discord integration status' }
@@ -84,14 +78,10 @@ export async function saveDiscordIntegrationAction(formData: FormData) {
       return { error: 'Discord Channel ID or Server Guild ID is required.' }
     }
 
-    const supabase = await createClient()
-
-    const { data: existingChannel } = await supabase
-      .from('communication_channels')
-      .select('id, metadata')
-      .eq('organization_id', session.organization.id)
-      .eq('provider', 'discord')
-      .maybeSingle()
+    const existingChannel = await queryOne<any>(
+      `SELECT id, metadata FROM communication_channels WHERE organization_id = $1 AND provider = 'discord'`,
+      [session.organization.id]
+    )
 
     const existingMeta = (existingChannel?.metadata as Record<string, any>) || {}
 
@@ -107,36 +97,24 @@ export async function saveDiscordIntegrationAction(formData: FormData) {
       bot_token: encryptedToken,
       public_key: encryptedPubKey,
       channel_id: externalAccountId,
-      updated_by_user_id: session.user.id
+      updated_by_user_id: session.user.id,
     }
 
     if (existingChannel) {
-      const { error: updateError } = await supabase
-        .from('communication_channels')
-        .update({
-          external_account_id: externalAccountId,
-          channel_name: channelName,
-          status: 'active',
-          connected_at: new Date().toISOString(),
-          metadata: metadataPayload
-        })
-        .eq('id', existingChannel.id)
-
-      if (updateError) return { error: updateError.message }
+      await query(
+        `UPDATE communication_channels
+         SET external_account_id = $1, channel_name = $2, status = 'active',
+             connected_at = NOW(), metadata = $3, updated_at = NOW()
+         WHERE id = $4`,
+        [externalAccountId, channelName, JSON.stringify(metadataPayload), existingChannel.id]
+      )
     } else {
-      const { error: insertError } = await supabase
-        .from('communication_channels')
-        .insert({
-          organization_id: session.organization.id,
-          provider: 'discord',
-          external_account_id: externalAccountId,
-          channel_name: channelName,
-          status: 'active',
-          connected_at: new Date().toISOString(),
-          metadata: metadataPayload
-        })
-
-      if (insertError) return { error: insertError.message }
+      await query(
+        `INSERT INTO communication_channels (
+           organization_id, provider, external_account_id, channel_name, status, connected_at, metadata
+         ) VALUES ($1, 'discord', $2, $3, 'active', NOW(), $4)`,
+        [session.organization.id, externalAccountId, channelName, JSON.stringify(metadataPayload)]
+      )
     }
 
     revalidatePath('/settings/integrations')
@@ -155,15 +133,12 @@ export async function disconnectDiscordIntegrationAction(channelId: string) {
       return { error: 'Unauthorized' }
     }
 
-    const supabase = await createClient()
-
-    const { error } = await supabase
-      .from('communication_channels')
-      .update({ status: 'disconnected' })
-      .eq('id', channelId)
-      .eq('organization_id', session.organization.id)
-
-    if (error) return { error: error.message }
+    await query(
+      `UPDATE communication_channels
+       SET status = 'disconnected', updated_at = NOW()
+       WHERE id = $1 AND organization_id = $2`,
+      [channelId, session.organization.id]
+    )
 
     revalidatePath('/settings/integrations')
     revalidatePath('/settings/integrations/discord')
@@ -181,14 +156,12 @@ export async function testDiscordConnectionAction(channelId: string) {
       return { error: 'Unauthorized' }
     }
 
-    const supabase = await createClient()
-
-    const { data: channel } = await supabase
-      .from('communication_channels')
-      .select('id, external_account_id, metadata')
-      .eq('id', channelId)
-      .eq('organization_id', session.organization.id)
-      .single()
+    const channel = await queryOne<any>(
+      `SELECT id, external_account_id, metadata
+       FROM communication_channels
+       WHERE id = $1 AND organization_id = $2`,
+      [channelId, session.organization.id]
+    )
 
     if (!channel) {
       return { error: 'Discord Channel not found' }
