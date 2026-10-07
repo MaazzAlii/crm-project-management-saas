@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { queryOne } from '@/lib/db'
 
 export interface FeatureLimits {
   max_team_members: number
@@ -25,23 +25,17 @@ export interface LimitCheckResult {
 }
 
 export async function getOrganizationPlanLimits(organizationId: string): Promise<FeatureLimits> {
-  const supabase = await createClient()
+  const subscription = await queryOne<{ feature_limits: any }>(
+    `SELECT sp.feature_limits
+     FROM organization_subscriptions os
+     JOIN subscription_plans sp ON sp.id = os.plan_id
+     WHERE os.organization_id = $1
+     LIMIT 1`,
+    [organizationId]
+  )
 
-  const { data: subscription } = await supabase
-    .from('organization_subscriptions')
-    .select(`
-      subscription_plans (
-        feature_limits
-      )
-    `)
-    .eq('organization_id', organizationId)
-    .maybeSingle()
-
-  if (subscription && subscription.subscription_plans) {
-    const plans = Array.isArray(subscription.subscription_plans)
-      ? subscription.subscription_plans[0]
-      : subscription.subscription_plans
-    return plans.feature_limits as FeatureLimits
+  if (subscription && subscription.feature_limits) {
+    return subscription.feature_limits as FeatureLimits
   }
 
   // Default fallback limits (Starter Tier)
@@ -58,15 +52,14 @@ export async function getOrganizationPlanLimits(organizationId: string): Promise
 }
 
 export async function checkTeamMemberLimit(organizationId: string): Promise<LimitCheckResult> {
-  const supabase = await createClient()
   const limits = await getOrganizationPlanLimits(organizationId)
 
-  const { count } = await supabase
-    .from('organization_members')
-    .select('id', { count: 'exact', head: true })
-    .eq('organization_id', organizationId)
+  const countRow = await queryOne<{ count: string }>(
+    'SELECT COUNT(*) as count FROM organization_members WHERE organization_id = $1',
+    [organizationId]
+  )
 
-  const currentCount = count || 0
+  const currentCount = parseInt(countRow?.count || '0', 10)
   const allowed = currentCount < limits.max_team_members
 
   return {
@@ -78,15 +71,14 @@ export async function checkTeamMemberLimit(organizationId: string): Promise<Limi
 }
 
 export async function checkClientLimit(organizationId: string): Promise<LimitCheckResult> {
-  const supabase = await createClient()
   const limits = await getOrganizationPlanLimits(organizationId)
 
-  const { count } = await supabase
-    .from('clients')
-    .select('id', { count: 'exact', head: true })
-    .eq('organization_id', organizationId)
+  const countRow = await queryOne<{ count: string }>(
+    'SELECT COUNT(*) as count FROM clients WHERE organization_id = $1',
+    [organizationId]
+  )
 
-  const currentCount = count || 0
+  const currentCount = parseInt(countRow?.count || '0', 10)
   const allowed = currentCount < limits.max_clients
 
   return {
@@ -98,15 +90,14 @@ export async function checkClientLimit(organizationId: string): Promise<LimitChe
 }
 
 export async function checkProjectLimit(organizationId: string): Promise<LimitCheckResult> {
-  const supabase = await createClient()
   const limits = await getOrganizationPlanLimits(organizationId)
 
-  const { count } = await supabase
-    .from('projects')
-    .select('id', { count: 'exact', head: true })
-    .eq('organization_id', organizationId)
+  const countRow = await queryOne<{ count: string }>(
+    'SELECT COUNT(*) as count FROM projects WHERE organization_id = $1',
+    [organizationId]
+  )
 
-  const currentCount = count || 0
+  const currentCount = parseInt(countRow?.count || '0', 10)
   const allowed = currentCount < limits.max_projects
 
   return {
@@ -171,31 +162,27 @@ function calculateMetricStatus(current: number, max: number): {
 export async function getOrganizationPlanUsageDetails(
   organizationId: string
 ): Promise<OrganizationPlanUsage> {
-  const supabase = await createClient()
-
   // 1. Fetch Subscription & Plan Details
-  const { data: subscription } = await supabase
-    .from('organization_subscriptions')
-    .select(`
-      id,
-      status,
-      current_period_end,
-      cancel_at_period_end,
-      subscription_plans (
-        id,
-        name,
-        slug,
-        price_monthly,
-        feature_limits
-      )
-    `)
-    .eq('organization_id', organizationId)
-    .maybeSingle()
+  const subRow = await queryOne<{
+    id: string
+    status: string
+    current_period_end: string | null
+    cancel_at_period_end: boolean
+    plan_name: string | null
+    plan_slug: string | null
+    price_monthly: number | null
+    feature_limits: any
+  }>(
+    `SELECT os.id, os.status, os.current_period_end, os.cancel_at_period_end,
+            sp.name as plan_name, sp.slug as plan_slug, sp.price_monthly, sp.feature_limits
+     FROM organization_subscriptions os
+     JOIN subscription_plans sp ON sp.id = os.plan_id
+     WHERE os.organization_id = $1
+     LIMIT 1`,
+    [organizationId]
+  )
 
-  const rawPlan = subscription?.subscription_plans
-  const plan = Array.isArray(rawPlan) ? rawPlan[0] : rawPlan
-
-  const limits: FeatureLimits = (plan?.feature_limits as FeatureLimits) || {
+  const limits: FeatureLimits = (subRow?.feature_limits as FeatureLimits) || {
     max_team_members: 5,
     max_clients: 25,
     max_projects: 50,
@@ -207,42 +194,26 @@ export async function getOrganizationPlanUsageDetails(
   }
 
   // 2. Query Real Resource Counts
+  const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
   const [
-    { count: teamMembersCount },
-    { count: clientsCount },
-    { count: projectsCount },
-    { count: channelsCount },
-    { count: aiUsageCount },
+    teamRes,
+    clientRes,
+    projectRes,
+    channelRes,
+    aiRes,
   ] = await Promise.all([
-    supabase
-      .from('organization_members')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', organizationId),
-    supabase
-      .from('clients')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', organizationId),
-    supabase
-      .from('projects')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', organizationId),
-    supabase
-      .from('communication_channels')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', organizationId)
-      .eq('is_active', true),
-    supabase
-      .from('ai_usage_log')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', organizationId)
-      .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+    queryOne<{ count: string }>('SELECT COUNT(*) as count FROM organization_members WHERE organization_id = $1', [organizationId]),
+    queryOne<{ count: string }>('SELECT COUNT(*) as count FROM clients WHERE organization_id = $1', [organizationId]),
+    queryOne<{ count: string }>('SELECT COUNT(*) as count FROM projects WHERE organization_id = $1', [organizationId]),
+    queryOne<{ count: string }>('SELECT COUNT(*) as count FROM communication_channels WHERE organization_id = $1 AND is_active = true', [organizationId]),
+    queryOne<{ count: string }>('SELECT COUNT(*) as count FROM ai_usage_log WHERE organization_id = $1 AND created_at >= $2', [organizationId, startOfMonth]),
   ])
 
-  const curTeam = teamMembersCount || 0
-  const curClients = clientsCount || 0
-  const curProjects = projectsCount || 0
-  const curChannels = channelsCount || 0
-  const curAi = aiUsageCount || 0
+  const curTeam = parseInt(teamRes?.count || '0', 10)
+  const curClients = parseInt(clientRes?.count || '0', 10)
+  const curProjects = parseInt(projectRes?.count || '0', 10)
+  const curChannels = parseInt(channelRes?.count || '0', 10)
+  const curAi = parseInt(aiRes?.count || '0', 10)
 
   // Estimated storage: (deliverables count * 25MB + tasks * 1MB + projects * 5MB) / 1024 GB
   const estimatedStorageGb = Math.max(
@@ -317,19 +288,19 @@ export async function getOrganizationPlanUsageDetails(
   const highestProximityPercent = Math.max(...allMetrics.map((m) => m.percentage))
 
   return {
-    planName: plan?.name || 'Starter Plan',
-    planSlug: plan?.slug || 'starter',
-    status: subscription?.status || 'active',
-    priceMonthly: Number(plan?.price_monthly) || 29,
-    renewsAt: subscription?.current_period_end
-      ? new Date(subscription.current_period_end).toLocaleDateString('en-US', {
+    planName: subRow?.plan_name || 'Starter Plan',
+    planSlug: subRow?.plan_slug || 'starter',
+    status: subRow?.status || 'active',
+    priceMonthly: Number(subRow?.price_monthly) || 29,
+    renewsAt: subRow?.current_period_end
+      ? new Date(subRow.current_period_end).toLocaleDateString('en-US', {
           month: 'long',
           day: 'numeric',
           year: 'numeric',
         })
       : null,
-    currentPeriodEnd: subscription?.current_period_end || null,
-    cancelAtPeriodEnd: !!subscription?.cancel_at_period_end,
+    currentPeriodEnd: subRow?.current_period_end || null,
+    cancelAtPeriodEnd: !!subRow?.cancel_at_period_end,
     limits,
     metrics,
     hasWarnings: warnings.length > 0,
