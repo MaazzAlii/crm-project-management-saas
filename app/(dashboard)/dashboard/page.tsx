@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { getCurrentSessionContext } from '@/lib/auth/session'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { QuickActions } from '@/components/dashboard/QuickActions'
@@ -35,7 +35,6 @@ export default async function DashboardPage() {
   }
 
   const org = sessionContext.organization
-  const supabase = await createClient()
 
   let activeProjectsCount = 0
   let pendingTasksCount = 0
@@ -60,61 +59,55 @@ export default async function DashboardPage() {
         },
       ]
     } else {
-      // 1. Fetch Active Projects Count (RLS-scoped by orgId)
-      const { count: pCount } = await supabase
-        .from('projects')
-        .select('id', { count: 'exact', head: true })
-        .eq('organization_id', org.id)
-        .neq('status', 'completed')
+      // 1. Fetch Active Projects Count
+      const pRes = await queryOne<{ count: number }>(
+        `SELECT COUNT(*)::int as count FROM projects WHERE organization_id = $1 AND status != 'completed'`,
+        [org.id]
+      )
+      activeProjectsCount = pRes?.count || 0
 
-      activeProjectsCount = pCount || 0
+      // 2. Fetch Pending Tasks Count
+      const tRes = await queryOne<{ count: number }>(
+        `SELECT COUNT(*)::int as count FROM tasks WHERE organization_id = $1 AND status != 'completed'`,
+        [org.id]
+      )
+      pendingTasksCount = tRes?.count || 0
 
-    // 2. Fetch Pending Tasks Count
-    const { count: tCount } = await supabase
-      .from('tasks')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', org.id)
-      .neq('status', 'completed')
+      // 3. Fetch Overdue Projects Count
+      const oRes = await queryOne<{ count: number }>(
+        `SELECT COUNT(*)::int as count FROM projects
+         WHERE organization_id = $1 AND status != 'completed' AND deadline < CURRENT_DATE`,
+        [org.id]
+      )
+      overdueProjectsCount = oRes?.count || 0
 
-    pendingTasksCount = tCount || 0
+      // 4. Fetch Clients Count
+      const cRes = await queryOne<{ count: number }>(
+        `SELECT COUNT(*)::int as count FROM clients WHERE organization_id = $1`,
+        [org.id]
+      )
+      clientsCount = cRes?.count || 0
 
-    // 3. Fetch Overdue Projects Count
-    const today = new Date().toISOString()
-    const { count: oCount } = await supabase
-      .from('projects')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', org.id)
-      .neq('status', 'completed')
-      .lt('target_completion_date', today)
+      // 5. Fetch Recent Projects as Recent Activity feed
+      const recentProjects = await query<any>(
+        `SELECT id, COALESCE(title, name, 'Project') as project_title, status, created_at
+         FROM projects
+         WHERE organization_id = $1
+         ORDER BY created_at DESC
+         LIMIT 5`,
+        [org.id]
+      )
 
-    overdueProjectsCount = oCount || 0
-
-    // 4. Fetch Clients Count
-    const { count: cCount } = await supabase
-      .from('clients')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', org.id)
-
-    clientsCount = cCount || 0
-
-    // 5. Fetch Recent Projects as Recent Activity feed
-    const { data: recentProjects } = await supabase
-      .from('projects')
-      .select('id, name, status, created_at')
-      .eq('organization_id', org.id)
-      .order('created_at', { ascending: false })
-      .limit(5)
-
-    if (recentProjects && recentProjects.length > 0) {
-      recentActivities = recentProjects.map((p) => ({
-        id: p.id,
-        title: `Project Created: ${p.name}`,
-        description: `Status: ${p.status.toUpperCase()} · Org: ${org.name}`,
-        timestamp: p.created_at,
-        type: 'project',
-      }))
+      if (recentProjects.rows && recentProjects.rows.length > 0) {
+        recentActivities = recentProjects.rows.map((p: any) => ({
+          id: p.id,
+          title: `Project Created: ${p.project_title}`,
+          description: `Status: ${(p.status || '').toUpperCase()} · Org: ${org.name}`,
+          timestamp: p.created_at,
+          type: 'project',
+        }))
+      }
     }
-  }
   } catch (err) {
     console.warn('[DASHBOARD_QUERY_WARN] Using fallback metric calculation:', err)
   }
