@@ -2,7 +2,7 @@ import { fetchAllTasksAction, fetchTeamWorkloadAction } from './actions'
 import { fetchProjectsAction } from '../projects/actions'
 import { TaskList } from '@/components/tasks/TaskList'
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,13 +31,21 @@ export default async function TasksPage() {
   // Members list for dropdowns
   let membersList: { id: string; name: string }[] = []
   try {
-    const supabase = await createClient()
-    const { data } = await supabase.from('profiles').select('id, full_name, email').order('full_name')
-    if (data) {
-      membersList = data.map((p) => ({
-        id: p.id,
-        name: p.full_name || p.email || 'Team Member'
-      }))
+    if (session?.organization?.id) {
+      const data = await query<{ id: string; full_name: string | null; email: string }>(
+        `SELECT u.id, u.full_name, u.email
+         FROM users u
+         JOIN organization_members om ON om.user_id = u.id
+         WHERE om.organization_id = $1
+         ORDER BY u.full_name ASC`,
+        [session.organization.id]
+      )
+      if (data && data.length > 0) {
+        membersList = data.map((p) => ({
+          id: p.id,
+          name: p.full_name || p.email || 'Team Member'
+        }))
+      }
     }
   } catch (e) {}
 
