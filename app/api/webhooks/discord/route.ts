@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 import { decryptSecret } from '@/lib/security/encrypt'
 import {
   verifyDiscordSignature,
@@ -38,15 +38,18 @@ export async function POST(req: NextRequest) {
     const discordGuildId = payload.guild_id || payload.guild?.id
 
     // 1. Resolve matching active Discord channel from database
-    const supabase = await createClient()
+    const channelsRes = await query<{
+      id: string
+      organization_id: string
+      external_account_id: string | null
+      metadata: any
+      status: string
+    }>(
+      "SELECT id, organization_id, external_account_id, metadata, status FROM communication_channels WHERE provider = 'discord' AND status = 'active'"
+    )
+    const channels = channelsRes.rows
 
-    const { data: channels, error: channelError } = await supabase
-      .from('communication_channels')
-      .select('id, organization_id, external_account_id, metadata, status')
-      .eq('provider', 'discord')
-      .eq('status', 'active')
-
-    if (channelError || !channels || channels.length === 0) {
+    if (!channels || channels.length === 0) {
       console.warn('[DiscordWebhook] No active Discord channel registered in platform.')
       return NextResponse.json({ ok: true, warning: 'No active Discord channel found' })
     }
