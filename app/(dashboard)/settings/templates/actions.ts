@@ -1,7 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
 
@@ -36,22 +36,34 @@ export async function fetchProjectTemplatesAction(): Promise<ProjectTemplateReco
       return getDevTemplates()
     }
 
-    const supabase = await createClient()
+    const { rows } = await query<any>(
+      `SELECT pt.*,
+              COALESCE(
+                json_agg(
+                  json_build_object(
+                    'id', ptt.id,
+                    'template_id', ptt.template_id,
+                    'title', ptt.title,
+                    'description', ptt.description,
+                    'priority', ptt.priority,
+                    'day_offset', ptt.day_offset
+                  )
+                ) FILTER (WHERE ptt.id IS NOT NULL),
+                '[]'
+              ) as tasks
+       FROM project_templates pt
+       LEFT JOIN project_template_tasks ptt ON ptt.template_id = pt.id
+       WHERE pt.organization_id = $1
+       GROUP BY pt.id
+       ORDER BY pt.name ASC`,
+      [session.organization.id]
+    )
 
-    const { data, error } = await supabase
-      .from('project_templates')
-      .select(`
-        *,
-        project_template_tasks ( id, template_id, title, description, priority, day_offset )
-      `)
-      .eq('organization_id', session.organization.id)
-      .order('name', { ascending: true })
-
-    if (error || !data || data.length === 0) {
+    if (!rows || rows.length === 0) {
       return getDevTemplates()
     }
 
-    return data.map((t) => ({
+    return rows.map((t: any) => ({
       id: t.id,
       organization_id: t.organization_id,
       name: t.name,
@@ -59,16 +71,20 @@ export async function fetchProjectTemplatesAction(): Promise<ProjectTemplateReco
       type: t.type,
       default_amount: parseFloat(t.default_amount || '0'),
       currency: t.currency || 'USD',
-      default_deliverables: Array.isArray(t.default_deliverables) ? t.default_deliverables : [],
+      default_deliverables: Array.isArray(t.default_deliverables)
+        ? t.default_deliverables
+        : typeof t.default_deliverables === 'string'
+        ? JSON.parse(t.default_deliverables || '[]')
+        : [],
       created_at: t.created_at,
-      tasks: (t.project_template_tasks || []).map((task: any) => ({
+      tasks: (typeof t.tasks === 'string' ? JSON.parse(t.tasks) : t.tasks || []).map((task: any) => ({
         id: task.id,
         template_id: task.template_id,
         title: task.title,
         description: task.description,
         priority: task.priority || 'medium',
-        day_offset: task.day_offset || 0
-      }))
+        day_offset: task.day_offset || 0,
+      })),
     }))
   } catch (err) {
     console.error('fetchProjectTemplatesAction error:', err)
@@ -109,39 +125,28 @@ export async function createProjectTemplateAction(formData: FormData) {
       tasks = JSON.parse(tasksRaw)
     } catch (e) {}
 
-    const supabase = await createClient()
+    const templateData = await queryOne<{ id: string }>(
+      `INSERT INTO project_templates (
+         organization_id, name, description, type, default_amount, currency, default_deliverables
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id`,
+      [orgId, name, description, type, default_amount, currency, JSON.stringify(deliverables)]
+    )
 
-    const { data: templateData, error: templateError } = await supabase
-      .from('project_templates')
-      .insert({
-        organization_id: orgId,
-        name,
-        description,
-        type,
-        default_amount,
-        currency,
-        default_deliverables: deliverables
-      })
-      .select('id')
-      .single()
-
-    if (templateError || !templateData) {
-      console.error('Failed to create template:', templateError)
-      return { error: templateError?.message || 'Database error creating template.' }
+    if (!templateData) {
+      return { error: 'Database error creating template.' }
     }
 
     // Insert template tasks
     if (tasks.length > 0) {
-      const taskPayloads = tasks.map((t) => ({
-        organization_id: orgId,
-        template_id: templateData.id,
-        title: t.title,
-        description: t.description || null,
-        priority: t.priority || 'medium',
-        day_offset: t.day_offset || 0
-      }))
-
-      await supabase.from('project_template_tasks').insert(taskPayloads)
+      for (const t of tasks) {
+        await query(
+          `INSERT INTO project_template_tasks (
+             organization_id, template_id, title, description, priority, day_offset
+           ) VALUES ($1, $2, $3, $4, $5, $6)`,
+          [orgId, templateData.id, t.title, t.description || null, t.priority || 'medium', t.day_offset || 0]
+        )
+      }
     }
 
     try {
@@ -150,7 +155,7 @@ export async function createProjectTemplateAction(formData: FormData) {
         action: 'PROJECT_TEMPLATE_CREATED',
         targetType: 'template',
         targetId: templateData.id,
-        details: { name, organizationId: session.organization.id }
+        details: { name, organizationId: session.organization.id },
       })
     } catch (e) {}
 
@@ -171,13 +176,10 @@ export async function deleteProjectTemplateAction(templateId: string) {
       return { error: 'Unauthorized.' }
     }
 
-    const supabase = await createClient()
-
-    await supabase
-      .from('project_templates')
-      .delete()
-      .eq('id', templateId)
-      .eq('organization_id', session.organization.id)
+    await query(
+      `DELETE FROM project_templates WHERE id = $1 AND organization_id = $2`,
+      [templateId, session.organization.id]
+    )
 
     revalidatePath('/settings/templates')
     revalidatePath('/projects')
@@ -196,60 +198,59 @@ export async function saveProjectAsTemplateAction(projectId: string, templateNam
       return { error: 'Unauthorized.' }
     }
 
-    const supabase = await createClient()
-
     // Query source project
-    const { data: project } = await supabase
-      .from('projects')
-      .select('*')
-      .eq('id', projectId)
-      .eq('organization_id', session.organization.id)
-      .single()
+    const project = await queryOne<any>(
+      `SELECT * FROM projects WHERE id = $1 AND organization_id = $2`,
+      [projectId, session.organization.id]
+    )
 
     if (!project) {
       return { error: 'Project not found.' }
     }
 
     // Query tasks and deliverables for source project
-    const [{ data: tasks }, { data: deliverables }] = await Promise.all([
-      supabase.from('tasks').select('*').eq('project_id', projectId),
-      supabase.from('deliverables').select('title').eq('project_id', projectId)
-    ])
+    const tasksRes = await query<any>(`SELECT * FROM tasks WHERE project_id = $1`, [projectId])
+    let deliverablesRes: { rows: any[] } = { rows: [] }
+    try {
+      deliverablesRes = await query<any>(`SELECT title FROM deliverables WHERE project_id = $1`, [projectId])
+    } catch {}
 
-    const deliverablesList = (deliverables || []).map((d) => d.title)
+    const deliverablesList = (deliverablesRes.rows || []).map((d) => d.title)
 
     // Insert new template
-    const { data: newTemplate, error: templateError } = await supabase
-      .from('project_templates')
-      .insert({
-        organization_id: session.organization.id,
-        name: templateName,
-        description: `Saved from project "${project.title}"`,
-        type: project.type || 'Combined',
-        default_amount: parseFloat(project.amount || '0'),
-        currency: project.currency || 'USD',
-        default_deliverables: deliverablesList
-      })
-      .select('id')
-      .single()
+    const newTemplate = await queryOne<{ id: string }>(
+      `INSERT INTO project_templates (
+         organization_id, name, description, type, default_amount, currency, default_deliverables
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id`,
+      [
+        session.organization.id,
+        templateName,
+        `Saved from project "${project.title}"`,
+        project.type || 'Combined',
+        parseFloat(project.amount || '0'),
+        project.currency || 'USD',
+        JSON.stringify(deliverablesList),
+      ]
+    )
 
-    if (templateError || !newTemplate) {
-      return { error: templateError?.message || 'Failed to save template.' }
+    if (!newTemplate) {
+      return { error: 'Failed to save template.' }
     }
 
     const orgId = session.organization.id
 
     // Insert template tasks
-    if (tasks && tasks.length > 0) {
-      const taskPayloads = tasks.map((t, idx) => ({
-        organization_id: orgId,
-        template_id: newTemplate.id,
-        title: t.title,
-        description: t.description || null,
-        priority: t.priority || 'medium',
-        day_offset: idx * 2 // spread tasks by offset
-      }))
-      await supabase.from('project_template_tasks').insert(taskPayloads)
+    if (tasksRes.rows && tasksRes.rows.length > 0) {
+      for (let idx = 0; idx < tasksRes.rows.length; idx++) {
+        const t = tasksRes.rows[idx]
+        await query(
+          `INSERT INTO project_template_tasks (
+             organization_id, template_id, title, description, priority, day_offset
+           ) VALUES ($1, $2, $3, $4, $5, $6)`,
+          [orgId, newTemplate.id, t.title, t.description || null, t.priority || 'medium', idx * 2]
+        )
+      }
     }
 
     revalidatePath('/settings/templates')
@@ -273,7 +274,7 @@ function getDevTemplates(): ProjectTemplateRecord[] {
       default_deliverables: [
         'Voice Bot Architecture & Dialog Flow Diagram',
         'Twilio Webhook Integration & Audio Sample Test',
-        'Final Load Testing & Quality Assurance Report'
+        'Final Load Testing & Quality Assurance Report',
       ],
       created_at: new Date().toISOString(),
       tasks: [
@@ -283,7 +284,7 @@ function getDevTemplates(): ProjectTemplateRecord[] {
           title: 'Configure OpenAI Realtime API credentials & audio streaming',
           description: 'Set up low-latency web sockets for live voice agent response.',
           priority: 'high',
-          day_offset: 1
+          day_offset: 1,
         },
         {
           id: 'tt-2',
@@ -291,7 +292,7 @@ function getDevTemplates(): ProjectTemplateRecord[] {
           title: 'Build inbound call routing & fallback handler',
           description: 'Handle offline mode and send SMS callback link if user hangs up.',
           priority: 'urgent',
-          day_offset: 3
+          day_offset: 3,
         },
         {
           id: 'tt-3',
@@ -299,9 +300,9 @@ function getDevTemplates(): ProjectTemplateRecord[] {
           title: 'Conduct end-to-end load test on 50 concurrent calls',
           description: 'Ensure system latency remains below 800ms during peak load.',
           priority: 'medium',
-          day_offset: 7
-        }
-      ]
+          day_offset: 7,
+        },
+      ],
     },
     {
       id: 'tmpl-2',
@@ -314,7 +315,7 @@ function getDevTemplates(): ProjectTemplateRecord[] {
       default_deliverables: [
         'Script & Hook Concepts Document',
         'Raw Video Clips Folder',
-        '15 Edited Video Ads with Animated Subtitles'
+        '15 Edited Video Ads with Animated Subtitles',
       ],
       created_at: new Date().toISOString(),
       tasks: [
@@ -324,7 +325,7 @@ function getDevTemplates(): ProjectTemplateRecord[] {
           title: 'Draft 5 Hook Concepts & Script Angles',
           description: 'Focus on direct-response problem-solution hooks.',
           priority: 'high',
-          day_offset: 1
+          day_offset: 1,
         },
         {
           id: 'tt-5',
@@ -332,7 +333,7 @@ function getDevTemplates(): ProjectTemplateRecord[] {
           title: 'Receive creator raw footage and verify resolution',
           description: 'Ensure 4K vertical 9:16 format with clear audio.',
           priority: 'medium',
-          day_offset: 5
+          day_offset: 5,
         },
         {
           id: 'tt-6',
@@ -340,9 +341,9 @@ function getDevTemplates(): ProjectTemplateRecord[] {
           title: 'Edit first draft cuts with motion captions',
           description: 'Export 1080x1920 MP4 files.',
           priority: 'high',
-          day_offset: 8
-        }
-      ]
+          day_offset: 8,
+        },
+      ],
     },
     {
       id: 'tmpl-3',
@@ -355,7 +356,7 @@ function getDevTemplates(): ProjectTemplateRecord[] {
       default_deliverables: [
         'Stripe Webhook Listener Service',
         'Automated Invoice PDF Generator',
-        'Database Sync Schema Migration'
+        'Database Sync Schema Migration',
       ],
       created_at: new Date().toISOString(),
       tasks: [
@@ -364,16 +365,16 @@ function getDevTemplates(): ProjectTemplateRecord[] {
           template_id: 'tmpl-3',
           title: 'Configure Stripe Webhook Secrets & Environment Variables',
           priority: 'high',
-          day_offset: 1
+          day_offset: 1,
         },
         {
           id: 'tt-8',
           template_id: 'tmpl-3',
           title: 'Build automated email invoice delivery on invoice.paid',
           priority: 'medium',
-          day_offset: 4
-        }
-      ]
-    }
+          day_offset: 4,
+        },
+      ],
+    },
   ]
 }
