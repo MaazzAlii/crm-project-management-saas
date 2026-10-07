@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { requirePortalSession } from '@/lib/portal/auth'
 
 export interface ClientPortalSettings {
@@ -58,38 +58,62 @@ export interface ClientPortalFullSettingsData {
 
 export async function fetchClientPortalSettingsData(): Promise<ClientPortalFullSettingsData> {
   const { clientId, organizationId } = await requirePortalSession()
-  const supabase = await createClient()
 
   // 1. Fetch Client Record
-  const { data: clientData, error: clientErr } = await supabase
-    .from('clients')
-    .select('id, name, company, email, phone, country, currency, payment_schedule, platform, portal_settings')
-    .eq('id', clientId)
-    .single()
+  const clientData = await queryOne<{
+    id: string
+    name: string
+    company: string | null
+    email: string | null
+    phone: string | null
+    country: string | null
+    currency: string | null
+    payment_schedule: string | null
+    platform: string | null
+    portal_settings: any
+  }>(
+    'SELECT id, name, company, email, phone, country, currency, payment_schedule, platform, portal_settings FROM clients WHERE id = $1',
+    [clientId]
+  )
 
-  if (clientErr || !clientData) {
+  if (!clientData) {
     throw new Error('Client profile not found.')
   }
 
   // 2. Fetch Organization Details
-  const { data: orgData } = await supabase
-    .from('organizations')
-    .select('name, logo_url')
-    .eq('id', organizationId)
-    .single()
+  const orgData = await queryOne<{
+    name: string
+    logo_url: string | null
+  }>(
+    'SELECT name, logo_url FROM organizations WHERE id = $1',
+    [organizationId]
+  )
 
   // 3. Fetch Client Users (Team)
-  const { data: clientUsers } = await supabase
-    .from('client_users')
-    .select('id, user_id, invited_at, last_login_at, is_active')
-    .eq('client_id', clientId)
+  const clientUsersRes = await query<{
+    id: string
+    user_id: string
+    invited_at: string | null
+    last_login_at: string | null
+    is_active: boolean
+  }>(
+    'SELECT id, user_id, invited_at, last_login_at, is_active FROM client_users WHERE client_id = $1',
+    [clientId]
+  )
+  const clientUsers = clientUsersRes.rows
 
   // 4. Fetch Active Communication Channels for Org
-  const { data: orgChannels } = await supabase
-    .from('communication_channels')
-    .select('id, channel_type, channel_name, is_active, updated_at')
-    .eq('organization_id', organizationId)
-    .eq('is_active', true)
+  const channelsRes = await query<{
+    id: string
+    channel_type: string
+    channel_name: string | null
+    is_active: boolean
+    updated_at: string | null
+  }>(
+    'SELECT id, channel_type, channel_name, is_active, updated_at FROM communication_channels WHERE organization_id = $1 AND is_active = true',
+    [organizationId]
+  )
+  const orgChannels = channelsRes.rows
 
   const defaultSettings: ClientPortalSettings = {
     logo_url: null,
