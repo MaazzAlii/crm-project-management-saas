@@ -1,7 +1,7 @@
 'use server'
 
 import { requirePortalSession } from '@/lib/portal/auth'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 
 /**
@@ -13,27 +13,32 @@ export async function approveDeliverable(
   projectId: string
 ): Promise<{ success: boolean; error?: string }> {
   const { clientId, organizationId } = await requirePortalSession()
-  const supabase = await createClient()
 
   // Security: verify the project belongs to this client before acting
-  const { data: project } = await supabase
-    .from('projects')
-    .select('id, title, client_id, organization_id')
-    .eq('id', projectId)
-    .eq('client_id', clientId)
-    .maybeSingle()
+  const project = await queryOne<{
+    id: string
+    title: string
+    client_id: string
+    organization_id: string
+  }>(
+    'SELECT id, title, client_id, organization_id FROM projects WHERE id = $1 AND client_id = $2',
+    [projectId, clientId]
+  )
 
   if (!project) {
     return { success: false, error: 'Project not found or access denied.' }
   }
 
   // Verify deliverable belongs to this project
-  const { data: deliverable } = await supabase
-    .from('deliverables')
-    .select('id, title, status, project_id')
-    .eq('id', deliverableId)
-    .eq('project_id', projectId)
-    .maybeSingle()
+  const deliverable = await queryOne<{
+    id: string
+    title: string
+    status: string
+    project_id: string
+  }>(
+    'SELECT id, title, status, project_id FROM deliverables WHERE id = $1 AND project_id = $2',
+    [deliverableId, projectId]
+  )
 
   if (!deliverable) {
     return { success: false, error: 'Deliverable not found.' }
@@ -44,39 +49,37 @@ export async function approveDeliverable(
   }
 
   // Update deliverable status
-  const { error: updateError } = await supabase
-    .from('deliverables')
-    .update({ status: 'approved', client_feedback: null, updated_at: new Date().toISOString() })
-    .eq('id', deliverableId)
-
-  if (updateError) {
-    return { success: false, error: updateError.message }
+  try {
+    await query(
+      `UPDATE deliverables
+       SET status = 'approved', client_feedback = NULL, updated_at = NOW()
+       WHERE id = $1`,
+      [deliverableId]
+    )
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to update deliverable' }
   }
 
   // Fire in-app notification to the org team (best effort)
   try {
-    const { data: clientUser } = await supabase
-      .from('client_users')
-      .select('user_id')
-      .eq('client_id', clientId)
-      .eq('organization_id', organizationId)
-      .maybeSingle()
-
-    // Notify org members — insert notification for the assigned project member or org-wide
-    await supabase.from('in_app_notifications').insert({
-      organization_id: organizationId,
-      type: 'deliverable_approved',
-      title: 'Deliverable Approved by Client',
-      body: `"${deliverable.title}" was approved by the client for project "${project.title}".`,
-      link: `/projects/${projectId}`,
-      metadata: {
-        deliverable_id: deliverableId,
-        project_id: projectId,
-        client_id: clientId,
-      },
-    })
+    await query(
+      `INSERT INTO in_app_notifications (organization_id, type, title, body, link, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        organizationId,
+        'deliverable_approved',
+        'Deliverable Approved by Client',
+        `"${deliverable.title}" was approved by the client for project "${project.title}".`,
+        `/projects/${projectId}`,
+        JSON.stringify({
+          deliverable_id: deliverableId,
+          project_id: projectId,
+          client_id: clientId,
+        }),
+      ]
+    )
   } catch {
-    // Non-blocking — don't fail the approval if notification fails
+    // Non-blocking
   }
 
   revalidatePath(`/client/projects/${projectId}`)
@@ -98,80 +101,88 @@ export async function requestRevision(
   }
 
   const { clientId, organizationId } = await requirePortalSession()
-  const supabase = await createClient()
 
   // Security: verify project belongs to this client
-  const { data: project } = await supabase
-    .from('projects')
-    .select('id, title, client_id, organization_id, assigned_to')
-    .eq('id', projectId)
-    .eq('client_id', clientId)
-    .maybeSingle()
+  const project = await queryOne<{
+    id: string
+    title: string
+    client_id: string
+    organization_id: string
+    assigned_to: string | null
+  }>(
+    'SELECT id, title, client_id, organization_id, assigned_to FROM projects WHERE id = $1 AND client_id = $2',
+    [projectId, clientId]
+  )
 
   if (!project) {
     return { success: false, error: 'Project not found or access denied.' }
   }
 
-  const { data: deliverable } = await supabase
-    .from('deliverables')
-    .select('id, title, project_id')
-    .eq('id', deliverableId)
-    .eq('project_id', projectId)
-    .maybeSingle()
+  const deliverable = await queryOne<{
+    id: string
+    title: string
+    project_id: string
+  }>(
+    'SELECT id, title, project_id FROM deliverables WHERE id = $1 AND project_id = $2',
+    [deliverableId, projectId]
+  )
 
   if (!deliverable) {
     return { success: false, error: 'Deliverable not found.' }
   }
 
   // Update deliverable: set revision_required + store feedback
-  const { error: deliverableError } = await supabase
-    .from('deliverables')
-    .update({
-      status: 'revision_required',
-      client_feedback: feedback.trim(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', deliverableId)
-
-  if (deliverableError) {
-    return { success: false, error: deliverableError.message }
+  try {
+    await query(
+      `UPDATE deliverables
+       SET status = 'revision_required', client_feedback = $1, updated_at = NOW()
+       WHERE id = $2`,
+      [feedback.trim(), deliverableId]
+    )
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to update deliverable' }
   }
 
   // Create an internal revision task for the team
   const dueDate = new Date()
   dueDate.setDate(dueDate.getDate() + 3) // Default: 3 days
 
-  const { error: taskError } = await supabase.from('tasks').insert({
-    organization_id: organizationId,
-    project_id: projectId,
-    title: `Revision: ${deliverable.title}`,
-    description: `Client requested revisions:\n\n${feedback.trim()}`,
-    status: 'todo',
-    priority: 'high',
-    due_date: dueDate.toISOString().split('T')[0],
-    assigned_to: project.assigned_to ?? null,
-  })
-
-  if (taskError) {
-    // Don't fail — deliverable status was already updated
-    console.error('Failed to create revision task:', taskError.message)
+  try {
+    await query(
+      `INSERT INTO tasks (organization_id, project_id, title, description, status, priority, due_date, assigned_to)
+       VALUES ($1, $2, $3, $4, 'todo', 'high', $5, $6)`,
+      [
+        organizationId,
+        projectId,
+        `Revision: ${deliverable.title}`,
+        `Client requested revisions:\n\n${feedback.trim()}`,
+        dueDate.toISOString().split('T')[0],
+        project.assigned_to || null,
+      ]
+    )
+  } catch (err) {
+    console.error('Failed to create revision task:', err)
   }
 
   // In-app notification to org
   try {
-    await supabase.from('in_app_notifications').insert({
-      organization_id: organizationId,
-      type: 'deliverable_revision_requested',
-      title: 'Client Requested Revisions',
-      body: `Client requested revisions on "${deliverable.title}" for project "${project.title}".`,
-      link: `/projects/${projectId}`,
-      metadata: {
-        deliverable_id: deliverableId,
-        project_id: projectId,
-        client_id: clientId,
-        feedback: feedback.trim().substring(0, 200),
-      },
-    })
+    await query(
+      `INSERT INTO in_app_notifications (organization_id, type, title, body, link, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        organizationId,
+        'deliverable_revision_requested',
+        'Client Requested Revisions',
+        `Client requested revisions on "${deliverable.title}" for project "${project.title}".`,
+        `/projects/${projectId}`,
+        JSON.stringify({
+          deliverable_id: deliverableId,
+          project_id: projectId,
+          client_id: clientId,
+          feedback: feedback.trim().substring(0, 200),
+        }),
+      ]
+    )
   } catch {
     // Non-blocking
   }
