@@ -1,36 +1,38 @@
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
 import { OrgListTable, type OrgListItem } from '@/components/super-admin/org-list-table'
-import { Building2, Plus, ShieldCheck } from 'lucide-react'
+import { Building2 } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SuperAdminOrganizationsPage() {
   await requireSuperAdmin()
-  const supabase = await createClient()
 
   let orgs: any[] = []
   const memberCountMap: Record<string, number> = {}
 
   try {
     // Fetch organizations
-    const { data: orgsData } = await supabase
-      .from('organizations')
-      .select('id, name, slug, plan_tier, billing_status, is_suspended, created_at')
-      .order('created_at', { ascending: false })
+    const orgsRes = await query<any>(
+      `SELECT id, name, slug, plan_tier, billing_status, is_suspended, created_at
+       FROM organizations
+       ORDER BY created_at DESC`
+    )
 
-    if (orgsData && orgsData.length > 0) {
-      orgs = orgsData
+    if (orgsRes.rows && orgsRes.rows.length > 0) {
+      orgs = orgsRes.rows
     }
 
     // Fetch member counts per organization
-    const { data: membersData } = await supabase
-      .from('organization_members')
-      .select('organization_id')
+    const membersRes = await query<{ organization_id: string; count: number }>(
+      `SELECT organization_id, COUNT(*)::int as count
+       FROM organization_members
+       GROUP BY organization_id`
+    )
 
-    if (membersData) {
-      membersData.forEach((m: any) => {
-        memberCountMap[m.organization_id] = (memberCountMap[m.organization_id] || 0) + 1
+    if (membersRes.rows) {
+      membersRes.rows.forEach((m) => {
+        memberCountMap[m.organization_id] = m.count
       })
     }
   } catch (err) {
