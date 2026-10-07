@@ -1,10 +1,10 @@
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { queryOne } from '@/lib/db'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { KanbanBoard } from '@/components/leads/KanbanBoard'
 import { isAIAccessible } from '@/lib/ai/client'
-import { ArrowLeft, Kanban, Clock, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Kanban } from 'lucide-react'
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   return {
@@ -37,18 +37,12 @@ export default async function ClientPipelinePage({ params }: { params: { id: str
     console.warn('AI lead scoring access check error:', e)
   }
 
-  const supabase = await createClient()
-
   let rawClient: any = null
   try {
-    const { data } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('id', params.id)
-      .eq('organization_id', session.organization.id)
-      .maybeSingle()
-
-    rawClient = data
+    rawClient = await queryOne<any>(
+      `SELECT * FROM clients WHERE id = $1 AND organization_id = $2`,
+      [params.id, session.organization.id]
+    )
   } catch (err) {}
 
   if (!rawClient && process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
