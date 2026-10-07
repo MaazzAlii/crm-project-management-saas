@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { emitAutomationEvent } from '@/lib/automation/emitter'
 import { checkAIAccess } from '@/lib/ai/guard'
 import { generateWeeklyReportNarrative } from '@/lib/ai/features/report-narrative'
@@ -39,28 +39,28 @@ async function processWeeklySummary(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const supabase = await createClient()
-
-    let orgQuery = supabase.from('organizations').select('id, name')
-    if (queryOrgId) {
-      orgQuery = orgQuery.eq('id', queryOrgId)
-    }
-
-    let organizations: any[] | null = null
-    let orgError: any = null
+    let orgs: Array<{ id: string; name: string }> = []
     try {
-      const res = await orgQuery
-      organizations = res.data
-      orgError = res.error
+      if (queryOrgId) {
+        const { rows } = await query<{ id: string; name: string }>(
+          `SELECT id, name FROM organizations WHERE id = $1`,
+          [queryOrgId]
+        )
+        orgs = rows
+      } else {
+        const { rows } = await query<{ id: string; name: string }>(
+          `SELECT id, name FROM organizations`
+        )
+        orgs = rows
+      }
     } catch (e) {
-      orgError = e
+      if (!isDev) {
+        return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 })
+      }
     }
 
-    let orgs = organizations || []
-    if ((orgError || orgs.length === 0) && isDev) {
+    if (orgs.length === 0 && isDev) {
       orgs = [{ id: 'dev-org', name: 'Innoventix Hub Agency' }]
-    } else if (orgError) {
-      return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 })
     }
 
     results.organizations_processed = orgs.length
@@ -80,36 +80,35 @@ async function processWeeklySummary(req: NextRequest): Promise<NextResponse> {
       try {
         // A. Aggregate performance figures across modules
         // 1. Completed Tasks (past 7 days)
-        const { count: completedTasksCount } = await supabase
-          .from('tasks')
-          .select('id', { count: 'exact', head: true })
-          .eq('organization_id', org.id)
-          .eq('status', 'done')
-          .gte('updated_at', weekAgo.toISOString())
+        const completedTasksRow = await queryOne<{ count: number }>(
+          `SELECT COUNT(*)::int as count FROM tasks
+           WHERE organization_id = $1 AND status = 'done' AND updated_at >= $2`,
+          [org.id, weekAgo.toISOString()]
+        )
+        const completedTasksCount = completedTasksRow?.count || 0
 
         // 2. Active Projects
-        const { data: activeProjectsData } = await supabase
-          .from('projects')
-          .select('id, title, status, amount')
-          .eq('organization_id', org.id)
-          .in('status', ['brief_received', 'in_progress', 'review'])
-
+        const { rows: activeProjectsData } = await query<{ id: string; title: string; status: string; amount: number }>(
+          `SELECT id, title, status, amount FROM projects
+           WHERE organization_id = $1 AND status IN ('brief_received', 'in_progress', 'review')`,
+          [org.id]
+        )
         const activeProjectsCount = activeProjectsData?.length || 0
 
         // 3. New Clients (past 7 days)
-        const { count: newClientsCount } = await supabase
-          .from('clients')
-          .select('id', { count: 'exact', head: true })
-          .eq('organization_id', org.id)
-          .gte('created_at', weekAgo.toISOString())
+        const newClientsRow = await queryOne<{ count: number }>(
+          `SELECT COUNT(*)::int as count FROM clients
+           WHERE organization_id = $1 AND created_at >= $2`,
+          [org.id, weekAgo.toISOString()]
+        )
+        const newClientsCount = newClientsRow?.count || 0
 
         // 4. Revenue Delivered/Invoiced (past 7 days)
-        const { data: revenueProjects } = await supabase
-          .from('projects')
-          .select('amount')
-          .eq('organization_id', org.id)
-          .in('status', ['delivered', 'invoiced', 'paid'])
-          .gte('updated_at', weekAgo.toISOString())
+        const { rows: revenueProjects } = await query<{ amount: number }>(
+          `SELECT amount FROM projects
+           WHERE organization_id = $1 AND status IN ('delivered', 'invoiced', 'paid') AND updated_at >= $2`,
+          [org.id, weekAgo.toISOString()]
+        )
 
         const revenueGenerated = (revenueProjects || []).reduce(
           (sum, p) => sum + (Number(p.amount) || 0),
@@ -119,26 +118,25 @@ async function processWeeklySummary(req: NextRequest): Promise<NextResponse> {
         // 5. Communication Volume (past 7 days)
         let commVolume = 0
         try {
-          const { count: msgCount } = await supabase
-            .from('communication_messages')
-            .select('id', { count: 'exact', head: true })
-            .eq('organization_id', org.id)
-            .gte('created_at', weekAgo.toISOString())
-          commVolume = msgCount || 0
+          const msgCountRow = await queryOne<{ count: number }>(
+            `SELECT COUNT(*)::int as count FROM communication_messages
+             WHERE organization_id = $1 AND created_at >= $2`,
+            [org.id, weekAgo.toISOString()]
+          )
+          commVolume = msgCountRow?.count || 0
         } catch {
           commVolume = 0
         }
 
         // 6. Overdue Projects
         const todayStr = now.toISOString().split('T')[0]
-        const { count: overdueCount } = await supabase
-          .from('projects')
-          .select('id', { count: 'exact', head: true })
-          .eq('organization_id', org.id)
-          .lt('deadline', todayStr)
-          .not('status', 'in', '("delivered","invoiced","paid","completed","on_hold","archived")')
-
-        const overdueItemsCount = overdueCount || 0
+        const overdueRow = await queryOne<{ count: number }>(
+          `SELECT COUNT(*)::int as count FROM projects
+           WHERE organization_id = $1 AND deadline < $2
+             AND status NOT IN ('delivered','invoiced','paid','completed','on_hold','archived')`,
+          [org.id, todayStr]
+        )
+        const overdueItemsCount = overdueRow?.count || 0
 
         // B. Generate AI Narrative if enabled (3-tier gating check)
         let narrativeSummary: string | undefined = undefined
@@ -151,9 +149,9 @@ async function processWeeklySummary(req: NextRequest): Promise<NextResponse> {
               figures: {
                 organizationName: org.name,
                 weekDateRange,
-                completedTasksCount: completedTasksCount || 0,
+                completedTasksCount,
                 activeProjectsCount,
-                newClientsCount: newClientsCount || 0,
+                newClientsCount,
                 revenueGenerated,
                 currency: 'USD',
                 communicationVolume: commVolume,
@@ -183,9 +181,9 @@ async function processWeeklySummary(req: NextRequest): Promise<NextResponse> {
               period_start: weekAgo.toISOString(),
               period_end: now.toISOString(),
               metrics: {
-                tasks_completed: completedTasksCount || 0,
+                tasks_completed: completedTasksCount,
                 active_projects: activeProjectsCount,
-                new_clients: newClientsCount || 0,
+                new_clients: newClientsCount,
                 revenue: revenueGenerated,
                 communication_volume: commVolume,
                 overdue_items: overdueItemsCount,
@@ -199,13 +197,17 @@ async function processWeeklySummary(req: NextRequest): Promise<NextResponse> {
 
         // D. Insert notification for in-app notification center
         try {
-          await supabase.from('in_app_notifications').insert({
-            organization_id: org.id,
-            type: 'weekly_summary',
-            title: 'Weekly Performance Report Ready',
-            body: `Executive summary for ${weekDateRange}: ${completedTasksCount || 0} tasks completed, ${activeProjectsCount} active projects, $${revenueGenerated.toLocaleString()} revenue generated.`,
-            related_entity_type: 'report',
-          })
+          await query(
+            `INSERT INTO in_app_notifications (organization_id, type, title, body, related_entity_type)
+             VALUES ($1, $2, $3, $4, $5)`,
+            [
+              org.id,
+              'weekly_summary',
+              'Weekly Performance Report Ready',
+              `Executive summary for ${weekDateRange}: ${completedTasksCount} tasks completed, ${activeProjectsCount} active projects, $${revenueGenerated.toLocaleString()} revenue generated.`,
+              'report',
+            ]
+          )
         } catch (notifErr) {
           console.warn('[Automation:WeeklySummary] In-app notification insert skipped:', notifErr)
         }
