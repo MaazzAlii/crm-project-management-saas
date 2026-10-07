@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
 import { PlatformSettingsForm, type PlanItem } from '@/components/super-admin/platform-settings-form'
 import { Sliders, ShieldCheck } from 'lucide-react'
@@ -7,7 +7,6 @@ export const dynamic = 'force-dynamic'
 
 export default async function SuperAdminSettingsPage() {
   await requireSuperAdmin()
-  const supabase = await createClient()
 
   let plans: PlanItem[] = []
   let flags: any = undefined
@@ -15,22 +14,23 @@ export default async function SuperAdminSettingsPage() {
 
   try {
     // 1. Fetch Subscription Plans
-    const { data: plansData } = await supabase
-      .from('subscription_plans')
-      .select('id, name, price_monthly, feature_limits')
-      .order('price_monthly', { ascending: true })
+    const plansRes = await query<any>(
+      `SELECT id, name, price_monthly, feature_limits
+       FROM subscription_plans
+       ORDER BY price_monthly ASC`
+    )
 
-    if (plansData && plansData.length > 0) {
-      plans = plansData as PlanItem[]
+    if (plansRes.rows && plansRes.rows.length > 0) {
+      plans = plansRes.rows as PlanItem[]
     }
 
     // 2. Fetch Platform Settings (Feature Flags & Onboarding Defaults)
-    const { data: settingsData } = await supabase
-      .from('platform_settings')
-      .select('key, value')
+    const settingsRes = await query<any>(
+      `SELECT key, value FROM platform_settings`
+    )
 
-    if (settingsData) {
-      settingsData.forEach((row: any) => {
+    if (settingsRes.rows) {
+      settingsRes.rows.forEach((row: any) => {
         if (row.key === 'global_feature_flags') flags = row.value
         if (row.key === 'global_onboarding_defaults') defaults = row.value
       })
