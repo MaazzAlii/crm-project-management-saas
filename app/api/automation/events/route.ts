@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { queryOne } from '@/lib/db'
 import { verifyAutomationSignature } from '@/lib/automation/emitter'
 import { readValidatedBody } from '@/lib/security/payload'
 
@@ -50,12 +50,10 @@ export async function POST(req: NextRequest) {
 
     if (orgId) {
       try {
-        const supabase = await createClient()
-        const { data: org } = await supabase
-          .from('organizations')
-          .select('automation_webhook_secret')
-          .eq('id', orgId)
-          .maybeSingle()
+        const org = await queryOne<{ automation_webhook_secret: string }>(
+          `SELECT automation_webhook_secret FROM organizations WHERE id = $1`,
+          [orgId]
+        )
 
         if (org?.automation_webhook_secret) {
           secret = org.automation_webhook_secret
