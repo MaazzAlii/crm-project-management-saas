@@ -1,7 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { query, queryOne } from '@/lib/db'
 import { checkAIAccess } from '@/lib/ai/guard'
 import { isAIAccessible } from '@/lib/ai/client'
 import {
@@ -47,8 +47,6 @@ export async function fetchWeeklyReportMetricsAction(): Promise<WeeklyReportData
     console.warn('[WeeklyReport:Actions] AI access check error:', e)
   }
 
-  const supabase = await createClient()
-
   // 2. Compute 7-day date window
   const now = new Date()
   const weekAgoDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -69,36 +67,33 @@ export async function fetchWeeklyReportMetricsAction(): Promise<WeeklyReportData
 
   try {
     // A. Completed Tasks in last 7 days
-    const { count: cTaskCount } = await supabase
-      .from('tasks')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .eq('status', 'done')
-      .gte('updated_at', weekAgoIso)
-
-    completedTasksCount = cTaskCount || 0
+    const cTaskRes = await queryOne<{ count: number }>(
+      `SELECT COUNT(*)::int as count FROM tasks
+       WHERE organization_id = $1 AND status = 'done' AND updated_at >= $2`,
+      [orgId, weekAgoIso]
+    )
+    completedTasksCount = cTaskRes?.count || 0
 
     // B. Overdue Tasks
-    const { count: oTaskCount } = await supabase
-      .from('tasks')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .neq('status', 'done')
-      .lt('due_date', todayIso)
-
-    overdueItemsCount = oTaskCount || 0
+    const oTaskRes = await queryOne<{ count: number }>(
+      `SELECT COUNT(*)::int as count FROM tasks
+       WHERE organization_id = $1 AND status != 'done' AND due_date < $2`,
+      [orgId, todayIso]
+    )
+    overdueItemsCount = oTaskRes?.count || 0
 
     // C. Active Projects
-    const { data: activeProjs } = await supabase
-      .from('projects')
-      .select('id, title, status, amount, currency, created_at')
-      .eq('organization_id', orgId)
-      .not('status', 'in', '("delivered","paid")')
+    const { rows: activeProjs } = await query<any>(
+      `SELECT id, title, status, amount, currency, created_at
+       FROM projects
+       WHERE organization_id = $1 AND status NOT IN ('delivered', 'paid')`,
+      [orgId]
+    )
 
     if (activeProjs && activeProjs.length > 0) {
       activeProjectsCount = activeProjs.length
       revenueGenerated = activeProjs.reduce((acc, p) => acc + (parseFloat(p.amount as any) || 0), 0)
-      inProgressProjects = activeProjs.slice(0, 5).map((p) => ({
+      inProgressProjects = activeProjs.slice(0, 5).map((p: any) => ({
         name: p.title,
         status: p.status,
         totalBudget: parseFloat(p.amount as any) || 0,
@@ -107,22 +102,20 @@ export async function fetchWeeklyReportMetricsAction(): Promise<WeeklyReportData
     }
 
     // D. New Clients in last 7 days
-    const { count: nClients } = await supabase
-      .from('clients')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .gte('created_at', weekAgoIso)
-
-    newClientsCount = nClients || 0
+    const nClientsRes = await queryOne<{ count: number }>(
+      `SELECT COUNT(*)::int as count FROM clients
+       WHERE organization_id = $1 AND created_at >= $2`,
+      [orgId, weekAgoIso]
+    )
+    newClientsCount = nClientsRes?.count || 0
 
     // E. Communication Volume in last 7 days
-    const { count: commCount } = await supabase
-      .from('communication_messages')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .gte('sent_at', weekAgoIso)
-
-    communicationVolume = commCount || 0
+    const commRes = await queryOne<{ count: number }>(
+      `SELECT COUNT(*)::int as count FROM communication_messages
+       WHERE organization_id = $1 AND sent_at >= $2`,
+      [orgId, weekAgoIso]
+    )
+    communicationVolume = commRes?.count || 0
   } catch (err) {
     console.warn('[WeeklyReport:Actions] Error querying metrics from database:', err)
   }
