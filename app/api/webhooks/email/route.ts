@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 import { decryptSecret } from '@/lib/security/encrypt'
 import {
   parseEmailAddressHeader,
@@ -60,15 +60,13 @@ export async function POST(req: NextRequest) {
     const parsedRecipient = parseEmailAddressHeader(recipientTo)
 
     // Resolve matching active Email communication channel from database
-    const supabase = await createClient()
+    const { rows: channels } = await query<any>(
+      `SELECT id, organization_id, external_account_id, metadata, status
+       FROM communication_channels
+       WHERE provider = 'email' AND status = 'active'`
+    )
 
-    const { data: channels, error: channelError } = await supabase
-      .from('communication_channels')
-      .select('id, organization_id, external_account_id, metadata, status')
-      .eq('provider', 'email')
-      .eq('status', 'active')
-
-    if (channelError || !channels || channels.length === 0) {
+    if (!channels || channels.length === 0) {
       console.warn('[EmailWebhook] No active Email channel registered in platform.')
       return NextResponse.json({ ok: true, warning: 'No active Email channel found' })
     }
