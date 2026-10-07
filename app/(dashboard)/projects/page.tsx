@@ -1,7 +1,7 @@
 import { fetchProjectsAction } from './actions'
 import { fetchProjectTemplatesAction } from '@/app/(dashboard)/settings/templates/actions'
 import { ProjectsList } from '@/components/projects/ProjectsList'
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,18 +16,16 @@ export default async function ProjectsPage() {
   let membersList: { id: string; name: string }[] = []
 
   try {
-    const supabase = await createClient()
-
-    const [clientsRes, profilesRes] = await Promise.all([
-      supabase.from('clients').select('id, name').order('name'),
-      supabase.from('profiles').select('id, full_name, email').order('full_name')
+    const [clientsRes, usersRes] = await Promise.all([
+      query<any>(`SELECT id, name FROM clients ORDER BY name ASC`),
+      query<any>(`SELECT id, full_name, email FROM users ORDER BY full_name ASC`),
     ])
 
-    if (clientsRes.data) {
-      clientsList = clientsRes.data
+    if (clientsRes.rows) {
+      clientsList = clientsRes.rows
     }
-    if (profilesRes.data) {
-      membersList = profilesRes.data.map((p) => ({
+    if (usersRes.rows) {
+      membersList = usersRes.rows.map((p) => ({
         id: p.id,
         name: p.full_name || p.email || 'Team Member'
       }))
