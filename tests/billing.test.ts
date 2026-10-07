@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Mock Supabase server client before importing plan-limits
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(),
+vi.mock('@/lib/db', () => ({
+  query: vi.fn(),
+  queryOne: vi.fn(),
 }))
 
-import { createClient } from '@/lib/supabase/server'
+import { queryOne } from '@/lib/db'
 import {
   getOrganizationPlanLimits,
   checkTeamMemberLimit,
@@ -39,22 +39,9 @@ describe('Billing & Plan Usage Calculations', () => {
         analytics_level: 'advanced',
       }
 
-      const mockSupabase = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              maybeSingle: vi.fn().mockResolvedValue({
-                data: {
-                  subscription_plans: {
-                    feature_limits: mockLimits,
-                  },
-                },
-              }),
-            }),
-          }),
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(queryOne as any).mockResolvedValue({
+        feature_limits: mockLimits,
+      })
 
       const limits = await getOrganizationPlanLimits('org-pro-123')
       expect(limits.max_team_members).toBe(15)
@@ -64,16 +51,7 @@ describe('Billing & Plan Usage Calculations', () => {
     })
 
     it('returns starter fallback limits when no subscription record exists', async () => {
-      const mockSupabase = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              maybeSingle: vi.fn().mockResolvedValue({ data: null }),
-            }),
-          }),
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(queryOne as any).mockResolvedValue(null)
 
       const limits = await getOrganizationPlanLimits('org-no-sub')
       expect(limits.max_team_members).toBe(5)
@@ -86,34 +64,17 @@ describe('Billing & Plan Usage Calculations', () => {
 
   describe('Quota checks: Team, Client, Project', () => {
     it('allows team member creation when under the limit', async () => {
-      const mockSupabase = {
-        from: vi.fn((table: string) => {
-          if (table === 'organization_subscriptions') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  maybeSingle: vi.fn().mockResolvedValue({
-                    data: {
-                      subscription_plans: {
-                        feature_limits: { max_team_members: 5, max_clients: 25, max_projects: 50 },
-                      },
-                    },
-                  }),
-                }),
-              }),
-            }
-          }
-          if (table === 'organization_members') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockResolvedValue({ count: 3 }),
-              }),
-            }
-          }
-          return {}
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(queryOne as any).mockImplementation((sql: string) => {
+        if (sql.includes('organization_subscriptions')) {
+          return Promise.resolve({
+            feature_limits: { max_team_members: 5, max_clients: 25, max_projects: 50 },
+          })
+        }
+        if (sql.includes('organization_members')) {
+          return Promise.resolve({ count: '3' })
+        }
+        return Promise.resolve(null)
+      })
 
       const result = await checkTeamMemberLimit('org-1')
       expect(result.allowed).toBe(true)
@@ -123,34 +84,17 @@ describe('Billing & Plan Usage Calculations', () => {
     })
 
     it('blocks team member creation when at or exceeding the limit', async () => {
-      const mockSupabase = {
-        from: vi.fn((table: string) => {
-          if (table === 'organization_subscriptions') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  maybeSingle: vi.fn().mockResolvedValue({
-                    data: {
-                      subscription_plans: {
-                        feature_limits: { max_team_members: 5 },
-                      },
-                    },
-                  }),
-                }),
-              }),
-            }
-          }
-          if (table === 'organization_members') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockResolvedValue({ count: 5 }),
-              }),
-            }
-          }
-          return {}
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(queryOne as any).mockImplementation((sql: string) => {
+        if (sql.includes('organization_subscriptions')) {
+          return Promise.resolve({
+            feature_limits: { max_team_members: 5 },
+          })
+        }
+        if (sql.includes('organization_members')) {
+          return Promise.resolve({ count: '5' })
+        }
+        return Promise.resolve(null)
+      })
 
       const result = await checkTeamMemberLimit('org-1')
       expect(result.allowed).toBe(false)
@@ -160,34 +104,17 @@ describe('Billing & Plan Usage Calculations', () => {
     })
 
     it('blocks client creation when client limit reached', async () => {
-      const mockSupabase = {
-        from: vi.fn((table: string) => {
-          if (table === 'organization_subscriptions') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  maybeSingle: vi.fn().mockResolvedValue({
-                    data: {
-                      subscription_plans: {
-                        feature_limits: { max_clients: 10 },
-                      },
-                    },
-                  }),
-                }),
-              }),
-            }
-          }
-          if (table === 'clients') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockResolvedValue({ count: 10 }),
-              }),
-            }
-          }
-          return {}
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(queryOne as any).mockImplementation((sql: string) => {
+        if (sql.includes('organization_subscriptions')) {
+          return Promise.resolve({
+            feature_limits: { max_clients: 10 },
+          })
+        }
+        if (sql.includes('clients')) {
+          return Promise.resolve({ count: '10' })
+        }
+        return Promise.resolve(null)
+      })
 
       const result = await checkClientLimit('org-1')
       expect(result.allowed).toBe(false)
@@ -195,34 +122,17 @@ describe('Billing & Plan Usage Calculations', () => {
     })
 
     it('blocks project creation when project limit reached', async () => {
-      const mockSupabase = {
-        from: vi.fn((table: string) => {
-          if (table === 'organization_subscriptions') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  maybeSingle: vi.fn().mockResolvedValue({
-                    data: {
-                      subscription_plans: {
-                        feature_limits: { max_projects: 20 },
-                      },
-                    },
-                  }),
-                }),
-              }),
-            }
-          }
-          if (table === 'projects') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockResolvedValue({ count: 20 }),
-              }),
-            }
-          }
-          return {}
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(queryOne as any).mockImplementation((sql: string) => {
+        if (sql.includes('organization_subscriptions')) {
+          return Promise.resolve({
+            feature_limits: { max_projects: 20 },
+          })
+        }
+        if (sql.includes('projects')) {
+          return Promise.resolve({ count: '20' })
+        }
+        return Promise.resolve(null)
+      })
 
       const result = await checkProjectLimit('org-1')
       expect(result.allowed).toBe(false)
@@ -232,70 +142,43 @@ describe('Billing & Plan Usage Calculations', () => {
 
   describe('Proximity warning tiers in getOrganizationPlanUsageDetails', () => {
     it('evaluates normal, warning, critical, and exceeded thresholds correctly', async () => {
-      // Setup limits: team=10, clients=100, projects=50
-      // Current: team=9 (90% -> warning), clients=96 (96% -> critical), projects=50 (100% -> exceeded)
-      const mockSupabase = {
-        from: vi.fn((table: string) => {
-          if (table === 'organization_subscriptions') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  maybeSingle: vi.fn().mockResolvedValue({
-                    data: {
-                      id: 'sub-1',
-                      status: 'active',
-                      current_period_end: new Date(Date.now() + 864000000).toISOString(),
-                      cancel_at_period_end: false,
-                      subscription_plans: {
-                        name: 'Growth Plan',
-                        slug: 'growth',
-                        price_monthly: 99,
-                        feature_limits: {
-                          max_team_members: 10,
-                          max_clients: 100,
-                          max_projects: 50,
-                          storage_limit_gb: 20,
-                          communication_channels_included: 3,
-                          ai_features_enabled: true,
-                        },
-                      },
-                    },
-                  }),
-                }),
-              }),
-            }
-          }
-          if (table === 'organization_members') {
-            return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ count: 9 }) }) }
-          }
-          if (table === 'clients') {
-            return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ count: 96 }) }) }
-          }
-          if (table === 'projects') {
-            return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ count: 50 }) }) }
-          }
-          if (table === 'communication_channels') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  eq: vi.fn().mockResolvedValue({ count: 1 }), // 1/3 (33% -> normal)
-                }),
-              }),
-            }
-          }
-          if (table === 'ai_usage_log') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  gte: vi.fn().mockResolvedValue({ count: 100 }), // 100/500 (20% -> normal)
-                }),
-              }),
-            }
-          }
-          return {}
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(queryOne as any).mockImplementation((sql: string) => {
+        if (sql.includes('organization_subscriptions')) {
+          return Promise.resolve({
+            id: 'sub-1',
+            status: 'active',
+            current_period_end: new Date(Date.now() + 864000000).toISOString(),
+            cancel_at_period_end: false,
+            plan_name: 'Growth Plan',
+            plan_slug: 'growth',
+            price_monthly: 99,
+            feature_limits: {
+              max_team_members: 10,
+              max_clients: 100,
+              max_projects: 50,
+              storage_limit_gb: 20,
+              communication_channels_included: 3,
+              ai_features_enabled: true,
+            },
+          })
+        }
+        if (sql.includes('organization_members')) {
+          return Promise.resolve({ count: '9' })
+        }
+        if (sql.includes('clients')) {
+          return Promise.resolve({ count: '96' })
+        }
+        if (sql.includes('projects')) {
+          return Promise.resolve({ count: '50' })
+        }
+        if (sql.includes('communication_channels')) {
+          return Promise.resolve({ count: '1' })
+        }
+        if (sql.includes('ai_usage_log')) {
+          return Promise.resolve({ count: '100' })
+        }
+        return Promise.resolve(null)
+      })
 
       const usage = await getOrganizationPlanUsageDetails('org-growth')
 
@@ -323,47 +206,21 @@ describe('Billing & Plan Usage Calculations', () => {
 
   describe('isAIFeatureAllowed', () => {
     it('returns false when ai_features_enabled is false on plan', async () => {
-      const mockSupabase = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              maybeSingle: vi.fn().mockResolvedValue({
-                data: {
-                  subscription_plans: {
-                    feature_limits: { ai_features_enabled: false },
-                  },
-                },
-              }),
-            }),
-          }),
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(queryOne as any).mockResolvedValue({
+        feature_limits: { ai_features_enabled: false },
+      })
 
       const allowed = await isAIFeatureAllowed('org-starter', 'reply_suggestions')
       expect(allowed).toBe(false)
     })
 
     it('returns true when capability is enabled on plan', async () => {
-      const mockSupabase = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              maybeSingle: vi.fn().mockResolvedValue({
-                data: {
-                  subscription_plans: {
-                    feature_limits: {
-                      ai_features_enabled: true,
-                      ai_capabilities: { reply_suggestions: true },
-                    },
-                  },
-                },
-              }),
-            }),
-          }),
-        }),
-      }
-      ;(createClient as any).mockResolvedValue(mockSupabase)
+      ;(queryOne as any).mockResolvedValue({
+        feature_limits: {
+          ai_features_enabled: true,
+          ai_capabilities: { reply_suggestions: true },
+        },
+      })
 
       const allowed = await isAIFeatureAllowed('org-pro', 'reply_suggestions')
       expect(allowed).toBe(true)
