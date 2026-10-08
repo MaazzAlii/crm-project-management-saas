@@ -90,7 +90,7 @@ export default async function DashboardPage() {
 
       // 5. Fetch Recent Projects as Recent Activity feed
       const recentProjects = await query<any>(
-        `SELECT id, COALESCE(title, name, 'Project') as project_title, status, created_at
+        `SELECT id, title as project_title, status, created_at
          FROM projects
          WHERE organization_id = $1
          ORDER BY created_at DESC
