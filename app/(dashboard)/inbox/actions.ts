@@ -195,7 +195,7 @@ export async function fetchInboxDataAction(filters?: {
 
     // Fetch clients for dropdown
     const clientsRes = await query<ClientSelectItem>(
-      `SELECT id, name, company_name, email, communication_mode
+      `SELECT id, name, company as company_name, email, communication_mode
        FROM clients
        WHERE organization_id = $1
        ORDER BY name ASC`,
@@ -571,9 +571,12 @@ export async function generateReplySuggestionsAction(
     let effectiveClientName = params.clientName
     let effectiveClientCompany = params.clientCompany
 
-    if (params.clientId) {
+    const isUuid = (val?: string | null) =>
+      !!val && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val)
+
+    if (params.clientId && isUuid(params.clientId)) {
       const clientRecord = await queryOne<{ name: string; company_name: string; communication_mode: string }>(
-        `SELECT name, company_name, communication_mode
+        `SELECT name, company as company_name, communication_mode
          FROM clients
          WHERE id = $1 AND organization_id = $2`,
         [params.clientId, orgId]
@@ -588,7 +591,7 @@ export async function generateReplySuggestionsAction(
 
     // 3. Resolve channel provider
     let providerName = params.channelProvider || 'email'
-    if (params.channelId) {
+    if (params.channelId && isUuid(params.channelId)) {
       const channelRecord = await queryOne<{ provider: string }>(
         `SELECT provider FROM communication_channels WHERE id = $1 AND organization_id = $2`,
         [params.channelId, orgId]
