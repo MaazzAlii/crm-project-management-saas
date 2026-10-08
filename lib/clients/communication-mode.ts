@@ -9,7 +9,7 @@ export type CommunicationMode = 'manual' | 'connected'
 export async function hasActiveChannels(organizationId: string): Promise<boolean> {
   try {
     const row = await queryOne<{ count: string }>(
-      "SELECT COUNT(*) as count FROM communication_channels WHERE organization_id = $1 AND (status = 'active' OR is_active = true)",
+      "SELECT COUNT(*) as count FROM communication_channels WHERE organization_id = $1 AND status = 'active'",
       [organizationId]
     )
 
