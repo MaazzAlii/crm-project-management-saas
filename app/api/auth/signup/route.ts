@@ -67,7 +67,23 @@ export async function POST(request: NextRequest) {
     const refreshToken = generateRefreshToken({
       userId: user.id,
       tokenFamily,
+      email: user.email,
+      role: user.role,
     });
+
+    // Mirror to public.profiles and auth.users for relational integrity
+    try {
+      await query(
+        'INSERT INTO auth.users (id, email) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [user.id, email.toLowerCase()]
+      );
+      await query(
+        `INSERT INTO public.profiles (id, email, full_name)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (id) DO NOTHING`,
+        [user.id, email.toLowerCase(), fullName || null]
+      );
+    } catch {}
 
     // Store refresh token hash
     const refreshTokenHash = crypto

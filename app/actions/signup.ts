@@ -71,6 +71,8 @@ export async function handleSignUpAction(input: SignUpInput) {
     const refreshToken = generateRefreshToken({
       userId: user.id,
       tokenFamily,
+      email: user.email,
+      role: user.role,
     })
 
     const refreshTokenHash = crypto

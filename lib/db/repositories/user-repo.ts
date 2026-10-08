@@ -63,6 +63,7 @@ export class UserRepository {
 
       // Mirror to auth.users and public.profiles for relational FK compatibility
       try {
+        await client.query('SAVEPOINT user_mirror_sp');
         await client.query(
           'INSERT INTO auth.users (id, email) VALUES ($1, $2) ON CONFLICT DO NOTHING',
           [user.id, normalizedEmail]
@@ -70,11 +71,14 @@ export class UserRepository {
         await client.query(
           `INSERT INTO public.profiles (id, email, full_name, avatar_url)
            VALUES ($1, $2, $3, $4)
-           ON CONFLICT (id) DO NOTHING`,
+           ON CONFLICT (id) DO UPDATE SET full_name = EXCLUDED.full_name, email = EXCLUDED.email, avatar_url = EXCLUDED.avatar_url`,
           [user.id, normalizedEmail, user.full_name, user.avatar_url]
         );
+        await client.query('RELEASE SAVEPOINT user_mirror_sp');
       } catch {
-        // Safe fallback if compatibility schema is not in use
+        try {
+          await client.query('ROLLBACK TO SAVEPOINT user_mirror_sp');
+        } catch {}
       }
 
       return user;

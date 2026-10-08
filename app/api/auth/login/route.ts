@@ -55,6 +55,8 @@ export async function POST(request: NextRequest) {
     const refreshToken = generateRefreshToken({
       userId: user.id,
       tokenFamily,
+      email: user.email,
+      role: user.role,
     });
 
     // Store refresh token hash

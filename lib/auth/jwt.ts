@@ -18,6 +18,8 @@ export interface TokenPayload {
 export interface RefreshTokenPayload {
   userId: string;
   tokenFamily: string;
+  email?: string;
+  role?: 'user' | 'org_admin' | 'super_admin' | string;
   iat?: number;
   exp?: number;
 }
