@@ -1,13 +1,21 @@
 import { Pool, QueryResult, QueryResultRow, PoolClient } from 'pg';
 import { dbMonitor } from './monitoring';
 
-let pool: Pool | null = null;
+declare global {
+  var __postgres_pool__: Pool | undefined;
+}
+
+let pool: Pool | null = (globalThis as any).__postgres_pool__ || null;
 
 /**
  * Initialize PostgreSQL connection pool
  */
 export function initializePool(): Pool {
   if (pool) return pool;
+  if ((globalThis as any).__postgres_pool__) {
+    pool = (globalThis as any).__postgres_pool__;
+    return pool!;
+  }
 
   const poolSize = parseInt(process.env.DB_POOL_MAX || '10', 10);
   const minSize = parseInt(process.env.DB_POOL_MIN || '2', 10);
@@ -38,6 +46,8 @@ export function initializePool(): Pool {
   pool.on('error', (err) => {
     console.error('Unexpected error on idle PostgreSQL client', err);
   });
+
+  (globalThis as any).__postgres_pool__ = pool;
 
   return pool;
 }
