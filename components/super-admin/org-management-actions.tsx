@@ -140,7 +140,7 @@ interface OverridePlanModalProps {
 
 export function OverridePlanModal({ orgId, orgName, currentPlanTier }: OverridePlanModalProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState<'free' | 'starter' | 'pro' | 'enterprise'>(
+  const [selectedPlan, setSelectedPlan] = useState<'free' | 'starter' | 'pro' | 'agency' | 'enterprise' | 'lifetime'>(
     (currentPlanTier.toLowerCase() as any) || 'free'
   )
   const [reason, setReason] = useState('')
@@ -195,8 +195,8 @@ export function OverridePlanModal({ orgId, orgName, currentPlanTier }: OverrideP
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                   Select Target Tier
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {(['free', 'starter', 'pro', 'enterprise'] as const).map((tier) => (
+                <div className="grid grid-cols-3 gap-2">
+                  {(['free', 'starter', 'pro', 'agency', 'enterprise', 'lifetime'] as const).map((tier) => (
                     <button
                       key={tier}
                       type="button"
@@ -207,7 +207,7 @@ export function OverridePlanModal({ orgId, orgName, currentPlanTier }: OverrideP
                           : 'border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-800'
                       }`}
                     >
-                      {tier}
+                      {tier === 'lifetime' ? '⭐ Lifetime VIP' : tier}
                     </button>
                   ))}
                 </div>

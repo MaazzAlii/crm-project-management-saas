@@ -7,6 +7,7 @@ import { setRefreshTokenCookie } from '@/lib/auth/session'
 import { userRepo } from '@/lib/db/repositories/user-repo'
 import { orgRepo } from '@/lib/db/repositories/org-repo'
 import { query } from '@/lib/db'
+import { ensureAutoMigrated } from '@/lib/db/auto-migrate'
 
 export interface SignUpInput {
   fullName: string
@@ -28,6 +29,8 @@ export async function handleSignUpAction(input: SignUpInput) {
   }
 
   try {
+    await ensureAutoMigrated()
+
     const cleanEmail = email.toLowerCase().trim()
     const existing = await userRepo.findByEmail(cleanEmail)
     if (existing) {

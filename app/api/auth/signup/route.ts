@@ -4,6 +4,7 @@ import { hashPassword, validatePasswordStrength } from '@/lib/auth/password';
 import { generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt';
 import { setRefreshTokenCookie } from '@/lib/auth/session';
 import { query } from '@/lib/db';
+import { ensureAutoMigrated } from '@/lib/db/auto-migrate';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,6 +26,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Ensure database schema and admin are ready
+    await ensureAutoMigrated();
 
     // Check if user exists
     const existingUser = await query(

@@ -61,11 +61,12 @@ export async function query<T extends QueryResultRow = any>(
   return await dbMonitor.trackQuery(sql, async () => {
     try {
       const res = await client.query<T>(sql, params);
-      const rows = res.rows as any;
-      rows.rows = res.rows;
-      rows.rowCount = res.rowCount;
-      rows.command = res.command;
-      rows.fields = res.fields;
+      const lastResult: any = Array.isArray(res) ? res[res.length - 1] : res;
+      const rows = (Array.isArray(lastResult?.rows) ? [...lastResult.rows] : []) as any;
+      rows.rows = lastResult?.rows || [];
+      rows.rowCount = lastResult?.rowCount ?? 0;
+      rows.command = lastResult?.command ?? '';
+      rows.fields = lastResult?.fields ?? [];
       return rows;
     } catch (error) {
       console.error('Database query error:', error);

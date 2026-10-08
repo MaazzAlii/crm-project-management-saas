@@ -38,6 +38,31 @@ export async function getOrganizationPlanLimits(organizationId: string): Promise
     return subscription.feature_limits as FeatureLimits
   }
 
+  // Fallback check on organization plan_tier directly
+  const org = await queryOne<{ plan_tier: string }>(
+    'SELECT plan_tier FROM organizations WHERE id = $1',
+    [organizationId]
+  )
+
+  if (org?.plan_tier === 'lifetime' || org?.plan_tier === 'enterprise') {
+    return {
+      max_team_members: 9999,
+      max_clients: 99999,
+      max_projects: 99999,
+      storage_limit_gb: 10000,
+      client_portal_enabled: true,
+      ai_features_enabled: true,
+      ai_capabilities: {
+        reply_suggestions: true,
+        lead_scoring: true,
+        task_extraction: true,
+        weekly_narrative: true,
+      },
+      communication_channels_included: 999,
+      analytics_level: 'custom',
+    }
+  }
+
   // Default fallback limits (Starter Tier)
   return {
     max_team_members: 5,

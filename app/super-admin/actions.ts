@@ -45,7 +45,7 @@ export async function toggleSuspendOrganization(
 
 export async function overrideOrganizationPlan(
   orgId: string,
-  newPlanTier: 'free' | 'starter' | 'pro' | 'enterprise',
+  newPlanTier: 'free' | 'starter' | 'pro' | 'agency' | 'enterprise' | 'lifetime',
   reason?: string
 ) {
   try {
