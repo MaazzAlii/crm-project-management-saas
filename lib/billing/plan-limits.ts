@@ -230,7 +230,7 @@ export async function getOrganizationPlanUsageDetails(
     queryOne<{ count: string }>('SELECT COUNT(*) as count FROM organization_members WHERE organization_id = $1', [organizationId]),
     queryOne<{ count: string }>('SELECT COUNT(*) as count FROM clients WHERE organization_id = $1', [organizationId]),
     queryOne<{ count: string }>('SELECT COUNT(*) as count FROM projects WHERE organization_id = $1', [organizationId]),
-    queryOne<{ count: string }>('SELECT COUNT(*) as count FROM communication_channels WHERE organization_id = $1 AND is_active = true', [organizationId]),
+    queryOne<{ count: string }>('SELECT COUNT(*) as count FROM communication_channels WHERE organization_id = $1 AND status = \'active\'', [organizationId]),
     queryOne<{ count: string }>('SELECT COUNT(*) as count FROM ai_usage_log WHERE organization_id = $1 AND created_at >= $2', [organizationId, startOfMonth]),
   ])
 
