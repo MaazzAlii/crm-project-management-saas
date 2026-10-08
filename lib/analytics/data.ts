@@ -149,11 +149,11 @@ export async function fetchOrganizationAnalytics(
   }
 
   const projectsSql = rangeStart
-    ? `SELECT p.id, COALESCE(p.title, p.name) as name, p.status, COALESCE(p.amount, p.budget, 0) as budget, p.deadline, p.created_at, p.delivered_at, p.client_id, c.name as client_name
+    ? `SELECT p.id, p.title as name, p.status, COALESCE(p.amount, 0) as budget, p.deadline, p.created_at, p.delivered_at, p.client_id, c.name as client_name
        FROM projects p
        LEFT JOIN clients c ON c.id = p.client_id
        WHERE p.organization_id = $1 AND p.created_at >= $2`
-    : `SELECT p.id, COALESCE(p.title, p.name) as name, p.status, COALESCE(p.amount, p.budget, 0) as budget, p.deadline, p.created_at, p.delivered_at, p.client_id, c.name as client_name
+    : `SELECT p.id, p.title as name, p.status, COALESCE(p.amount, 0) as budget, p.deadline, p.created_at, p.delivered_at, p.client_id, c.name as client_name
        FROM projects p
        LEFT JOIN clients c ON c.id = p.client_id
        WHERE p.organization_id = $1`
@@ -192,7 +192,7 @@ export async function fetchOrganizationAnalytics(
       project_name: string | null
     }>(
       `SELECT t.id, t.title, t.status, t.priority, t.due_date, t.assigned_to, t.project_id, t.created_at, t.completed_at,
-              COALESCE(p.title, p.name) as project_name
+              p.title as project_name
        FROM tasks t
        LEFT JOIN projects p ON p.id = t.project_id
        WHERE t.organization_id = $1`,
@@ -523,10 +523,10 @@ export async function fetchRevenueReport(
   }
 
   const projectsSql = rangeStart
-    ? `SELECT id, COALESCE(title, name) as name, client_id, COALESCE(amount, budget, 0) as budget, amount, status, type, created_at, delivered_at
+    ? `SELECT id, title as name, client_id, COALESCE(amount, 0) as budget, amount, status, type, created_at, delivered_at
        FROM projects
        WHERE organization_id = $1 AND created_at >= $2`
-    : `SELECT id, COALESCE(title, name) as name, client_id, COALESCE(amount, budget, 0) as budget, amount, status, type, created_at, delivered_at
+    : `SELECT id, title as name, client_id, COALESCE(amount, 0) as budget, amount, status, type, created_at, delivered_at
        FROM projects
        WHERE organization_id = $1`
 
