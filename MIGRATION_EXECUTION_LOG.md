@@ -249,6 +249,33 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - Local auto-migration tested and verified: `[AutoMigrate] 🚀 Admin user maazalisshahid@gmail.com ready with Lifetime VIP subscription.`
 - **Status**: ✅ Complete and ready for deployment.
 
+---
+
+### Step 12: Standalone PostgreSQL Auth Compatibility Stubs & Registration Transaction Safety
+- **Date/Time**: 2026-10-08 21:40
+- **Task**: Fix `error: schema "auth" does not exist` and `relation "users" does not exist` occurring on live Coolify VPS deployment during registration and auto-migration.
+- **Why Performed**: Standalone PostgreSQL container in Coolify lacks Supabase's default `auth` schema, causing legacy migration `0002_memberships_roles.sql` (`REFERENCES auth.users(id)`) to halt auto-migration prior to table initialization. In addition, user registration transactions needed PostgreSQL `SAVEPOINT` isolation when mirroring profiles.
+- **Actions Performed**:
+  1. Created `supabase/migrations/0000_auth_compatibility.sql` and updated `lib/db/embedded-migrations.ts` establishing `auth` schema, `auth.users` stub, `auth.uid()`, `auth.role()` functions, and native `public.users` table.
+  2. Enhanced `ensureAutoMigrated()` in `lib/db/auto-migrate.ts` with Step 0 prerequisite verification ensuring compatibility objects exist before executing migrations.
+  3. Hardened `userRepo.create()` in `lib/db/repositories/user-repo.ts` with `SAVEPOINT user_mirror_sp` to prevent aborting client transactions on profile mirroring.
+  4. Updated `lib/auth/jwt.ts` and auth routes (`/api/auth/login`, `/api/auth/signup`, `app/actions/signup.ts`) to attach `email` and `role` to refresh tokens so Edge JWT middleware recognizes `super_admin` permissions without redirection loops.
+- **Files Modified/Created**:
+  - `supabase/migrations/0000_auth_compatibility.sql`
+  - `lib/db/embedded-migrations.ts`
+  - `lib/db/auto-migrate.ts`
+  - `lib/db/repositories/user-repo.ts`
+  - `lib/auth/jwt.ts`
+  - `app/actions/signup.ts`
+  - `app/api/auth/login/route.ts`
+  - `app/api/auth/signup/route.ts`
+- **Verification / Test Result**:
+  - `npm run type-check`: 0 errors.
+  - `npm test`: 15 test files, 149/149 tests passed (100%).
+  - `npm run build`: 77 routes compiled successfully with 0 errors.
+- **Status**: ✅ Completed and deployed.
+
+
 
 
 
