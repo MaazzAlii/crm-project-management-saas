@@ -267,6 +267,20 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
 
 ---
 
+### Step 13: CI/CD Pipeline Fix — Automated Test Database Service Container
+- **Date/Time**: 2026-10-09 14:05
+- **Task**: Configure isolated PostgreSQL 16 service container in `.github/workflows/deploy.yml` for automated CI test and build validation steps.
+- **Why Performed**: GitHub Actions runner runs in a clean VM without a local PostgreSQL instance by default, causing integration and database service tests to fail with `ECONNREFUSED 127.0.0.1:54322`.
+- **Actions Performed**:
+  1. Added `services: postgres:` (`postgres:16-alpine`) to the `validate:` job in `.github/workflows/deploy.yml` on port `54322:5432`.
+  2. Injected test environment variables (`DATABASE_URL`, `JWT_SECRET`, `REFRESH_TOKEN_SECRET`) to test and build steps.
+  3. Removed deprecated `NEXT_PUBLIC_SUPABASE_URL` build arguments.
+- **Verification / Test Result**:
+  - `npm test`: 15 test files, 151/151 tests passed (100%).
+- **Status**: ✅ CI/CD Pipeline Configured with PostgreSQL Service.
+
+---
+
 ### Step 12: Standalone PostgreSQL Auth Compatibility Stubs & Registration Transaction Safety
 - **Date/Time**: 2026-10-08 21:40
 - **Task**: Fix `error: schema "auth" does not exist` and `relation "users" does not exist` occurring on live Coolify VPS deployment during registration and auto-migration.

@@ -30,6 +30,21 @@ jobs:
   validate:
     name: Type-Check, Test & Build Validation
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres_dev_password
+          POSTGRES_DB: innoventix
+        ports:
+          - 54322:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -48,6 +63,16 @@ jobs:
 
       - name: Run Automated Test Suite (Vitest)
         run: npm run test
+        env:
+          DATABASE_URL: postgres://postgres:postgres_dev_password@localhost:54322/innoventix
+          DB_HOST: localhost
+          DB_PORT: 54322
+          DB_USER: postgres
+          DB_PASSWORD: postgres_dev_password
+          DB_NAME: innoventix
+          JWT_SECRET: d0a391b9da5876ead44bdbf4de07fa3cf73ebe0355f65521e9b902f256c4851f
+          REFRESH_TOKEN_SECRET: fc75593f45889b1e6fbd283ab846b36d0b6998b4954097f3e8fc4d8c6adb5807
+          REFRESH_SECRET: fc75593f45889b1e6fbd283ab846b36d0b6998b4954097f3e8fc4d8c6adb5807
 
       - name: Build Application
         run: npm run build
@@ -55,7 +80,10 @@ jobs:
           NEXT_TELEMETRY_DISABLED: 1
           NODE_ENV: production
           NEXT_PUBLIC_APP_URL: https://app.innoventixhub.com
-          NEXT_PUBLIC_SUPABASE_URL: https://api.innoventixhub.com
+          DATABASE_URL: postgres://postgres:postgres_dev_password@localhost:54322/innoventix
+          JWT_SECRET: d0a391b9da5876ead44bdbf4de07fa3cf73ebe0355f65521e9b902f256c4851f
+          REFRESH_TOKEN_SECRET: fc75593f45889b1e6fbd283ab846b36d0b6998b4954097f3e8fc4d8c6adb5807
+          REFRESH_SECRET: fc75593f45889b1e6fbd283ab846b36d0b6998b4954097f3e8fc4d8c6adb5807
 
   # =========================================================================
   # STEP 3 & 4: BUILD DOCKER IMAGE & PUSH TO GHCR
@@ -101,7 +129,7 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NEXT_PUBLIC_APP_URL=https://app.innoventixhub.com
-            NEXT_PUBLIC_SUPABASE_URL=https://api.innoventixhub.com
+
 
   # =========================================================================
   # STEP 5, 6 & 7: DEPLOY TO CONTABO VPS WITH POST-DEPLOY HEALTHCHECK & ROLLBACK
