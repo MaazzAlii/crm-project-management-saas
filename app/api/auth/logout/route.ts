@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { deleteRefreshTokenCookie, getRefreshTokenFromCookie } from '@/lib/auth/session';
+import { deleteRefreshTokenCookie, getRefreshTokenFromCookie, getDefaultSessionConfig } from '@/lib/auth/session';
 import { query } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
@@ -20,13 +20,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Delete cookie
+    // Delete cookie via helper
     await deleteRefreshTokenCookie();
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       { message: 'Logged out successfully' },
       { status: 200 }
     );
+
+    const sessionConfig = getDefaultSessionConfig();
+    response.cookies.set(sessionConfig.cookieName, '', {
+      httpOnly: sessionConfig.cookieHttpOnly,
+      secure: sessionConfig.cookieSecure,
+      sameSite: sessionConfig.cookieSameSite,
+      maxAge: 0,
+      domain: sessionConfig.cookieDomain,
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     console.error('Logout error:', error);
     return NextResponse.json(

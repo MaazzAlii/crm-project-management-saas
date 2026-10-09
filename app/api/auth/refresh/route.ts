@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { verifyRefreshToken, generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt';
-import { getRefreshTokenFromCookie, setRefreshTokenCookie, deleteRefreshTokenCookie } from '@/lib/auth/session';
+import { getRefreshTokenFromCookie, setRefreshTokenCookie, deleteRefreshTokenCookie, getDefaultSessionConfig } from '@/lib/auth/session';
 import { query } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
@@ -85,13 +85,25 @@ export async function POST(request: NextRequest) {
       [user.id, newRefreshTokenHash, payload.tokenFamily]
     );
 
-    // Set new refresh token cookie
+    // Set new refresh token cookie via helper
     await setRefreshTokenCookie(newRefreshToken);
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       { accessToken: newAccessToken },
       { status: 200 }
     );
+
+    const sessionConfig = getDefaultSessionConfig();
+    response.cookies.set(sessionConfig.cookieName, newRefreshToken, {
+      httpOnly: sessionConfig.cookieHttpOnly,
+      secure: sessionConfig.cookieSecure,
+      sameSite: sessionConfig.cookieSameSite,
+      maxAge: sessionConfig.maxAge,
+      domain: sessionConfig.cookieDomain,
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     console.error('Refresh error:', error);
     return NextResponse.json(

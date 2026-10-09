@@ -9,14 +9,28 @@ export interface SessionConfig {
   maxAge: number; // in seconds
 }
 
-const defaultConfig: SessionConfig = {
-  cookieName: process.env.COOKIE_NAME || 'innoventix_session',
-  cookieDomain: process.env.COOKIE_DOMAIN,
-  cookieSecure: process.env.NODE_ENV === 'production',
-  cookieHttpOnly: true,
-  cookieSameSite: 'lax',
-  maxAge: 7 * 24 * 60 * 60, // 7 days
-};
+export function getCookieDomain(): string | undefined {
+  const domain = process.env.COOKIE_DOMAIN?.trim();
+  return domain && domain.length > 0 ? domain : undefined;
+}
+
+export function getCookieSecure(): boolean {
+  if (process.env.COOKIE_SECURE === 'false') return false;
+  if (process.env.COOKIE_SECURE === 'true') return true;
+  if (process.env.NEXT_PUBLIC_APP_URL?.startsWith('http://')) return false;
+  return process.env.NODE_ENV === 'production';
+}
+
+export function getDefaultSessionConfig(): SessionConfig {
+  return {
+    cookieName: process.env.COOKIE_NAME || 'innoventix_session',
+    cookieDomain: getCookieDomain(),
+    cookieSecure: getCookieSecure(),
+    cookieHttpOnly: true,
+    cookieSameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60, // 7 days
+  };
+}
 
 /**
  * Set a refresh token in HTTP-only cookie
@@ -25,7 +39,7 @@ export async function setRefreshTokenCookie(
   token: string,
   config: Partial<SessionConfig> = {}
 ): Promise<void> {
-  const finalConfig = { ...defaultConfig, ...config };
+  const finalConfig = { ...getDefaultSessionConfig(), ...config };
   try {
     const cookieStore = await cookies();
     cookieStore.set(finalConfig.cookieName, token, {
@@ -118,7 +132,8 @@ export type UserSessionContext = SessionContext;
 export async function getCurrentSessionContext(): Promise<SessionContext | null> {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get(defaultConfig.cookieName)?.value;
+    const sessionConfig = getDefaultSessionConfig();
+    const token = cookieStore.get(sessionConfig.cookieName)?.value;
 
     // Check if token exists
     if (!token) {

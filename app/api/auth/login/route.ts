@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { verifyPassword } from '@/lib/auth/password';
 import { generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt';
-import { setRefreshTokenCookie } from '@/lib/auth/session';
+import { setRefreshTokenCookie, getDefaultSessionConfig } from '@/lib/auth/session';
 import { query } from '@/lib/db';
 import { ensureAutoMigrated } from '@/lib/db/auto-migrate';
 
@@ -77,16 +77,29 @@ export async function POST(request: NextRequest) {
       [user.id]
     );
 
-    // Set refresh token cookie
+    // Set refresh token cookie via helper
     await setRefreshTokenCookie(refreshToken);
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         accessToken,
         user: { id: user.id, email: user.email, role: user.role },
       },
       { status: 200 }
     );
+
+    // Also attach cookie directly to the outgoing NextResponse
+    const sessionConfig = getDefaultSessionConfig();
+    response.cookies.set(sessionConfig.cookieName, refreshToken, {
+      httpOnly: sessionConfig.cookieHttpOnly,
+      secure: sessionConfig.cookieSecure,
+      sameSite: sessionConfig.cookieSameSite,
+      maxAge: sessionConfig.maxAge,
+      domain: sessionConfig.cookieDomain,
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(

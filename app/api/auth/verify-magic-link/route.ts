@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { verifyMagicLinkToken } from '@/lib/auth/magic-link';
 import { generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt';
-import { setRefreshTokenCookie } from '@/lib/auth/session';
+import { setRefreshTokenCookie, getDefaultSessionConfig } from '@/lib/auth/session';
 import { query } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
@@ -50,10 +50,10 @@ export async function POST(request: NextRequest) {
       [user.id, refreshTokenHash, tokenFamily]
     );
 
-    // Set refresh token cookie
+    // Set refresh token cookie via helper
     await setRefreshTokenCookie(refreshToken);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       message: 'Authentication successful',
       accessToken,
       user: {
@@ -64,6 +64,18 @@ export async function POST(request: NextRequest) {
         emailVerified: user.email_verified,
       },
     });
+
+    const sessionConfig = getDefaultSessionConfig();
+    response.cookies.set(sessionConfig.cookieName, refreshToken, {
+      httpOnly: sessionConfig.cookieHttpOnly,
+      secure: sessionConfig.cookieSecure,
+      sameSite: sessionConfig.cookieSameSite,
+      maxAge: sessionConfig.maxAge,
+      domain: sessionConfig.cookieDomain,
+      path: '/',
+    });
+
+    return response;
   } catch (error: any) {
     console.error('Magic link verification error:', error);
     return NextResponse.json(

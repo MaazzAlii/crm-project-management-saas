@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers'
+import { getCookieSecure, getCookieDomain } from './session'
 
 export interface ImpersonationContext {
   active: boolean
@@ -56,10 +57,11 @@ export async function setImpersonationCookie(orgId: string, orgName: string): Pr
   const cookieStore = cookies()
   cookieStore.set(COOKIE_NAME, payload, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: getCookieSecure(),
     sameSite: 'lax',
     path: '/',
     maxAge: 3600,
+    domain: getCookieDomain(),
   })
 
   return expiresAt

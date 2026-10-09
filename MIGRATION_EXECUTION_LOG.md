@@ -364,6 +364,36 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - Every change committed individually with Conventional Commits and pushed immediately to `origin main` and `deploy main`.
 - **Status**: ✅ All 7 Sections Fully Tested, Documented & Pushed.
 
+---
+
+### Step 10: Browser Testing & Resolution for Domain Login Issue
+
+- **Timestamp**: 2026-10-09T23:25:00+05:00
+- **Task ID**: `FIX-DOMAIN-LOGIN`
+- **Action Performed**:
+  - Tested login in browser environment on live domain `http://mspxxqi8itcxqfdkkkqxzfr6.85.239.246.243.sslip.io` and dev server.
+  - Diagnosed exact root cause why domain login redirected back to `/login`:
+    1. `lib/auth/session.ts` previously hardcoded `cookieSecure: process.env.NODE_ENV === 'production'`, ignoring `COOKIE_SECURE=false`. In production environments accessed over HTTP (non-SSL), browsers strictly reject/drop any cookie marked `Secure`.
+    2. `process.env.COOKIE_DOMAIN` was defaulting to empty string `""` in cookie options instead of `undefined`, corrupting cookie domain attributes on custom domains.
+    3. Route Handlers needed explicit `response.cookies.set()` in addition to `setRefreshTokenCookie()` to guarantee the `Set-Cookie` header serialization across all Next.js App Router boundaries.
+  - Implemented `getCookieSecure()` and `getCookieDomain()` helpers to automatically adapt cookie security flags to HTTP/HTTPS protocols and environment configurations.
+  - Updated `app/api/auth/login/route.ts`, `app/api/auth/signup/route.ts`, `app/api/auth/refresh/route.ts`, `app/api/auth/logout/route.ts`, `app/api/auth/verify-magic-link/route.ts`, `lib/auth/impersonation.ts`, and `app/actions/org.ts`.
+- **Files Modified**:
+  - `lib/auth/session.ts`
+  - `lib/auth/impersonation.ts`
+  - `app/actions/org.ts`
+  - `app/api/auth/login/route.ts`
+  - `app/api/auth/signup/route.ts`
+  - `app/api/auth/refresh/route.ts`
+  - `app/api/auth/logout/route.ts`
+  - `app/api/auth/verify-magic-link/route.ts`
+- **Verification / Test Result**:
+  - 151/151 Vitest test suites passed (`npm test`).
+  - TypeScript type checking clean (`npm run type-check`).
+  - Full domain login cookie generation and routing validated.
+- **Status**: ✅ Resolved and Verified.
+
+
 
 
 
