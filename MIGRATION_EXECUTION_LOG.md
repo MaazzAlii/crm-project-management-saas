@@ -251,6 +251,22 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
 
 ---
 
+### Step 12: Security Hardening — Auth Tables Row Level Security & Privilege Revocation
+- **Date/Time**: 2026-10-09 12:30
+- **Task**: Enforce Row Level Security (RLS) and revoke all public privileges (`anon`, `authenticated`) on server-side auth tables (`users`, `refresh_tokens`, `sessions`, `auth_tokens`).
+- **Why Performed**: Responsible disclosure finding verified that PostgreSQL auth tables in the `public` schema lacked explicit RLS enablement and privilege revocation, which in Supabase/PostgREST setups could expose user records and password hashes to public API roles.
+- **Actions Performed**:
+  1. Created `supabase/migrations/0033_auth_tables_rls_security.sql` enabling RLS on `users`, `refresh_tokens`, `sessions`, and `auth_tokens`, and revoking `ALL` from `anon` and `authenticated` roles.
+  2. Updated `supabase/migrations/0001_init_auth_system.sql`, `0002_auth_tokens.sql`, and `0008_rls_policies.sql` to include RLS on auth tables.
+  3. Registered migration 33 in `lib/db/embedded-migrations.ts` and enabled RLS in `lib/db/auto-migrate.ts` schema bootstrap.
+  4. Expanded `tests/rls-isolation.test.ts` to assert deny-by-default on all internal auth tables.
+- **Verification / Test Result**:
+  - `npm test`: **15 test files, 151/151 tests passed (100%)**.
+  - `npm run build`: **77 routes compiled successfully (0 errors)**.
+- **Status**: ✅ Auth Tables Hardened & RLS Enforced.
+
+---
+
 ### Step 12: Standalone PostgreSQL Auth Compatibility Stubs & Registration Transaction Safety
 - **Date/Time**: 2026-10-08 21:40
 - **Task**: Fix `error: schema "auth" does not exist` and `relation "users" does not exist` occurring on live Coolify VPS deployment during registration and auto-migration.

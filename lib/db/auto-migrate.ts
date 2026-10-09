@@ -46,6 +46,7 @@ export async function ensureAutoMigrated(): Promise<{ status: string; appliedCou
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
         CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
+        ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
         -- Ensure platform_settings table exists
         CREATE TABLE IF NOT EXISTS public.platform_settings (

@@ -18,3 +18,7 @@ CREATE INDEX IF NOT EXISTS idx_auth_tokens_email_type ON auth_tokens(email, type
 CREATE INDEX IF NOT EXISTS idx_auth_tokens_token_hash ON auth_tokens(token_hash);
 CREATE INDEX IF NOT EXISTS idx_auth_tokens_expires_at ON auth_tokens(expires_at);
 CREATE INDEX IF NOT EXISTS idx_auth_tokens_user_id ON auth_tokens(user_id);
+
+-- Enable Row Level Security (Server-side access only; deny-by-default for API roles)
+ALTER TABLE auth_tokens ENABLE ROW LEVEL SECURITY;
+

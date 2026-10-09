@@ -155,3 +155,21 @@ ALTER TABLE public.super_admins ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Super admins can view super admins list"
     ON public.super_admins FOR SELECT
     USING (public.is_super_admin());
+
+-- 12. RLS & Access Hardening: Internal Auth Tables (users, refresh_tokens, sessions, auth_tokens)
+-- Server-side only tables; deny-by-default for anon/authenticated roles
+ALTER TABLE IF EXISTS public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.refresh_tokens ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.auth_tokens ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+        REVOKE ALL ON public.users, public.refresh_tokens, public.sessions, public.auth_tokens FROM anon;
+    END IF;
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+        REVOKE ALL ON public.users, public.refresh_tokens, public.sessions, public.auth_tokens FROM authenticated;
+    END IF;
+END $$;
+

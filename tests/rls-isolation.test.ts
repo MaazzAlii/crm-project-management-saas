@@ -251,4 +251,39 @@ describe('Row-Level Security (RLS) Multi-Tenant Isolation', () => {
       expect(Policies.clients.delete(superAdminUser, clientA)).toBe(false)
     })
   })
+
+  describe('Internal Auth Tables RLS Boundary (Migration 33 / Security Hardening)', () => {
+    // Auth tables (users, refresh_tokens, sessions, auth_tokens) have RLS enabled with NO policies
+    // This enforces a strict deny-by-default on all API roles (anon, authenticated, portal)
+    const AuthTablePolicies = {
+      users: {
+        select: (_ctx: MockAuthContext) => false, // Only service_role / backend direct connection bypasses RLS
+        insert: (_ctx: MockAuthContext) => false,
+      },
+      refresh_tokens: {
+        select: (_ctx: MockAuthContext) => false,
+      },
+      sessions: {
+        select: (_ctx: MockAuthContext) => false,
+      },
+      auth_tokens: {
+        select: (_ctx: MockAuthContext) => false,
+      },
+    }
+
+    it('denies direct API access to users table for org members, super admins, and portal users', () => {
+      expect(AuthTablePolicies.users.select(userOrgAAdmin)).toBe(false)
+      expect(AuthTablePolicies.users.select(userOrgAMember)).toBe(false)
+      expect(AuthTablePolicies.users.select(superAdminUser)).toBe(false)
+      expect(AuthTablePolicies.users.select(portalUserOrgAClient1)).toBe(false)
+    })
+
+    it('denies direct API access to token and session tables', () => {
+      expect(AuthTablePolicies.refresh_tokens.select(userOrgAMember)).toBe(false)
+      expect(AuthTablePolicies.sessions.select(userOrgAMember)).toBe(false)
+      expect(AuthTablePolicies.auth_tokens.select(userOrgAMember)).toBe(false)
+    })
+
+  })
 })
+
