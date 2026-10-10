@@ -8,6 +8,10 @@ export const pipelineService = {
   // PIPELINES
   // ==========================================
 
+  async ensureDefaultPipeline(orgId: string, createdBy?: string | null): Promise<Pipeline> {
+    return await pipelineRepo.ensureDefaultPipeline(orgId, createdBy);
+  },
+
   async listPipelines(session: SessionContext): Promise<ServiceResult<Pipeline[]>> {
     const orgId = session.orgId;
     if (!orgId) return { success: false, error: { code: 'UNAUTHORIZED', message: 'No org context' } };
