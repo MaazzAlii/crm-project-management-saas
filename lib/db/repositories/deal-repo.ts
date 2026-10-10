@@ -140,7 +140,7 @@ export const dealRepo = {
           ), 0) as checklist_done_count,
           COALESCE((
             SELECT COUNT(*) FROM public.deal_comments dcm
-            WHERE dcm.deal_id = d.id AND dcm.is_deleted = false
+            WHERE dcm.deal_id = d.id AND dcm.deleted_at IS NULL
           ), 0) as comments_count
         FROM public.deals d
         WHERE ${conditions.join(' AND ')}
@@ -234,7 +234,7 @@ export const dealRepo = {
         ), 0) as checklist_done_count,
         COALESCE((
           SELECT COUNT(*) FROM public.deal_comments dcm
-          WHERE dcm.deal_id = d.id AND dcm.is_deleted = false
+          WHERE dcm.deal_id = d.id AND dcm.deleted_at IS NULL
         ), 0) as comments_count
       FROM public.deals d
       WHERE ${where}
@@ -281,7 +281,7 @@ export const dealRepo = {
         ), 0) as checklist_done_count,
         COALESCE((
           SELECT COUNT(*) FROM public.deal_comments dcm
-          WHERE dcm.deal_id = d.id AND dcm.is_deleted = false
+          WHERE dcm.deal_id = d.id AND dcm.deleted_at IS NULL
         ), 0) as comments_count
       FROM public.deals d
       WHERE d.org_id = $1 AND d.id = $2`,
@@ -651,14 +651,21 @@ export const dealRepo = {
   async getDealComments(orgId: string, dealId: string): Promise<DealComment[]> {
     const res = await query<any>(
       `SELECT 
-        dc.*,
-        u.name as author_name,
+        dc.id,
+        dc.org_id,
+        dc.deal_id,
+        dc.author_id,
+        dc.body as content,
+        dc.body,
+        dc.created_at,
+        dc.updated_at,
+        u.full_name as author_name,
         u.email as author_email,
         u.avatar_url as author_avatar_url
       FROM public.deal_comments dc
       JOIN public.deals d ON d.id = dc.deal_id
       LEFT JOIN public.users u ON u.id = dc.author_id
-      WHERE d.org_id = $1 AND dc.deal_id = $2 AND dc.is_deleted = false
+      WHERE d.org_id = $1 AND dc.deal_id = $2 AND dc.deleted_at IS NULL
       ORDER BY dc.created_at ASC`,
       [orgId, dealId]
     );
@@ -670,10 +677,10 @@ export const dealRepo = {
     if (!deal) return null;
 
     const res = await query<DealComment>(
-      `INSERT INTO public.deal_comments (deal_id, author_id, content, is_deleted, created_at, updated_at)
-       VALUES ($1, $2, $3, false, NOW(), NOW())
-       RETURNING *`,
-      [dealId, authorId, content.trim()]
+      `INSERT INTO public.deal_comments (org_id, deal_id, author_id, body, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, NOW(), NOW())
+       RETURNING id, org_id, deal_id, author_id, body as content, created_at, updated_at`,
+      [orgId, dealId, authorId, content.trim()]
     );
     return res.rows[0];
   },
@@ -686,10 +693,10 @@ export const dealRepo = {
   ): Promise<DealComment | null> {
     const res = await query<DealComment>(
       `UPDATE public.deal_comments dc
-       SET content = $1, updated_at = NOW()
+       SET body = $1, updated_at = NOW()
        FROM public.deals d
-       WHERE dc.deal_id = d.id AND d.org_id = $2 AND dc.id = $3 AND dc.author_id = $4 AND dc.is_deleted = false
-       RETURNING dc.*`,
+       WHERE dc.deal_id = d.id AND d.org_id = $2 AND dc.id = $3 AND dc.author_id = $4 AND dc.deleted_at IS NULL
+       RETURNING dc.id, dc.org_id, dc.deal_id, dc.author_id, dc.body as content, dc.created_at, dc.updated_at`,
       [content.trim(), orgId, commentId, authorId]
     );
     return res.rows?.[0] || null;
@@ -706,7 +713,7 @@ export const dealRepo = {
 
     const res = await query(
       `UPDATE public.deal_comments dc
-       SET is_deleted = true, updated_at = NOW()
+       SET deleted_at = NOW(), updated_at = NOW()
        FROM public.deals d
        WHERE dc.deal_id = d.id AND d.org_id = $1 AND dc.id = $2 ${whereAuth}`,
       params
