@@ -9,19 +9,22 @@ export interface EdgeTokenPayload {
   [key: string]: any
 }
 
-const DEFAULT_JWT_SECRET = 'd0a391b9da5876ead44bdbf4de07fa3cf73ebe0355f65521e9b902f256c4851f';
-const DEFAULT_REFRESH_SECRET = 'fc75593f45889b1e6fbd283ab846b36d0b6998b4954097f3e8fc4d8c6adb5807';
-
-function getJwtSecret(): Uint8Array {
-  return new TextEncoder().encode(
-    process.env.JWT_SECRET?.trim() || DEFAULT_JWT_SECRET
-  )
+export function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET?.trim();
+  if (secret) return new TextEncoder().encode(secret);
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is missing in production');
+  }
+  return new TextEncoder().encode('dev-jwt-secret-insecure-fallback-do-not-use-in-prod');
 }
 
-function getRefreshSecret(): Uint8Array {
-  return new TextEncoder().encode(
-    process.env.REFRESH_TOKEN_SECRET?.trim() || process.env.REFRESH_SECRET?.trim() || DEFAULT_REFRESH_SECRET
-  )
+export function getRefreshSecret(): Uint8Array {
+  const secret = process.env.REFRESH_TOKEN_SECRET?.trim() || process.env.REFRESH_SECRET?.trim();
+  if (secret) return new TextEncoder().encode(secret);
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('REFRESH_TOKEN_SECRET environment variable is missing in production');
+  }
+  return new TextEncoder().encode('dev-refresh-secret-insecure-fallback-do-not-use-in-prod');
 }
 
 /**
