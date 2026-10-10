@@ -29,6 +29,7 @@ export default async function LeadsPage() {
         initialPipelines={pipelines}
         defaultPipelineId={defaultPipeline.id}
         currentUserId={session.userId}
+        currentUserRole={session.role}
       />
     </div>
   );
