@@ -314,14 +314,12 @@ export const dealRepo = {
 
       const res = await client.query<Deal>(
         `INSERT INTO public.deals (
-          org_id, pipeline_id, stage_id, title, value, currency,
-          probability, expected_close_date, company_name, contact_name,
-          contact_email, contact_phone, client_id, owner_id, position,
+          org_id, pipeline_id, stage_id, title, description, value, currency,
+          probability, expected_close_date, client_id, owner_id, position,
           status, version, created_at, updated_at
         ) VALUES (
-          $1, $2, $3, $4, $5, $6,
-          $7, $8, $9, $10,
-          $11, $12, $13, $14, $15,
+          $1, $2, $3, $4, $5, $6, $7,
+          $8, $9, $10, $11, $12,
           'open', 1, NOW(), NOW()
         ) RETURNING *`,
         [
@@ -329,14 +327,11 @@ export const dealRepo = {
           input.pipeline_id,
           input.stage_id,
           input.title.trim(),
+          input.description || null,
           input.value ?? 0,
           input.currency || 'USD',
           input.probability ?? 50,
           input.expected_close_date || null,
-          input.company_name || null,
-          input.contact_name || null,
-          input.contact_email || null,
-          input.contact_phone || null,
           input.client_id || null,
           input.owner_id || null,
           position,
