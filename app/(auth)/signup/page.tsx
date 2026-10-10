@@ -21,22 +21,24 @@ export default function SignUpPage() {
     setLoading(true)
     setError(null)
 
-    const res = await handleSignUpAction({
-      fullName,
-      orgName,
-      email,
-      password,
-    })
+    try {
+      const res = await handleSignUpAction({
+        fullName,
+        orgName,
+        email,
+        password,
+      })
 
-    if (res.error) {
-      setError(res.error)
+      if (res.error) {
+        setError(res.error)
+      } else if (res.redirectUrl) {
+        window.location.assign(res.redirectUrl)
+        return
+      }
+    } catch {
+      setError('An unexpected network error occurred. Please try again.')
+    } finally {
       setLoading(false)
-      return
-    }
-
-    if (res.redirectUrl) {
-      router.push(res.redirectUrl)
-      router.refresh()
     }
   }
 
