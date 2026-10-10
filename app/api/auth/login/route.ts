@@ -77,8 +77,11 @@ export async function POST(request: NextRequest) {
       [user.id]
     );
 
+    // Get session config adapted to request headers (x-forwarded-proto, etc.)
+    const sessionConfig = getDefaultSessionConfig(request.headers);
+
     // Set refresh token cookie via helper
-    await setRefreshTokenCookie(refreshToken);
+    await setRefreshTokenCookie(refreshToken, sessionConfig, request.headers);
 
     const response = NextResponse.json(
       {
@@ -89,7 +92,6 @@ export async function POST(request: NextRequest) {
     );
 
     // Also attach cookie directly to the outgoing NextResponse
-    const sessionConfig = getDefaultSessionConfig();
     response.cookies.set(sessionConfig.cookieName, refreshToken, {
       httpOnly: sessionConfig.cookieHttpOnly,
       secure: sessionConfig.cookieSecure,

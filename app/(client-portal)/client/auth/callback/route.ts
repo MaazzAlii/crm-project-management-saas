@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       [user.id, refreshTokenHash, tokenFamily]
     )
 
-    await setRefreshTokenCookie(refreshToken)
+    await setRefreshTokenCookie(refreshToken, {}, request.headers)
 
     // Update last login
     await query(

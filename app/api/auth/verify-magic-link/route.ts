@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const sessionConfig = getDefaultSessionConfig();
+    const sessionConfig = getDefaultSessionConfig(request.headers);
     response.cookies.set(sessionConfig.cookieName, refreshToken, {
       httpOnly: sessionConfig.cookieHttpOnly,
       secure: sessionConfig.cookieSecure,

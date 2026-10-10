@@ -85,15 +85,17 @@ export async function POST(request: NextRequest) {
       [user.id, newRefreshTokenHash, payload.tokenFamily]
     );
 
+    // Get session config adapted to request headers (x-forwarded-proto, etc.)
+    const sessionConfig = getDefaultSessionConfig(request.headers);
+
     // Set new refresh token cookie via helper
-    await setRefreshTokenCookie(newRefreshToken);
+    await setRefreshTokenCookie(newRefreshToken, sessionConfig, request.headers);
 
     const response = NextResponse.json(
       { accessToken: newAccessToken },
       { status: 200 }
     );
 
-    const sessionConfig = getDefaultSessionConfig();
     response.cookies.set(sessionConfig.cookieName, newRefreshToken, {
       httpOnly: sessionConfig.cookieHttpOnly,
       secure: sessionConfig.cookieSecure,

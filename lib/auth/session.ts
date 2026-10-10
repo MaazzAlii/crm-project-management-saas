@@ -1,4 +1,4 @@
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 export interface SessionConfig {
   cookieName: string;
@@ -14,18 +14,66 @@ export function getCookieDomain(): string | undefined {
   return domain && domain.length > 0 ? domain : undefined;
 }
 
-export function getCookieSecure(): boolean {
+export function getCookieSecure(
+  requestHeaders?: Headers | { get(name: string): string | null } | null
+): boolean {
+  // Explicit env override takes highest precedence
   if (process.env.COOKIE_SECURE === 'false') return false;
   if (process.env.COOKIE_SECURE === 'true') return true;
+
+  // Helper to inspect headers
+  const checkProto = (h: { get(name: string): string | null }): boolean | null => {
+    const proto = h.get('x-forwarded-proto') || h.get('x-forwarded-protocol') || h.get('x-url-scheme');
+    if (proto) {
+      return proto.split(',')[0].trim().toLowerCase() === 'https';
+    }
+    const ssl = h.get('x-forwarded-ssl');
+    if (ssl) {
+      return ssl.trim().toLowerCase() === 'on' || ssl.trim() === '1';
+    }
+    const referer = h.get('referer');
+    if (referer) {
+      if (referer.startsWith('https://')) return true;
+      if (referer.startsWith('http://')) return false;
+    }
+    const origin = h.get('origin');
+    if (origin) {
+      if (origin.startsWith('https://')) return true;
+      if (origin.startsWith('http://')) return false;
+    }
+    return null;
+  };
+
+  // 1. Check passed request headers if provided
+  if (requestHeaders) {
+    const isHttps = checkProto(requestHeaders);
+    if (isHttps !== null) return isHttps;
+  }
+
+  // 2. Next.js dynamic headers() check if in server request context
+  try {
+    const h = headers();
+    const isHttps = checkProto(h);
+    if (isHttps !== null) return isHttps;
+  } catch {
+    // Gracefully ignore if headers() is called outside server request context (CLI, scripts)
+  }
+
+  // 3. Check NEXT_PUBLIC_APP_URL if defined
   if (process.env.NEXT_PUBLIC_APP_URL?.startsWith('http://')) return false;
+  if (process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://')) return true;
+
+  // 4. Fallback: production default to true, dev default to false
   return process.env.NODE_ENV === 'production';
 }
 
-export function getDefaultSessionConfig(): SessionConfig {
+export function getDefaultSessionConfig(
+  requestHeaders?: Headers | { get(name: string): string | null } | null
+): SessionConfig {
   return {
     cookieName: process.env.COOKIE_NAME || 'innoventix_session',
     cookieDomain: getCookieDomain(),
-    cookieSecure: getCookieSecure(),
+    cookieSecure: getCookieSecure(requestHeaders),
     cookieHttpOnly: true,
     cookieSameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60, // 7 days
@@ -37,9 +85,10 @@ export function getDefaultSessionConfig(): SessionConfig {
  */
 export async function setRefreshTokenCookie(
   token: string,
-  config: Partial<SessionConfig> = {}
+  config: Partial<SessionConfig> = {},
+  requestHeaders?: Headers | { get(name: string): string | null } | null
 ): Promise<void> {
-  const finalConfig = { ...getDefaultSessionConfig(), ...config };
+  const finalConfig = { ...getDefaultSessionConfig(requestHeaders), ...config };
   try {
     const cookieStore = await cookies();
     cookieStore.set(finalConfig.cookieName, token, {

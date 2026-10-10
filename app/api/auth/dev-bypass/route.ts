@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getCookieSecure, getCookieDomain } from '@/lib/auth/session'
 
 export async function GET(request: NextRequest) {
   if (
@@ -15,6 +16,8 @@ export async function GET(request: NextRequest) {
   response.cookies.set('dev_super_admin', 'true', {
     path: '/',
     httpOnly: false,
+    secure: getCookieSecure(request.headers),
+    domain: getCookieDomain(),
     sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 7, // 7 days
   })

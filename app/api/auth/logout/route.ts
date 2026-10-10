@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
-    const sessionConfig = getDefaultSessionConfig();
+    const sessionConfig = getDefaultSessionConfig(request.headers);
     response.cookies.set(sessionConfig.cookieName, '', {
       httpOnly: sessionConfig.cookieHttpOnly,
       secure: sessionConfig.cookieSecure,
