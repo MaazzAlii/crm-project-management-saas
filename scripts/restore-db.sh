@@ -24,7 +24,7 @@ fi
 
 echo "⚠️  Restoring database ${DB_NAME} from ${BACKUP_FILE}..."
 
-PGPASSWORD="${DB_PASSWORD:-postgres_dev_password}" gunzip -c "$BACKUP_FILE" | psql \
+PGPASSWORD="${DB_PASSWORD}" gunzip -c "$BACKUP_FILE" | psql \
   -h "$DB_HOST" \
   -p "$DB_PORT" \
   -U "$DB_USER" \
