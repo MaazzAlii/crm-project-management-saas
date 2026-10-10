@@ -5,6 +5,9 @@ import fs from 'fs';
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const SCREENSHOT_DIR = path.resolve(process.cwd(), 'assets/screenshots');
 
+const TEST_EMAIL = process.env.TEST_USER_EMAIL || process.env.ADMIN_EMAIL || 'admin@innoventix.io';
+const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || process.env.ADMIN_PASSWORD || 'AdminPassword123!';
+
 async function runSection2() {
   if (!fs.existsSync(SCREENSHOT_DIR)) {
     fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
@@ -19,8 +22,8 @@ async function runSection2() {
   console.log(`[Section 2] 1. Logging in as super admin...`);
   const loginRes = await context.request.post(`${BASE_URL}/api/auth/login`, {
     data: {
-      email: 'maazalisshahid@gmail.com',
-      password: 'pas#123#',
+      email: TEST_EMAIL,
+      password: TEST_PASSWORD,
     },
   });
   console.log('Login API status:', loginRes.status());

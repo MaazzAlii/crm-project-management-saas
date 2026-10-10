@@ -1,8 +1,7 @@
 # Innoventix Platform v2 — Full System E2E Testing & Screenshot Protocol
 
-> **Target Live Deployment**: `http://mspxxqi8itcxqfdkkkqxzfr6.85.239.246.243.sslip.io/`  
-> **Admin Email**: `maazalisshahid@gmail.com`  
-> **Admin Password**: `pas#123#`  
+> **Admin Email**: Configure via `ADMIN_EMAIL` / `TEST_USER_EMAIL` env var (default: `admin@innoventix.io`)  
+> **Admin Password**: Configure via `ADMIN_PASSWORD` / `TEST_USER_PASSWORD` env var  
 > **Role**: `super_admin` & Workspace Owner  
 > **Access Tier**: `Lifetime VIP Access` (Permanent unlimited access)  
 > **Output Screenshot Directory**: `assets/screenshots/`  
@@ -21,13 +20,13 @@ The agent will read `.agent-state.md`, check the completed sections, launch the 
 
 ### 🔹 Section 1: Authentication, Onboarding & Workspace Initialization
 - **Target URLs**:
-  - `http://mspxxqi8itcxqfdkkkqxzfr6.85.239.246.243.sslip.io/` (Landing Page)
-  - `http://mspxxqi8itcxqfdkkkqxzfr6.85.239.246.243.sslip.io/login` (Admin Sign In)
-  - `http://mspxxqi8itcxqfdkkkqxzfr6.85.239.246.243.sslip.io/signup` (Workspace Sign Up)
+  - Landing Page: `/`
+  - Admin Sign In: `/login`
+  - Workspace Sign Up: `/signup`
 - **Actions to Execute**:
   1. Navigate to `/` landing page, inspect hero, features, and pricing cards.
   2. Click **"Sign In"** / navigate to `/login`.
-  3. Enter email `maazalisshahid@gmail.com` and password `pas#123#`.
+  3. Enter configured administrator credentials.
   4. Submit login form and verify session cookie issuance and redirect to `/dashboard`.
 - **Screenshots to Capture**:
   - `assets/screenshots/01-landing-page.png`

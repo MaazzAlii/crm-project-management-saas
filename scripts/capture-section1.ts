@@ -5,6 +5,9 @@ import fs from 'fs';
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const SCREENSHOT_DIR = path.resolve(process.cwd(), 'assets/screenshots');
 
+const TEST_EMAIL = process.env.TEST_USER_EMAIL || process.env.ADMIN_EMAIL || 'admin@innoventix.io';
+const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || process.env.ADMIN_PASSWORD || 'AdminPassword123!';
+
 async function runSection1() {
   if (!fs.existsSync(SCREENSHOT_DIR)) {
     fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
@@ -31,11 +34,11 @@ async function runSection1() {
   await page.screenshot({ path: path.join(SCREENSHOT_DIR, '02b-signup-page.png') });
   console.log('✅ Captured: assets/screenshots/02b-signup-page.png');
 
-  console.log(`[Section 1] 4. Performing Login as maazalisshahid@gmail.com...`);
+  console.log(`[Section 1] 4. Performing Login as ${TEST_EMAIL}...`);
   const loginRes = await context.request.post(`${BASE_URL}/api/auth/login`, {
     data: {
-      email: 'maazalisshahid@gmail.com',
-      password: 'pas#123#',
+      email: TEST_EMAIL,
+      password: TEST_PASSWORD,
     },
   });
   console.log('Login API status:', loginRes.status());

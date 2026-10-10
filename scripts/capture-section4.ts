@@ -6,6 +6,9 @@ const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const SCREENSHOT_DIR = path.resolve(process.cwd(), 'assets/screenshots');
 const PROJECT_ID = 'c6f17969-43c5-4cfc-b27d-91516c5c1d8a';
 
+const TEST_EMAIL = process.env.TEST_USER_EMAIL || process.env.ADMIN_EMAIL || 'admin@innoventix.io';
+const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || process.env.ADMIN_PASSWORD || 'AdminPassword123!';
+
 async function runSection4() {
   if (!fs.existsSync(SCREENSHOT_DIR)) {
     fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
@@ -20,8 +23,8 @@ async function runSection4() {
   console.log(`[Section 4] 1. Logging in as super admin...`);
   const loginRes = await context.request.post(`${BASE_URL}/api/auth/login`, {
     data: {
-      email: 'maazalisshahid@gmail.com',
-      password: 'pas#123#',
+      email: TEST_EMAIL,
+      password: TEST_PASSWORD,
     },
   });
   console.log('Login API status:', loginRes.status());
