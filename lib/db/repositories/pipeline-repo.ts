@@ -185,18 +185,29 @@ export const pipelineRepo = {
   async deleteStage(
     orgId: string,
     stageId: string,
-    moveDealsToStageId: string
+    moveDealsToStageId?: string | null
   ): Promise<{ success: boolean; error?: string }> {
-    if (stageId === moveDealsToStageId) {
+    if (moveDealsToStageId && stageId === moveDealsToStageId) {
       return { success: false, error: 'Target stage cannot be the same as the deleted stage.' };
     }
 
     return await transaction(async (client) => {
-      // 1. Move all deals to target stage
-      await client.query(
-        `UPDATE public.deals SET stage_id = $1, updated_at = NOW() WHERE org_id = $2 AND stage_id = $3`,
-        [moveDealsToStageId, orgId, stageId]
-      );
+      // 1. Move all deals to target stage if provided
+      if (moveDealsToStageId) {
+        await client.query(
+          `UPDATE public.deals SET stage_id = $1, updated_at = NOW() WHERE org_id = $2 AND stage_id = $3`,
+          [moveDealsToStageId, orgId, stageId]
+        );
+      } else {
+        const countRes = await client.query<{ count: string }>(
+          `SELECT count(*) as count FROM public.deals WHERE org_id = $1 AND stage_id = $2`,
+          [orgId, stageId]
+        );
+        const count = parseInt(countRes.rows?.[0]?.count || '0', 10);
+        if (count > 0) {
+          throw new Error('Cannot delete a stage containing deals without specifying a target stage to move them to.');
+        }
+      }
 
       // 2. Delete the stage
       await client.query(
