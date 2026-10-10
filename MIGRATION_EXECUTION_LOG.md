@@ -501,3 +501,27 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm test`: **21/21 test files, 184/184 tests passed (100%)**.
   - `npm run build`: **Compiled successfully with all 81 routes static and dynamic**.
 - **Status**: ✅ Completed and Verified locally. Commits held until all prompts pass.
+
+---
+
+### Step 12: Sales Pipeline Fixes — Prompt 03 (Column Order, Colors, Won/Lost Flags)
+- **Timestamp**: 2026-10-10T16:40:00+05:00
+- **Task ID**: `PIPELINE-FIX-PROMPT-03`
+- **Actions Performed**:
+  1. **Horizontal Column Drag & Reordering ([Board.tsx](file:///home/maazzalii/Desktop/100%20days%20of%20code/91-crm-project-management-saas/components/pipeline/Board.tsx) & [Column.tsx](file:///home/maazzalii/Desktop/100%20days%20of%20code/91-crm-project-management-saas/components/pipeline/Column.tsx))**:
+     - Wrapped columns in `@dnd-kit/sortable` `SortableContext` with `horizontalListSortingStrategy`.
+     - Added column header drag handle with `GripVertical` icon.
+     - Persists reordering via `PUT /api/pipelines/[id]/stages/order` with strict validation against missing/duplicate/extra IDs.
+  2. **10-Color Modern Stage Palette**:
+     - Added "Change color" popover to column menu with 10 vibrant accent colors.
+     - Persists via `PATCH /api/pipelines/[id]/stages/[stageId]`.
+  3. **Single Won & Lost Enforcement**:
+     - Added "Mark as Won" and "Mark as Lost" toggles to column menu.
+     - Enforced single Won and single Lost stage constraint per pipeline in `pipelineRepo.updateStage` using an atomic transaction that clears prior flags with confirmation.
+  4. **Distinct Won (Emerald) & Lost (Rose) Top Borders and Open Deals Calculation**:
+     - Won columns render with emerald green top border (`border-t-4 border-t-emerald-500`) and emerald badge.
+     - Lost columns render with rose red top border (`border-t-4 border-t-rose-500`) and rose badge.
+     - Pipeline header Open Value and Deals count calculations strictly filter to open deals (excluding Won and Lost stages).
+  5. **Automated Testing ([pipeline-column-order-colors-won-lost.test.ts](file:///home/maazzalii/Desktop/100%20days%20of%20code/91-crm-project-management-saas/tests/pipeline-column-order-colors-won-lost.test.ts))**:
+     - 9 automated unit and integration tests covering all 4 Prompt 03 behaviors (22/22 test suites, 193/193 tests passing).
+- **Status**: ✅ Completed & Fully Verified.
