@@ -38,21 +38,33 @@ export class OrganizationService {
       throw new ConflictError('Organization slug is already in use');
     }
 
-    const org = await orgRepo.create({
-      name: data.name,
-      slug: data.slug,
-      logoUrl: data.logoUrl,
-      ownerUserId,
-    });
+    const { transaction } = await import('../db');
+    const { pipelineRepo } = await import('../db/repositories/pipeline-repo');
 
-    // Seed default sales pipeline & stages for new organization (Prompt 05)
-    try {
-      const { pipelineRepo } = await import('@/lib/db/repositories/pipeline-repo');
-      await pipelineRepo.ensureDefaultPipeline(org.id, ownerUserId);
-    } catch (pipeErr) {
-      console.error(`[OrgService] ❌ CRITICAL: Failed to seed default pipeline for new organization ${org.id}:`, pipeErr);
-      throw new Error(`Failed to initialize default sales pipeline for organization: ${(pipeErr as Error)?.message || 'Unknown error'}`);
-    }
+    // Atomic transaction: org insert + owner membership + default pipeline & stages
+    const org = await transaction(async (client) => {
+      // 1. Insert organization row
+      const insertRes = await client.query<Organization>(
+        `INSERT INTO organizations (name, slug, plan_tier, billing_status, logo_url, is_suspended, created_at, updated_at)
+         VALUES ($1, $2, 'free', 'active', $3, false, NOW(), NOW())
+         RETURNING *`,
+        [data.name.trim(), data.slug.toLowerCase().trim(), data.logoUrl || null]
+      );
+      const newOrg = insertRes.rows[0];
+
+      // 2. Add owner membership
+      await client.query(
+        `INSERT INTO organization_members (organization_id, user_id, role)
+         VALUES ($1, $2, 'owner')
+         ON CONFLICT (organization_id, user_id) DO NOTHING`,
+        [newOrg.id, ownerUserId]
+      );
+
+      // 3. Seed default sales pipeline & 6 stages inside the SAME transaction
+      await pipelineRepo.ensureDefaultPipeline(newOrg.id, ownerUserId, client);
+
+      return newOrg;
+    });
 
     await auditRepo.log({
       organizationId: org.id,
