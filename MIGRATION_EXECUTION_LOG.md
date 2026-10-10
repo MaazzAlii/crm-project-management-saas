@@ -581,3 +581,41 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm run build`: **Next.js production build succeeded with 0 errors**.
   - Secret scan: **0 plaintext secrets in outgoing commits**.
 - **Status**: ✅ Fully Completed & Verified. Ready for Prompt 08 Push Approval.
+
+---
+
+### Step 17: Screen Fixes — Prompt 02 Step 1 (Remove Dev Fallbacks & Fix Scanner)
+- **Timestamp**: 2026-10-10T19:34:00+05:00
+- **Task ID**: `SCREEN-FIX-PROMPT-02-STEP-01`
+- **Actions Performed**:
+  1. Deleted `app/api/auth/dev-bypass/route.ts` and removed dev bypass button from `app/(auth)/login/page.tsx`. Verified via curl that GET and POST both return 404.
+  2. Removed all `getDev*`, `DEV_*`, `__DEV_*`, and `DEV_SAMPLE_*` fallbacks and all `DEV_SUPER_ADMIN` conditional branches across:
+     - `app/(dashboard)/projects/actions.ts` (`getDevProjects`, `__DEV_PROJECTS`, `getDevDeliverables`, `getDevTasks`, `getDevActivityLogs`, error-swallowing fallback)
+     - `app/(dashboard)/tasks/actions.ts` (`getDevGlobalTasks` injecting `proj-1`..`proj-3`)
+     - `app/(dashboard)/inbox/actions.ts` (`DEV_SAMPLE_MESSAGES`, `getDevInboxData`, fake `proj-1`..`proj-2` injection)
+     - `app/(dashboard)/notifications/actions.ts` (`getDevNotifications`)
+     - `app/(dashboard)/clients/actions.ts` (`__DEV_CLIENTS` memory fallbacks)
+     - `app/(dashboard)/leads/actions.ts` (`__DEV_CLIENTS` fallbacks)
+     - `app/(dashboard)/clients/tags/actions.ts` (`getDevTags`, `__DEV_TAGS`)
+     - `app/(dashboard)/clients/[id]/communications/actions.ts` (`getDevCommunications`, `__DEV_COMMUNICATIONS`)
+     - `app/(dashboard)/reports/actions.ts` (`getDevWeeklyFigures`)
+     - `app/(dashboard)/settings/templates/actions.ts` (`getDevTemplates`)
+     - `app/api/automation/cron/deadline-check/route.ts` & `weekly-summary/route.ts` (`DEV_SUPER_ADMIN`, `isDev` bypasses)
+     - `lib/auth/super-admin.ts` (`dev_super_admin` cookie bypass)
+     - `lib/ai/features/lead-scoring.ts` (`__DEV_CLIENTS` fallback)
+     - `lib/audit/query.ts` (`getSeededOrgAuditLogs`, `getSeededSuperAdminAuditLogs`)
+     - `lib/audit/log.ts` (`__DEV_AUDIT_LOGS` in-memory fallback)
+     - `app/(dashboard)/dashboard/page.tsx` (fake metrics override for dev org)
+     - `app/(dashboard)/clients/page.tsx`, `clients/[id]/page.tsx`, `clients/[id]/communications/page.tsx`, `clients/[id]/pipeline/page.tsx` (fake Acme client and `__DEV_CLIENTS` fallbacks)
+     - `app/(dashboard)/projects/page.tsx`, `projects/kanban/page.tsx`, `projects/[id]/page.tsx`, `tasks/page.tsx` (fake `cli_1`..`cli_3` and `usr_1`..`usr_3` fallbacks)
+     - Deleted `lib/dev/fallbacks.ts`.
+  3. Ensured `createProjectAction`, `createGlobalTaskAction`, `createClientAction`, and `createLeadAction` fail visibly on database errors, returning clear error messages and writing nothing to in-memory state.
+  4. Calibrated tenancy scanner (`scripts/audit-tenancy.ts`) with documented allowlists for webhooks, public auth routes, cron secret checks, and global system tables.
+- **Verification / Test Result**:
+  - `scripts/audit-tenancy.ts`: **Total DEV_FALLBACK instances: 0** (0 remaining across all scanned files).
+  - `curl -i -X GET http://localhost:3005/api/auth/dev-bypass`: **404 Not Found**.
+  - `curl -i -X POST http://localhost:3005/api/auth/dev-bypass`: **404 Not Found**.
+  - `npm test`: **23 test suites passed, 199/199 tests passed (100%)**.
+  - `npm run build`: **Next.js production build completed successfully (code 0)**.
+- **Status**: ✅ Completed. Kept local (not pushed).
+
