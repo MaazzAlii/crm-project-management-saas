@@ -20,7 +20,7 @@ mkdir -p "$BACKUP_DIR"
 
 echo "📦 Generating PostgreSQL dump for offsite sync: ${DB_NAME}..."
 
-PGPASSWORD="${DB_PASSWORD:-postgres_dev_password}" pg_dump \
+PGPASSWORD="${DB_PASSWORD}" pg_dump \
   -h "$DB_HOST" \
   -p "$DB_PORT" \
   -U "$DB_USER" \
