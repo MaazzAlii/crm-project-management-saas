@@ -37,22 +37,6 @@ export default async function ProjectsKanbanPage() {
     console.error('Failed to fetch clients/profiles for kanban page:', e)
   }
 
-  if (clientsList.length === 0) {
-    clientsList = [
-      { id: 'cli_1', name: 'Acme Corp' },
-      { id: 'cli_2', name: 'Stark Industries' },
-      { id: 'cli_3', name: 'Wayne Enterprises' }
-    ]
-  }
-
-  if (membersList.length === 0) {
-    membersList = [
-      { id: 'usr_1', name: 'Alex Johnson' },
-      { id: 'usr_2', name: 'Sarah Smith' },
-      { id: 'usr_3', name: 'Michael Brown' }
-    ]
-  }
-
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <ProjectsKanban

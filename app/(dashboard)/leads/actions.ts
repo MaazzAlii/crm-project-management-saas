@@ -54,21 +54,6 @@ export async function updateLeadStageAction(
       )
     }
 
-    // Dev mode fallback
-    if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
-      const idx = (global as any).__DEV_CLIENTS.findIndex((c: any) => c.id === clientId)
-      if (idx !== -1) {
-        ;(global as any).__DEV_CLIENTS[idx] = {
-          ...(global as any).__DEV_CLIENTS[idx],
-          pipeline_stage: newStage,
-          ...(statusUpdate ? { status: statusUpdate } : {}),
-          lost_reason: lostReasonValue,
-          stage_updated_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-      }
-    }
-
     // Audit Log
     try {
       await logAuditEvent({
@@ -159,35 +144,6 @@ export async function createLeadAction(formData: FormData) {
       )
     } catch (err: any) {
       insertError = err
-    }
-
-    if ((insertError || !newLead) && process.env.DEV_SUPER_ADMIN === 'true') {
-      const devLeadId = 'dev-lead-' + Date.now()
-      const devRecord = {
-        id: devLeadId,
-        organization_id: session.organization.id,
-        name,
-        company,
-        email,
-        phone,
-        platform,
-        country,
-        currency,
-        deal_value,
-        pipeline_stage,
-        status,
-        communication_mode,
-        notes,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        stage_updated_at: new Date().toISOString(),
-      }
-      ;(global as any).__DEV_CLIENTS = (global as any).__DEV_CLIENTS || []
-      ;(global as any).__DEV_CLIENTS.unshift(devRecord)
-
-      revalidatePath('/leads')
-      revalidatePath('/clients')
-      return { success: true, leadId: devLeadId }
     }
 
     if (insertError || !newLead) {

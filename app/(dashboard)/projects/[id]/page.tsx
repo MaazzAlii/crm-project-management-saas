@@ -44,14 +44,6 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     }
   } catch (e) {}
 
-  if (membersList.length === 0) {
-    membersList = [
-      { id: 'usr_1', name: 'Alex Johnson' },
-      { id: 'usr_2', name: 'Sarah Smith' },
-      { id: 'usr_3', name: 'Michael Brown' }
-    ]
-  }
-
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <ProjectHeader

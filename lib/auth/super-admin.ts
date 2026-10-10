@@ -1,19 +1,7 @@
-import { cookies } from 'next/headers'
 import { queryOne } from '@/lib/db'
 import { getCurrentSessionContext } from '@/lib/auth/session'
 
 export async function isSuperAdmin(userId?: string): Promise<boolean> {
-  const isDevAllowed =
-    process.env.NODE_ENV !== 'production' &&
-    process.env.ALLOW_DEV_AUTH_BYPASS === 'true'
-  try {
-    const cookieStore = cookies()
-    const devSuperAdminCookie = cookieStore.get('dev_super_admin')
-    if (isDevAllowed && (devSuperAdminCookie?.value === 'true' || process.env.DEV_SUPER_ADMIN === 'true')) {
-      return true
-    }
-  } catch {}
-
   try {
     let targetUserId = userId
     if (!targetUserId) {

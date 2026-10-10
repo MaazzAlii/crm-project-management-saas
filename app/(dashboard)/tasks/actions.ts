@@ -40,7 +40,7 @@ export async function fetchAllTasksAction(): Promise<GlobalTaskRecord[]> {
     const session = await getCurrentSessionContext()
 
     if (!session || !session.organization) {
-      return getDevGlobalTasks()
+      return []
     }
 
     const data = await query<any>(
@@ -54,7 +54,7 @@ export async function fetchAllTasksAction(): Promise<GlobalTaskRecord[]> {
     )
 
     if (!data || data.length === 0) {
-      return getDevGlobalTasks()
+      return []
     }
 
     return data.map((t) => ({
@@ -75,7 +75,7 @@ export async function fetchAllTasksAction(): Promise<GlobalTaskRecord[]> {
     }))
   } catch (err) {
     console.error('fetchAllTasksAction error:', err)
-    return getDevGlobalTasks()
+    return []
   }
 }
 
@@ -331,70 +331,3 @@ export async function fetchTeamWorkloadAction(): Promise<TeamWorkloadRecord[]> {
   }
 }
 
-// Dev Fallback Data
-function getDevGlobalTasks(): GlobalTaskRecord[] {
-  const now = new Date()
-  const yesterday = new Date(now.getTime() - 3600000 * 24).toISOString().slice(0, 10)
-  const tomorrow = new Date(now.getTime() + 3600000 * 24).toISOString().slice(0, 10)
-  const nextWeek = new Date(now.getTime() + 3600000 * 24 * 7).toISOString().slice(0, 10)
-
-  return [
-    {
-      id: 'tsk-101',
-      organization_id: 'dev-org',
-      project_id: 'proj-1',
-      project_title: 'Voice Agent AI Integration',
-      title: 'Configure Webhook Endpoints & API Key Security',
-      description: 'Setup TLS encryption & auth token verification for voice webhooks.',
-      assigned_to: 'usr_1',
-      assigned_name: 'Alex Johnson',
-      status: 'in_progress',
-      priority: 'high',
-      due_date: yesterday, // Overdue
-      created_at: new Date(now.getTime() - 3600000 * 48).toISOString()
-    },
-    {
-      id: 'tsk-102',
-      organization_id: 'dev-org',
-      project_id: 'proj-1',
-      project_title: 'Voice Agent AI Integration',
-      title: 'Audio Speech Synthesis & Latency Tuning',
-      description: 'Optimize audio output buffer to achieve sub-800ms response.',
-      assigned_to: 'usr_2',
-      assigned_name: 'Sarah Smith',
-      status: 'todo',
-      priority: 'urgent',
-      due_date: tomorrow,
-      created_at: new Date(now.getTime() - 3600000 * 24).toISOString()
-    },
-    {
-      id: 'tsk-103',
-      organization_id: 'dev-org',
-      project_id: 'proj-2',
-      project_title: 'UGC Content Creation Campaign',
-      title: 'Review Video Clips & Add Subtitles',
-      description: 'Export 15 UGC video ads with animated closed captions.',
-      assigned_to: 'usr_3',
-      assigned_name: 'Michael Brown',
-      status: 'review',
-      priority: 'medium',
-      due_date: nextWeek,
-      created_at: new Date(now.getTime() - 3600000 * 72).toISOString()
-    },
-    {
-      id: 'tsk-104',
-      organization_id: 'dev-org',
-      project_id: 'proj-3',
-      project_title: 'Automated Billing Webhook Pipeline',
-      title: 'Stripe Webhook Event Signature Validation',
-      description: 'Implement HMAC signature check for Stripe webhooks.',
-      assigned_to: 'usr_1',
-      assigned_name: 'Alex Johnson',
-      status: 'done',
-      priority: 'low',
-      due_date: yesterday,
-      completed_at: new Date().toISOString(),
-      created_at: new Date(now.getTime() - 3600000 * 120).toISOString()
-    }
-  ]
-}

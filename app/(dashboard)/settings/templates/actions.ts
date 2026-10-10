@@ -33,7 +33,7 @@ export async function fetchProjectTemplatesAction(): Promise<ProjectTemplateReco
     const session = await getCurrentSessionContext()
 
     if (!session || !session.organization) {
-      return getDevTemplates()
+      return []
     }
 
     const { rows } = await query<any>(
@@ -60,7 +60,7 @@ export async function fetchProjectTemplatesAction(): Promise<ProjectTemplateReco
     )
 
     if (!rows || rows.length === 0) {
-      return getDevTemplates()
+      return []
     }
 
     return rows.map((t: any) => ({
@@ -88,7 +88,7 @@ export async function fetchProjectTemplatesAction(): Promise<ProjectTemplateReco
     }))
   } catch (err) {
     console.error('fetchProjectTemplatesAction error:', err)
-    return getDevTemplates()
+    return []
   }
 }
 
@@ -260,121 +260,3 @@ export async function saveProjectAsTemplateAction(projectId: string, templateNam
   }
 }
 
-// Dev Fallback Templates
-function getDevTemplates(): ProjectTemplateRecord[] {
-  return [
-    {
-      id: 'tmpl-1',
-      organization_id: 'dev-org',
-      name: 'AI Voice Agent Implementation',
-      description: 'Standard workflow for deploying real-time AI voice agents for inbound/outbound calls.',
-      type: 'AI Voice Agent',
-      default_amount: 5000,
-      currency: 'USD',
-      default_deliverables: [
-        'Voice Bot Architecture & Dialog Flow Diagram',
-        'Twilio Webhook Integration & Audio Sample Test',
-        'Final Load Testing & Quality Assurance Report',
-      ],
-      created_at: new Date().toISOString(),
-      tasks: [
-        {
-          id: 'tt-1',
-          template_id: 'tmpl-1',
-          title: 'Configure OpenAI Realtime API credentials & audio streaming',
-          description: 'Set up low-latency web sockets for live voice agent response.',
-          priority: 'high',
-          day_offset: 1,
-        },
-        {
-          id: 'tt-2',
-          template_id: 'tmpl-1',
-          title: 'Build inbound call routing & fallback handler',
-          description: 'Handle offline mode and send SMS callback link if user hangs up.',
-          priority: 'urgent',
-          day_offset: 3,
-        },
-        {
-          id: 'tt-3',
-          template_id: 'tmpl-1',
-          title: 'Conduct end-to-end load test on 50 concurrent calls',
-          description: 'Ensure system latency remains below 800ms during peak load.',
-          priority: 'medium',
-          day_offset: 7,
-        },
-      ],
-    },
-    {
-      id: 'tmpl-2',
-      organization_id: 'dev-org',
-      name: 'UGC Video Ads Campaign Template',
-      description: 'Production pipeline for high-converting TikTok & Instagram UGC video ads.',
-      type: 'UGC Media',
-      default_amount: 8000,
-      currency: 'USD',
-      default_deliverables: [
-        'Script & Hook Concepts Document',
-        'Raw Video Clips Folder',
-        '15 Edited Video Ads with Animated Subtitles',
-      ],
-      created_at: new Date().toISOString(),
-      tasks: [
-        {
-          id: 'tt-4',
-          template_id: 'tmpl-2',
-          title: 'Draft 5 Hook Concepts & Script Angles',
-          description: 'Focus on direct-response problem-solution hooks.',
-          priority: 'high',
-          day_offset: 1,
-        },
-        {
-          id: 'tt-5',
-          template_id: 'tmpl-2',
-          title: 'Receive creator raw footage and verify resolution',
-          description: 'Ensure 4K vertical 9:16 format with clear audio.',
-          priority: 'medium',
-          day_offset: 5,
-        },
-        {
-          id: 'tt-6',
-          template_id: 'tmpl-2',
-          title: 'Edit first draft cuts with motion captions',
-          description: 'Export 1080x1920 MP4 files.',
-          priority: 'high',
-          day_offset: 8,
-        },
-      ],
-    },
-    {
-      id: 'tmpl-3',
-      organization_id: 'dev-org',
-      name: 'Automated Billing & Webhook Pipeline',
-      description: 'Stripe subscription syncing and automated client invoice generation.',
-      type: 'Automation',
-      default_amount: 4500,
-      currency: 'USD',
-      default_deliverables: [
-        'Stripe Webhook Listener Service',
-        'Automated Invoice PDF Generator',
-        'Database Sync Schema Migration',
-      ],
-      created_at: new Date().toISOString(),
-      tasks: [
-        {
-          id: 'tt-7',
-          template_id: 'tmpl-3',
-          title: 'Configure Stripe Webhook Secrets & Environment Variables',
-          priority: 'high',
-          day_offset: 1,
-        },
-        {
-          id: 'tt-8',
-          template_id: 'tmpl-3',
-          title: 'Build automated email invoice delivery on invoice.paid',
-          priority: 'medium',
-          day_offset: 4,
-        },
-      ],
-    },
-  ]
-}

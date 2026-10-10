@@ -34,7 +34,7 @@ export async function fetchProjectsAction(): Promise<ProjectRecord[]> {
     const session = await getCurrentSessionContext()
 
     if (!session || !session.organization) {
-      return getDevProjects()
+      return []
     }
 
     let projects: ProjectRecord[] = []
@@ -76,18 +76,14 @@ export async function fetchProjectsAction(): Promise<ProjectRecord[]> {
           updated_at: item.updated_at,
         }))
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error('Error querying projects:', err)
+    }
 
-    const devProjects = getDevProjects()
-    const combined = [...projects, ...devProjects]
-    const uniqueMap = new Map<string, ProjectRecord>()
-    combined.forEach((p) => uniqueMap.set(p.id, p))
-
-    return Array.from(uniqueMap.values()).sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    )
+    return projects
   } catch (err) {
-    return getDevProjects()
+    console.error('fetchProjectsAction error:', err)
+    return []
   }
 }
 
@@ -214,38 +210,6 @@ export async function createProjectAction(formData: FormData) {
       insertError = err
     }
 
-    if ((insertError || !newProject) && process.env.DEV_SUPER_ADMIN === 'true') {
-      const devProjId = 'dev-proj-' + Date.now()
-      const devRecord: ProjectRecord = {
-        id: devProjId,
-        organization_id: session.organization.id,
-        client_id: clientId,
-        client_name: 'Agency Client',
-        title,
-        description,
-        type,
-        brief_source,
-        amount,
-        currency,
-        status,
-        priority,
-        start_date,
-        deadline,
-        assigned_to: assigned_to || null,
-        assigned_name: session.user.full_name || session.user.email,
-        notes,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }
-
-      ;(global as any).__DEV_PROJECTS = (global as any).__DEV_PROJECTS || []
-      ;(global as any).__DEV_PROJECTS.unshift(devRecord)
-
-      revalidatePath('/projects')
-      revalidatePath(`/clients/${clientId}`)
-      return { success: true, projectId: devProjId }
-    }
-
     if (insertError || !newProject) {
       console.error('Failed to create project:', insertError)
       return { error: insertError?.message || 'Database error occurred while creating project.' }
@@ -337,16 +301,9 @@ export async function updateProjectAction(projectId: string, formData: FormData)
           session.organization.id,
         ]
       )
-    } catch (err) {}
-
-    if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_PROJECTS) {
-      const idx = (global as any).__DEV_PROJECTS.findIndex((p: any) => p.id === projectId)
-      if (idx !== -1) {
-        ;(global as any).__DEV_PROJECTS[idx] = {
-          ...(global as any).__DEV_PROJECTS[idx],
-          ...updatePayload,
-        }
-      }
+    } catch (err: any) {
+      console.error('Failed to update project:', err)
+      return { error: err?.message || 'Database error occurred while updating project.' }
     }
 
     try {
@@ -387,10 +344,6 @@ export async function updateProjectStatusAction(projectId: string, newStatus: st
         [projectId, session.organization.id]
       )
     } catch (err) {}
-
-    if (!project && process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_PROJECTS) {
-      project = (global as any).__DEV_PROJECTS.find((p: any) => p.id === projectId)
-    }
 
     const normalizedStatus = newStatus.toLowerCase().replace(/ /g, '_')
     const updatePayload: Record<string, any> = {
@@ -463,13 +416,6 @@ export async function updateProjectStatusAction(projectId: string, newStatus: st
       )
     } catch (err) {}
 
-    if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_PROJECTS) {
-      const idx = (global as any).__DEV_PROJECTS.findIndex((p: any) => p.id === projectId)
-      if (idx !== -1) {
-        Object.assign((global as any).__DEV_PROJECTS[idx], updatePayload)
-      }
-    }
-
     try {
       await logAuditEvent({
         actorId: session.user.id,
@@ -512,12 +458,6 @@ export async function deleteProjectAction(projectId: string) {
       )
     } catch (err) {}
 
-    if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_PROJECTS) {
-      ;(global as any).__DEV_PROJECTS = ((global as any).__DEV_PROJECTS as ProjectRecord[]).filter(
-        (p) => p.id !== projectId
-      )
-    }
-
     try {
       await logAuditEvent({
         actorId: session.user.id,
@@ -533,105 +473,6 @@ export async function deleteProjectAction(projectId: string) {
   } catch (error: any) {
     return { error: error?.message || 'Failed to delete project.' }
   }
-}
-
-function getDevProjects(): ProjectRecord[] {
-  if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_PROJECTS) {
-    return (global as any).__DEV_PROJECTS as ProjectRecord[]
-  }
-
-  const defaultProjects: ProjectRecord[] = [
-    {
-      id: 'proj-1',
-      organization_id: 'dev-org',
-      client_id: 'client-1',
-      client_name: 'Acme Agency Partner',
-      client_company: 'Acme Corp',
-      title: 'V2 AI Voice & CRM Portal Integration',
-      description: 'Building custom automated voice workflow agent and real-time CRM dashboard.',
-      type: 'AI Voice Agent',
-      brief_source: 'WhatsApp',
-      amount: 14500,
-      currency: 'USD',
-      status: 'Active',
-      priority: 'high',
-      start_date: new Date(Date.now() - 3600000 * 24 * 10).toISOString().slice(0, 10),
-      deadline: new Date(Date.now() + 3600000 * 24 * 20).toISOString().slice(0, 10),
-      assigned_to: 'dev-user-1',
-      assigned_name: 'Lead Developer',
-      notes: 'Phase 1 delivered, Phase 2 in progress.',
-      created_at: new Date(Date.now() - 3600000 * 24 * 10).toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: 'proj-2',
-      organization_id: 'dev-org',
-      client_id: 'client-2',
-      client_name: 'Nexus Tech Global',
-      client_company: 'Nexus Tech',
-      title: 'UGC Content Creation & Media Ads Campaign',
-      description: 'Production of 15 high-converting UGC video ads for TikTok and Instagram reels.',
-      type: 'UGC Media',
-      brief_source: 'Slack',
-      amount: 8200,
-      currency: 'USD',
-      status: 'In Review',
-      priority: 'medium',
-      start_date: new Date(Date.now() - 3600000 * 24 * 15).toISOString().slice(0, 10),
-      deadline: new Date(Date.now() + 3600000 * 24 * 5).toISOString().slice(0, 10),
-      assigned_to: 'dev-user-2',
-      assigned_name: 'Creative Director',
-      notes: 'Videos uploaded to review portal.',
-      created_at: new Date(Date.now() - 3600000 * 24 * 15).toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: 'proj-3',
-      organization_id: 'dev-org',
-      client_id: 'client-3',
-      client_name: 'Solaria E-Commerce',
-      client_company: 'Solaria Brands',
-      title: 'Automated Billing & Subscription Webhook Pipeline',
-      description: 'Stripe subscription syncing and automated client invoice generation.',
-      type: 'Automation',
-      brief_source: 'Email',
-      amount: 6500,
-      currency: 'USD',
-      status: 'Completed',
-      priority: 'low',
-      start_date: new Date(Date.now() - 3600000 * 24 * 40).toISOString().slice(0, 10),
-      deadline: new Date(Date.now() - 3600000 * 24 * 10).toISOString().slice(0, 10),
-      assigned_to: 'dev-user-1',
-      assigned_name: 'Backend Specialist',
-      notes: 'Final invoice paid cleanly.',
-      created_at: new Date(Date.now() - 3600000 * 24 * 40).toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: 'proj-4',
-      organization_id: 'dev-org',
-      client_id: 'client-4',
-      client_name: 'Vanguard Marketing',
-      client_company: 'Vanguard Group',
-      title: 'Custom Client Portal & Analytics Board',
-      description: 'Designing client-facing reporting view with live metric charts.',
-      type: 'Combined',
-      brief_source: 'Upwork',
-      amount: 11000,
-      currency: 'USD',
-      status: 'Planning',
-      priority: 'urgent',
-      start_date: new Date(Date.now() + 3600000 * 24 * 2).toISOString().slice(0, 10),
-      deadline: new Date(Date.now() + 3600000 * 24 * 30).toISOString().slice(0, 10),
-      assigned_to: null,
-      assigned_name: null,
-      notes: 'Contract signed, awaiting initial kickoff call.',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-  ]
-
-  return defaultProjects
 }
 
 // Deliverables, Tasks & Activity Log Interfaces
@@ -745,13 +586,10 @@ export async function fetchProjectDetailAction(projectId: string): Promise<Proje
       }
     }
 
-    // Dev Fallback
-    const devProjects = getDevProjects()
-    return devProjects.find((p) => p.id === projectId) || devProjects[0] || null
+    return null
   } catch (err) {
     console.error('fetchProjectDetailAction error:', err)
-    const devProjects = getDevProjects()
-    return devProjects.find((p) => p.id === projectId) || null
+    return null
   }
 }
 
@@ -759,17 +597,16 @@ export async function fetchProjectDetailAction(projectId: string): Promise<Proje
 export async function fetchProjectDeliverablesAction(projectId: string): Promise<DeliverableRecord[]> {
   try {
     const session = await getCurrentSessionContext()
-    if (!session || !session.organization) return getDevDeliverables(projectId)
+    if (!session || !session.organization) return []
 
     const data = await query<DeliverableRecord>(
       `SELECT * FROM deliverables WHERE project_id = $1 AND organization_id = $2 ORDER BY created_at DESC`,
       [projectId, session.organization.id]
     )
 
-    if (data && data.length > 0) return data
-    return getDevDeliverables(projectId)
+    return data || []
   } catch (err) {
-    return getDevDeliverables(projectId)
+    return []
   }
 }
 
@@ -900,7 +737,7 @@ export async function deleteDeliverableAction(deliverableId: string, projectId: 
 export async function fetchProjectTasksAction(projectId: string): Promise<TaskRecord[]> {
   try {
     const session = await getCurrentSessionContext()
-    if (!session || !session.organization) return getDevTasks(projectId)
+    if (!session || !session.organization) return []
 
     const data = await query<any>(
       `SELECT t.*, u.full_name AS assigned_name, u.email AS assigned_email
@@ -928,9 +765,9 @@ export async function fetchProjectTasksAction(projectId: string): Promise<TaskRe
       }))
     }
 
-    return getDevTasks(projectId)
+    return []
   } catch (err) {
-    return getDevTasks(projectId)
+    return []
   }
 }
 
@@ -1020,125 +857,16 @@ export async function updateProjectTeamAssigneeAction(projectId: string, assigne
 export async function fetchProjectActivityLogAction(projectId: string): Promise<ProjectActivityLogRecord[]> {
   try {
     const session = await getCurrentSessionContext()
-    if (!session || !session.organization) return getDevActivityLogs(projectId)
+    if (!session || !session.organization) return []
 
     const data = await query<ProjectActivityLogRecord>(
       `SELECT * FROM project_activity_log WHERE project_id = $1 AND organization_id = $2 ORDER BY created_at DESC`,
       [projectId, session.organization.id]
     )
 
-    if (data && data.length > 0) return data
-    return getDevActivityLogs(projectId)
+    return data || []
   } catch (err) {
-    return getDevActivityLogs(projectId)
+    return []
   }
-}
-
-// Dev Fallbacks for Deliverables, Tasks & Activity Logs
-function getDevDeliverables(projectId: string): DeliverableRecord[] {
-  return [
-    {
-      id: 'del-1',
-      organization_id: 'dev-org',
-      project_id: projectId,
-      title: 'Voice Bot Dialog Flow Architecture Diagram',
-      drive_link: 'https://drive.google.com/file/d/voice-bot-flow',
-      status: 'approved',
-      client_feedback: 'Approved! Clean workflow design.',
-      created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
-      updated_at: new Date(Date.now() - 3600000 * 24).toISOString()
-    },
-    {
-      id: 'del-2',
-      organization_id: 'dev-org',
-      project_id: projectId,
-      title: 'Twilio Webhook Integration & Audio Sample Test',
-      drive_link: 'https://drive.google.com/file/d/audio-sample',
-      status: 'pending',
-      client_feedback: null,
-      created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
-      updated_at: new Date(Date.now() - 3600000 * 12).toISOString()
-    }
-  ]
-}
-
-function getDevTasks(projectId: string): TaskRecord[] {
-  return [
-    {
-      id: 'task-1',
-      organization_id: 'dev-org',
-      project_id: projectId,
-      title: 'Configure OpenAI Realtime API credentials & audio streaming',
-      description: 'Set up low-latency web sockets for live voice agent response.',
-      assigned_to: 'usr_1',
-      assigned_name: 'Alex Johnson',
-      status: 'done',
-      priority: 'high',
-      due_date: new Date(Date.now() - 3600000 * 24).toISOString().slice(0, 10),
-      completed_at: new Date(Date.now() - 3600000 * 24).toISOString(),
-      created_at: new Date(Date.now() - 3600000 * 72).toISOString()
-    },
-    {
-      id: 'task-2',
-      organization_id: 'dev-org',
-      project_id: projectId,
-      title: 'Build inbound call routing & fallback handler',
-      description: 'Handle offline mode and send SMS callback link if user hangs up.',
-      assigned_to: 'usr_2',
-      assigned_name: 'Sarah Smith',
-      status: 'in_progress',
-      priority: 'urgent',
-      due_date: new Date(Date.now() + 3600000 * 24 * 3).toISOString().slice(0, 10),
-      created_at: new Date(Date.now() - 3600000 * 36).toISOString()
-    },
-    {
-      id: 'task-3',
-      organization_id: 'dev-org',
-      project_id: projectId,
-      title: 'Conduct end-to-end load test on 50 concurrent calls',
-      description: 'Ensure system latency remains below 800ms during peak load.',
-      assigned_to: 'usr_3',
-      assigned_name: 'Michael Brown',
-      status: 'todo',
-      priority: 'medium',
-      due_date: new Date(Date.now() + 3600000 * 24 * 7).toISOString().slice(0, 10),
-      created_at: new Date(Date.now() - 3600000 * 10).toISOString()
-    }
-  ]
-}
-
-function getDevActivityLogs(projectId: string): ProjectActivityLogRecord[] {
-  return [
-    {
-      id: 'act-1',
-      organization_id: 'dev-org',
-      project_id: projectId,
-      actor_id: 'usr_1',
-      actor_name: 'Alex Johnson',
-      action: 'DELIVERABLE_CREATED',
-      details: { title: 'Twilio Webhook Integration & Audio Sample Test' },
-      created_at: new Date(Date.now() - 3600000 * 12).toISOString()
-    },
-    {
-      id: 'act-2',
-      organization_id: 'dev-org',
-      project_id: projectId,
-      actor_id: 'usr_2',
-      actor_name: 'Sarah Smith',
-      action: 'TASK_STATUS_UPDATED',
-      details: { taskId: 'task-1', newStatus: 'done' },
-      created_at: new Date(Date.now() - 3600000 * 24).toISOString()
-    },
-    {
-      id: 'act-3',
-      organization_id: 'dev-org',
-      project_id: projectId,
-      actor_id: 'usr_1',
-      actor_name: 'System Admin',
-      action: 'PROJECT_CREATED',
-      details: { title: 'Project Kickoff' },
-      created_at: new Date(Date.now() - 3600000 * 72).toISOString()
-    }
-  ]
 }
 

@@ -34,23 +34,6 @@ export default async function ProjectsPage() {
     console.error('Failed to fetch clients/profiles for projects page:', e)
   }
 
-  // Fallbacks if db is empty or disconnected
-  if (clientsList.length === 0) {
-    clientsList = [
-      { id: 'cli_1', name: 'Acme Corp' },
-      { id: 'cli_2', name: 'Stark Industries' },
-      { id: 'cli_3', name: 'Wayne Enterprises' }
-    ]
-  }
-
-  if (membersList.length === 0) {
-    membersList = [
-      { id: 'usr_1', name: 'Alex Johnson' },
-      { id: 'usr_2', name: 'Sarah Smith' },
-      { id: 'usr_3', name: 'Michael Brown' }
-    ]
-  }
-
   const templatesList = templates.map((t) => ({
     id: t.id,
     name: t.name,

@@ -24,13 +24,6 @@ export interface WeeklyReportData {
 export async function fetchWeeklyReportMetricsAction(): Promise<WeeklyReportData> {
   const session = await getCurrentSessionContext()
 
-  if (process.env.NODE_ENV !== 'production' && (!session || !session.organization || session.organization.id === '00000000-0000-0000-0000-000000000001')) {
-    return {
-      figures: getDevWeeklyFigures(session?.organization?.name || 'Acme Agency Workspace'),
-      aiEnabled: true,
-    }
-  }
-
   if (!session || !session.organization) {
     throw new Error('Unauthorized: Valid session and organization required.')
   }
@@ -127,21 +120,19 @@ export async function fetchWeeklyReportMetricsAction(): Promise<WeeklyReportData
     newClientsCount > 0 ||
     communicationVolume > 0
 
-  const figures: WeeklyReportFigures = (hasRealData || process.env.NODE_ENV === 'production')
-    ? {
-        organizationName: org.name,
-        weekDateRange,
-        completedTasksCount,
-        activeProjectsCount,
-        newClientsCount,
-        revenueGenerated,
-        currency: 'USD',
-        communicationVolume,
-        overdueItemsCount,
-        completedDeliverables,
-        inProgressProjects,
-      }
-    : getDevWeeklyFigures(org.name, weekDateRange)
+  const figures: WeeklyReportFigures = {
+    organizationName: org.name,
+    weekDateRange,
+    completedTasksCount,
+    activeProjectsCount,
+    newClientsCount,
+    revenueGenerated,
+    currency: 'USD',
+    communicationVolume,
+    overdueItemsCount,
+    completedDeliverables,
+    inProgressProjects,
+  }
 
   return {
     figures,
@@ -256,32 +247,3 @@ export async function sendWeeklyReportAction(params: {
   }
 }
 
-function getDevWeeklyFigures(orgName: string, dateRange?: string): WeeklyReportFigures {
-  const now = new Date()
-  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-  const dateOpts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }
-  const range = dateRange || `${weekAgo.toLocaleDateString('en-US', dateOpts)} – ${now.toLocaleDateString('en-US', dateOpts)}`
-
-  return {
-    organizationName: orgName,
-    weekDateRange: range,
-    completedTasksCount: 14,
-    activeProjectsCount: 5,
-    newClientsCount: 3,
-    revenueGenerated: 28500,
-    currency: 'USD',
-    communicationVolume: 42,
-    overdueItemsCount: 1,
-    completedDeliverables: [
-      { title: 'Unified Inbox UI & Real-Time Sync', projectName: 'SaaS Platform Redesign', completedDate: 'Sep 15' },
-      { title: 'Client Mode Toggle & Security Migration', projectName: 'Client Portal V2', completedDate: 'Sep 16' },
-      { title: 'AI Reply Suggestion Engine', projectName: 'AI Communication Hub', completedDate: 'Sep 17' },
-    ],
-    inProgressProjects: [
-      { name: 'SaaS Platform Redesign', status: 'in_progress', progressPercent: 82, budgetUsed: 12000, totalBudget: 15000 },
-      { name: 'Client Portal V2', status: 'in_progress', progressPercent: 65, budgetUsed: 9500, totalBudget: 14000 },
-      { name: 'AI Voice Automation Workflow', status: 'review', progressPercent: 90, budgetUsed: 7000, totalBudget: 7500 },
-    ],
-    openBlockers: ['1 client sign-off pending for milestone 3 release.'],
-  }
-}

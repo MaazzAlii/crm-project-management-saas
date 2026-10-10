@@ -17,14 +17,12 @@ async function processWeeklySummary(req: NextRequest): Promise<NextResponse> {
   // 1. Authenticate cron trigger via secret header
   const authHeader = req.headers.get('authorization')
   const cronSecretHeader = req.headers.get('x-cron-secret')
-  const expectedSecret =
-    process.env.CRON_SECRET || process.env.AUTOMATION_WEBHOOK_SECRET || 'dev-cron-secret'
+  const expectedSecret = process.env.CRON_SECRET || process.env.AUTOMATION_WEBHOOK_SECRET
 
   const providedSecret =
     cronSecretHeader || (authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : '')
 
-  const isDev = process.env.NODE_ENV !== 'production' || process.env.DEV_SUPER_ADMIN === 'true'
-  if (!isDev && providedSecret !== expectedSecret) {
+  if (!expectedSecret || providedSecret !== expectedSecret) {
     return NextResponse.json({ error: 'Unauthorized: Invalid cron secret' }, { status: 401 })
   }
 
@@ -54,13 +52,7 @@ async function processWeeklySummary(req: NextRequest): Promise<NextResponse> {
         orgs = rows
       }
     } catch (e) {
-      if (!isDev) {
-        return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 })
-      }
-    }
-
-    if (orgs.length === 0 && isDev) {
-      orgs = [{ id: 'dev-org', name: 'Innoventix Hub Agency' }]
+      return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 })
     }
 
     results.organizations_processed = orgs.length
@@ -166,10 +158,6 @@ async function processWeeklySummary(req: NextRequest): Promise<NextResponse> {
           } catch (aiErr) {
             console.warn(`[Automation:WeeklySummary] AI narrative failed for org ${org.id}:`, aiErr)
           }
-        }
-
-        if (!narrativeSummary && isDev) {
-          narrativeSummary = `Executive Weekly Digest for ${org.name}: Operations are running smoothly with ${completedTasksCount || 8} milestone tasks delivered and ${activeProjectsCount || 3} active agency projects on schedule. Omnichannel communication across Slack and WhatsApp remained active with healthy client sentiment.`
         }
 
         // C. Emit signed outbound event to n8n (N8N Flow 4)

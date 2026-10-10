@@ -78,33 +78,6 @@ export async function logCommunicationAction(formData: FormData) {
       insertError = err
     }
 
-    // Dev mode fallback
-    if ((insertError || !insertedMessage) && process.env.DEV_SUPER_ADMIN === 'true') {
-      const devRecord: CommunicationItem = {
-        id: 'dev-comm-' + Date.now(),
-        organization_id: session.organization.id,
-        client_id: clientId,
-        channel_id: null,
-        channel_type: channelType,
-        direction,
-        sender_name: senderName,
-        sender_identifier: senderIdentifier,
-        subject,
-        body: body || subject || '',
-        is_manual: true,
-        metadata: { logged_by_user_id: session.user.id, logged_by_name: session.user.full_name },
-        sent_at: sentAt,
-        created_at: new Date().toISOString(),
-      }
-
-      ;(global as any).__DEV_COMMUNICATIONS = (global as any).__DEV_COMMUNICATIONS || []
-      ;(global as any).__DEV_COMMUNICATIONS.unshift(devRecord)
-
-      revalidatePath(`/clients/${clientId}`)
-      revalidatePath(`/clients/${clientId}/communications`)
-      return { success: true, message: devRecord }
-    }
-
     if (insertError || !insertedMessage) {
       console.error('Failed to log communication message:', insertError)
       return { error: insertError?.message || 'Database error while logging communication.' }
@@ -140,7 +113,7 @@ export async function fetchClientCommunicationsAction(clientId: string): Promise
     const session = await getCurrentSessionContext()
 
     if (!session || !session.organization) {
-      return getDevCommunications(clientId)
+      return []
     }
 
     let isManualMode = false
@@ -179,79 +152,9 @@ export async function fetchClientCommunicationsAction(clientId: string): Promise
       }
     } catch (err) {}
 
-    // Merge dev mode records if active
-    let devItems = getDevCommunications(clientId)
-    if (isManualMode) {
-      devItems = devItems.filter((item) => item.is_manual)
-    }
-    const combined = [...items, ...devItems]
-
-    // Deduplicate by ID
-    const uniqueMap = new Map<string, CommunicationItem>()
-    combined.forEach((item) => uniqueMap.set(item.id, item))
-
-    // Return sorted descending by sent_at
-    return Array.from(uniqueMap.values()).sort(
-      (a, b) => new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime()
-    )
+    return items
   } catch (err) {
-    return getDevCommunications(clientId)
+    return []
   }
 }
 
-function getDevCommunications(clientId: string): CommunicationItem[] {
-  if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_COMMUNICATIONS) {
-    return ((global as any).__DEV_COMMUNICATIONS as CommunicationItem[])
-      .filter((item) => item.client_id === clientId)
-      .sort((a, b) => new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime())
-  }
-
-  // Seed sample mock messages if none exist yet for demo
-  const mockSeed: CommunicationItem[] = [
-    {
-      id: 'mock-comm-1',
-      organization_id: 'dev-org',
-      client_id: clientId,
-      channel_type: 'email',
-      direction: 'inbound',
-      sender_name: 'Client Contact',
-      sender_identifier: 'client@example.com',
-      subject: 'Project Discovery & Scope Review',
-      body: 'Hi team, checking in regarding the upcoming sprint deliverables and launch timeline. Can we schedule a quick call tomorrow?',
-      is_manual: false,
-      sent_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-      created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-    },
-    {
-      id: 'mock-comm-2',
-      organization_id: 'dev-org',
-      client_id: clientId,
-      channel_type: 'call',
-      direction: 'outbound',
-      sender_name: 'Account Executive',
-      sender_identifier: 'account.exec@agency.com',
-      subject: 'Discovery Call Log',
-      body: 'Discussed project requirements, budget allocation ($15,000 USD), and target deployment date. Client confirmed team availability.',
-      is_manual: true,
-      metadata: { duration_minutes: 25 },
-      sent_at: new Date(Date.now() - 3600000 * 24).toISOString(),
-      created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
-    },
-    {
-      id: 'mock-comm-3',
-      organization_id: 'dev-org',
-      client_id: clientId,
-      channel_type: 'whatsapp',
-      direction: 'inbound',
-      sender_name: 'Client Manager',
-      sender_identifier: '+1234567890',
-      subject: null,
-      body: 'Thanks for sending over the proposal draft! Our board will review it by Friday.',
-      is_manual: false,
-      sent_at: new Date(Date.now() - 3600000 * 48).toISOString(),
-      created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
-    },
-  ]
-
-  return mockSeed
-}

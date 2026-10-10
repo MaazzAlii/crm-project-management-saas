@@ -13,30 +13,18 @@ export async function fetchTagsAction(): Promise<TagRecord[]> {
     const session = await getCurrentSessionContext()
 
     if (!session || !session.organization) {
-      return getDevTags()
+      return []
     }
 
-    let tags: TagRecord[] = []
+    const data = await query<TagRecord>(
+      `SELECT * FROM tags WHERE organization_id = $1 ORDER BY name ASC`,
+      [session.organization.id]
+    )
 
-    try {
-      const data = await query<TagRecord>(
-        `SELECT * FROM tags WHERE organization_id = $1 ORDER BY name ASC`,
-        [session.organization.id]
-      )
-
-      if (data) {
-        tags = data
-      }
-    } catch (err) {}
-
-    const devTags = getDevTags()
-    const combined = [...tags, ...devTags]
-    const uniqueMap = new Map<string, TagRecord>()
-    combined.forEach((t) => uniqueMap.set(t.name.toLowerCase(), t))
-
-    return Array.from(uniqueMap.values())
+    return data || []
   } catch (err) {
-    return getDevTags()
+    console.error('fetchTagsAction error:', err)
+    return []
   }
 }
 
@@ -67,23 +55,6 @@ export async function createTagAction(name: string, color: string = 'sky') {
       insertError = err
     }
 
-    // Dev fallback
-    if ((insertError || !newTag) && process.env.DEV_SUPER_ADMIN === 'true') {
-      const devTag: TagRecord = {
-        id: 'dev-tag-' + Date.now(),
-        organization_id: session.organization.id,
-        name: trimmedName,
-        color,
-        created_at: new Date().toISOString(),
-      }
-
-      ;(global as any).__DEV_TAGS = (global as any).__DEV_TAGS || []
-      ;(global as any).__DEV_TAGS.push(devTag)
-
-      revalidatePath('/clients')
-      return { success: true, tag: devTag }
-    }
-
     if (insertError || !newTag) {
       if (insertError?.code === '23505') {
         return { error: 'A tag with this name already exists.' }
@@ -112,10 +83,8 @@ export async function deleteTagAction(tagId: string) {
         `DELETE FROM tags WHERE id = $1 AND organization_id = $2`,
         [tagId, session.organization.id]
       )
-    } catch (err) {}
-
-    if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_TAGS) {
-      ;(global as any).__DEV_TAGS = ((global as any).__DEV_TAGS as TagRecord[]).filter((t) => t.id !== tagId)
+    } catch (err: any) {
+      return { error: err?.message || 'Failed to delete tag.' }
     }
 
     revalidatePath('/clients')
@@ -138,14 +107,8 @@ export async function updateClientTagsAction(clientId: string, tags: string[]) {
         `UPDATE clients SET tags = $1, updated_at = NOW() WHERE id = $2 AND organization_id = $3`,
         [tags, clientId, session.organization.id]
       )
-    } catch (err) {}
-
-    // Dev fallback
-    if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
-      const idx = (global as any).__DEV_CLIENTS.findIndex((c: any) => c.id === clientId)
-      if (idx !== -1) {
-        ;(global as any).__DEV_CLIENTS[idx].tags = tags
-      }
+    } catch (err: any) {
+      return { error: err?.message || 'Failed to update client tags.' }
     }
 
     try {
@@ -164,20 +127,4 @@ export async function updateClientTagsAction(clientId: string, tags: string[]) {
   } catch (error: any) {
     return { error: error?.message || 'Failed to update client tags.' }
   }
-}
-
-function getDevTags(): TagRecord[] {
-  if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_TAGS) {
-    return (global as any).__DEV_TAGS as TagRecord[]
-  }
-
-  const defaultSeed: TagRecord[] = [
-    { id: 'tag-1', organization_id: 'dev-org', name: 'VIP Client', color: 'amber', created_at: new Date().toISOString() },
-    { id: 'tag-2', organization_id: 'dev-org', name: 'High Value', color: 'emerald', created_at: new Date().toISOString() },
-    { id: 'tag-3', organization_id: 'dev-org', name: 'Retainer', color: 'sky', created_at: new Date().toISOString() },
-    { id: 'tag-4', organization_id: 'dev-org', name: 'Saas Partner', color: 'purple', created_at: new Date().toISOString() },
-    { id: 'tag-5', organization_id: 'dev-org', name: 'Web Dev', color: 'cyan', created_at: new Date().toISOString() },
-  ]
-
-  return defaultSeed
 }

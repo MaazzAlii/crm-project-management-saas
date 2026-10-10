@@ -44,23 +44,8 @@ export default async function DashboardPage() {
   let recentActivities: ActivityItem[] = []
 
   try {
-    if (process.env.NODE_ENV !== 'production' && org.id === '00000000-0000-0000-0000-000000000001') {
-      activeProjectsCount = 3
-      pendingTasksCount = 8
-      overdueProjectsCount = 1
-      clientsCount = 5
-      recentActivities = [
-        {
-          id: 'act-1',
-          title: 'Project Created: Website Redesign',
-          description: `Status: IN_PROGRESS · Org: ${org.name}`,
-          timestamp: new Date().toISOString(),
-          type: 'project',
-        },
-      ]
-    } else {
-      // 1. Fetch Active Projects Count
-      const pRes = await queryOne<{ count: number }>(
+    // 1. Fetch Active Projects Count
+    const pRes = await queryOne<{ count: number }>(
         `SELECT COUNT(*)::int as count FROM projects WHERE organization_id = $1 AND status != 'completed'`,
         [org.id]
       )
@@ -107,7 +92,6 @@ export default async function DashboardPage() {
           type: 'project',
         }))
       }
-    }
   } catch (err) {
     console.warn('[DASHBOARD_QUERY_WARN] Using fallback metric calculation:', err)
   }

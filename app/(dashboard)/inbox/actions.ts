@@ -46,105 +46,6 @@ export interface FetchInboxDataResult {
   aiTaskExtractionEnabled?: boolean
 }
 
-// Dev fallback sample conversations if database is empty
-const DEV_SAMPLE_MESSAGES: InboxMessageRecord[] = [
-  {
-    id: 'msg-sample-1',
-    organization_id: 'dev-org',
-    channel_id: 'chan-slack-1',
-    client_id: 'cli-sample-1',
-    direction: 'inbound',
-    sender_name: 'Sarah Jenkins',
-    sender_identifier: 'sarah.j@acmecorp.com',
-    body: 'Hey team! Just reviewed the latest homepage mockup design draft. Love the dark mode toggle!',
-    sent_at: new Date(Date.now() - 1000 * 60 * 25).toISOString(), // 25 mins ago
-    read_at: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    channel: { id: 'chan-slack-1', provider: 'slack', channel_name: '#acme-redesign', status: 'active' },
-    client: { id: 'cli-sample-1', name: 'Sarah Jenkins', company_name: 'Acme Corp', email: 'sarah.j@acmecorp.com', communication_mode: 'connected' }
-  },
-  {
-    id: 'msg-sample-2',
-    organization_id: 'dev-org',
-    channel_id: 'chan-whatsapp-1',
-    client_id: 'cli-sample-2',
-    direction: 'inbound',
-    sender_name: 'Michael Chang',
-    sender_identifier: '+15550192831',
-    body: 'Hi, can we schedule a quick call tomorrow at 2 PM EST to go over the Q3 marketing campaign budget?',
-    sent_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
-    read_at: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    channel: { id: 'chan-whatsapp-1', provider: 'whatsapp', channel_name: 'WhatsApp Business (+1 555-019-2831)', status: 'active' },
-    client: { id: 'cli-sample-2', name: 'Michael Chang', company_name: 'Nexus Tech', email: 'mchang@nexustech.io', communication_mode: 'manual' }
-  },
-  {
-    id: 'msg-sample-3',
-    organization_id: 'dev-org',
-    channel_id: 'chan-email-1',
-    client_id: null,
-    direction: 'inbound',
-    sender_name: 'David Vance',
-    sender_identifier: 'david.vance@leadprospect.com',
-    body: 'Inquiry regarding custom CRM integration services for our 50-person sales team. Do you support custom webhooks?',
-    sent_at: new Date(Date.now() - 1000 * 60 * 360).toISOString(), // 6 hours ago
-    read_at: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    channel: { id: 'chan-email-1', provider: 'email', channel_name: 'support@agency.com', status: 'active' },
-    client: null
-  },
-  {
-    id: 'msg-sample-4',
-    organization_id: 'dev-org',
-    channel_id: 'chan-slack-1',
-    client_id: 'cli-sample-1',
-    direction: 'outbound',
-    sender_name: 'Agency Support',
-    sender_identifier: 'support@agency.com',
-    body: 'Thanks Sarah! We have pushed the updated responsive navigation component to staging.',
-    sent_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    read_at: new Date().toISOString(),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    channel: { id: 'chan-slack-1', provider: 'slack', channel_name: '#acme-redesign', status: 'active' },
-    client: { id: 'cli-sample-1', name: 'Sarah Jenkins', company_name: 'Acme Corp', email: 'sarah.j@acmecorp.com', communication_mode: 'connected' }
-  },
-  {
-    id: 'msg-sample-5',
-    organization_id: 'dev-org',
-    channel_id: 'chan-discord-1',
-    client_id: 'cli-sample-2',
-    direction: 'inbound',
-    sender_name: 'Marcus Vance',
-    sender_identifier: 'marcus_v#0001',
-    body: 'Hey guys, pinging from the Discord VIP server. Can you check the build artifact link?',
-    sent_at: new Date(Date.now() - 1000 * 60 * 450).toISOString(),
-    read_at: new Date().toISOString(),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    channel: { id: 'chan-discord-1', provider: 'discord', channel_name: 'Discord VIP Community', status: 'active' },
-    client: { id: 'cli-sample-2', name: 'Michael Chang', company_name: 'Nexus Tech', email: 'mchang@nexustech.io', communication_mode: 'manual' }
-  },
-  {
-    id: 'msg-sample-6',
-    organization_id: 'dev-org',
-    channel_id: 'chan-upwork-1',
-    client_id: null,
-    direction: 'inbound',
-    sender_name: 'Elena Rostova',
-    sender_identifier: 'elena_upwork_buyer',
-    body: 'We accepted your contract proposal for the SaaS Dashboard redesign! Looking forward to starting.',
-    sent_at: new Date(Date.now() - 1000 * 60 * 720).toISOString(),
-    read_at: new Date().toISOString(),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    channel: { id: 'chan-upwork-1', provider: 'upwork', channel_name: 'Upwork Direct Contracts', status: 'active' },
-    client: null
-  }
-]
 
 export async function fetchInboxDataAction(filters?: {
   channelId?: string
@@ -156,10 +57,6 @@ export async function fetchInboxDataAction(filters?: {
 }): Promise<FetchInboxDataResult> {
   try {
     const session = await getCurrentSessionContext()
-
-    if (process.env.NODE_ENV !== 'production' && (!session || !session.organization || session.organization.id === '00000000-0000-0000-0000-000000000001')) {
-      return getDevInboxData(filters)
-    }
 
     if (!session || !session.organization) {
       throw new Error('Unauthorized: Valid session and organization required.')
@@ -210,11 +107,7 @@ export async function fetchInboxDataAction(filters?: {
       [orgId]
     )
 
-    let messages = messagesRes.data || []
-    if (process.env.NODE_ENV !== 'production' && messages.length === 0 && (!filters || Object.keys(filters).length === 0)) {
-      // If DB is empty, provide rich dev sample data
-      return getDevInboxData(filters)
-    }
+    const messages = messagesRes.data || []
 
     return {
       messages,
@@ -226,86 +119,10 @@ export async function fetchInboxDataAction(filters?: {
     }
   } catch (err: any) {
     console.error('[CommunicationHub:Actions] Error fetching inbox data:', err)
-    if (process.env.NODE_ENV !== 'production') {
-      return getDevInboxData(filters)
-    }
     throw err
   }
 }
 
-function getDevInboxData(filters?: {
-  channelId?: string
-  clientId?: string
-  provider?: string
-  readStatus?: 'all' | 'read' | 'unread'
-  unmatchedOnly?: boolean
-  search?: string
-}): FetchInboxDataResult {
-  let messages = [...DEV_SAMPLE_MESSAGES]
-
-  if (filters?.channelId) {
-    messages = messages.filter((m) => m.channel_id === filters.channelId)
-  }
-  if (filters?.clientId) {
-    messages = messages.filter((m) => m.client_id === filters.clientId)
-  }
-  if (filters?.provider && filters.provider !== 'ALL') {
-    messages = messages.filter((m) => m.channel?.provider === filters.provider)
-  }
-  if (filters?.readStatus === 'unread') {
-    messages = messages.filter((m) => !m.read_at && m.direction === 'inbound')
-  } else if (filters?.readStatus === 'read') {
-    messages = messages.filter((m) => !!m.read_at)
-  }
-  if (filters?.unmatchedOnly) {
-    messages = messages.filter((m) => !m.client_id)
-  }
-  if (filters?.search) {
-    const s = filters.search.toLowerCase()
-    messages = messages.filter(
-      (m) =>
-        m.body.toLowerCase().includes(s) ||
-        (m.sender_name && m.sender_name.toLowerCase().includes(s)) ||
-        (m.sender_identifier && m.sender_identifier.toLowerCase().includes(s))
-    )
-  }
-
-  return {
-    messages,
-    summary: {
-      totalMessages: DEV_SAMPLE_MESSAGES.length,
-      unreadCount: DEV_SAMPLE_MESSAGES.filter((m) => !m.read_at && m.direction === 'inbound').length,
-      unmatchedCount: DEV_SAMPLE_MESSAGES.filter((m) => !m.client_id).length,
-      byProvider: {
-        slack: 2,
-        whatsapp: 1,
-        email: 1,
-        discord: 1,
-        upwork: 1
-      },
-      unreadByProvider: {
-        slack: 1,
-        whatsapp: 1,
-        email: 1,
-        discord: 0,
-        upwork: 0
-      }
-    },
-    clients: [
-      { id: 'cli-sample-1', name: 'Sarah Jenkins', company_name: 'Acme Corp', email: 'sarah.j@acmecorp.com', communication_mode: 'connected' },
-      { id: 'cli-sample-2', name: 'Michael Chang', company_name: 'Nexus Tech', email: 'mchang@nexustech.io', communication_mode: 'manual' },
-      { id: 'cli-sample-3', name: 'Elena Rostova', company_name: 'Global Ventures', email: 'elena@globalventures.com', communication_mode: 'connected' }
-    ],
-    channels: [
-      { id: 'chan-slack-1', provider: 'slack', channel_name: '#acme-redesign', status: 'active', connected_at: new Date(Date.now() - 86400000 * 5).toISOString(), external_account_id: 'T08DEMO_SLACK' },
-      { id: 'chan-whatsapp-1', provider: 'whatsapp', channel_name: 'WhatsApp Business (+1 555-019-2831)', status: 'active', connected_at: new Date(Date.now() - 86400000 * 3).toISOString(), external_account_id: 'whatsapp:+15550192831' },
-      { id: 'chan-email-1', provider: 'email', channel_name: 'support@agency.com', status: 'active', connected_at: new Date(Date.now() - 86400000 * 10).toISOString(), external_account_id: 'support@agency.com' },
-      { id: 'chan-discord-1', provider: 'discord', channel_name: 'Discord VIP Community', status: 'active', connected_at: new Date(Date.now() - 86400000 * 2).toISOString(), external_account_id: '123456789012345678' },
-      { id: 'chan-upwork-1', provider: 'upwork', channel_name: 'Upwork Direct Contracts', status: 'active', connected_at: new Date(Date.now() - 86400000 * 1).toISOString(), external_account_id: '~0198273645' }
-    ],
-    aiEnabled: true
-  }
-}
 
 export async function markMessageReadAction(messageId: string) {
   try {
@@ -712,13 +529,6 @@ export async function extractTasksFromThreadAction(
         }))
       }
     } catch (e) {}
-
-    if (projects.length === 0 && process.env.DEV_SUPER_ADMIN === 'true') {
-      projects = [
-        { id: 'proj-1', title: 'V2 AI Voice & CRM Portal Integration', client_id: params.clientId || 'client-1' },
-        { id: 'proj-2', title: 'Agency Mobile App Redesign', client_id: 'client-2' },
-      ]
-    }
 
     // 2. Fetch Team Members
     let teamMembers: TaskCandidateAssignee[] = []

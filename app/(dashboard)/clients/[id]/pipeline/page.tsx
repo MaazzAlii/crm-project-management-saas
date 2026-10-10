@@ -45,10 +45,6 @@ export default async function ClientPipelinePage({ params }: { params: { id: str
     )
   } catch (err) {}
 
-  if (!rawClient && process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
-    rawClient = (global as any).__DEV_CLIENTS.find((c: any) => c.id === params.id)
-  }
-
   if (!rawClient) {
     notFound()
   }

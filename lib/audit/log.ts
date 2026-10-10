@@ -108,15 +108,6 @@ export interface AuditLogRecord {
   created_at: string
 }
 
-// Global in-memory storage fallback for dev and test environments
-declare global {
-  // eslint-disable-next-line no-var
-  var __DEV_AUDIT_LOGS: AuditLogRecord[] | undefined
-}
-
-if (!global.__DEV_AUDIT_LOGS) {
-  global.__DEV_AUDIT_LOGS = []
-}
 
 /**
  * Log a sensitive system, org, or super-admin event into the immutable audit_logs store.
@@ -169,13 +160,6 @@ export async function logAuditEvent(event: AuditLogEvent): Promise<boolean> {
       created_at: new Date().toISOString(),
     }
 
-    // Always maintain dev store for fast integration testing
-    if (global.__DEV_AUDIT_LOGS) {
-      global.__DEV_AUDIT_LOGS.unshift(record)
-      if (global.__DEV_AUDIT_LOGS.length > 500) {
-        global.__DEV_AUDIT_LOGS.pop()
-      }
-    }
 
     // Persist to PostgreSQL Database
     try {

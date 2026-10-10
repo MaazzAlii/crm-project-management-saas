@@ -109,10 +109,6 @@ export async function scoreLead(params: ScoreLeadParams): Promise<ScoreLeadResul
     )
   } catch (err) {}
 
-  if (!clientRecord && process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
-    clientRecord = (global as any).__DEV_CLIENTS.find((c: any) => c.id === clientId)
-  }
-
   if (!clientRecord) {
     return {
       success: false,
@@ -276,19 +272,6 @@ export async function scoreLead(params: ScoreLeadParams): Promise<ScoreLeadResul
     )
   } catch (dbErr) {
     console.warn('[AI:LeadScoring] Failed to persist score to database:', dbErr)
-  }
-
-  // Dev fallback cache
-  if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
-    const idx = (global as any).__DEV_CLIENTS.findIndex((c: any) => c.id === clientId)
-    if (idx !== -1) {
-      ;(global as any).__DEV_CLIENTS[idx] = {
-        ...(global as any).__DEV_CLIENTS[idx],
-        lead_score: breakdown.score,
-        lead_score_updated_at: breakdown.calculatedAt,
-        lead_score_breakdown: breakdown,
-      }
-    }
   }
 
   return {

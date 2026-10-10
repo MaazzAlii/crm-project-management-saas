@@ -54,7 +54,7 @@ export async function fetchInAppNotificationsAction(): Promise<InAppNotification
     const session = await getCurrentSessionContext()
 
     if (!session || !session.organization) {
-      return getDevNotifications()
+      return []
     }
 
     const { rows } = await query<InAppNotificationRecord>(
@@ -65,13 +65,9 @@ export async function fetchInAppNotificationsAction(): Promise<InAppNotification
       [session.organization.id]
     )
 
-    if (!rows || rows.length === 0) {
-      return getDevNotifications()
-    }
-
-    return rows
+    return rows || []
   } catch (err) {
-    return getDevNotifications()
+    return []
   }
 }
 
@@ -145,43 +141,3 @@ export async function createInAppNotificationAction(
   } catch (e) {}
 }
 
-// Dev Fallback Notifications
-function getDevNotifications(): InAppNotificationRecord[] {
-  const now = new Date()
-
-  return [
-    {
-      id: 'notif-1',
-      organization_id: 'dev-org',
-      type: 'deadline_approaching',
-      title: 'Project Deadline Approaching',
-      body: 'Project "Voice Agent AI Integration" is due in 2 days.',
-      read_at: null,
-      related_entity_type: 'project',
-      related_entity_id: 'proj-1',
-      created_at: new Date(now.getTime() - 3600000 * 2).toISOString(),
-    },
-    {
-      id: 'notif-2',
-      organization_id: 'dev-org',
-      type: 'milestone_completed',
-      title: 'Deliverable Approved',
-      body: 'Client approved "Voice Bot Dialog Flow Architecture Diagram".',
-      read_at: new Date(now.getTime() - 3600000 * 12).toISOString(),
-      related_entity_type: 'project',
-      related_entity_id: 'proj-1',
-      created_at: new Date(now.getTime() - 3600000 * 24).toISOString(),
-    },
-    {
-      id: 'notif-3',
-      organization_id: 'dev-org',
-      type: 'project_overdue',
-      title: 'Task Overdue Alert',
-      body: 'Task "Configure Webhook Endpoints" passed its target due date.',
-      read_at: null,
-      related_entity_type: 'task',
-      related_entity_id: 'tsk-101',
-      created_at: new Date(now.getTime() - 3600000 * 36).toISOString(),
-    },
-  ]
-}

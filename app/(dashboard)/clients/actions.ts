@@ -84,33 +84,6 @@ export async function createClientAction(formData: FormData) {
       insertError = err
     }
 
-    if ((insertError || !newClient) && process.env.DEV_SUPER_ADMIN === 'true') {
-      const devClientId = 'dev-client-' + Date.now()
-      const devRecord = {
-        id: devClientId,
-        organization_id: session.organization.id,
-        name: validatedData.name,
-        company: validatedData.company,
-        email: validatedData.email,
-        phone: validatedData.phone,
-        platform: validatedData.platform,
-        country: validatedData.country,
-        currency: validatedData.currency,
-        payment_schedule: validatedData.payment_schedule,
-        status: rawData.status,
-        communication_mode: validatedData.communication_mode,
-        notes: validatedData.notes,
-        tags,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }
-      ;(global as any).__DEV_CLIENTS = (global as any).__DEV_CLIENTS || []
-      ;(global as any).__DEV_CLIENTS.unshift(devRecord)
-
-      revalidatePath('/clients')
-      return { success: true, clientId: devClientId }
-    }
-
     if (insertError || !newClient) {
       console.error('Failed to insert client record:', insertError)
       return { error: insertError?.message || 'Database error occurred while creating client.' }
@@ -285,28 +258,6 @@ export async function updateClientAction(clientId: string, formData: FormData) {
       updateError = err
     }
 
-    if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
-      const idx = (global as any).__DEV_CLIENTS.findIndex((c: any) => c.id === clientId)
-      if (idx !== -1) {
-        ;(global as any).__DEV_CLIENTS[idx] = {
-          ...(global as any).__DEV_CLIENTS[idx],
-          name: validatedData.name,
-          company: validatedData.company,
-          email: validatedData.email,
-          phone: validatedData.phone,
-          platform: validatedData.platform,
-          country: validatedData.country,
-          currency: validatedData.currency,
-          payment_schedule: validatedData.payment_schedule,
-          status: validatedData.status || rawData.status,
-          communication_mode: validatedData.communication_mode,
-          notes: validatedData.notes,
-          ...(tags !== undefined ? { tags } : {}),
-          updated_at: new Date().toISOString(),
-        }
-      }
-    }
-
     try {
       await logAuditEvent({
         actorId: session.user.id,
@@ -344,14 +295,6 @@ export async function updateClientNotesAction(clientId: string, notes: string) {
         [notes, clientId, session.organization.id]
       )
     } catch (e) {}
-
-    if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
-      const idx = (global as any).__DEV_CLIENTS.findIndex((c: any) => c.id === clientId)
-      if (idx !== -1) {
-        ;(global as any).__DEV_CLIENTS[idx].notes = notes
-        ;(global as any).__DEV_CLIENTS[idx].updated_at = new Date().toISOString()
-      }
-    }
 
     revalidatePath(`/clients/${clientId}`)
     return { success: true }
@@ -395,12 +338,6 @@ export async function switchClientToConnectedModeAction(clientId: string) {
       }
     } catch (e) {}
 
-    if (!currentClient && process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
-      currentClient = (global as any).__DEV_CLIENTS.find(
-        (c: any) => c.id === clientId && c.organization_id === orgId
-      )
-    }
-
     if (!currentClient) {
       return { error: 'Client not found in your organization.' }
     }
@@ -418,15 +355,6 @@ export async function switchClientToConnectedModeAction(clientId: string) {
     } catch (err: any) {
       console.error('PostgreSQL update error:', err)
       return { error: err.message }
-    }
-
-    // In-memory dev fallback
-    if (process.env.DEV_SUPER_ADMIN === 'true' && (global as any).__DEV_CLIENTS) {
-      const idx = (global as any).__DEV_CLIENTS.findIndex((c: any) => c.id === clientId)
-      if (idx !== -1) {
-        ;(global as any).__DEV_CLIENTS[idx].communication_mode = 'connected'
-        ;(global as any).__DEV_CLIENTS[idx].updated_at = new Date().toISOString()
-      }
     }
 
     // Audit logging
