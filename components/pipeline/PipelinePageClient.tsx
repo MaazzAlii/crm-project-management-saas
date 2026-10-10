@@ -18,21 +18,34 @@ import { ForecastView } from './ForecastView';
 import { DealDetailModal } from './DealDetailModal';
 import { CreateDealModal } from './CreateDealModal';
 import { ManagePipelinesModal } from './ManagePipelinesModal';
-import { Loader2, Plus, Sparkles, Layers } from 'lucide-react';
+import { Loader2, Plus, Sparkles, Layers, AlertCircle, CheckCircle2 } from 'lucide-react';
+
+interface ToastInfo {
+  id: string;
+  message: string;
+  type: 'error' | 'success' | 'info';
+}
 
 interface PipelinePageClientProps {
   initialPipelines: Pipeline[];
   defaultPipelineId: string;
   currentUserId?: string;
+  currentUserRole?: string;
 }
 
 export function PipelinePageClient({
   initialPipelines,
   defaultPipelineId,
   currentUserId,
+  currentUserRole = 'owner',
 }: PipelinePageClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Admin / owner permissions for managing pipeline columns & settings
+  const canManage = ['owner', 'admin', 'org_admin', 'super_admin'].includes(
+    currentUserRole?.toLowerCase() || ''
+  );
 
   const [pipelines, setPipelines] = useState<Pipeline[]>(initialPipelines);
   const [activePipelineId, setActivePipelineId] = useState<string>(
@@ -44,6 +57,17 @@ export function PipelinePageClient({
   const [labels, setLabels] = useState<PipelineLabel[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
+
+  // Floating Toast Notifications
+  const [toasts, setToasts] = useState<ToastInfo[]>([]);
+
+  const showToast = useCallback((message: string, type: 'error' | 'success' | 'info' = 'info') => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4000);
+  }, []);
 
   // Filters & Search
   const [filters, setFilters] = useState<DealFilters>({});
@@ -137,9 +161,7 @@ export function PipelinePageClient({
 
     if (targetDeal) {
       const nextBoard = boardData.map((stageView) => {
-        // Remove from old stage
         const filtered = stageView.deals.filter((d) => d.id !== dealId);
-        // Add to new stage
         if (stageView.stage.id === opts.toStageId) {
           return {
             ...stageView,
@@ -166,19 +188,151 @@ export function PipelinePageClient({
       const json = await res.json();
 
       if (json.data) {
-        // Reload fresh state to get correct positions & server timestamps
         loadBoardData();
         return true;
       } else {
-        // Rollback optimistic update
         setBoardData(previousState);
-        alert(json.error?.message || 'Failed to move deal');
+        showToast(json.error?.message || 'Failed to move deal', 'error');
         return false;
       }
     } catch {
       setBoardData(previousState);
-      alert('Network error while moving deal');
+      showToast('Network error while moving deal', 'error');
       return false;
+    }
+  };
+
+  // Rename Stage with optimistic update and rollback
+  const handleRenameStage = async (stageId: string, newName: string) => {
+    const previousState = [...boardData];
+
+    // Optimistic update
+    setBoardData((prev) =>
+      prev.map((sv) =>
+        sv.stage.id === stageId
+          ? { ...sv, stage: { ...sv.stage, name: newName } }
+          : sv
+      )
+    );
+
+    try {
+      const res = await fetch(`/api/pipelines/${activePipelineId}/stages/${stageId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName }),
+      });
+      const json = await res.json();
+
+      if (!json.data) {
+        setBoardData(previousState);
+        showToast(json.error?.message || 'Failed to rename column', 'error');
+      } else {
+        showToast(`Column renamed to "${newName}"`, 'success');
+      }
+    } catch {
+      setBoardData(previousState);
+      showToast('Network error while renaming column', 'error');
+    }
+  };
+
+  // Add Stage with optimistic update
+  const handleAddStage = async (name: string) => {
+    const tempId = `temp-${Date.now()}`;
+    const previousState = [...boardData];
+
+    // Optimistic stage
+    const newStage: PipelineStage = {
+      id: tempId,
+      org_id: '',
+      pipeline_id: activePipelineId,
+      name,
+      color: '#6366f1',
+      position: (boardData.length + 1) * 1000.0,
+      is_won: false,
+      is_lost: false,
+      wip_limit: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    setBoardData((prev) => [
+      ...prev,
+      {
+        stage: newStage,
+        deals: [],
+        totalValue: 0,
+        totalDeals: 0,
+      },
+    ]);
+
+    try {
+      const res = await fetch(`/api/pipelines/${activePipelineId}/stages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      const json = await res.json();
+
+      if (json.data) {
+        showToast(`Column "${name}" added`, 'success');
+        loadBoardData();
+      } else {
+        setBoardData(previousState);
+        showToast(json.error?.message || 'Failed to add column', 'error');
+      }
+    } catch {
+      setBoardData(previousState);
+      showToast('Network error adding column', 'error');
+    }
+  };
+
+  // Delete Stage with optimistic update and deal migration
+  const handleDeleteStage = async (stageId: string, moveToStageId: string | null) => {
+    const previousState = [...boardData];
+
+    // Optimistically remove column and move deals
+    const stageViewToDelete = boardData.find((s) => s.stage.id === stageId);
+    const dealsToMove = stageViewToDelete?.deals || [];
+
+    setBoardData((prev) =>
+      prev
+        .filter((s) => s.stage.id !== stageId)
+        .map((s) => {
+          if (moveToStageId && s.stage.id === moveToStageId) {
+            const combinedDeals = [
+              ...s.deals,
+              ...dealsToMove.map((d) => ({ ...d, stage_id: moveToStageId })),
+            ];
+            return {
+              ...s,
+              deals: combinedDeals,
+              totalDeals: combinedDeals.length,
+              totalValue: combinedDeals.reduce((sum, d) => sum + (Number(d.value) || 0), 0),
+            };
+          }
+          return s;
+        })
+    );
+
+    try {
+      const url = `/api/pipelines/${activePipelineId}/stages/${stageId}${
+        moveToStageId ? `?moveTo=${moveToStageId}` : ''
+      }`;
+      const res = await fetch(url, {
+        method: 'DELETE',
+      });
+      const json = await res.json();
+
+      if (json.data) {
+        showToast('Column deleted successfully', 'success');
+        loadBoardData();
+      } else {
+        setBoardData(previousState);
+        showToast(json.error?.message || 'Failed to delete column', 'error');
+      }
+    } catch {
+      setBoardData(previousState);
+      showToast('Network error deleting column', 'error');
     }
   };
 
@@ -200,10 +354,10 @@ export function PipelinePageClient({
       if (json.data) {
         loadBoardData();
       } else {
-        alert(json.error?.message || 'Failed to add card');
+        showToast(json.error?.message || 'Failed to add card', 'error');
       }
     } catch {
-      alert('Network error adding deal');
+      showToast('Network error adding deal', 'error');
     }
   };
 
@@ -229,7 +383,30 @@ export function PipelinePageClient({
   const totalPipelineValue = boardData.reduce((sum, s) => sum + s.totalValue, 0);
 
   return (
-    <div className="flex flex-col h-full w-full bg-slate-950 text-slate-100 overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-slate-950 text-slate-100 overflow-hidden relative">
+      {/* Floating Toast Notification Container */}
+      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-sm">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`flex items-center gap-2.5 rounded-xl border p-3.5 shadow-2xl text-xs font-semibold animate-in slide-in-from-bottom-2 fade-in duration-200 pointer-events-auto ${
+              toast.type === 'error'
+                ? 'border-rose-500/40 bg-rose-950/90 text-rose-200 shadow-rose-900/20'
+                : toast.type === 'success'
+                ? 'border-emerald-500/40 bg-emerald-950/90 text-emerald-200 shadow-emerald-900/20'
+                : 'border-slate-700 bg-slate-900/90 text-slate-200'
+            }`}
+          >
+            {toast.type === 'error' ? (
+              <AlertCircle className="h-4 w-4 text-rose-400 flex-shrink-0" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+            )}
+            <span>{toast.message}</span>
+          </div>
+        ))}
+      </div>
+
       {/* Top Pipeline Header */}
       <PipelineHeader
         pipelines={pipelines}
@@ -296,9 +473,13 @@ export function PipelinePageClient({
         ) : activeView === 'board' ? (
           <Board
             boardData={boardData}
+            canManage={canManage}
             onMoveDeal={handleMoveDeal}
             onCardClick={handleOpenDealModal}
             onAddCard={handleAddCardInline}
+            onAddStage={handleAddStage}
+            onRenameStage={handleRenameStage}
+            onDeleteStage={handleDeleteStage}
           />
         ) : activeView === 'table' ? (
           <TableView
