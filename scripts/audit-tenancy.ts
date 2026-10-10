@@ -37,26 +37,38 @@ const SESSION_CHECK_ALLOWLIST: Record<string, string> = {
   'app/api/seed-demo-data/route.ts': 'Internal / dev database seeder',
 };
 
-// PLATFORM-LEVEL AUTH TOKEN TABLES
-// These are the ONLY tables that the scanner allows to be queried without an
-// organization_id scope.  Every entry must have a written justification.
-// DO NOT add tenant tables here (e.g. users, organizations, clients, projects).
-// Login-by-email and password reset need to look up a single row by the
-// credential token before an org is known.  Refresh tokens are the same.
-// Narrowly scoped: lookup is by unique token column, never a bulk table scan.
-const GLOBAL_TABLE_NAMES = [
-  // Auth login: SELECT FROM users WHERE email = $1  — before org is known
-  'users',
-  // Token stores: looked up by token value before a session exists
-  'refresh_tokens',
-  'password_reset_tokens',
-  // Magic-link token store
-  'magic_link_tokens',
-];
+// FILE-LEVEL QUERY ALLOWLIST FOR PUBLIC AUTH & TOKEN LOOKUPS
+// Global tables like 'users' MUST NOT be excluded table-wide because tenant
+// pages and user endpoints could otherwise read all platform users unscoped.
+// Only specific auth endpoints performing pre-session or token validation
+// lookups are permitted, each with an explicit documented reason.
+const AUTH_QUERY_ALLOWLIST: Record<string, { allowedTables: string[]; reason: string }> = {
+  'app/api/auth/login/route.ts': {
+    allowedTables: ['users', 'refresh_tokens'],
+    reason: 'Public login: looks up user by email before tenant context exists (SELECT FROM users WHERE email = $1), records refresh token, and updates last_login_at',
+  },
+  'app/api/auth/refresh/route.ts': {
+    allowedTables: ['refresh_tokens', 'users'],
+    reason: 'Token refresh endpoint: validates refresh_tokens by hash before session exists, and retrieves user record to issue new access token',
+  },
+  'app/api/auth/session/route.ts': {
+    allowedTables: ['refresh_tokens', 'users'],
+    reason: 'Session validation: validates refresh token cookie and retrieves active user profile across tenant boundaries',
+  },
+  'app/api/auth/logout/route.ts': {
+    allowedTables: ['refresh_tokens'],
+    reason: 'Session logout: marks refresh token revoked by token_hash',
+  },
+  'app/api/auth/verify-magic-link/route.ts': {
+    allowedTables: ['refresh_tokens', 'magic_link_tokens'],
+    reason: 'Magic link verification: verifies one-time magic link token and records refresh token',
+  },
+};
 
 const apiFiles = walk('app/api', (f) => f.endsWith('route.ts'));
 const actionFiles = walk('app', (f) => f.endsWith('.ts') && (f.endsWith('actions.ts') || f.includes(`${path.sep}actions${path.sep}`)));
-const allFiles = Array.from(new Set(apiFiles.concat(actionFiles)));
+const pageFiles = walk('app', (f) => f.endsWith('page.tsx'));
+const allFiles = Array.from(new Set(apiFiles.concat(actionFiles).concat(pageFiles)));
 
 console.log(`Scanning ${allFiles.length} files\n`);
 
@@ -86,7 +98,7 @@ for (const f of allFiles) {
   // Known auth mechanisms: session, getCurrentSessionContext, requireSession, getAuthFromRequest, getPipelineSession, withRole, requireSuperAdmin
   const hasSessionCheck = /session|getCurrentSessionContext|requireSession|getAuthFromRequest|getPipelineSession|withRole|requireSuperAdmin/i.test(c);
   if (!hasSessionCheck) {
-    if (!SESSION_CHECK_ALLOWLIST[f]) {
+    if (!SESSION_CHECK_ALLOWLIST[f] && !f.endsWith('page.tsx')) {
       flags.push('NO_SESSION_CHECK');
     }
   }
@@ -107,24 +119,34 @@ for (const f of allFiles) {
     // Check if query is scoped by organization_id or org_id
     if (/(organization_id|org_id)/i.test(sql)) return false;
 
-    // Check if it's a simple query on a global non-tenant table
-    const touchesOnlyGlobal = GLOBAL_TABLE_NAMES.some((table) => {
-      const fromMatch = new RegExp(`FROM\\s+(?:public\\.)?${table}\\b`, 'i').test(sql);
-      const updateMatch = new RegExp(`UPDATE\\s+(?:public\\.)?${table}\\b`, 'i').test(sql);
-      const insertMatch = new RegExp(`INSERT\\s+INTO\\s+(?:public\\.)?${table}\\b`, 'i').test(sql);
-      return fromMatch || updateMatch || insertMatch;
-    });
-
-    if (touchesOnlyGlobal) return false;
-
-    // Check for health check or schema check
+    // Check for health check or schema check (SELECT 1)
     if (/SELECT\s+1\b/i.test(sql)) return false;
+
+    // File-level allowlist: check if this file is explicitly allowed to query specific auth/token tables unscoped
+    const allowedEntry = AUTH_QUERY_ALLOWLIST[f];
+    if (allowedEntry) {
+      const touchesAllowedOnly = allowedEntry.allowedTables.some((table) => {
+        const fromMatch = new RegExp(`FROM\\s+(?:public\\.)?${table}\\b`, 'i').test(sql);
+        const updateMatch = new RegExp(`UPDATE\\s+(?:public\\.)?${table}\\b`, 'i').test(sql);
+        const insertMatch = new RegExp(`INSERT\\s+INTO\\s+(?:public\\.)?${table}\\b`, 'i').test(sql);
+        return fromMatch || updateMatch || insertMatch;
+      });
+      if (touchesAllowedOnly) return false;
+    }
 
     return true;
   });
 
   if (unscoped.length > 0) {
     flags.push(`UNSCOPED_SQL x${unscoped.length}`);
+  }
+
+  // 7. Unscoped user operations check (app/api/users/route.ts, app/api/users/[id]/route.ts)
+  // Flags user endpoints that list or retrieve user data without an organization boundary
+  const isUnscopedUserRoute = f === 'app/api/users/route.ts' || f === 'app/api/users/[id]/route.ts';
+  const hasOrgScoping = /(organization_id|org_id|auth\.orgId|session\.organization\.id)/i.test(c);
+  if (isUnscopedUserRoute && !hasOrgScoping) {
+    flags.push('UNSCOPED_USERS');
   }
 
   if (flags.length > 0) {
