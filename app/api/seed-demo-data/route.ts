@@ -5,10 +5,16 @@ import { verifyAccessToken } from '@/lib/auth/jwt';
 import crypto from 'crypto';
 
 export async function GET(request: NextRequest) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not Found' }, { status: 404 });
+  }
   return POST(request);
 }
 
 export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not Found' }, { status: 404 });
+  }
   try {
     // 1. Authenticate user from session cookie or Authorization header
     let userId: string | null = null;
@@ -502,7 +508,6 @@ export async function POST(request: NextRequest) {
           contact_name: d.contact,
           owner_id: userId,
           label_ids: d.labels,
-          status: d.stageName === 'won' ? 'won' : 'open',
         });
       }
     }
