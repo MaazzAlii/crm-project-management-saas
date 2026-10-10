@@ -8,13 +8,16 @@ async function testPipeline() {
   console.log('1. Navigating to login...');
   await page.goto('http://localhost:3005/login');
 
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.TEST_USER_EMAIL || 'admin@innoventix.io';
+  const adminPassword = process.env.ADMIN_PASSWORD || process.env.TEST_USER_PASSWORD || '';
+
   const bypassBtn = page.locator('button:has-text("Dev Bypass")');
   if (await bypassBtn.isVisible()) {
     console.log('Clicking Dev Bypass...');
     await bypassBtn.click();
   } else {
-    await page.fill('input[type="email"]', 'admin@innoventix.io');
-    await page.fill('input[type="password"]', 'AdminPassword123!');
+    await page.fill('input[type="email"]', adminEmail);
+    await page.fill('input[type="password"]', adminPassword);
     await page.click('button[type="submit"]');
   }
 
