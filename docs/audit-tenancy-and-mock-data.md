@@ -1,7 +1,7 @@
 # Tenant Isolation and Mock Data Audit Report
 
 > **Audit Date:** 2026-10-10  
-> **Target Branch:** `main` (Synced with `deploy/main` at commit `3998e99`)  
+> **Target Branch:** `main` (Synced with `deploy/main` at commit `5c2c92f`)  
 > **Scope:** Read-Only Audit of API Route Handlers, Server Actions, Server Components, Mock Data, and Navigation Routes.
 
 ---
@@ -28,10 +28,10 @@
 | **A-16** | **HIGH** | `app/api/billing/invoices/route.ts` (L14) | Invoices API (`GET /api/billing/invoices`) | Exposes tenant invoices and billing amounts to any caller supplying `?orgId=`. |
 | **A-17** | **HIGH** | `app/api/communications/inbox/route.ts` (L14) | Communications Inbox API (`GET /api/communications/inbox`) | Derives `orgId` from `?orgId=` parameter, exposing external client messages across tenants. |
 | **A-18** | **HIGH** | `app/actions/org.ts` (L6) | Organization Switch Action (`setActiveOrgAction`) | Sets active org cookie directly from client argument without verifying user membership in that organization. |
-| **B-1** | **MEDIUM** | `app/(dashboard)/inbox/actions.ts` (L50–140, L215, L276) | Unified Inbox (`/inbox`) | Fallback `DEV_SAMPLE_MESSAGES` with fake users ("Sarah Jenkins", "Michael Chang", "Elena Rostova") returned when DB is empty. |
-| **B-2** | **MEDIUM** | `app/(dashboard)/projects/actions.ts` (L538–625) | Projects Directory (`/projects`) | Fallback `getDevProjects` returns 4 fake projects (`proj-1`, `proj-2`, `proj-3`, `proj-4`) with fixed dollar amounts ($14,500, $8,200, $6,500, $11,000). |
-| **B-3** | **MEDIUM** | `app/(dashboard)/tasks/actions.ts` (L335–401) | Tasks Board (`/tasks`) | Fallback `getDevGlobalTasks` returns 4 fake tasks (`tsk-101`..`tsk-104`) referencing `proj-1`..`proj-3` and fake users ("Alex Johnson", "Sarah Smith", "Michael Brown"). |
-| **B-4** | **MEDIUM** | `app/(dashboard)/dashboard/page.tsx` (L47–60) | Workspace Dashboard (`/dashboard`) | Hardcoded metric overrides (3 active projects, 8 pending tasks, 1 overdue, 5 clients, `act-1`) for dev default org. |
+| **B-1** | **CRITICAL** | `app/(dashboard)/inbox/actions.ts` (L50–140, L215, L276) | Unified Inbox (`/inbox`) | Fallback `DEV_SAMPLE_MESSAGES` with fake users ("Sarah Jenkins", "Michael Chang", "Elena Rostova") returned when DB is empty; pollutes tenant view. |
+| **B-2** | **CRITICAL** | `app/(dashboard)/projects/actions.ts` (L81–85, L538–625) | Projects Directory (`/projects`) | Hardcoded fallback `getDevProjects` always merged into project list, displaying 4 fake projects (`proj-1`..`proj-4`) totaling **$40,200** ($14.5k + $8.2k + $6.5k + $11k), causing non-UUID errors in tasks and bypassing Postgres so Analytics shows 0/50 projects. |
+| **B-3** | **CRITICAL** | `app/(dashboard)/tasks/actions.ts` (L56–58, L335–401) | Tasks Board (`/tasks`) | Fallback `getDevGlobalTasks` returned when DB is empty; injects fake tasks referencing `proj-1`..`proj-3`, triggering `invalid input syntax for type uuid: "proj-2"` errors in Postgres. |
+| **B-4** | **CRITICAL** | `app/(dashboard)/dashboard/page.tsx` (L47–60) | Workspace Dashboard (`/dashboard`) | Hardcoded metric overrides (3 active projects, 8 pending tasks, 1 overdue, 5 clients, `act-1`) for dev default org, masking real database state. |
 | **B-5** | **MEDIUM** | `app/(dashboard)/projects/[id]/page.tsx` (L48–52) | Project Detail (`/projects/[id]`) | Hardcoded fallback team members (`usr_1`: Alex Johnson, `usr_2`: Sarah Smith, `usr_3`: Michael Brown). |
 | **B-6** | **MEDIUM** | `app/(dashboard)/projects/kanban/page.tsx` (L41–54) | Projects Kanban (`/projects/kanban`) | Hardcoded fallback clients (`Acme Corp`, `Stark Industries`, `Wayne Enterprises`) and members (`Alex Johnson`, `Sarah Smith`). |
 | **B-7** | **MEDIUM** | `app/(dashboard)/tasks/page.tsx` (L52–58) | Tasks Directory (`/tasks`) | Hardcoded fallback team members (`usr_1`: Alex Johnson, `usr_2`: Sarah Smith, `usr_3`: Michael Brown). |
@@ -282,7 +282,15 @@ Source: `lib/billing/plan-limits.ts:193–330` in `getOrganizationPlanUsageDetai
      )
    }
    ```
-4. **Behavior**: Set during client creation or upgraded via `switchClientToConnectedModeAction` in `app/(dashboard)/clients/actions.ts:371`. It is backed by real database data, though in empty states or dev mock states (`__DEV_CLIENTS`), it was initialized with mock values.
+4. **Analysis of "rahmat" Client and "Connected" Badge**:
+   - Investigation reveals that the "Connected" badge on client cards like "rahmat" is **NOT fake mock data**.
+   - In `components/clients/ClientForm.tsx` (L30–46), the form state initializes with:
+     - `platform: 'WhatsApp'`
+     - `communication_mode: initialMode` (where `initialMode = 'connected'` by default).
+   - When a user/tester creates a real client (such as "rahmat") and only fills in the name without modifying these dropdowns, the form submits `communication_mode: 'connected'` and `platform: 'WhatsApp'`.
+   - The server action `createClientAction` saves these values to the Postgres database.
+   - When `/clients` is loaded, it reads this real record from Postgres and renders the `<CommunicationModeBadge mode="connected" />` and the `'WhatsApp'` badge.
+   - Therefore, the "Connected" badge represents real user-created data in the database, not hardcoded mock strings. The empty area on the "rahmat" card is caused by `ClientsList.tsx` (L442–461) rendering empty contact dividers when email, phone, and country are omitted.
 
 ---
 
@@ -303,10 +311,10 @@ Source: `lib/billing/plan-limits.ts:193–330` in `getOrganizationPlanUsageDetai
 ### 2. Git Commit Hash Comparison
 
 - **Command Run**: `git fetch deploy && git log --oneline deploy/main -1 && git log --oneline -1`
-- **Deployed Commit Hash (`deploy/main`)**: `3998e99`
-- **Local HEAD Commit Hash (`HEAD`)**: `3998e99`
+- **Deployed Commit Hash (`deploy/main`)**: `5c2c92f`
+- **Local HEAD Commit Hash (`HEAD`)**: `5c2c92f`
 - **Status**: **MATCHES IDENTICALLY**.
-- **Active Commit Title**: `docs(screen-fix): add prompt 09 deploy and verify specification`
+- **Active Commit Title**: `docs(screen-fix): add tenant isolation and mock data audit report (prompt 01)`
 
 ---
 
