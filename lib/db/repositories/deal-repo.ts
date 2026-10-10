@@ -101,7 +101,13 @@ export const dealRepo = {
 
     if (filters.q && filters.q.trim().length > 0) {
       params.push(`%${filters.q.trim()}%`);
-      conditions.push(`(d.title ILIKE $${params.length} OR d.company_name ILIKE $${params.length} OR d.contact_name ILIKE $${params.length})`);
+      conditions.push(`(
+        d.title ILIKE $${params.length} OR
+        EXISTS (
+          SELECT 1 FROM public.clients c 
+          WHERE c.id = d.client_id AND (c.name ILIKE $${params.length} OR c.company ILIKE $${params.length} OR c.email ILIKE $${params.length})
+        )
+      )`);
     }
 
     if (filters.labelId) {
@@ -404,10 +410,6 @@ export const dealRepo = {
       if (input.currency !== undefined) appendField('currency', input.currency);
       if (input.probability !== undefined) appendField('probability', input.probability);
       if (input.expected_close_date !== undefined) appendField('expected_close_date', input.expected_close_date);
-      if (input.company_name !== undefined) appendField('company_name', input.company_name);
-      if (input.contact_name !== undefined) appendField('contact_name', input.contact_name);
-      if (input.contact_email !== undefined) appendField('contact_email', input.contact_email);
-      if (input.contact_phone !== undefined) appendField('contact_phone', input.contact_phone);
       if (input.client_id !== undefined) appendField('client_id', input.client_id);
       if (input.owner_id !== undefined) appendField('owner_id', input.owner_id);
       if (input.status !== undefined) appendField('status', input.status);
