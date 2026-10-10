@@ -257,15 +257,19 @@ export const pipelineRepo = {
   // DEFAULT PIPELINE BOOTSTRAP / SEEDING (Prompt 05)
   // ==========================================
 
-  async ensureDefaultPipeline(orgId: string, createdBy?: string | null): Promise<Pipeline> {
-    const existing = await this.getDefaultPipeline(orgId);
-    if (existing) {
-      return existing;
-    }
+  async ensureDefaultPipeline(orgId: string, createdBy?: string | null, client?: any): Promise<Pipeline> {
+    const runOnClient = async (c: any) => {
+      // 1. Check if default pipeline exists
+      const pGet = await c.query(
+        `SELECT * FROM public.pipelines WHERE org_id = $1 AND is_default = true LIMIT 1`,
+        [orgId]
+      );
+      if (pGet.rows?.[0]) {
+        return pGet.rows[0];
+      }
 
-    return await transaction(async (client) => {
-      // 1. Create default pipeline
-      const pRes = await client.query<Pipeline>(
+      // 2. Create default pipeline
+      const pRes = await c.query(
         `INSERT INTO public.pipelines (org_id, name, description, is_default, created_by, created_at, updated_at)
          VALUES ($1, 'Sales Pipeline', 'Main organizational sales pipeline and deal tracking board.', true, $2, NOW(), NOW())
          ON CONFLICT (org_id) WHERE is_default = true DO NOTHING
@@ -275,14 +279,14 @@ export const pipelineRepo = {
 
       let pipeline = pRes.rows?.[0];
       if (!pipeline) {
-        const pGet = await client.query<Pipeline>(
+        const pFetch = await c.query(
           `SELECT * FROM public.pipelines WHERE org_id = $1 AND is_default = true LIMIT 1`,
           [orgId]
         );
-        pipeline = pGet.rows[0];
+        pipeline = pFetch.rows[0];
       }
 
-      // 2. Insert standard 6 stages (Prompt 05)
+      // 3. Insert standard 6 stages (Prompt 05)
       const defaultStages = [
         { name: 'Lead', color: '#94a3b8', pos: 1000, won: false, lost: false },
         { name: 'Qualified', color: '#38bdf8', pos: 2000, won: false, lost: false },
@@ -293,7 +297,7 @@ export const pipelineRepo = {
       ];
 
       for (const s of defaultStages) {
-        await client.query(
+        await c.query(
           `INSERT INTO public.pipeline_stages (
             org_id, pipeline_id, name, color, position, is_won, is_lost, created_at, updated_at
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
@@ -302,7 +306,7 @@ export const pipelineRepo = {
         );
       }
 
-      // 3. Seed starter pipeline labels
+      // 4. Seed starter pipeline labels
       const defaultLabels = [
         { name: 'High Value', color: '#ef4444' },
         { name: 'Enterprise', color: '#8b5cf6' },
@@ -311,7 +315,7 @@ export const pipelineRepo = {
       ];
 
       for (const l of defaultLabels) {
-        await client.query(
+        await c.query(
           `INSERT INTO public.pipeline_labels (org_id, pipeline_id, name, color, created_at)
            VALUES ($1, $2, $3, $4, NOW())
            ON CONFLICT DO NOTHING`,
@@ -320,6 +324,12 @@ export const pipelineRepo = {
       }
 
       return pipeline;
-    });
+    };
+
+    if (client) {
+      return await runOnClient(client);
+    } else {
+      return await transaction(async (c) => await runOnClient(c));
+    }
   },
 };
