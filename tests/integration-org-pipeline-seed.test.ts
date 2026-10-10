@@ -3,11 +3,41 @@ import { orgService } from '@/lib/services/org-service';
 import { orgRepo } from '@/lib/db/repositories/org-repo';
 import { pipelineRepo } from '@/lib/db/repositories/pipeline-repo';
 import { auditRepo } from '@/lib/db/repositories/audit-repo';
+import { transaction } from '@/lib/db';
+
+vi.mock('@/lib/db', () => ({
+  query: vi.fn(),
+  queryOne: vi.fn(),
+  transaction: vi.fn(async (cb) => {
+    const mockClient = {
+      query: vi.fn().mockImplementation(async (sql: string, params: any[]) => {
+        if (sql.includes('INSERT INTO organizations')) {
+          return {
+            rows: [
+              {
+                id: 'org-uuid-999',
+                name: params[0],
+                slug: params[1],
+                logo_url: params[2],
+                plan_tier: 'free',
+                billing_status: 'active',
+              },
+            ],
+          };
+        }
+        if (sql.includes('INSERT INTO organization_members')) {
+          return { rows: [{ id: 'mem-1' }] };
+        }
+        return { rows: [] };
+      }),
+    };
+    return await cb(mockClient);
+  }),
+}));
 
 vi.mock('@/lib/db/repositories/org-repo', () => ({
   orgRepo: {
     findBySlug: vi.fn(),
-    create: vi.fn(),
     findById: vi.fn(),
   },
 }));
@@ -27,7 +57,7 @@ vi.mock('@/lib/db/repositories/pipeline-repo', () => ({
   },
 }));
 
-describe('Integration: Organization Creation & Default Pipeline Seeding (Prompt 05)', () => {
+describe('Integration: Organization Creation & Default Pipeline Seeding in Single Transaction (Prompt 05)', () => {
   const mockOwnerId = 'user-owner-uuid-1';
   const mockOrgId = 'org-uuid-999';
 
@@ -35,16 +65,8 @@ describe('Integration: Organization Creation & Default Pipeline Seeding (Prompt 
     vi.clearAllMocks();
   });
 
-  it('creates organization and seeds a default sales pipeline with 6 stages', async () => {
+  it('creates organization and seeds default sales pipeline with 6 stages atomically in one transaction', async () => {
     (orgRepo.findBySlug as any).mockResolvedValue(null);
-    (orgRepo.create as any).mockResolvedValue({
-      id: mockOrgId,
-      name: 'Acme Growth Labs',
-      slug: 'acme-growth-labs',
-      plan_tier: 'starter',
-      billing_status: 'active',
-      owner_user_id: mockOwnerId,
-    });
 
     const mockPipeline = {
       id: 'pipe-uuid-1',
@@ -72,12 +94,19 @@ describe('Integration: Organization Creation & Default Pipeline Seeding (Prompt 
       slug: 'acme-growth-labs',
     });
 
-    // Assert: Organization created
+    // Assert: Single transaction was used
+    expect(transaction).toHaveBeenCalledTimes(1);
+
+    // Assert: Organization returned from transaction
     expect(org).toBeDefined();
     expect(org.id).toBe(mockOrgId);
 
-    // Assert: ensureDefaultPipeline was called with correct org ID & owner ID
-    expect(pipelineRepo.ensureDefaultPipeline).toHaveBeenCalledWith(mockOrgId, mockOwnerId);
+    // Assert: ensureDefaultPipeline was called inside transaction with client passed
+    expect(pipelineRepo.ensureDefaultPipeline).toHaveBeenCalledWith(
+      mockOrgId,
+      mockOwnerId,
+      expect.anything()
+    );
 
     // Assert: Check pipeline stages structure
     const stages = await pipelineRepo.listStages(mockOrgId, mockPipeline.id);
@@ -95,23 +124,22 @@ describe('Integration: Organization Creation & Default Pipeline Seeding (Prompt 
     expect(stages.find((s) => s.name === 'Lost')?.is_lost).toBe(true);
   });
 
-  it('fails visibly if ensureDefaultPipeline throws an error during organization creation', async () => {
+  it('aborts transaction and does NOT commit organization if ensureDefaultPipeline throws an error', async () => {
     (orgRepo.findBySlug as any).mockResolvedValue(null);
-    (orgRepo.create as any).mockResolvedValue({
-      id: mockOrgId,
-      name: 'Fail Corp',
-      slug: 'fail-corp',
-    });
 
     (pipelineRepo.ensureDefaultPipeline as any).mockRejectedValue(
-      new Error('Database transaction lock failure')
+      new Error('Database deadlock on stage insertion')
     );
 
+    // Act & Assert: Error is thrown and organization creation is aborted
     await expect(
       orgService.createOrganization(mockOwnerId, {
         name: 'Fail Corp',
         slug: 'fail-corp',
       })
-    ).rejects.toThrow(/Failed to initialize default sales pipeline/);
+    ).rejects.toThrow('Database deadlock on stage insertion');
+
+    // Audit log for creation should NOT have been recorded
+    expect(auditRepo.log).not.toHaveBeenCalled();
   });
 });
