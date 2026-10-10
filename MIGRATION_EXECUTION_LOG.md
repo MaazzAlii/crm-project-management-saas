@@ -461,10 +461,43 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
      - Pushed all atomic commits to both remotes: `origin` and `deploy` (`Urk-Khan/Project-Management-CRM`).
 - **Status**: ✅ 100% Complete & Production Ready.
 
+---
 
+### Step 10: Sales Pipeline Fixes — Prompt 01 (Fix Duplicate Deal on Move)
+- **Timestamp**: 2026-10-10T15:45:00+05:00
+- **Task ID**: `PIPELINE-FIX-PROMPT-01`
+- **Actions Performed**:
+  1. Fixed `deal-repo.ts` SQL queries:
+     - Replaced non-existent `content`/`is_deleted` column references with `body` and `deleted_at IS NULL` for deal comments.
+     - Cleaned up deal creation column list to prevent invalid column insertion.
+  2. Fixed default stage assignment in `CreateDealModal.tsx`.
+  3. Replaced static Kanban on `/leads` with interactive `PipelinePageClient`.
+  4. Added `tests/pipeline-move-deal.test.ts` verifying no duplicate deals on move or page reload.
+- **Verification / Test Result**:
+  - `npm test`: 20/20 test suites, 175/175 tests passed.
+  - Verified in browser with Playwright (`scripts/verify-pipeline-ui.ts`) on `http://localhost:3005/leads`.
+- **Status**: ✅ Completed and Verified.
 
+---
 
-
-
-
-
+### Step 11: Sales Pipeline Fixes — Prompt 02 (Editable Columns: Rename, Add, Delete)
+- **Timestamp**: 2026-10-10T16:25:00+05:00
+- **Task ID**: `PIPELINE-FIX-PROMPT-02`
+- **Actions Performed**:
+  1. **Inline Stage Rename (`components/pipeline/Column.tsx`)**:
+     - Added inline `<input>` editing on column title click with Enter/blur save, Escape cancel, 50 max character limit, empty name validation.
+     - Added column header dropdown menu with Rename & Delete options.
+  2. **Add Stage Column (`components/pipeline/Board.tsx`)**:
+     - Added "+ Add another list" card at the rightmost end of the board with keyboard shortcuts (Enter to submit, Escape to cancel).
+  3. **Delete Stage Modal (`components/pipeline/DeleteStageModal.tsx`)**:
+     - Added interactive modal allowing user to choose destination stage to reassign existing deals before deletion.
+     - Refused deleting the last remaining stage or Won/Lost stages.
+  4. **Optimistic Updates & Role Permissions (`components/pipeline/PipelinePageClient.tsx` & `lib/pipeline/pipeline-service.ts`)**:
+     - Optimistic UI updates with automatic rollback and floating toast alerts on errors.
+     - Gated stage creation, renaming, and deletion to admin/owner roles.
+  5. **Automated Testing (`tests/pipeline-editable-columns.test.ts`)**:
+     - 9 automated unit and integration tests covering rename persistence, length limits, empty name rejection, stage addition at end of board, deal reassignment on deletion, last stage deletion refusal, won/lost deletion refusal, and role authorization.
+- **Verification / Test Result**:
+  - `npm test`: **21/21 test files, 184/184 tests passed (100%)**.
+  - `npm run build`: **Compiled successfully with all 81 routes static and dynamic**.
+- **Status**: ✅ Completed and Verified locally. Commits held until all prompts pass.
