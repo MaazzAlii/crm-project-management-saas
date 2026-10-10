@@ -130,11 +130,18 @@ export const pipelineService = {
     const pipeline = await pipelineRepo.getPipeline(orgId, pipelineId);
     if (!pipeline) return { success: false, error: { code: 'NOT_FOUND', message: 'Pipeline not found' } };
 
-    if (!input.name || input.name.trim().length === 0) {
+    const trimmedName = input.name?.trim();
+    if (!trimmedName || trimmedName.length === 0) {
       return { success: false, error: { code: 'BAD_REQUEST', message: 'Stage name is required' } };
     }
+    if (trimmedName.length > 50) {
+      return { success: false, error: { code: 'BAD_REQUEST', message: 'Stage name cannot exceed 50 characters' } };
+    }
 
-    const stage = await pipelineRepo.createStage(orgId, pipelineId, input);
+    const stage = await pipelineRepo.createStage(orgId, pipelineId, {
+      ...input,
+      name: trimmedName,
+    });
     return { success: true, data: stage };
   },
 
@@ -153,7 +160,19 @@ export const pipelineService = {
       return { success: false, error: { code: 'NOT_FOUND', message: 'Stage not found' } };
     }
 
-    const updated = await pipelineRepo.updateStage(orgId, stageId, input);
+    const updatedInput = { ...input };
+    if (input.name !== undefined) {
+      const trimmedName = input.name.trim();
+      if (trimmedName.length === 0) {
+        return { success: false, error: { code: 'BAD_REQUEST', message: 'Stage name cannot be empty' } };
+      }
+      if (trimmedName.length > 50) {
+        return { success: false, error: { code: 'BAD_REQUEST', message: 'Stage name cannot exceed 50 characters' } };
+      }
+      updatedInput.name = trimmedName;
+    }
+
+    const updated = await pipelineRepo.updateStage(orgId, stageId, updatedInput);
     return { success: true, data: updated || stage };
   },
 
@@ -161,20 +180,31 @@ export const pipelineService = {
     session: SessionContext,
     pipelineId: string,
     stageId: string,
-    moveToStageId: string
+    moveToStageId?: string | null
   ): Promise<ServiceResult<boolean>> {
     const orgId = session.orgId;
     if (!orgId) return { success: false, error: { code: 'UNAUTHORIZED', message: 'No org context' } };
     if (!canUserManage(session)) return { success: false, error: { code: 'FORBIDDEN', message: 'Only admins can delete stages' } };
 
-    const stage = await pipelineRepo.getStage(orgId, stageId);
+    const stages = await pipelineRepo.listStages(orgId, pipelineId);
+    if (stages.length <= 1) {
+      return { success: false, error: { code: 'BAD_REQUEST', message: 'Cannot delete the last remaining column in a pipeline.' } };
+    }
+
+    const stage = stages.find((s) => s.id === stageId);
     if (!stage || stage.pipeline_id !== pipelineId) {
       return { success: false, error: { code: 'NOT_FOUND', message: 'Stage not found' } };
     }
 
-    const targetStage = await pipelineRepo.getStage(orgId, moveToStageId);
-    if (!targetStage || targetStage.pipeline_id !== pipelineId) {
-      return { success: false, error: { code: 'BAD_REQUEST', message: 'Target stage to move deals into is invalid' } };
+    if (stage.is_won || stage.is_lost) {
+      return { success: false, error: { code: 'BAD_REQUEST', message: 'Cannot delete Won or Lost columns while they are marked as special.' } };
+    }
+
+    if (moveToStageId) {
+      const targetStage = stages.find((s) => s.id === moveToStageId);
+      if (!targetStage || targetStage.pipeline_id !== pipelineId) {
+        return { success: false, error: { code: 'BAD_REQUEST', message: 'Target column to move deals into is invalid.' } };
+      }
     }
 
     const res = await pipelineRepo.deleteStage(orgId, stageId, moveToStageId);
