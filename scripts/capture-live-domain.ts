@@ -5,8 +5,8 @@ import fs from 'fs';
 const BASE_URL = process.env.LIVE_DOMAIN_URL || 'https://www.project-manager.calara.agency';
 const SCREENSHOT_DIR = path.resolve(process.cwd(), 'assets/screenshots_live_domain');
 
-const TEST_EMAIL = process.env.TEST_USER_EMAIL || 'maazalisshahid@gmail.com';
-const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || 'pas#123#';
+const TEST_EMAIL = process.env.TEST_USER_EMAIL || '';
+const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || '';
 
 let screenshotCount = 0;
 
