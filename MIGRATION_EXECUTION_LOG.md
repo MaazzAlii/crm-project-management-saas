@@ -525,3 +525,59 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   5. **Automated Testing ([pipeline-column-order-colors-won-lost.test.ts](file:///home/maazzalii/Desktop/100%20days%20of%20code/91-crm-project-management-saas/tests/pipeline-column-order-colors-won-lost.test.ts))**:
      - 9 automated unit and integration tests covering all 4 Prompt 03 behaviors (22/22 test suites, 193/193 tests passing).
 - **Status**: ✅ Completed & Fully Verified.
+
+---
+
+### Step 13: Sales Pipeline Fixes — Prompt 04 (Remove Test Data & Audit Secrets)
+- **Timestamp**: 2026-10-10T16:55:00+05:00
+- **Task ID**: `PIPELINE-FIX-PROMPT-04`
+- **Actions Performed**:
+  1. Created scoped test deals cleanup CLI tool (`scripts/cleanup-test-deals.ts`) with mandatory `--orgId` multi-tenant scoping and `--confirm` dry-run safeguards.
+  2. Sanitized all fallback database passwords across `lib/db/auto-migrate.ts`, `lib/db/index.ts`, `scripts/backup-db.sh`, `scripts/backup-s3.sh`, `scripts/restore-db.sh`, `scripts/capture-section1.ts` through `section7.ts`, `scripts/verify-editable-columns-ui.ts`, and `scripts/verify-pipeline-ui.ts`.
+  3. Audited entire repository git history for secrets.
+- **Status**: ✅ Completed & Verified.
+
+---
+
+### Step 14: Sales Pipeline Fixes — Prompt 05 (Coolify Environment Audit)
+- **Timestamp**: 2026-10-10T17:00:00+05:00
+- **Task ID**: `PIPELINE-FIX-PROMPT-05`
+- **Actions Performed**:
+  1. Audited every `process.env.*` variable read across the entire codebase.
+  2. Created comprehensive deployment reference (`docs/env-coolify.md`) categorizing all required, generated secret, optional integration, and dev-only environment variables with format rules, examples, and production guidance.
+- **Status**: ✅ Completed & Documented.
+
+---
+
+### Step 15: Sales Pipeline Fixes — Prompt 06 (Production Safety Guards)
+- **Timestamp**: 2026-10-10T17:05:00+05:00
+- **Task ID**: `PIPELINE-FIX-PROMPT-06`
+- **Actions Performed**:
+  1. Gated `/api/seed-demo-data` with 404 in production before any database calls.
+  2. Made `ensureAutoMigrated` idempotent: preserves existing admin accounts and does not overwrite passwords.
+  3. Enforced minimum 32-character secret length for `JWT_SECRET` and `REFRESH_TOKEN_SECRET` in production in `lib/auth/jwt.ts` and `lib/auth/edge-jwt.ts`.
+  4. Configured session cookies to enforce `secure: true` on HTTPS / production with `COOKIE_SECURE` override support.
+  5. Created `tests/production-safety.test.ts` (6/6 passing).
+- **Status**: ✅ Completed & Verified.
+
+---
+
+### Step 16: Sales Pipeline Fixes — Prompt 07 (Playwright E2E Tests)
+- **Timestamp**: 2026-10-10T17:15:00+05:00
+- **Task ID**: `PIPELINE-FIX-PROMPT-07`
+- **Actions Performed**:
+  1. Configured `playwright.config.ts` for local Next.js server on port 3005 without Supabase dependencies.
+  2. Created `e2e/pipeline-board.spec.ts` covering all 6 critical user flows:
+     - 1. Six default columns visible on `/leads`
+     - 2. Deal creation in Lead stage
+     - 3. Deal drag to Qualified with persistence across reload
+     - 4. Column renaming with persistence across reload
+     - 5. Custom column creation and deletion
+     - 6. Deal drag to Won with live Open Value and deals count recalculation
+  3. Enhanced `components/pipeline/Column.tsx` and `components/pipeline/DeleteStageModal.tsx` with accessible labels, roles, and test identifiers.
+- **Verification / Test Result**:
+  - `npm run test:e2e`: **6/6 tests passing (27.1s)**.
+  - `npm test`: **23/23 test suites, 199/199 unit & integration tests passing (100%)**.
+  - `npm run build`: **Next.js production build succeeded with 0 errors**.
+  - Secret scan: **0 plaintext secrets in outgoing commits**.
+- **Status**: ✅ Fully Completed & Verified. Ready for Prompt 08 Push Approval.
