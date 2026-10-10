@@ -11,20 +11,20 @@ export interface EdgeTokenPayload {
 
 export function getJwtSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET?.trim();
-  if (secret) return new TextEncoder().encode(secret);
+  if (secret && secret.length >= 32) return new TextEncoder().encode(secret);
   if (process.env.NODE_ENV === 'production') {
-    throw new Error('JWT_SECRET environment variable is missing in production');
+    throw new Error('JWT_SECRET environment variable is missing or shorter than 32 characters in production');
   }
-  return new TextEncoder().encode('dev-jwt-secret-insecure-fallback-do-not-use-in-prod');
+  return new TextEncoder().encode(secret || 'dev-jwt-secret-insecure-fallback-do-not-use-in-prod');
 }
 
 export function getRefreshSecret(): Uint8Array {
   const secret = process.env.REFRESH_TOKEN_SECRET?.trim() || process.env.REFRESH_SECRET?.trim();
-  if (secret) return new TextEncoder().encode(secret);
+  if (secret && secret.length >= 32) return new TextEncoder().encode(secret);
   if (process.env.NODE_ENV === 'production') {
-    throw new Error('REFRESH_TOKEN_SECRET environment variable is missing in production');
+    throw new Error('REFRESH_TOKEN_SECRET environment variable is missing or shorter than 32 characters in production');
   }
-  return new TextEncoder().encode('dev-refresh-secret-insecure-fallback-do-not-use-in-prod');
+  return new TextEncoder().encode(secret || 'dev-refresh-secret-insecure-fallback-do-not-use-in-prod');
 }
 
 /**
