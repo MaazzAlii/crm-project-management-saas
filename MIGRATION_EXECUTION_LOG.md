@@ -233,20 +233,20 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
 ### Step 11: Production Auto-Migration, Lifetime VIP Access & Admin Bootstrap
 - **Date/Time**: 2026-10-08 20:05
 - **Task**: Implement self-healing production auto-migration engine, Lifetime VIP plan, and automatic super-admin provisioning for live VPS/Coolify deployment.
-- **Why Performed**: Production PostgreSQL container on Coolify initialized without migrations executed, causing 500 errors on `/api/auth/login` and `/api/auth/signup`. Additionally, user requested Lifetime permanent access capability and admin credentials setup for `maazalisshahid@gmail.com`.
+- **Why Performed**: Production PostgreSQL container on Coolify initialized without migrations executed, causing 500 errors on `/api/auth/login` and `/api/auth/signup`. Additionally, implemented Lifetime permanent access capability and configurable admin credentials bootstrap.
 - **Actions Performed**:
   1. Built `lib/db/embedded-migrations.ts` and `lib/db/auto-migrate.ts` executing all schema migrations and seeds automatically upon server start or health check.
   2. Created `supabase/migrations/0031_lifetime_access_plan.sql` adding Lifetime VIP subscription plan and updating `organizations_plan_tier_check`.
   3. Created `supabase/migrations/0032_fix_auth_users_foreign_keys.sql` updating foreign key constraints referencing `auth.users` to `public.users`.
   4. Updated `lib/db/index.ts` to safely support multi-statement PostgreSQL queries returning QueryResult arrays.
-  5. Implemented `bootstrapAdminUser()` provisioning `maazalisshahid@gmail.com` with Super Admin platform access and Lifetime organization workspace.
+  5. Implemented `bootstrapAdminUser()` provisioning administrator with Super Admin platform access and Lifetime organization workspace.
   6. Updated `app/super-admin/actions.ts`, `components/super-admin/org-management-actions.tsx`, and `lib/billing/plan-limits.ts` to support Lifetime plan overrides.
   7. Updated `Dockerfile` Stage 3 to copy `supabase` directory.
 - **Verification / Test Result**:
   - `npm run type-check`: 0 errors.
   - `npm test`: 15 test files, 149/149 tests passed (100%).
   - `npm run build`: 77 routes compiled successfully.
-  - Local auto-migration tested and verified: `[AutoMigrate] 🚀 Admin user maazalisshahid@gmail.com ready with Lifetime VIP subscription.`
+  - Local auto-migration tested and verified: `[AutoMigrate] 🚀 Admin user ready with Lifetime VIP subscription.`
 - **Status**: ✅ Complete and ready for deployment.
 
 ---
@@ -392,6 +392,43 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - TypeScript type checking clean (`npm run type-check`).
   - Full domain login cookie generation and routing validated.
 - **Status**: ✅ Resolved and Verified.
+
+---
+
+### Step 11: Production Cookie Protocol Adaptation & JWT Secret Hardening
+
+- **Timestamp**: 2026-10-10T12:15:00+05:00
+- **Task ID**: `FIX-COOKIE-PROTOCOL-JWT-HARDENING`
+- **Action Performed**:
+  1. **Dynamic Cookie Protocol Resolution**: Updated `lib/auth/session.ts`, `app/api/auth/login/route.ts`, `app/api/auth/signup/route.ts`, `app/api/auth/refresh/route.ts`, `app/api/auth/logout/route.ts`, `app/api/auth/verify-magic-link/route.ts`, `lib/auth/impersonation.ts`, and `app/actions/org.ts`. `getCookieSecure` now dynamically inspects `x-forwarded-proto`, `x-forwarded-ssl`, referer/origin headers, `COOKIE_SECURE` environment variable override, and `NEXT_PUBLIC_APP_URL` protocol rather than blindly enforcing `secure: true` in production over HTTP (such as Coolify `.sslip.io` test domains).
+  2. **Login Hard Navigation & State Reset**: In `app/(auth)/login/page.tsx`, switched from `router.push + router.refresh` to `window.location.assign(redirectTo)` ensuring complete page context re-initialization upon login, and moved `setLoading(false)` into a `finally` block to prevent UI button lockup on any network failure.
+  3. **JWT Secret Hardening**: Removed hardcoded `DEFAULT_JWT_SECRET` and `DEFAULT_REFRESH_SECRET` from `lib/auth/jwt.ts` and `lib/auth/edge-jwt.ts`. In production (`NODE_ENV === 'production'`), functions strictly throw a descriptive Error if `JWT_SECRET` or `REFRESH_TOKEN_SECRET` is missing. Maintained safe fallback strictly when `NODE_ENV !== 'production'`.
+  4. **Credential Removal**: Stripped hardcoded email and password credentials from `scripts/capture-section*.ts` and `test.md` in favor of environment variable parameters (`ADMIN_EMAIL`, `ADMIN_PASSWORD`, `TEST_USER_EMAIL`, `TEST_USER_PASSWORD`).
+  5. **Auto-Migration Robustness**: Added `ON CONFLICT (id) DO UPDATE` for subscription plan seeding in `lib/db/auto-migrate.ts`.
+- **Files Modified**:
+  - `lib/auth/session.ts`
+  - `lib/auth/jwt.ts`
+  - `lib/auth/edge-jwt.ts`
+  - `app/(auth)/login/page.tsx`
+  - `app/api/auth/login/route.ts`
+  - `app/api/auth/signup/route.ts`
+  - `app/api/auth/refresh/route.ts`
+  - `app/api/auth/logout/route.ts`
+  - `app/api/auth/verify-magic-link/route.ts`
+  - `app/api/auth/dev-bypass/route.ts`
+  - `app/actions/org.ts`
+  - `lib/auth/impersonation.ts`
+  - `lib/db/auto-migrate.ts`
+  - `scripts/capture-section1.ts` through `scripts/capture-section7.ts`
+  - `test.md`
+- **Verification / Test Result**:
+  - `npm test`: 15/15 test suites, 151/151 tests passed.
+  - `npm run build`: Built cleanly with 0 errors across all routes.
+  - Live production start test on port 3005:
+    - Over plain HTTP: Returns `200 OK` with `set-cookie: innoventix_session=...; Path=/; HttpOnly; SameSite=lax` (without `Secure` flag, allowing browser storage).
+    - With `-H "x-forwarded-proto: https"`: Returns `200 OK` with `set-cookie: innoventix_session=...; Path=/; Secure; HttpOnly; SameSite=lax` (with `Secure` flag).
+- **Status**: ✅ Completed and Verified.
+
 
 
 
