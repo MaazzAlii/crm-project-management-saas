@@ -12,13 +12,18 @@ import {
   DragStartEvent,
   DragEndEvent,
 } from '@dnd-kit/core';
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+  sortableKeyboardCoordinates,
+  arrayMove,
+} from '@dnd-kit/sortable';
 import { BoardStageView, Deal, PipelineStage } from '@/lib/types/pipeline';
 import { Column } from './Column';
 import { DealCard } from './DealCard';
 import { WonLostDialog } from './WonLostDialog';
 import { DeleteStageModal } from './DeleteStageModal';
-import { Plus, X, Layers } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 
 interface BoardProps {
   boardData: BoardStageView[];
@@ -37,7 +42,12 @@ interface BoardProps {
   onAddCard?: (stageId: string, title: string) => Promise<void>;
   onAddStage?: (name: string) => Promise<void>;
   onRenameStage?: (stageId: string, newName: string) => Promise<void>;
+  onUpdateStage?: (
+    stageId: string,
+    input: { name?: string; color?: string; isWon?: boolean; isLost?: boolean }
+  ) => Promise<void>;
   onDeleteStage?: (stageId: string, moveToStageId: string | null) => Promise<void>;
+  onReorderStages?: (orderedIds: string[]) => Promise<void>;
 }
 
 export function Board({
@@ -48,9 +58,13 @@ export function Board({
   onAddCard,
   onAddStage,
   onRenameStage,
+  onUpdateStage,
   onDeleteStage,
+  onReorderStages,
 }: BoardProps) {
+  // Dragging active states
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
+  const [activeColumn, setActiveColumn] = useState<PipelineStage | null>(null);
   const [activeStageColor, setActiveStageColor] = useState<string>('#6366f1');
 
   // Pending lost move state
@@ -89,20 +103,50 @@ export function Board({
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    const deal = active.data.current?.deal as Deal;
-    if (deal) {
-      setActiveDeal(deal);
-      const stage = boardData.find((s) => s.stage.id === deal.stage_id)?.stage;
-      setActiveStageColor(stage?.color || '#6366f1');
+    const type = active.data.current?.type;
+
+    if (type === 'Deal') {
+      const deal = active.data.current?.deal as Deal;
+      if (deal) {
+        setActiveDeal(deal);
+        const stage = boardData.find((s) => s.stage.id === deal.stage_id)?.stage;
+        setActiveStageColor(stage?.color || '#6366f1');
+      }
+    } else if (type === 'Column') {
+      const stage = active.data.current?.stage as PipelineStage;
+      if (stage) {
+        setActiveColumn(stage);
+      }
     }
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveDeal(null);
+    setActiveColumn(null);
 
     if (!over) return;
 
+    const activeType = active.data.current?.type;
+
+    // 1. Column Reordering Drag
+    if (activeType === 'Column') {
+      if (active.id !== over.id) {
+        const oldIndex = boardData.findIndex((s) => s.stage.id === active.id);
+        const newIndex = boardData.findIndex((s) => s.stage.id === over.id);
+
+        if (oldIndex !== -1 && newIndex !== -1) {
+          const newBoardOrder = arrayMove(boardData, oldIndex, newIndex);
+          const orderedIds = newBoardOrder.map((s) => s.stage.id);
+          if (onReorderStages) {
+            await onReorderStages(orderedIds);
+          }
+        }
+      }
+      return;
+    }
+
+    // 2. Deal Card Move Drag
     const activeDealData = active.data.current?.deal as Deal;
     if (!activeDealData) return;
 
@@ -206,6 +250,9 @@ export function Board({
     ? boardData.filter((s) => s.stage.id !== stageToDelete.id).map((s) => s.stage)
     : [];
 
+  const wonStage = boardData.find((s) => s.stage.is_won)?.stage;
+  const lostStage = boardData.find((s) => s.stage.is_lost)?.stage;
+
   return (
     <DndContext
       sensors={sensors}
@@ -214,21 +261,29 @@ export function Board({
       onDragEnd={handleDragEnd}
     >
       <div className="flex h-full w-full gap-3 overflow-x-auto p-4 pb-6 scroll-smooth snap-x items-start">
-        {boardData.map((stageView) => (
-          <Column
-            key={stageView.stage.id}
-            stage={stageView.stage}
-            deals={stageView.deals}
-            totalValue={stageView.totalValue}
-            totalDeals={stageView.totalDeals}
-            canManage={canManage}
-            onCardClick={onCardClick}
-            onAddCard={onAddCard}
-            onRenameStage={onRenameStage}
-            onDeleteStageClick={(stage) => setStageToDelete(stage)}
-            isOnlyColumn={boardData.length <= 1}
-          />
-        ))}
+        <SortableContext
+          items={boardData.map((s) => s.stage.id)}
+          strategy={horizontalListSortingStrategy}
+        >
+          {boardData.map((stageView) => (
+            <Column
+              key={stageView.stage.id}
+              stage={stageView.stage}
+              deals={stageView.deals}
+              totalValue={stageView.totalValue}
+              totalDeals={stageView.totalDeals}
+              canManage={canManage}
+              onCardClick={onCardClick}
+              onAddCard={onAddCard}
+              onRenameStage={onRenameStage}
+              onUpdateStage={onUpdateStage}
+              onDeleteStageClick={(stage) => setStageToDelete(stage)}
+              existingWonStageName={wonStage?.name}
+              existingLostStageName={lostStage?.name}
+              isOnlyColumn={boardData.length <= 1}
+            />
+          ))}
+        </SortableContext>
 
         {/* "+ Add another list" column at the end of the board */}
         <div className="flex-shrink-0 w-72">
@@ -292,6 +347,10 @@ export function Board({
               stageColor={activeStageColor}
               isDragging={false}
             />
+          </div>
+        ) : activeColumn ? (
+          <div className="w-72 rounded-2xl border-2 border-sky-500 bg-slate-900/90 p-4 shadow-2xl rotate-1 opacity-90 cursor-grabbing pointer-events-none">
+            <h3 className="text-xs font-bold text-white">{activeColumn.name}</h3>
           </div>
         ) : null}
       </DragOverlay>
