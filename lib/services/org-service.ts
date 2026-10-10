@@ -50,7 +50,8 @@ export class OrganizationService {
       const { pipelineRepo } = await import('@/lib/db/repositories/pipeline-repo');
       await pipelineRepo.ensureDefaultPipeline(org.id, ownerUserId);
     } catch (pipeErr) {
-      console.error('[OrgService] Failed to seed default pipeline:', pipeErr);
+      console.error(`[OrgService] ❌ CRITICAL: Failed to seed default pipeline for new organization ${org.id}:`, pipeErr);
+      throw new Error(`Failed to initialize default sales pipeline for organization: ${(pipeErr as Error)?.message || 'Unknown error'}`);
     }
 
     await auditRepo.log({
