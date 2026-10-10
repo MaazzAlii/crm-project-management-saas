@@ -1,5 +1,12 @@
 import { Pool, QueryResult, QueryResultRow, PoolClient } from 'pg';
 import { dbMonitor } from './monitoring';
+import nextEnv from '@next/env';
+
+try {
+  nextEnv.loadEnvConfig(process.cwd(), true);
+} catch {
+  // Ignore in browser/edge runtimes
+}
 
 declare global {
   var __postgres_pool__: Pool | undefined;
@@ -15,6 +22,40 @@ export function initializePool(): Pool {
   if ((globalThis as any).__postgres_pool__) {
     pool = (globalThis as any).__postgres_pool__;
     return pool!;
+  }
+
+  if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL && !process.env.DB_PASSWORD) {
+    try {
+      nextEnv.loadEnvConfig(process.cwd(), true);
+    } catch {
+      // Ignore
+    }
+    if (!process.env.DATABASE_URL && !process.env.DB_PASSWORD) {
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const envPath = path.resolve(process.cwd(), '.env.local');
+        if (fs.existsSync(envPath)) {
+          const content = fs.readFileSync(envPath, 'utf8');
+          content.split('\n').forEach((line: string) => {
+            const trimmed = line.trim();
+            if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+              const idx = trimmed.indexOf('=');
+              const key = trimmed.slice(0, idx).trim();
+              let val = trimmed.slice(idx + 1).trim();
+              if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+                val = val.slice(1, -1);
+              }
+              if (!process.env[key]) {
+                process.env[key] = val;
+              }
+            }
+          });
+        }
+      } catch {
+        // Ignore
+      }
+    }
   }
 
   const poolSize = parseInt(process.env.DB_POOL_MAX || '10', 10);
@@ -35,7 +76,7 @@ export function initializePool(): Pool {
       port: parseInt(process.env.DB_PORT || '54322', 10),
       database: process.env.DB_NAME || 'innoventix',
       user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres_dev_password',
+      password: process.env.DB_PASSWORD,
       max: poolSize,
       min: minSize,
       idleTimeoutMillis: 30000,
