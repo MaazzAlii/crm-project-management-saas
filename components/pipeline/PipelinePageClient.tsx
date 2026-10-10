@@ -202,36 +202,102 @@ export function PipelinePageClient({
     }
   };
 
-  // Rename Stage with optimistic update and rollback
-  const handleRenameStage = async (stageId: string, newName: string) => {
+  // Drag and drop stage reorder handler with optimistic update
+  const handleReorderStages = async (orderedIds: string[]) => {
+    const previousState = [...boardData];
+
+    // Optimistically reorder boardData
+    const stageMap = new Map(boardData.map((s) => [s.stage.id, s]));
+    const reordered: BoardStageView[] = [];
+    for (const id of orderedIds) {
+      const found = stageMap.get(id);
+      if (found) reordered.push(found);
+    }
+    setBoardData(reordered);
+
+    try {
+      const res = await fetch(`/api/pipelines/${activePipelineId}/stages/order`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds }),
+      });
+      const json = await res.json();
+
+      if (json.data) {
+        showToast('Column order updated', 'success');
+        loadBoardData();
+      } else {
+        setBoardData(previousState);
+        showToast(json.error?.message || 'Failed to reorder columns', 'error');
+      }
+    } catch {
+      setBoardData(previousState);
+      showToast('Network error reordering columns', 'error');
+    }
+  };
+
+  // Update Stage (color, name, won/lost) with optimistic update
+  const handleUpdateStage = async (
+    stageId: string,
+    input: { name?: string; color?: string; isWon?: boolean; isLost?: boolean }
+  ) => {
     const previousState = [...boardData];
 
     // Optimistic update
     setBoardData((prev) =>
-      prev.map((sv) =>
-        sv.stage.id === stageId
-          ? { ...sv, stage: { ...sv.stage, name: newName } }
-          : sv
-      )
+      prev.map((sv) => {
+        if (sv.stage.id === stageId) {
+          return {
+            ...sv,
+            stage: {
+              ...sv.stage,
+              ...input,
+              name: input.name !== undefined ? input.name : sv.stage.name,
+              color: input.color !== undefined ? input.color : sv.stage.color,
+              is_won: input.isWon !== undefined ? input.isWon : sv.stage.is_won,
+              is_lost: input.isLost !== undefined ? input.isLost : sv.stage.is_lost,
+            },
+          };
+        } else {
+          // If another stage was marked won or lost, clear it on other stages
+          let newWon = sv.stage.is_won;
+          let newLost = sv.stage.is_lost;
+          if (input.isWon === true) newWon = false;
+          if (input.isLost === true) newLost = false;
+          return {
+            ...sv,
+            stage: {
+              ...sv.stage,
+              is_won: newWon,
+              is_lost: newLost,
+            },
+          };
+        }
+      })
     );
 
     try {
       const res = await fetch(`/api/pipelines/${activePipelineId}/stages/${stageId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newName }),
+        body: JSON.stringify(input),
       });
       const json = await res.json();
 
-      if (!json.data) {
-        setBoardData(previousState);
-        showToast(json.error?.message || 'Failed to rename column', 'error');
+      if (json.data) {
+        if (input.name) showToast(`Column renamed to "${input.name}"`, 'success');
+        else if (input.color) showToast('Column color updated', 'success');
+        else if (input.isWon) showToast('Marked as Won column', 'success');
+        else if (input.isLost) showToast('Marked as Lost column', 'success');
+        else showToast('Column updated', 'success');
+        loadBoardData();
       } else {
-        showToast(`Column renamed to "${newName}"`, 'success');
+        setBoardData(previousState);
+        showToast(json.error?.message || 'Failed to update column', 'error');
       }
     } catch {
       setBoardData(previousState);
-      showToast('Network error while renaming column', 'error');
+      showToast('Network error while updating column', 'error');
     }
   };
 
@@ -379,8 +445,10 @@ export function PipelinePageClient({
   const allDeals = boardData.flatMap((s) => s.deals);
   const stages = boardData.map((s) => s.stage);
 
-  const totalDealsCount = boardData.reduce((sum, s) => sum + s.totalDeals, 0);
-  const totalPipelineValue = boardData.reduce((sum, s) => sum + s.totalValue, 0);
+  // Prompt 03 Requirement 4: The header total uses ONLY open deals (excludes won and lost stages)
+  const openStages = boardData.filter((s) => !s.stage.is_won && !s.stage.is_lost);
+  const totalDealsCount = openStages.reduce((sum, s) => sum + s.totalDeals, 0);
+  const totalPipelineValue = openStages.reduce((sum, s) => sum + s.totalValue, 0);
 
   return (
     <div className="flex flex-col h-full w-full bg-slate-950 text-slate-100 overflow-hidden relative">
@@ -478,8 +546,10 @@ export function PipelinePageClient({
             onCardClick={handleOpenDealModal}
             onAddCard={handleAddCardInline}
             onAddStage={handleAddStage}
-            onRenameStage={handleRenameStage}
+            onRenameStage={(stageId, newName) => handleUpdateStage(stageId, { name: newName })}
+            onUpdateStage={handleUpdateStage}
             onDeleteStage={handleDeleteStage}
+            onReorderStages={handleReorderStages}
           />
         ) : activeView === 'table' ? (
           <TableView
