@@ -34,11 +34,21 @@ export function CreateDealModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (!stageId && stages.length > 0) {
+      setStageId(stages[0].id);
+    }
+  }, [stages, stageId]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !stageId) return;
+    const effectiveStageId = stageId || stages[0]?.id;
+    if (!title.trim() || !effectiveStageId) {
+      setError('Please provide a title and select a stage.');
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -49,7 +59,7 @@ export function CreateDealModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           pipeline_id: pipelineId,
-          stage_id: stageId,
+          stage_id: effectiveStageId,
           title: title.trim(),
           value: parseFloat(value) || 0,
           probability: parseInt(probability, 10) || 50,
