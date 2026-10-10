@@ -7,15 +7,29 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { PipelineStage, Deal } from '@/lib/types/pipeline';
 import { DealCard } from './DealCard';
-import { Plus, X, AlertTriangle, ChevronRight, ChevronDown } from 'lucide-react';
+import {
+  Plus,
+  X,
+  AlertTriangle,
+  ChevronRight,
+  ChevronDown,
+  MoreVertical,
+  Edit2,
+  Trash2,
+  Minimize2,
+} from 'lucide-react';
 
 interface ColumnProps {
   stage: PipelineStage;
   deals: Deal[];
   totalValue: number;
   totalDeals: number;
+  canManage?: boolean;
   onCardClick?: (deal: Deal) => void;
   onAddCard?: (stageId: string, title: string) => Promise<void>;
+  onRenameStage?: (stageId: string, newName: string) => Promise<void>;
+  onDeleteStageClick?: (stage: PipelineStage) => void;
+  isOnlyColumn?: boolean;
   isDropTarget?: boolean;
 }
 
@@ -67,8 +81,12 @@ export function Column({
   deals,
   totalValue,
   totalDeals,
+  canManage = true,
   onCardClick,
   onAddCard,
+  onRenameStage,
+  onDeleteStageClick,
+  isOnlyColumn = false,
 }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: stage.id,
@@ -78,19 +96,57 @@ export function Column({
     },
   });
 
+  // Card addition state
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  // Stage rename state
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editTitleValue, setEditTitleValue] = useState(stage.name);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [titleError, setTitleError] = useState<string | null>(null);
+
+  // Column menu state
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const listEndRef = useRef<HTMLDivElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setEditTitleValue(stage.name);
+  }, [stage.name]);
 
   useEffect(() => {
     if (isAdding && textareaRef.current) {
       textareaRef.current.focus();
     }
   }, [isAdding]);
+
+  useEffect(() => {
+    if (isEditingTitle && titleInputRef.current) {
+      titleInputRef.current.focus();
+      titleInputRef.current.select();
+    }
+  }, [isEditingTitle]);
+
+  // Click outside to close column menu
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
 
   const handleAddSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -100,7 +156,6 @@ export function Column({
       setIsSubmitting(true);
       await onAddCard?.(stage.id, newTitle.trim());
       setNewTitle('');
-      // Scroll to bottom after adding
       setTimeout(() => {
         listEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 50);
@@ -109,13 +164,62 @@ export function Column({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleCardKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleAddSubmit();
     } else if (e.key === 'Escape') {
       setIsAdding(false);
       setNewTitle('');
+    }
+  };
+
+  const handleStartEditingTitle = () => {
+    if (!canManage) return;
+    setEditTitleValue(stage.name);
+    setTitleError(null);
+    setIsEditingTitle(true);
+    setMenuOpen(false);
+  };
+
+  const handleSaveTitle = async () => {
+    const trimmed = editTitleValue.trim();
+    if (!trimmed) {
+      setTitleError('Stage name cannot be empty');
+      setEditTitleValue(stage.name);
+      setIsEditingTitle(false);
+      return;
+    }
+    if (trimmed.length > 50) {
+      setTitleError('Maximum 50 characters');
+      setEditTitleValue(stage.name);
+      setIsEditingTitle(false);
+      return;
+    }
+    if (trimmed === stage.name) {
+      setIsEditingTitle(false);
+      return;
+    }
+
+    try {
+      setIsRenaming(true);
+      setIsEditingTitle(false);
+      await onRenameStage?.(stage.id, trimmed);
+    } catch {
+      setEditTitleValue(stage.name);
+    } finally {
+      setIsRenaming(false);
+    }
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveTitle();
+    } else if (e.key === 'Escape') {
+      setEditTitleValue(stage.name);
+      setIsEditingTitle(false);
+      setTitleError(null);
     }
   };
 
@@ -129,6 +233,8 @@ export function Column({
   const isWipExceeded = stage.wip_limit && totalDeals > stage.wip_limit;
   const isWon = stage.is_won;
   const isLost = stage.is_lost;
+  const isSpecialStage = isWon || isLost;
+  const canDelete = canManage && !isOnlyColumn && !isSpecialStage;
 
   if (isCollapsed) {
     return (
@@ -168,7 +274,7 @@ export function Column({
     >
       {/* Column Header */}
       <div
-        className={`flex items-center justify-between border-b px-3.5 py-3 ${
+        className={`relative flex items-center justify-between border-b px-3.5 py-3 ${
           isWon
             ? 'border-emerald-500/30 bg-emerald-950/10'
             : isLost
@@ -176,14 +282,38 @@ export function Column({
             : 'border-slate-800/80 bg-slate-900/50'
         } rounded-t-2xl`}
       >
-        <div className="flex items-center gap-2 truncate">
+        <div className="flex items-center gap-2 flex-1 min-w-0 pr-2">
           <div
             className="h-2.5 w-2.5 rounded-full flex-shrink-0 shadow-sm"
             style={{ backgroundColor: stage.color || '#6366f1' }}
           />
-          <h3 className="truncate text-xs font-bold text-slate-100">{stage.name}</h3>
+
+          {/* Inline Title Editor or Clickable Title */}
+          {isEditingTitle ? (
+            <input
+              ref={titleInputRef}
+              type="text"
+              value={editTitleValue}
+              maxLength={50}
+              onChange={(e) => setEditTitleValue(e.target.value)}
+              onBlur={handleSaveTitle}
+              onKeyDown={handleTitleKeyDown}
+              className="w-full rounded bg-slate-900 px-1.5 py-0.5 text-xs font-bold text-white border border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            />
+          ) : (
+            <h3
+              onClick={handleStartEditingTitle}
+              title={canManage ? 'Click to rename' : stage.name}
+              className={`truncate text-xs font-bold text-slate-100 ${
+                canManage ? 'cursor-pointer hover:text-sky-300 transition-colors' : ''
+              }`}
+            >
+              {stage.name}
+            </h3>
+          )}
+
           <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
+            className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold flex-shrink-0 ${
               isWipExceeded
                 ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
                 : 'bg-slate-800 text-slate-300'
@@ -194,17 +324,68 @@ export function Column({
           </span>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5 flex-shrink-0" ref={menuRef}>
           <span className="text-[11px] font-bold text-slate-400 font-mono">
             {formattedTotal}
           </span>
+
+          {/* Column Actions Dropdown */}
           <button
-            onClick={() => setIsCollapsed(true)}
-            title="Collapse column"
-            className="rounded p-1 text-slate-500 hover:bg-slate-800 hover:text-slate-300"
+            onClick={() => setMenuOpen(!menuOpen)}
+            title="Column actions"
+            className="rounded p-1 text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition"
           >
-            <ChevronDown className="h-3.5 w-3.5" />
+            <MoreVertical className="h-3.5 w-3.5" />
           </button>
+
+          {menuOpen && (
+            <div className="absolute right-3 top-10 z-30 w-44 rounded-xl border border-slate-800 bg-slate-900 p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+              <button
+                onClick={handleStartEditingTitle}
+                disabled={!canManage}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-40 transition"
+              >
+                <Edit2 className="h-3.5 w-3.5 text-slate-400" />
+                <span>Rename column</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  setIsCollapsed(true);
+                }}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 transition"
+              >
+                <Minimize2 className="h-3.5 w-3.5 text-slate-400" />
+                <span>Collapse column</span>
+              </button>
+
+              <div className="my-1 border-t border-slate-800" />
+
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  if (canDelete && onDeleteStageClick) {
+                    onDeleteStageClick(stage);
+                  }
+                }}
+                disabled={!canDelete}
+                title={
+                  !canManage
+                    ? 'Admins only'
+                    : isOnlyColumn
+                    ? 'Cannot delete the only column'
+                    : isSpecialStage
+                    ? 'Cannot delete Won or Lost column'
+                    : undefined
+                }
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-40 transition"
+              >
+                <Trash2 className="h-3.5 w-3.5 text-rose-400" />
+                <span>Delete list</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -245,7 +426,7 @@ export function Column({
               ref={textareaRef}
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              onKeyDown={handleKeyDown}
+              onKeyDown={handleCardKeyDown}
               placeholder="Enter a title for this deal..."
               rows={2}
               className="w-full resize-none rounded-lg border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none"
