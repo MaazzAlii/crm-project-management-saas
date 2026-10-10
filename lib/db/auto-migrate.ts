@@ -190,43 +190,40 @@ export async function ensureAutoMigrated(): Promise<{ status: string; appliedCou
 }
 
 export async function bootstrapAdminUser() {
-  const adminEmail = (process.env.ADMIN_EMAIL || process.env.BOOTSTRAP_ADMIN_EMAIL || 'admin@innoventix.io').toLowerCase().trim();
+  const adminEmail = (process.env.ADMIN_EMAIL || process.env.BOOTSTRAP_ADMIN_EMAIL || '').toLowerCase().trim();
   const rawPassword = process.env.ADMIN_PASSWORD || process.env.BOOTSTRAP_ADMIN_PASSWORD || '';
 
-  if (!rawPassword) {
-    console.log('[AutoMigrate] No ADMIN_PASSWORD provided; skipping bootstrap admin provisioning.');
+  if (!adminEmail || !rawPassword) {
+    if (process.env.NODE_ENV === 'production') {
+      console.log('[AutoMigrate] No ADMIN_EMAIL / ADMIN_PASSWORD configured; skipping bootstrap admin provisioning.');
+    }
     return;
   }
 
-  const adminName = process.env.ADMIN_NAME || process.env.BOOTSTRAP_ADMIN_NAME || 'Platform Administrator';
-  const passwordHash = await hashPassword(rawPassword);
-
-  // 1. Check or create User
-  let user = (
+  // 1. Check if user already exists
+  const existingUser = (
     await query<{ id: string; email: string }>(
       'SELECT id, email FROM users WHERE email = $1',
       [adminEmail]
     )
   ).rows?.[0];
 
-  if (!user) {
-    console.log(`[AutoMigrate] Creating Admin user ${adminEmail}...`);
-    const insertRes = await query<{ id: string; email: string }>(
-      `INSERT INTO users (email, password_hash, full_name, role, is_active, email_verified)
-       VALUES ($1, $2, $3, $4, true, true)
-       RETURNING id, email`,
-      [adminEmail, passwordHash, adminName, 'super_admin']
-    );
-    user = insertRes.rows?.[0];
-  } else {
-    // Update credentials to guarantee login matches configured password and role
-    await query(
-      `UPDATE users 
-       SET password_hash = $1, role = 'super_admin', is_active = true, email_verified = true
-       WHERE id = $2`,
-      [passwordHash, user.id]
-    );
+  if (existingUser) {
+    console.log(`[AutoMigrate] Admin user ${adminEmail} already exists. Skipping bootstrap to preserve existing password.`);
+    return;
   }
+
+  const adminName = process.env.ADMIN_NAME || process.env.BOOTSTRAP_ADMIN_NAME || 'Platform Administrator';
+  const passwordHash = await hashPassword(rawPassword);
+
+  console.log(`[AutoMigrate] Creating Admin user ${adminEmail}...`);
+  const insertRes = await query<{ id: string; email: string }>(
+    `INSERT INTO users (email, password_hash, full_name, role, is_active, email_verified)
+     VALUES ($1, $2, $3, $4, true, true)
+     RETURNING id, email`,
+    [adminEmail, passwordHash, adminName, 'super_admin']
+  );
+  const user = insertRes.rows?.[0];
 
   if (!user) return;
 
