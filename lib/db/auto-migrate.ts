@@ -191,7 +191,13 @@ export async function ensureAutoMigrated(): Promise<{ status: string; appliedCou
 
 export async function bootstrapAdminUser() {
   const adminEmail = (process.env.ADMIN_EMAIL || process.env.BOOTSTRAP_ADMIN_EMAIL || 'admin@innoventix.io').toLowerCase().trim();
-  const rawPassword = process.env.ADMIN_PASSWORD || process.env.BOOTSTRAP_ADMIN_PASSWORD || 'AdminPassword123!';
+  const rawPassword = process.env.ADMIN_PASSWORD || process.env.BOOTSTRAP_ADMIN_PASSWORD || '';
+
+  if (!rawPassword) {
+    console.log('[AutoMigrate] No ADMIN_PASSWORD provided; skipping bootstrap admin provisioning.');
+    return;
+  }
+
   const adminName = process.env.ADMIN_NAME || process.env.BOOTSTRAP_ADMIN_NAME || 'Platform Administrator';
   const passwordHash = await hashPassword(rawPassword);
 
