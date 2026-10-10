@@ -4,6 +4,10 @@ import { getCurrentSessionContext } from '@/lib/auth/session';
 import { verifyAccessToken } from '@/lib/auth/jwt';
 import crypto from 'crypto';
 
+export async function GET(request: NextRequest) {
+  return POST(request);
+}
+
 export async function POST(request: NextRequest) {
   try {
     // 1. Authenticate user from session cookie or Authorization header
@@ -427,12 +431,89 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 6. Bootstrap Sales Pipeline & Starter Deals
+    const { pipelineRepo } = await import('@/lib/db/repositories/pipeline-repo');
+    const { dealRepo } = await import('@/lib/db/repositories/deal-repo');
+
+    const defaultPipeline = await pipelineRepo.ensureDefaultPipeline(orgId, userId);
+    const stages = await pipelineRepo.listStages(orgId, defaultPipeline.id);
+    const labels = await pipelineRepo.listLabels(orgId, defaultPipeline.id);
+
+    const stageMap = new Map(stages.map((s) => [s.name.toLowerCase(), s.id]));
+
+    const sampleDeals = [
+      {
+        stageName: 'lead',
+        title: 'Global Fintech Cloud Core Migration',
+        value: 48000,
+        company: 'Apex Financial Technologies',
+        contact: 'Marcus Vance',
+        prob: 30,
+        labels: labels.slice(0, 2).map((l) => l.id),
+      },
+      {
+        stageName: 'qualified',
+        title: 'Enterprise CRM Database Refactoring',
+        value: 32000,
+        company: 'Vanguard Systems',
+        contact: 'Sophia Lin',
+        prob: 50,
+        labels: labels.slice(1, 3).map((l) => l.id),
+      },
+      {
+        stageName: 'proposal',
+        title: 'AI Multi-Tenant Search Architecture',
+        value: 75000,
+        company: 'HyperScale AI Labs',
+        contact: 'Elena Rostova',
+        prob: 70,
+        labels: labels.slice(0, 1).map((l) => l.id),
+      },
+      {
+        stageName: 'negotiation',
+        title: 'Dedicated VPS Kubernetes Cluster SLA',
+        value: 64000,
+        company: 'Nexus Media Group',
+        contact: 'David Keller',
+        prob: 85,
+        labels: labels.slice(2, 4).map((l) => l.id),
+      },
+      {
+        stageName: 'won',
+        title: 'Contabo Self-Hosted Node.js Backend Engine',
+        value: 52000,
+        company: 'Starlight Retail',
+        contact: 'Sarah Jenkins',
+        prob: 100,
+        labels: labels.slice(1, 2).map((l) => l.id),
+      },
+    ];
+
+    for (const d of sampleDeals) {
+      const stageId = stageMap.get(d.stageName) || stages[0]?.id;
+      if (stageId) {
+        await dealRepo.createDeal(orgId, {
+          pipeline_id: defaultPipeline.id,
+          stage_id: stageId,
+          title: d.title,
+          value: d.value,
+          probability: d.prob,
+          company_name: d.company,
+          contact_name: d.contact,
+          owner_id: userId,
+          label_ids: d.labels,
+          status: d.stageName === 'won' ? 'won' : 'open',
+        });
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Rich enterprise demo data populated successfully!',
       organizationId: orgId,
       clientsCount: insertedClientIds.length,
       projectsCount: projectsData.length,
+      dealsCount: sampleDeals.length,
     });
   } catch (error: any) {
     console.error('[SeedDemoError]', error);
