@@ -179,6 +179,7 @@ export interface CreateDealInput {
   pipeline_id: string;
   stage_id: string;
   title: string;
+  description?: string | null;
   value?: number;
   currency?: string;
   probability?: number;
