@@ -153,33 +153,58 @@ export const pipelineRepo = {
     stageId: string,
     input: { name?: string; color?: string; isWon?: boolean; isLost?: boolean; wipLimit?: number | null }
   ): Promise<PipelineStage | null> {
-    const fields: string[] = ['updated_at = NOW()'];
-    const params: any[] = [orgId, stageId];
+    return await transaction(async (client) => {
+      // If marking as won or lost, enforce single won/lost constraint across the pipeline
+      if (input.isWon === true || input.isLost === true) {
+        const stageRes = await client.query<{ pipeline_id: string }>(
+          `SELECT pipeline_id FROM public.pipeline_stages WHERE org_id = $1 AND id = $2`,
+          [orgId, stageId]
+        );
+        const pipelineId = stageRes.rows?.[0]?.pipeline_id;
+        if (pipelineId) {
+          if (input.isWon === true) {
+            await client.query(
+              `UPDATE public.pipeline_stages SET is_won = false, updated_at = NOW() WHERE org_id = $1 AND pipeline_id = $2 AND id != $3`,
+              [orgId, pipelineId, stageId]
+            );
+          }
+          if (input.isLost === true) {
+            await client.query(
+              `UPDATE public.pipeline_stages SET is_lost = false, updated_at = NOW() WHERE org_id = $1 AND pipeline_id = $2 AND id != $3`,
+              [orgId, pipelineId, stageId]
+            );
+          }
+        }
+      }
 
-    if (input.name !== undefined) {
-      params.push(input.name.trim());
-      fields.push(`name = $${params.length}`);
-    }
-    if (input.color !== undefined) {
-      params.push(input.color);
-      fields.push(`color = $${params.length}`);
-    }
-    if (input.isWon !== undefined) {
-      params.push(input.isWon);
-      fields.push(`is_won = $${params.length}`);
-    }
-    if (input.isLost !== undefined) {
-      params.push(input.isLost);
-      fields.push(`is_lost = $${params.length}`);
-    }
-    if (input.wipLimit !== undefined) {
-      params.push(input.wipLimit);
-      fields.push(`wip_limit = $${params.length}`);
-    }
+      const fields: string[] = ['updated_at = NOW()'];
+      const params: any[] = [orgId, stageId];
 
-    const sql = `UPDATE public.pipeline_stages SET ${fields.join(', ')} WHERE org_id = $1 AND id = $2 RETURNING *`;
-    const res = await query<PipelineStage>(sql, params);
-    return res.rows?.[0] || null;
+      if (input.name !== undefined) {
+        params.push(input.name.trim());
+        fields.push(`name = $${params.length}`);
+      }
+      if (input.color !== undefined) {
+        params.push(input.color);
+        fields.push(`color = $${params.length}`);
+      }
+      if (input.isWon !== undefined) {
+        params.push(input.isWon);
+        fields.push(`is_won = $${params.length}`);
+      }
+      if (input.isLost !== undefined) {
+        params.push(input.isLost);
+        fields.push(`is_lost = $${params.length}`);
+      }
+      if (input.wipLimit !== undefined) {
+        params.push(input.wipLimit);
+        fields.push(`wip_limit = $${params.length}`);
+      }
+
+      const sql = `UPDATE public.pipeline_stages SET ${fields.join(', ')} WHERE org_id = $1 AND id = $2 RETURNING *`;
+      const res = await client.query<PipelineStage>(sql, params);
+      return res.rows?.[0] || null;
+    });
   },
 
   async deleteStage(
