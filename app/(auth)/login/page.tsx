@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Lock, Mail, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
 
@@ -11,7 +11,6 @@ function LoginForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectTo') || '/dashboard'
 
@@ -31,13 +30,13 @@ function LoginForm() {
 
       if (!res.ok) {
         setError(data.error || 'Invalid email or password')
-        setLoading(false)
       } else {
-        router.push(redirectTo)
-        router.refresh()
+        window.location.assign(redirectTo)
+        return
       }
     } catch {
       setError('An unexpected network error occurred. Please try again.')
+    } finally {
       setLoading(false)
     }
   }
