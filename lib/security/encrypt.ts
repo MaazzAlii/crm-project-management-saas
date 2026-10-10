@@ -1,10 +1,16 @@
 import crypto from 'crypto'
 
 const ALGORITHM = 'aes-256-gcm'
-const SECRET_KEY =
-  process.env.ENCRYPTION_SECRET ||
-  process.env.NEXTAUTH_SECRET ||
-  'crm-saas-communication-hub-encryption-key-32b!'
+
+function getSecretKey(customSecret?: string): string {
+  if (customSecret) return customSecret;
+  const secret = process.env.ENCRYPTION_SECRET || process.env.NEXTAUTH_SECRET;
+  if (secret) return secret;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('ENCRYPTION_SECRET or NEXTAUTH_SECRET is required in production');
+  }
+  return 'dev-insecure-communication-hub-key-32b!';
+}
 
 function getDerivedKey(secret: string): Buffer {
   return crypto.createHash('sha256').update(secret).digest()
@@ -39,7 +45,7 @@ export function encryptSecret(plainText: string, customSecret?: string): string 
 
   try {
     const iv = crypto.randomBytes(12)
-    const key = getDerivedKey(customSecret || SECRET_KEY)
+    const key = getDerivedKey(getSecretKey(customSecret))
     const cipher = crypto.createCipheriv(ALGORITHM, key, iv)
     let encrypted = cipher.update(plainText, 'utf8', 'hex')
     encrypted += cipher.final('hex')
@@ -63,7 +69,7 @@ export function decryptSecret(cipherText: string, customSecret?: string): string
     const [ivHex, authTagHex, encryptedHex] = parts
     const iv = Buffer.from(ivHex, 'hex')
     const authTag = Buffer.from(authTagHex, 'hex')
-    const key = getDerivedKey(customSecret || SECRET_KEY)
+    const key = getDerivedKey(getSecretKey(customSecret))
     const decipher = crypto.createDecipheriv(ALGORITHM, key, iv)
     decipher.setAuthTag(authTag)
     let decrypted = decipher.update(encryptedHex, 'hex', 'utf8')
