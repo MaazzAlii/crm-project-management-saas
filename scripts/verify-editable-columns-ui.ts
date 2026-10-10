@@ -10,9 +10,12 @@ async function testEditableColumns() {
   await page.goto('http://localhost:3005/login');
   await page.waitForTimeout(1000);
 
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.TEST_USER_EMAIL || 'admin@innoventix.io';
+  const adminPassword = process.env.ADMIN_PASSWORD || process.env.TEST_USER_PASSWORD || '';
+
   console.log('2. Filling credentials...');
-  await page.fill('input[type="email"]', 'admin@innoventix.io');
-  await page.fill('input[type="password"]', 'AdminPassword123!');
+  await page.fill('input[type="email"]', adminEmail);
+  await page.fill('input[type="password"]', adminPassword);
   await page.click('button[type="submit"]');
 
   console.log('3. Waiting for dashboard navigation...');
