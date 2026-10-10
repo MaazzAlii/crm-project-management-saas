@@ -5,8 +5,8 @@ import fs from 'fs';
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const SCREENSHOT_DIR = path.resolve(process.cwd(), 'assets/screenshots');
 
-const TEST_EMAIL = process.env.TEST_USER_EMAIL || process.env.ADMIN_EMAIL || 'admin@innoventix.io';
-const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || process.env.ADMIN_PASSWORD || 'AdminPassword123!';
+const TEST_EMAIL = process.env.TEST_USER_EMAIL || process.env.ADMIN_EMAIL || '';
+const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || process.env.ADMIN_PASSWORD || '';
 
 async function runSection3() {
   if (!fs.existsSync(SCREENSHOT_DIR)) {
