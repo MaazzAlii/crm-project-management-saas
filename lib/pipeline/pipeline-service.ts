@@ -172,6 +172,12 @@ export const pipelineService = {
       updatedInput.name = trimmedName;
     }
 
+    if (input.isWon === true) {
+      updatedInput.isLost = false;
+    } else if (input.isLost === true) {
+      updatedInput.isWon = false;
+    }
+
     const updated = await pipelineRepo.updateStage(orgId, stageId, updatedInput);
     return { success: true, data: updated || stage };
   },
