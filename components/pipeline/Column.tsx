@@ -459,6 +459,7 @@ export function Column({
               setShowColorPalette(false);
             }}
             title="Column actions"
+            aria-label={`Column actions for ${stage.name}`}
             className="rounded p-1 text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition"
           >
             <MoreVertical className="h-3.5 w-3.5" />
