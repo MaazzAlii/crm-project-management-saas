@@ -159,6 +159,23 @@ export async function ensureAutoMigrated(): Promise<{ status: string; appliedCou
       // 5. Bootstrap / Provision Super Admin User & Lifetime Organization
       await bootstrapAdminUser();
 
+      // 6. Backfill default pipeline for any existing organizations missing one (Prompt 05)
+      try {
+        const { pipelineRepo } = await import('./repositories/pipeline-repo');
+        const orgsRes = await query<{ id: string }>(
+          `SELECT id FROM public.organizations WHERE id NOT IN (
+             SELECT org_id FROM public.pipelines WHERE is_default = true
+           )`
+        );
+        const unseededOrgs = orgsRes.rows || [];
+        for (const org of unseededOrgs) {
+          await pipelineRepo.ensureDefaultPipeline(org.id);
+          console.log(`[AutoMigrate] 🎯 Backfilled default pipeline for org: ${org.id}`);
+        }
+      } catch (backfillErr: any) {
+        console.warn('[AutoMigrate] ⚠️ Default pipeline backfill notice:', backfillErr.message);
+      }
+
       isMigrated = true;
       console.log(`[AutoMigrate] ✨ Migration check complete. Applied ${appliedCount} new migrations.`);
       return { status: 'migrated', appliedCount };
