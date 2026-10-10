@@ -2,8 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
+import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { PipelineStage, Deal } from '@/lib/types/pipeline';
 import { DealCard } from './DealCard';
@@ -17,7 +16,24 @@ import {
   Edit2,
   Trash2,
   Minimize2,
+  Palette,
+  Trophy,
+  XCircle,
+  GripVertical,
 } from 'lucide-react';
+
+export const STAGE_PALETTE = [
+  { name: 'Indigo', hex: '#6366f1' },
+  { name: 'Violet', hex: '#8b5cf6' },
+  { name: 'Pink', hex: '#ec4899' },
+  { name: 'Rose', hex: '#f43f5e' },
+  { name: 'Red', hex: '#ef4444' },
+  { name: 'Orange', hex: '#f97316' },
+  { name: 'Amber', hex: '#f59e0b' },
+  { name: 'Emerald', hex: '#10b981' },
+  { name: 'Cyan', hex: '#06b6d4' },
+  { name: 'Sky', hex: '#0ea5e9' },
+];
 
 interface ColumnProps {
   stage: PipelineStage;
@@ -28,7 +44,13 @@ interface ColumnProps {
   onCardClick?: (deal: Deal) => void;
   onAddCard?: (stageId: string, title: string) => Promise<void>;
   onRenameStage?: (stageId: string, newName: string) => Promise<void>;
+  onUpdateStage?: (
+    stageId: string,
+    input: { name?: string; color?: string; isWon?: boolean; isLost?: boolean }
+  ) => Promise<void>;
   onDeleteStageClick?: (stage: PipelineStage) => void;
+  existingWonStageName?: string | null;
+  existingLostStageName?: string | null;
   isOnlyColumn?: boolean;
   isDropTarget?: boolean;
 }
@@ -85,16 +107,42 @@ export function Column({
   onCardClick,
   onAddCard,
   onRenameStage,
+  onUpdateStage,
   onDeleteStageClick,
+  existingWonStageName,
+  existingLostStageName,
   isOnlyColumn = false,
 }: ColumnProps) {
-  const { setNodeRef, isOver } = useDroppable({
+  // Sortable column hook (for column reordering)
+  const {
+    attributes: columnAttributes,
+    listeners: columnListeners,
+    setNodeRef: setSortableNodeRef,
+    transform: columnTransform,
+    transition: columnTransition,
+    isDragging: isColumnDragging,
+  } = useSortable({
+    id: stage.id,
+    data: {
+      type: 'Column',
+      stage,
+    },
+    disabled: !canManage,
+  });
+
+  // Droppable hook for cards dropped into this column
+  const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({
     id: stage.id,
     data: {
       type: 'Column',
       stage,
     },
   });
+
+  const setCombinedNodeRef = (node: HTMLElement | null) => {
+    setSortableNodeRef(node);
+    setDroppableNodeRef(node);
+  };
 
   // Card addition state
   const [isAdding, setIsAdding] = useState(false);
@@ -105,11 +153,11 @@ export function Column({
   // Stage rename state
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitleValue, setEditTitleValue] = useState(stage.name);
-  const [isRenaming, setIsRenaming] = useState(false);
   const [titleError, setTitleError] = useState<string | null>(null);
 
-  // Column menu state
+  // Column menu & palette state
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showColorPalette, setShowColorPalette] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -138,6 +186,7 @@ export function Column({
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setMenuOpen(false);
+        setShowColorPalette(false);
       }
     }
     if (menuOpen) {
@@ -174,7 +223,8 @@ export function Column({
     }
   };
 
-  const handleStartEditingTitle = () => {
+  const handleStartEditingTitle = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     if (!canManage) return;
     setEditTitleValue(stage.name);
     setTitleError(null);
@@ -202,13 +252,14 @@ export function Column({
     }
 
     try {
-      setIsRenaming(true);
       setIsEditingTitle(false);
-      await onRenameStage?.(stage.id, trimmed);
+      if (onRenameStage) {
+        await onRenameStage(stage.id, trimmed);
+      } else if (onUpdateStage) {
+        await onUpdateStage(stage.id, { name: trimmed });
+      }
     } catch {
       setEditTitleValue(stage.name);
-    } finally {
-      setIsRenaming(false);
     }
   };
 
@@ -220,6 +271,52 @@ export function Column({
       setEditTitleValue(stage.name);
       setIsEditingTitle(false);
       setTitleError(null);
+    }
+  };
+
+  const handleSelectColor = async (hex: string) => {
+    setMenuOpen(false);
+    setShowColorPalette(false);
+    if (onUpdateStage) {
+      await onUpdateStage(stage.id, { color: hex });
+    }
+  };
+
+  const handleToggleWon = async () => {
+    setMenuOpen(false);
+    if (stage.is_won) {
+      // Remove won
+      if (onUpdateStage) await onUpdateStage(stage.id, { isWon: false });
+    } else {
+      if (
+        existingWonStageName &&
+        existingWonStageName !== stage.name &&
+        !window.confirm(
+          `Column "${existingWonStageName}" is currently set as Won. Do you want to set "${stage.name}" as Won instead?`
+        )
+      ) {
+        return;
+      }
+      if (onUpdateStage) await onUpdateStage(stage.id, { isWon: true, isLost: false });
+    }
+  };
+
+  const handleToggleLost = async () => {
+    setMenuOpen(false);
+    if (stage.is_lost) {
+      // Remove lost
+      if (onUpdateStage) await onUpdateStage(stage.id, { isLost: false });
+    } else {
+      if (
+        existingLostStageName &&
+        existingLostStageName !== stage.name &&
+        !window.confirm(
+          `Column "${existingLostStageName}" is currently set as Lost. Do you want to set "${stage.name}" as Lost instead?`
+        )
+      ) {
+        return;
+      }
+      if (onUpdateStage) await onUpdateStage(stage.id, { isLost: true, isWon: false });
     }
   };
 
@@ -236,16 +333,24 @@ export function Column({
   const isSpecialStage = isWon || isLost;
   const canDelete = canManage && !isOnlyColumn && !isSpecialStage;
 
+  const columnStyle = {
+    transform: CSS.Translate.toString(columnTransform),
+    transition: columnTransition,
+    opacity: isColumnDragging ? 0.35 : 1,
+  };
+
   if (isCollapsed) {
     return (
       <div
+        ref={setCombinedNodeRef}
+        style={columnStyle}
         onClick={() => setIsCollapsed(false)}
         className="flex h-full w-12 flex-shrink-0 flex-col items-center justify-between rounded-2xl border border-slate-800/80 bg-slate-950/70 p-3 py-4 cursor-pointer hover:border-slate-700 hover:bg-slate-900/60 transition select-none"
       >
         <div className="flex flex-col items-center gap-2">
           <div
             className="h-3 w-3 rounded-full"
-            style={{ backgroundColor: stage.color || '#6366f1' }}
+            style={{ backgroundColor: isWon ? '#10b981' : isLost ? '#ef4444' : stage.color || '#6366f1' }}
           />
           <span className="rounded-full bg-slate-800 px-1.5 py-0.5 text-[10px] font-bold text-slate-300">
             {totalDeals}
@@ -261,14 +366,15 @@ export function Column({
 
   return (
     <div
-      ref={setNodeRef}
-      className={`flex h-full w-72 flex-shrink-0 flex-col rounded-2xl border transition-colors select-none ${
+      ref={setCombinedNodeRef}
+      style={columnStyle}
+      className={`flex h-full w-72 flex-shrink-0 flex-col rounded-2xl border transition-all select-none ${
         isOver
           ? 'border-sky-500/80 bg-slate-900/90 ring-2 ring-sky-500/20'
           : isWon
-          ? 'border-emerald-500/30 bg-slate-950/70'
+          ? 'border-t-4 border-t-emerald-500 border-x border-b border-emerald-500/30 bg-slate-950/80 shadow-lg shadow-emerald-950/20'
           : isLost
-          ? 'border-rose-500/30 bg-slate-950/70'
+          ? 'border-t-4 border-t-rose-500 border-x border-b border-rose-500/30 bg-slate-950/80 shadow-lg shadow-rose-950/20'
           : 'border-slate-800/80 bg-slate-950/60'
       }`}
     >
@@ -276,16 +382,28 @@ export function Column({
       <div
         className={`relative flex items-center justify-between border-b px-3.5 py-3 ${
           isWon
-            ? 'border-emerald-500/30 bg-emerald-950/10'
+            ? 'border-emerald-500/20 bg-emerald-950/20'
             : isLost
-            ? 'border-rose-500/30 bg-rose-950/10'
+            ? 'border-rose-500/20 bg-rose-950/20'
             : 'border-slate-800/80 bg-slate-900/50'
         } rounded-t-2xl`}
       >
         <div className="flex items-center gap-2 flex-1 min-w-0 pr-2">
+          {/* Header Drag Handle for Column Reordering */}
+          {canManage && (
+            <div
+              {...columnAttributes}
+              {...columnListeners}
+              className="cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-300 p-0.5 -ml-1 transition"
+              title="Drag header to reorder column"
+            >
+              <GripVertical className="h-3.5 w-3.5" />
+            </div>
+          )}
+
           <div
             className="h-2.5 w-2.5 rounded-full flex-shrink-0 shadow-sm"
-            style={{ backgroundColor: stage.color || '#6366f1' }}
+            style={{ backgroundColor: isWon ? '#10b981' : isLost ? '#ef4444' : stage.color || '#6366f1' }}
           />
 
           {/* Inline Title Editor or Clickable Title */}
@@ -304,9 +422,9 @@ export function Column({
             <h3
               onClick={handleStartEditingTitle}
               title={canManage ? 'Click to rename' : stage.name}
-              className={`truncate text-xs font-bold text-slate-100 ${
-                canManage ? 'cursor-pointer hover:text-sky-300 transition-colors' : ''
-              }`}
+              className={`truncate text-xs font-bold ${
+                isWon ? 'text-emerald-300' : isLost ? 'text-rose-300' : 'text-slate-100'
+              } ${canManage ? 'cursor-pointer hover:text-sky-300 transition-colors' : ''}`}
             >
               {stage.name}
             </h3>
@@ -316,6 +434,10 @@ export function Column({
             className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold flex-shrink-0 ${
               isWipExceeded
                 ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                : isWon
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                : isLost
+                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
                 : 'bg-slate-800 text-slate-300'
             }`}
           >
@@ -331,7 +453,11 @@ export function Column({
 
           {/* Column Actions Dropdown */}
           <button
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen(!menuOpen);
+              setShowColorPalette(false);
+            }}
             title="Column actions"
             className="rounded p-1 text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition"
           >
@@ -339,7 +465,7 @@ export function Column({
           </button>
 
           {menuOpen && (
-            <div className="absolute right-3 top-10 z-30 w-44 rounded-xl border border-slate-800 bg-slate-900 p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute right-3 top-10 z-30 w-48 rounded-xl border border-slate-800 bg-slate-900 p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
               <button
                 onClick={handleStartEditingTitle}
                 disabled={!canManage}
@@ -348,6 +474,74 @@ export function Column({
                 <Edit2 className="h-3.5 w-3.5 text-slate-400" />
                 <span>Rename column</span>
               </button>
+
+              {/* Color Palette Trigger */}
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowColorPalette(!showColorPalette);
+                  }}
+                  disabled={!canManage}
+                  className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-40 transition"
+                >
+                  <div className="flex items-center gap-2">
+                    <Palette className="h-3.5 w-3.5 text-slate-400" />
+                    <span>Change color</span>
+                  </div>
+                  <div
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: stage.color || '#6366f1' }}
+                  />
+                </button>
+
+                {showColorPalette && (
+                  <div className="my-1.5 grid grid-cols-5 gap-1.5 rounded-lg bg-slate-950 p-2 border border-slate-800">
+                    {STAGE_PALETTE.map((color) => (
+                      <button
+                        key={color.hex}
+                        onClick={() => handleSelectColor(color.hex)}
+                        title={color.name}
+                        className="h-5 w-5 rounded-full transition-transform hover:scale-110 flex items-center justify-center border border-white/10"
+                        style={{ backgroundColor: color.hex }}
+                      >
+                        {stage.color === color.hex && (
+                          <div className="h-1.5 w-1.5 rounded-full bg-white shadow" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Mark as Won / Lost */}
+              <button
+                onClick={handleToggleWon}
+                disabled={!canManage}
+                className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition disabled:opacity-40 ${
+                  stage.is_won
+                    ? 'text-emerald-300 hover:bg-emerald-500/10'
+                    : 'text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <Trophy className="h-3.5 w-3.5 text-emerald-400" />
+                <span>{stage.is_won ? 'Remove Won flag' : 'Mark as Won'}</span>
+              </button>
+
+              <button
+                onClick={handleToggleLost}
+                disabled={!canManage}
+                className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition disabled:opacity-40 ${
+                  stage.is_lost
+                    ? 'text-rose-300 hover:bg-rose-500/10'
+                    : 'text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <XCircle className="h-3.5 w-3.5 text-rose-400" />
+                <span>{stage.is_lost ? 'Remove Lost flag' : 'Mark as Lost'}</span>
+              </button>
+
+              <div className="my-1 border-t border-slate-800" />
 
               <button
                 onClick={() => {
@@ -359,8 +553,6 @@ export function Column({
                 <Minimize2 className="h-3.5 w-3.5 text-slate-400" />
                 <span>Collapse column</span>
               </button>
-
-              <div className="my-1 border-t border-slate-800" />
 
               <button
                 onClick={() => {
@@ -407,7 +599,7 @@ export function Column({
             <SortableCard
               key={deal.id}
               deal={deal}
-              stageColor={stage.color}
+              stageColor={isWon ? '#10b981' : isLost ? '#ef4444' : stage.color}
               onClick={onCardClick}
             />
           ))}
