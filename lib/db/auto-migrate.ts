@@ -173,7 +173,7 @@ export async function ensureAutoMigrated(): Promise<{ status: string; appliedCou
           console.log(`[AutoMigrate] 🎯 Backfilled default pipeline for org: ${org.id}`);
         }
       } catch (backfillErr: any) {
-        console.warn('[AutoMigrate] ⚠️ Default pipeline backfill notice:', backfillErr.message);
+        console.error('[AutoMigrate] ❌ CRITICAL: Default sales pipeline backfill failed during startup:', backfillErr);
       }
 
       isMigrated = true;
