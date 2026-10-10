@@ -45,6 +45,14 @@ export class OrganizationService {
       ownerUserId,
     });
 
+    // Seed default sales pipeline & stages for new organization (Prompt 05)
+    try {
+      const { pipelineRepo } = await import('@/lib/db/repositories/pipeline-repo');
+      await pipelineRepo.ensureDefaultPipeline(org.id, ownerUserId);
+    } catch (pipeErr) {
+      console.error('[OrgService] Failed to seed default pipeline:', pipeErr);
+    }
+
     await auditRepo.log({
       organizationId: org.id,
       userId: ownerUserId,
