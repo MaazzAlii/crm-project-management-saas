@@ -26,7 +26,7 @@ export interface SidebarProps {
 export const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Clients (CRM)', href: '/clients', icon: Users },
-  { name: 'Sales Pipeline', href: '/leads', icon: Kanban },
+  { name: 'Sales Pipeline', href: '/pipeline', icon: Kanban },
   { name: 'Projects', href: '/projects', icon: Briefcase },
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },
   { name: 'Unified Inbox', href: '/inbox', icon: Inbox },
