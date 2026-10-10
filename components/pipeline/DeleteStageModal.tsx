@@ -58,14 +58,19 @@ export function DeleteStageModal({
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-stage-modal-title"
+        className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+      >
         <div className="flex items-start justify-between pb-4 border-b border-slate-800">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
               <Trash2 className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Delete Stage</h3>
+              <h3 id="delete-stage-modal-title" className="text-base font-bold text-white">Delete Stage</h3>
               <p className="text-xs text-slate-400 mt-0.5">
                 Column: <span className="font-semibold text-slate-200">{stage.name}</span>
               </p>
@@ -133,6 +138,7 @@ export function DeleteStageModal({
           </button>
           <button
             type="button"
+            data-testid="confirm-delete-stage-btn"
             onClick={handleDelete}
             disabled={isDeleting || (hasDeals && !selectedTargetId)}
             className="flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-500 transition disabled:opacity-50"
