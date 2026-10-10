@@ -148,8 +148,9 @@ export async function ensureAutoMigrated(): Promise<{ status: string; appliedCou
             "ai_capabilities": {"reply_suggestions": true, "lead_scoring": true, "task_extraction": true, "weekly_narrative": true},
             "communication_channels_included": 999, "analytics_level": "custom", "is_lifetime": true
           }'::jsonb)
-        ON CONFLICT (slug) DO UPDATE SET
+        ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name,
+          slug = EXCLUDED.slug,
           price_monthly = EXCLUDED.price_monthly,
           price_yearly = EXCLUDED.price_yearly,
           feature_limits = EXCLUDED.feature_limits;
@@ -172,15 +173,16 @@ export async function ensureAutoMigrated(): Promise<{ status: string; appliedCou
 }
 
 export async function bootstrapAdminUser() {
-  const adminEmail = 'maazalisshahid@gmail.com';
-  const rawPassword = 'pas#123#';
+  const adminEmail = (process.env.ADMIN_EMAIL || process.env.BOOTSTRAP_ADMIN_EMAIL || 'admin@innoventix.io').toLowerCase().trim();
+  const rawPassword = process.env.ADMIN_PASSWORD || process.env.BOOTSTRAP_ADMIN_PASSWORD || 'AdminPassword123!';
+  const adminName = process.env.ADMIN_NAME || process.env.BOOTSTRAP_ADMIN_NAME || 'Platform Administrator';
   const passwordHash = await hashPassword(rawPassword);
 
   // 1. Check or create User
   let user = (
     await query<{ id: string; email: string }>(
       'SELECT id, email FROM users WHERE email = $1',
-      [adminEmail.toLowerCase()]
+      [adminEmail]
     )
   ).rows?.[0];
 
@@ -190,11 +192,11 @@ export async function bootstrapAdminUser() {
       `INSERT INTO users (email, password_hash, full_name, role, is_active, email_verified)
        VALUES ($1, $2, $3, $4, true, true)
        RETURNING id, email`,
-      [adminEmail.toLowerCase(), passwordHash, 'Maaz Ali Shahid', 'super_admin']
+      [adminEmail, passwordHash, adminName, 'super_admin']
     );
     user = insertRes.rows?.[0];
   } else {
-    // Update credentials to guarantee login matches requested password and role
+    // Update credentials to guarantee login matches configured password and role
     await query(
       `UPDATE users 
        SET password_hash = $1, role = 'super_admin', is_active = true, email_verified = true
@@ -218,7 +220,7 @@ export async function bootstrapAdminUser() {
       `INSERT INTO public.profiles (id, email, full_name)
        VALUES ($1, $2, $3)
        ON CONFLICT (id) DO UPDATE SET full_name = EXCLUDED.full_name, email = EXCLUDED.email`,
-      [user.id, adminEmail.toLowerCase(), 'Maaz Ali Shahid']
+      [user.id, adminEmail.toLowerCase(), adminName]
     );
   } catch {}
 
