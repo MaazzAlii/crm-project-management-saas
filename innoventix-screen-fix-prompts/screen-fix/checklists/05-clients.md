@@ -1,6 +1,7 @@
 # Checklist: Clients (live domain)
 
 [ ] New Client saves; appears once; survives reload
+[ ] Default communication mode in New Client form is "manual" (not "connected")
 [ ] Client with no channel shows "Not connected" (not "Connected")
 [ ] Platform shown matches what was entered
 [ ] Count text ("Showing X of Y") is correct
