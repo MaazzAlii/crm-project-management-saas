@@ -1,20 +1,16 @@
 import { NextRequest } from 'next/server';
-import { getAuthFromRequest } from '@/lib/auth/middleware';
+import { getAuthFromRequest, getTenantOrgId } from '@/lib/auth/middleware';
 import { crmService } from '@/lib/services/crm-service';
 import { apiSuccess, handleApiError, apiError } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
+    const tenant = getTenantOrgId(request, auth);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
     }
-
-    const { searchParams } = request.nextUrl;
-    const orgId = searchParams.get('orgId') || auth.orgId;
-    if (!orgId) {
-      return apiError('Organization ID is required', 400, 'VALIDATION_ERROR');
-    }
+    const orgId = tenant.orgId;
 
     const tags = await crmService.getTags(orgId);
     return apiSuccess(tags);
@@ -26,14 +22,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
-    }
-
     const body = await request.json();
-    const orgId = body.organizationId || auth.orgId;
-    if (!orgId || !body.name) {
-      return apiError('organizationId and tag name are required', 400, 'VALIDATION_ERROR');
+    const tenant = getTenantOrgId(request, auth, body);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
+    }
+    const orgId = tenant.orgId;
+
+    if (!body.name) {
+      return apiError('Tag name is required', 400, 'VALIDATION_ERROR');
     }
 
     const tag = await crmService.createTag(orgId, body);
@@ -42,3 +39,4 @@ export async function POST(request: NextRequest) {
     return handleApiError(error);
   }
 }
+

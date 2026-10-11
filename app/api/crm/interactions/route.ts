@@ -1,23 +1,19 @@
 import { NextRequest } from 'next/server';
-import { getAuthFromRequest } from '@/lib/auth/middleware';
+import { getAuthFromRequest, getTenantOrgId } from '@/lib/auth/middleware';
 import { crmService } from '@/lib/services/crm-service';
 import { apiSuccess, handleApiError, apiError, extractPagination } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
+    const tenant = getTenantOrgId(request, auth);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
     }
+    const orgId = tenant.orgId;
 
-    const { searchParams } = request.nextUrl;
-    const orgId = searchParams.get('orgId') || auth.orgId;
-    if (!orgId) {
-      return apiError('Organization ID is required', 400, 'VALIDATION_ERROR');
-    }
-
-    const clientId = searchParams.get('clientId') || undefined;
-    const pagination = extractPagination(searchParams);
+    const clientId = request.nextUrl.searchParams.get('clientId') || undefined;
+    const pagination = extractPagination(request.nextUrl.searchParams);
 
     const logs = await crmService.getInteractions(orgId, clientId, pagination);
     return apiSuccess(logs);
@@ -29,19 +25,21 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
-    }
-
     const body = await request.json();
-    const orgId = body.organizationId || auth.orgId;
-    if (!orgId || !body.clientId || !body.type || !body.content) {
-      return apiError('organizationId, clientId, type, and content are required', 400, 'VALIDATION_ERROR');
+    const tenant = getTenantOrgId(request, auth, body);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
+    }
+    const orgId = tenant.orgId;
+
+    if (!body.clientId || !body.type || !body.content) {
+      return apiError('clientId, type, and content are required', 400, 'VALIDATION_ERROR');
     }
 
-    const log = await crmService.createInteraction(orgId, auth.userId, body);
+    const log = await crmService.createInteraction(orgId, auth!.userId, body);
     return apiSuccess(log, 201);
   } catch (error) {
     return handleApiError(error);
   }
 }
+

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getAuthFromRequest } from '@/lib/auth/middleware';
+import { getAuthFromRequest, getTenantOrgId } from '@/lib/auth/middleware';
 import { crmService } from '@/lib/services/crm-service';
 import { apiSuccess, handleApiError, apiError, extractPagination } from '@/lib/utils/response';
 
@@ -9,18 +9,14 @@ export async function GET(
 ) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
+    const tenant = getTenantOrgId(request, auth);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
     }
+    const orgId = tenant.orgId;
 
     const { id } = await params;
-    const { searchParams } = request.nextUrl;
-    const orgId = searchParams.get('orgId') || auth.orgId;
-    if (!orgId) {
-      return apiError('Organization ID is required', 400, 'VALIDATION_ERROR');
-    }
-
-    const pagination = extractPagination(searchParams);
+    const pagination = extractPagination(request.nextUrl.searchParams);
     const logs = await crmService.getInteractions(orgId, id, pagination);
     return apiSuccess(logs);
   } catch (error) {
@@ -34,18 +30,19 @@ export async function POST(
 ) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
+    const body = await request.json();
+    const tenant = getTenantOrgId(request, auth, body);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
     }
+    const orgId = tenant.orgId;
 
     const { id } = await params;
-    const body = await request.json();
-    const orgId = body.organizationId || request.nextUrl.searchParams.get('orgId') || auth.orgId;
-    if (!orgId || !body.type || !body.content) {
-      return apiError('Organization ID, type, and content are required', 400, 'VALIDATION_ERROR');
+    if (!body.type || !body.content) {
+      return apiError('Type and content are required', 400, 'VALIDATION_ERROR');
     }
 
-    const log = await crmService.createInteraction(orgId, auth.userId, {
+    const log = await crmService.createInteraction(orgId, auth!.userId, {
       ...body,
       clientId: id,
     });
@@ -55,3 +52,4 @@ export async function POST(
     return handleApiError(error);
   }
 }
+

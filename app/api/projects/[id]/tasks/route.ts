@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getAuthFromRequest } from '@/lib/auth/middleware';
+import { getAuthFromRequest, getTenantOrgId } from '@/lib/auth/middleware';
 import { projectService } from '@/lib/services/project-service';
 import { apiSuccess, handleApiError, apiError } from '@/lib/utils/response';
 
@@ -9,17 +9,13 @@ export async function GET(
 ) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
+    const tenant = getTenantOrgId(request, auth);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
     }
+    const orgId = tenant.orgId;
 
     const { id } = await params;
-    const { searchParams } = request.nextUrl;
-    const orgId = searchParams.get('orgId') || auth.orgId;
-    if (!orgId) {
-      return apiError('Organization ID is required', 400, 'VALIDATION_ERROR');
-    }
-
     const tasks = await projectService.getTasks(id, orgId);
     return apiSuccess(tasks);
   } catch (error) {
@@ -33,18 +29,19 @@ export async function POST(
 ) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
+    const body = await request.json();
+    const tenant = getTenantOrgId(request, auth, body);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
     }
+    const orgId = tenant.orgId;
 
     const { id } = await params;
-    const body = await request.json();
-    const orgId = body.organizationId || auth.orgId;
-    if (!orgId || !body.title) {
-      return apiError('Organization ID and task title are required', 400, 'VALIDATION_ERROR');
+    if (!body.title) {
+      return apiError('Task title is required', 400, 'VALIDATION_ERROR');
     }
 
-    const task = await projectService.createTask(orgId, auth.userId, {
+    const task = await projectService.createTask(orgId, auth!.userId, {
       projectId: id,
       title: body.title,
       description: body.description,
@@ -65,23 +62,23 @@ export async function PATCH(
 ) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
-    }
-
     const body = await request.json();
-    const { taskId, organizationId, status, ...rest } = body;
-    const orgId = organizationId || auth.orgId;
+    const tenant = getTenantOrgId(request, auth, body);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
+    }
+    const orgId = tenant.orgId;
 
-    if (!taskId || !orgId) {
-      return apiError('taskId and organizationId are required', 400, 'VALIDATION_ERROR');
+    const { taskId, status, ...rest } = body;
+    if (!taskId) {
+      return apiError('taskId is required', 400, 'VALIDATION_ERROR');
     }
 
     let updated;
     if (status && Object.keys(rest).length === 0) {
-      updated = await projectService.updateTaskStatus(taskId, orgId, auth.userId, status);
+      updated = await projectService.updateTaskStatus(taskId, orgId, auth!.userId, status);
     } else {
-      updated = await projectService.updateTask(taskId, orgId, auth.userId, { status, ...rest });
+      updated = await projectService.updateTask(taskId, orgId, auth!.userId, { status, ...rest });
     }
 
     return apiSuccess(updated);
@@ -96,21 +93,22 @@ export async function DELETE(
 ) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
+    const tenant = getTenantOrgId(request, auth);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
     }
+    const orgId = tenant.orgId;
 
     const { searchParams } = request.nextUrl;
     const taskId = searchParams.get('taskId');
-    const orgId = searchParams.get('orgId') || auth.orgId;
-
-    if (!taskId || !orgId) {
-      return apiError('taskId and organizationId are required', 400, 'VALIDATION_ERROR');
+    if (!taskId) {
+      return apiError('taskId parameter is required', 400, 'VALIDATION_ERROR');
     }
 
-    await projectService.deleteTask(taskId, orgId, auth.userId);
+    await projectService.deleteTask(taskId, orgId, auth!.userId);
     return apiSuccess({ deleted: true, taskId });
   } catch (error) {
     return handleApiError(error);
   }
 }
+

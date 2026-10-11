@@ -1,22 +1,23 @@
 import { NextRequest } from 'next/server';
-import { getAuthFromRequest } from '@/lib/auth/middleware';
+import { getAuthFromRequest, getTenantOrgId } from '@/lib/auth/middleware';
 import { communicationService } from '@/lib/services/communication-service';
 import { apiSuccess, handleApiError, apiError } from '@/lib/utils/response';
 
 export async function POST(request: NextRequest) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
-    }
-
     const body = await request.json();
-    const orgId = body.organizationId || auth.orgId;
-    if (!orgId || !body.channelId || !body.body) {
-      return apiError('organizationId, channelId, and body are required', 400, 'VALIDATION_ERROR');
+    const tenant = getTenantOrgId(request, auth, body);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
+    }
+    const orgId = tenant.orgId;
+
+    if (!body.channelId || !body.body) {
+      return apiError('channelId and body are required', 400, 'VALIDATION_ERROR');
     }
 
-    const message = await communicationService.sendMessage(orgId, auth.userId, {
+    const message = await communicationService.sendMessage(orgId, auth!.userId, {
       channelId: body.channelId,
       clientId: body.clientId,
       body: body.body,
@@ -28,3 +29,4 @@ export async function POST(request: NextRequest) {
     return handleApiError(error);
   }
 }
+

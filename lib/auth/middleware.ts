@@ -79,3 +79,39 @@ export function withRole(
     return handler(request, auth);
   };
 }
+
+/**
+ * Resolves the tenant organization ID strictly from auth session.
+ * If the request query string or body contains an organization ID that mismatches auth.orgId,
+ * returns { error: 'Organization not found', status: 404 } to strictly prevent tenant cross-probing.
+ */
+export function getTenantOrgId(
+  request: NextRequest,
+  auth: AuthContext | null,
+  bodyPayload?: any
+): { orgId: string } | { error: string; status: number } {
+  if (!auth) {
+    return { error: 'Unauthorized', status: 401 };
+  }
+  const sessionOrgId = auth.orgId;
+  if (!sessionOrgId) {
+    return { error: 'Organization context required', status: 400 };
+  }
+
+  // Check query parameters for cross-tenant probe
+  const url = new URL(request.url);
+  const qOrg = url.searchParams.get('orgId') || url.searchParams.get('organizationId') || url.searchParams.get('organization_id');
+  if (qOrg && qOrg !== sessionOrgId) {
+    return { error: 'Organization not found', status: 404 };
+  }
+
+  // Check body payload if provided
+  if (bodyPayload && typeof bodyPayload === 'object') {
+    const bOrg = bodyPayload.orgId || bodyPayload.organizationId || bodyPayload.organization_id;
+    if (bOrg && bOrg !== sessionOrgId) {
+      return { error: 'Organization not found', status: 404 };
+    }
+  }
+
+  return { orgId: sessionOrgId };
+}

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getAuthFromRequest } from '@/lib/auth/middleware';
+import { getAuthFromRequest, getTenantOrgId } from '@/lib/auth/middleware';
 import { projectService } from '@/lib/services/project-service';
 import { apiSuccess, handleApiError, apiError } from '@/lib/utils/response';
 
@@ -9,17 +9,13 @@ export async function GET(
 ) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
+    const tenant = getTenantOrgId(request, auth);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
     }
+    const orgId = tenant.orgId;
 
     const { id } = await params;
-    const { searchParams } = request.nextUrl;
-    const orgId = searchParams.get('orgId') || auth.orgId;
-    if (!orgId) {
-      return apiError('Organization ID is required', 400, 'VALIDATION_ERROR');
-    }
-
     const deliverables = await projectService.getDeliverables(id, orgId);
     return apiSuccess(deliverables);
   } catch (error) {
@@ -33,18 +29,19 @@ export async function POST(
 ) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
+    const body = await request.json();
+    const tenant = getTenantOrgId(request, auth, body);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
     }
+    const orgId = tenant.orgId;
 
     const { id } = await params;
-    const body = await request.json();
-    const orgId = body.organizationId || auth.orgId;
-    if (!orgId || !body.title) {
-      return apiError('Organization ID and deliverable title are required', 400, 'VALIDATION_ERROR');
+    if (!body.title) {
+      return apiError('Deliverable title is required', 400, 'VALIDATION_ERROR');
     }
 
-    const deliverable = await projectService.createDeliverable(orgId, auth.userId, {
+    const deliverable = await projectService.createDeliverable(orgId, auth!.userId, {
       projectId: id,
       title: body.title,
       fileUrl: body.fileUrl,
@@ -63,19 +60,19 @@ export async function PATCH(
 ) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
-    }
-
     const body = await request.json();
-    const { deliverableId, organizationId, status, feedback } = body;
-    const orgId = organizationId || auth.orgId;
+    const tenant = getTenantOrgId(request, auth, body);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
+    }
+    const orgId = tenant.orgId;
 
-    if (!deliverableId || !orgId) {
-      return apiError('deliverableId and organizationId are required', 400, 'VALIDATION_ERROR');
+    const { deliverableId, status, feedback } = body;
+    if (!deliverableId) {
+      return apiError('deliverableId is required', 400, 'VALIDATION_ERROR');
     }
 
-    const updated = await projectService.updateDeliverable(deliverableId, orgId, auth.userId, {
+    const updated = await projectService.updateDeliverable(deliverableId, orgId, auth!.userId, {
       status,
       feedback,
     });
@@ -85,3 +82,4 @@ export async function PATCH(
     return handleApiError(error);
   }
 }
+

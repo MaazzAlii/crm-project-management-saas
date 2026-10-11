@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getAuthFromRequest } from '@/lib/auth/middleware';
+import { getAuthFromRequest, getTenantOrgId } from '@/lib/auth/middleware';
 import { crmService } from '@/lib/services/crm-service';
 import { billingService } from '@/lib/services/billing-service';
 import { apiSuccess, apiPaginated, handleApiError, apiError } from '@/lib/utils/response';
@@ -7,16 +7,13 @@ import { apiSuccess, apiPaginated, handleApiError, apiError } from '@/lib/utils/
 export async function GET(request: NextRequest) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
+    const tenant = getTenantOrgId(request, auth);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
     }
+    const orgId = tenant.orgId;
 
     const { searchParams } = new URL(request.url);
-    const orgId = searchParams.get('orgId') || auth.orgId;
-    if (!orgId) {
-      return apiError('Organization ID is required', 400, 'VALIDATION_ERROR');
-    }
-
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const search = searchParams.get('search') || undefined;
@@ -32,22 +29,24 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
-    }
-
     const body = await request.json();
-    const orgId = body.organizationId || auth.orgId;
-    if (!orgId || !body.name) {
-      return apiError('Organization ID and client name are required', 400, 'VALIDATION_ERROR');
+    const tenant = getTenantOrgId(request, auth, body);
+    if ('error' in tenant) {
+      return apiError(tenant.error, tenant.status as any, tenant.status === 404 ? 'NOT_FOUND' : 'UNAUTHORIZED');
+    }
+    const orgId = tenant.orgId;
+
+    if (!body.name) {
+      return apiError('Client name is required', 400, 'VALIDATION_ERROR');
     }
 
     // Check plan limits
     await billingService.assertQuotaAvailable(orgId, 'clients');
 
-    const client = await crmService.createClient(orgId, auth.userId, body);
+    const client = await crmService.createClient(orgId, auth!.userId, body);
     return apiSuccess(client, 201);
   } catch (error) {
     return handleApiError(error);
   }
 }
+
