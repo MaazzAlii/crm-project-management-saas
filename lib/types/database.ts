@@ -103,6 +103,8 @@ export interface Organization {
   is_suspended: boolean;
   suspension_reason: string | null;
   onboarding_completed: boolean;
+  verified_domain?: string | null;
+  domain_verified_at?: Timestamp | null;
   settings?: JSONObject | null;
   created_at: Timestamp;
   updated_at: Timestamp;
