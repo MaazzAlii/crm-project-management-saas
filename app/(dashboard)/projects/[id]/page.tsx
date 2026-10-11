@@ -32,10 +32,17 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     notFound()
   }
 
-  // Fetch team members list
+  // Fetch team members list scoped to organization
   let membersList: { id: string; name: string }[] = []
   try {
-    const { rows } = await query<any>(`SELECT id, full_name, email FROM users ORDER BY full_name`)
+    const { rows } = await query<any>(
+      `SELECT u.id, u.full_name, u.email 
+       FROM users u 
+       JOIN organization_members om ON om.user_id = u.id 
+       WHERE om.organization_id = $1 
+       ORDER BY u.full_name ASC`,
+      [sessionContext.organization.id]
+    )
     if (rows) {
       membersList = rows.map((p) => ({
         id: p.id,

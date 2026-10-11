@@ -23,7 +23,7 @@ export function QuickActions() {
     },
     {
       label: 'Invite Team',
-      href: '/team?action=invite',
+      href: '/settings/team?action=invite',
       icon: UserCheck,
       color: 'from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500',
     },

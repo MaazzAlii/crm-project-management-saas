@@ -289,11 +289,7 @@ export async function fetchTeamWorkloadAction(): Promise<TeamWorkloadRecord[]> {
     }
 
     if (profiles.length === 0) {
-      profiles = [
-        { id: 'usr_1', full_name: 'Alex Johnson', email: 'alex@agency.com' },
-        { id: 'usr_2', full_name: 'Sarah Smith', email: 'sarah@agency.com' },
-        { id: 'usr_3', full_name: 'Michael Brown', email: 'michael@agency.com' }
-      ]
+      return []
     }
 
     const allTasks = await fetchAllTasksAction()

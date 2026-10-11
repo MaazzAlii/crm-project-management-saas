@@ -20,8 +20,15 @@ export default async function ProjectsKanbanPage() {
 
   try {
     const [clientsRes, usersRes] = await Promise.all([
-      query<any>(`SELECT id, name FROM clients ORDER BY name ASC`),
-      query<any>(`SELECT id, full_name, email FROM users ORDER BY full_name ASC`),
+      query<any>(`SELECT id, name FROM clients WHERE organization_id = $1 ORDER BY name ASC`, [sessionContext.organization.id]),
+      query<any>(
+        `SELECT u.id, u.full_name, u.email 
+         FROM users u 
+         JOIN organization_members om ON om.user_id = u.id 
+         WHERE om.organization_id = $1 
+         ORDER BY u.full_name ASC`,
+        [sessionContext.organization.id]
+      ),
     ])
 
     if (clientsRes.rows) {
