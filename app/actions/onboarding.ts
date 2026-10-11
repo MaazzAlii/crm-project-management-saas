@@ -12,22 +12,17 @@ export interface CompleteOnboardingInput {
 }
 
 export async function completeOnboarding(input: CompleteOnboardingInput) {
-  if (process.env.NODE_ENV !== 'production' && input.organizationId === '00000000-0000-0000-0000-000000000001') {
-    return { success: true }
-  }
-
   const session = await getCurrentSessionContext()
-  if (!session || !session.user) {
+  if (!session || !session.user || !session.organization) {
     return { success: false, error: 'Unauthorized' }
   }
 
-  const orgId = input.organizationId && input.organizationId !== '00000000-0000-0000-0000-000000000001'
-    ? input.organizationId
-    : session.orgId
-
-  if (!orgId) {
+  // Cross-tenant check: input organization must match active session organization
+  if (input.organizationId && input.organizationId !== session.organization.id) {
     return { success: false, error: 'Organization not found' }
   }
+
+  const orgId = session.organization.id
 
   try {
     await query(

@@ -47,8 +47,8 @@ export async function updatePortalProfileAction(input: UpdateProfileInput) {
 
     // Fetch existing settings to preserve nested preferences
     const currentClient = await queryOne<{ portal_settings: any }>(
-      'SELECT portal_settings FROM clients WHERE id = $1',
-      [clientId]
+      'SELECT portal_settings FROM clients WHERE id = $1 AND organization_id = $2',
+      [clientId, organizationId]
     )
 
     const currentSettings: ClientPortalSettings = currentClient?.portal_settings || {
@@ -70,7 +70,7 @@ export async function updatePortalProfileAction(input: UpdateProfileInput) {
            country = $5,
            portal_settings = $6,
            updated_at = NOW()
-       WHERE id = $7`,
+       WHERE id = $7 AND organization_id = $8`,
       [
         name,
         input.company?.trim() || null,
@@ -79,6 +79,7 @@ export async function updatePortalProfileAction(input: UpdateProfileInput) {
         input.country?.trim() || null,
         JSON.stringify(updatedSettings),
         clientId,
+        organizationId,
       ]
     )
 
@@ -112,8 +113,8 @@ export async function updatePortalBillingAction(input: UpdateBillingInput) {
     }
 
     const currentClient = await queryOne<{ portal_settings: any; currency: string }>(
-      'SELECT portal_settings, currency FROM clients WHERE id = $1',
-      [clientId]
+      'SELECT portal_settings, currency FROM clients WHERE id = $1 AND organization_id = $2',
+      [clientId, organizationId]
     )
 
     const currentSettings: ClientPortalSettings = currentClient?.portal_settings || {
@@ -136,15 +137,15 @@ export async function updatePortalBillingAction(input: UpdateBillingInput) {
       await query(
         `UPDATE clients
          SET portal_settings = $1, currency = $2, updated_at = NOW()
-         WHERE id = $3`,
-        [JSON.stringify(updatedSettings), input.currency, clientId]
+         WHERE id = $3 AND organization_id = $4`,
+        [JSON.stringify(updatedSettings), input.currency, clientId, organizationId]
       )
     } else {
       await query(
         `UPDATE clients
          SET portal_settings = $1, updated_at = NOW()
-         WHERE id = $2`,
-        [JSON.stringify(updatedSettings), clientId]
+         WHERE id = $2 AND organization_id = $3`,
+        [JSON.stringify(updatedSettings), clientId, organizationId]
       )
     }
 
@@ -174,8 +175,8 @@ export async function updatePortalNotificationsAction(input: UpdateNotifications
     const { clientId, organizationId, clientUser } = await requirePortalSession()
 
     const currentClient = await queryOne<{ portal_settings: any }>(
-      'SELECT portal_settings FROM clients WHERE id = $1',
-      [clientId]
+      'SELECT portal_settings FROM clients WHERE id = $1 AND organization_id = $2',
+      [clientId, organizationId]
     )
 
     const currentSettings: ClientPortalSettings = currentClient?.portal_settings || {
@@ -196,8 +197,8 @@ export async function updatePortalNotificationsAction(input: UpdateNotifications
     await query(
       `UPDATE clients
        SET portal_settings = $1, updated_at = NOW()
-       WHERE id = $2`,
-      [JSON.stringify(updatedSettings), clientId]
+       WHERE id = $2 AND organization_id = $3`,
+      [JSON.stringify(updatedSettings), clientId, organizationId]
     )
 
     try {
