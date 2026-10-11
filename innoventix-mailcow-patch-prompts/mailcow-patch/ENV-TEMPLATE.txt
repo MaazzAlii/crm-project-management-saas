@@ -1,0 +1,14 @@
+# Put these in .env.local (local) and in Coolify environment variables (production).
+# Values are examples. Use real values only in Coolify and .env.local. Never commit them.
+
+EMAIL_PROVIDER=smtp
+EMAIL_FROM_ADDRESS=noreply@YOUR_COMPANY_DOMAIN
+EMAIL_FROM_NAME=Innoventix
+EMAIL_REPLY_TO=support@YOUR_COMPANY_DOMAIN
+SMTP_HOST=mail.YOUR_COMPANY_DOMAIN
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_REQUIRE_TLS=true
+SMTP_USER=noreply@YOUR_COMPANY_DOMAIN
+SMTP_PASSWORD=SET_THIS_IN_COOLIFY_ONLY
+APP_PUBLIC_URL=https://project-manager.calara.agency
