@@ -4,3 +4,4 @@ export * from './client-repo';
 export * from './project-repo';
 export * from './message-repo';
 export * from './audit-repo';
+export * from './invitation-repo';
