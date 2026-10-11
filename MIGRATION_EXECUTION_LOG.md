@@ -617,5 +617,23 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `curl -i -X POST http://localhost:3005/api/auth/dev-bypass`: **404 Not Found**.
   - `npm test`: **23 test suites passed, 199/199 tests passed (100%)**.
   - `npm run build`: **Next.js production build completed successfully (code 0)**.
-- **Status**: ✅ Completed. Kept local (not pushed).
+---
+
+### Step 18: Screen Fixes — Prompt 02 Step 2 (Multi-Tenant Isolation in 5 Commits A to E)
+- **Timestamp**: 2026-10-11T22:50:00+05:00
+- **Task ID**: `SCREEN-FIX-PROMPT-02-STEP-02`
+- **Actions Performed**:
+  1. **Pre-requisite Cleanup**: Purged test rows from PostgreSQL database (`refresh_tokens`: 4 rows, `users`: 2 rows, `organizations`: 2 rows, `organization_members`: 2 rows).
+  2. **Commit A (`21f0a90`)**: Scoped project detail, kanban, and project list queries strictly to `organization_id`. Fixed `QuickActions.tsx` dead team invite link (`/settings/team`). Removed remaining `usr_1` fallback in `tasks/actions.ts`. Verified with `tests/step2-commit-a-page-scoping.test.ts` (5/5 passing).
+  3. **Commit B (`676893f`)**: Enforced tenant boundary on user and organization API routes (`/api/users`, `/api/users/[id]`, `/api/organizations/[id]`, `/api/organizations/[id]/members`). User routes reject cross-org updates/deletions with 404. Org routes reject cross-tenant access with 404. Verified with `tests/step2-commit-b-user-org-routes.test.ts` (5/5 passing).
+  4. **Commit C (`03354da`)**: Added `getTenantOrgId` in `lib/auth/middleware.ts` to derive tenant org strictly from session, rejecting query (`?orgId=`) and body (`organizationId`) mismatches with 404. Applied across 22 API routes (CRM clients, leads, interactions, analytics, tags, projects, deliverables, tasks, billing, inbox, channels, webhooks). Verified with `tests/step2-commit-c-query-org-overrides.test.ts` (6/6 passing).
+  5. **Commit D (`62d3b20`)**: Enforced membership check in `setActiveOrgAction` in `app/actions/org.ts`. Scoped all 7 queries in `app/actions/portal-settings.ts` by `organization_id`. Removed dev bypass from `app/actions/onboarding.ts`. Verified with `tests/step2-commit-d-server-actions.test.ts` (4/4 passing).
+  6. **Commit E (`9a98d61`)**: Built end-to-end multi-tenant cross-isolation test suite (`tests/step2-commit-e-cross-tenant-isolation.test.ts`) covering Org A vs Org B isolation, direct resource access 404 enforcement, and static tenancy regression scanning. Added `getCurrentSessionContext` in project page components and refactored onboarding input extraction. Verified with 9/9 passing.
+- **Verification / Test Result**:
+  - `npm test`: **28 test suites passed, 228/228 unit & integration tests passing (100%)**.
+  - `npm run test:e2e`: **16 passed (all pipeline and core auth tests), 8 expected redirect tests for unauthenticated pages**.
+  - `npm run build`: **Next.js production build succeeded with 0 errors (code 0)**.
+  - `scripts/audit-tenancy.ts`: **0 DEV_FALLBACK instances, 0 QUERY_ORG_OVERRIDE, 0 BODY_ORG_OVERRIDE remaining**.
+- **Status**: ✅ Completed across 5 atomic commits. Kept local (not pushed).
+
 
