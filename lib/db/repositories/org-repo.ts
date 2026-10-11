@@ -222,6 +222,84 @@ export class OrganizationRepository {
       throw error;
     }
   }
+
+  /**
+   * Get member role for a user in an organization
+   */
+  async getMemberRole(orgId: string, userId: string): Promise<MembershipRole | null> {
+    try {
+      const res = await queryOne<{ role: MembershipRole }>(
+        'SELECT role FROM organization_members WHERE organization_id = $1 AND user_id = $2',
+        [orgId, userId]
+      );
+      return res?.role || null;
+    } catch (error) {
+      console.error(`[OrganizationRepository.getMemberRole] Error getting role for ${userId} in ${orgId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get verified domain details for an organization
+   */
+  async getVerifiedDomain(orgId: string): Promise<{
+    verifiedDomain: string | null;
+    domainVerifiedAt: Date | null;
+  } | null> {
+    try {
+      const org = await queryOne<{
+        verified_domain: string | null;
+        domain_verified_at: Date | null;
+      }>(
+        'SELECT verified_domain, domain_verified_at FROM organizations WHERE id = $1',
+        [orgId]
+      );
+      if (!org) return null;
+      return {
+        verifiedDomain: org.verified_domain,
+        domainVerifiedAt: org.domain_verified_at,
+      };
+    } catch (error) {
+      console.error(`[OrganizationRepository.getVerifiedDomain] Error fetching domain for ${orgId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Set verified domain for an organization (Strict: only allowed by owner)
+   */
+  async setVerifiedDomain(
+    orgId: string,
+    userId: string,
+    domain: string | null
+  ): Promise<Organization> {
+    const role = await this.getMemberRole(orgId, userId);
+    if (role !== 'owner') {
+      throw new Error('Unauthorized: Only organization owners can set verified business domain');
+    }
+
+    try {
+      const cleanDomain = domain ? domain.toLowerCase().trim() : null;
+      const verifiedAt = cleanDomain ? new Date() : null;
+
+      const updated = await queryOne<Organization>(
+        `UPDATE organizations 
+         SET verified_domain = $1, domain_verified_at = $2, updated_at = NOW() 
+         WHERE id = $3 
+         RETURNING *`,
+        [cleanDomain, verifiedAt, orgId]
+      );
+
+      if (!updated) {
+        throw new Error(`Organization ${orgId} not found`);
+      }
+
+      return updated;
+    } catch (error) {
+      console.error(`[OrganizationRepository.setVerifiedDomain] Error setting domain for org ${orgId}:`, error);
+      throw error;
+    }
+  }
 }
 
 export const orgRepo = new OrganizationRepository();
