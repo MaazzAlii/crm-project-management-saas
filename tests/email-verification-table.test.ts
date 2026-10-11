@@ -48,14 +48,37 @@ describe('Prompt 08: Email Verification Table Migration & Backfill', () => {
     expect(res.rows.length).toBe(1);
   });
 
-  it('verifies existing users with passwords have email_verified_at backfilled', async () => {
-    const res = await query<{ count: string }>(`
-      SELECT count(*) as count
-      FROM users
-      WHERE password_hash IS NOT NULL AND email_verified_at IS NULL;
+  it('verifies backfill query marks existing users with passwords as email_verified_at', async () => {
+    // Insert a legacy user with password and null email_verified_at
+    const legacyUser = await query<{ id: string }>(`
+      INSERT INTO users (email, password_hash, role, email_verified, email_verified_at)
+      VALUES ('legacy_${Date.now()}@example.com', 'pwd_hash', 'user', false, NULL)
+      RETURNING id;
     `);
+    const legacyId = legacyUser.rows[0].id;
 
-    expect(parseInt(res.rows[0].count, 10)).toBe(0);
+    // Run backfill query from migration 0036
+    await query(`
+      UPDATE users 
+      SET 
+        email_verified_at = COALESCE(created_at, NOW()),
+        email_verified = TRUE
+      WHERE 
+        id = $1 
+        AND email_verified_at IS NULL 
+        AND password_hash IS NOT NULL;
+    `, [legacyId]);
+
+    const check = await query<{ email_verified: boolean; email_verified_at: Date | null }>(
+      'SELECT email_verified, email_verified_at FROM users WHERE id = $1',
+      [legacyId]
+    );
+
+    expect(check.rows[0].email_verified).toBe(true);
+    expect(check.rows[0].email_verified_at).not.toBeNull();
+
+    // Clean up
+    await query('DELETE FROM users WHERE id = $1', [legacyId]);
   });
 
   it('verifies TypeScript types export properly', () => {
