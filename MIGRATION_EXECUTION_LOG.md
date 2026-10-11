@@ -636,4 +636,32 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `scripts/audit-tenancy.ts`: **0 DEV_FALLBACK instances, 0 QUERY_ORG_OVERRIDE, 0 BODY_ORG_OVERRIDE remaining**.
 - **Status**: ✅ Completed across 5 atomic commits. Kept local (not pushed).
 
+---
+
+### Step 19: Innoventix Invite System & Seat Limits — Prompts 01 to 15 & Mailcow Patch
+- **Timestamp**: 2026-10-12T00:30:00+05:00
+- **Task ID**: `INVITE-SYSTEM-PROMPTS-01-TO-15`
+- **Actions Performed**:
+  1. **Prompt 01: Audit Current Invite & Dashboard**: Generated `docs/audit-invites-dashboard.md` documenting invitation entry points, API routes, email providers, and permissions.
+  2. **Prompt 02: Compare Local Code, Deploy, and Environment**: Audited commit differences between local and remotes, route availability, and Coolify environment.
+  3. **Prompt 03: Plan Rules & Seat Limit Config**: Created `config/plans.ts` and `tests/plans-config.test.ts` (seats: free=3, pro=15, enterprise=500; canUseAllFeatures=true).
+  4. **Prompt 04: Email Sender Configuration**: Implemented `lib/email/config.ts`, `docs/email-setup.md`, and `tests/email-config.test.ts` with strict production validation and domain preservation.
+  5. **Prompt 05: Invitations Table Schema Migration**: Applied idempotent migration `supabase/migrations/0035_invitations.sql` with check constraints and partial unique index `(organization_id, email) WHERE status = 'pending'`. Added types and tests.
+  6. **Prompt 06: Secure Token Utility**: Implemented `lib/security/invite-token.ts` (32-byte base64url generator, SHA-256 hash, timing-safe equality, token logger redaction) with `tests/invite-token.test.ts`.
+  7. **Prompt 07: Pure Invitation Status Rules**: Implemented `lib/invitations/status.ts` (computeStatus, canAccept, canRevoke, canResend, 7-day expiry) with `tests/invitation-status.test.ts`.
+  8. **Prompt 08: Email Verification Table & Backfill**: Applied migration `supabase/migrations/0036_email_verifications.sql` adding `email_verifications` table, index, `email_verified_at` column, and password-user backfill. Added `tests/email-verification-table.test.ts`.
+  9. **Prompt 09: Organization Business Domain Fields**: Applied migration `supabase/migrations/0037_organization_domain_fields.sql` adding `verified_domain` and `domain_verified_at`. Added owner-gated repository methods `setVerifiedDomain` and `getVerifiedDomain` with `tests/organization-domain.test.ts`.
+  10. **Prompt 10: Organization Plans Table & Default Provisioning**: Applied migration `supabase/migrations/0038_organization_plans.sql` with backfill query. Updated `OrganizationRepository.create` to provision `free` plan in the same transaction. Added `tests/organization-plans.test.ts`.
+  11. **Prompt 11: Current Plan Lookup Service & TTL Cache**: Implemented `lib/billing/current-plan.ts` with 30-second TTL in-memory cache, past_due/canceled restriction banners, and `tests/current-plan.test.ts`.
+  12. **Prompt 12: Invitation Audit Events**: Implemented `lib/audit/invitations.ts` (`logInvitationAudit`) stripping tokens/hashes before logging 12 event types, with `tests/invitation-audit-events.test.ts`.
+  13. **Prompt 13: Invitation Repository**: Implemented `lib/db/repositories/invitation-repo.ts` (`insertInvitation`, `findPendingByEmail`, `findByTokenHash`, `listForOrg`, `updateStatus`, `countPending`) strictly scoped with `tests/invitation-repository.test.ts`.
+  14. **Prompt 14: Email Verification Repository**: Implemented `lib/db/repositories/email-verification-repo.ts` (`insertVerification`, `findByTokenHash`, atomic `consume`, `invalidateOlder`) with `tests/email-verification-repo.test.ts`.
+  15. **Prompt 15: Seat Count Repository**: Added `countMembers` and `countSeatsUsed` to `OrganizationRepository` and exported `memberRepo`. Validated live seat math with `tests/seat-count-repository.test.ts`.
+  16. **Mailcow Patch Prompts Integration**: Committed all 7 files from `innoventix-mailcow-patch-prompts/mailcow-patch/` individually.
+- **Verification / Test Result**:
+  - `npm test`: **38 test suites passed, 275/275 unit & integration tests passing (100%)**.
+  - All migrations applied successfully (`0035`, `0036`, `0037`, `0038`).
+- **Status**: ✅ Phase 1 complete, Phase 2 in progress. Ready for Prompt 16 upon resumption.
+
+
 
