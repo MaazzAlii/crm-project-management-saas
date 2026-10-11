@@ -52,6 +52,7 @@ export interface User {
   role: UserRole;
   is_active: boolean;
   email_verified: boolean;
+  email_verified_at?: Timestamp | null;
   last_login_at: Timestamp | null;
   preferences?: JSONObject | null;
   created_at: Timestamp;
@@ -152,6 +153,16 @@ export interface Invitation {
   revoked_at?: Timestamp | null;
   created_at: Timestamp;
   updated_at: Timestamp;
+}
+
+export interface EmailVerification {
+  id: UUID;
+  user_id: UUID;
+  email: string;
+  token_hash: string;
+  expires_at: Timestamp;
+  consumed_at?: Timestamp | null;
+  created_at: Timestamp;
 }
 
 // -----------------------------------------------------------------------------
