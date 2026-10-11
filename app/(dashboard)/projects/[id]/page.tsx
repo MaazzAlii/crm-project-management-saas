@@ -8,6 +8,7 @@ import { ProjectHeader } from '@/components/projects/ProjectHeader'
 import { DeliverablesList } from '@/components/projects/DeliverablesList'
 import { ProjectTimeline } from '@/components/projects/ProjectTimeline'
 import { query } from '@/lib/db'
+import { getCurrentSessionContext } from '@/lib/auth/session'
 import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
@@ -21,6 +22,11 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
 }
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
+  const sessionContext = await getCurrentSessionContext()
+  if (!sessionContext || !sessionContext.organization) {
+    notFound()
+  }
+
   const [project, deliverables, tasks, activityLogs] = await Promise.all([
     fetchProjectDetailAction(params.id),
     fetchProjectDeliverablesAction(params.id),

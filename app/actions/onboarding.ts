@@ -17,8 +17,8 @@ export async function completeOnboarding(input: CompleteOnboardingInput) {
     return { success: false, error: 'Unauthorized' }
   }
 
-  // Cross-tenant check: input organization must match active session organization
-  if (input.organizationId && input.organizationId !== session.organization.id) {
+  const { organizationId: requestedOrgId, industryType } = input
+  if (requestedOrgId && requestedOrgId !== session.organization.id) {
     return { success: false, error: 'Organization not found' }
   }
 
@@ -31,7 +31,7 @@ export async function completeOnboarding(input: CompleteOnboardingInput) {
            onboarding_completed = true,
            updated_at = NOW()
        WHERE id = $2`,
-      [input.industryType, orgId]
+      [industryType, orgId]
     )
 
     revalidatePath('/dashboard')

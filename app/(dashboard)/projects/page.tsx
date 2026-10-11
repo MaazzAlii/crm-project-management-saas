@@ -2,10 +2,17 @@ import { fetchProjectsAction } from './actions'
 import { fetchProjectTemplatesAction } from '@/app/(dashboard)/settings/templates/actions'
 import { ProjectsList } from '@/components/projects/ProjectsList'
 import { query } from '@/lib/db'
+import { getCurrentSessionContext } from '@/lib/auth/session'
+import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ProjectsPage() {
+  const sessionContext = await getCurrentSessionContext()
+  if (!sessionContext || !sessionContext.organization) {
+    redirect('/auth/signin')
+  }
+
   const [projects, templates] = await Promise.all([
     fetchProjectsAction(),
     fetchProjectTemplatesAction()

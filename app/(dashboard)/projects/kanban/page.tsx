@@ -1,6 +1,8 @@
 import { fetchProjectsAction } from '../actions'
 import { ProjectsKanban } from '@/components/projects/ProjectsKanban'
 import { query } from '@/lib/db'
+import { getCurrentSessionContext } from '@/lib/auth/session'
+import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,6 +14,11 @@ export async function generateMetadata() {
 }
 
 export default async function ProjectsKanbanPage() {
+  const sessionContext = await getCurrentSessionContext()
+  if (!sessionContext || !sessionContext.organization) {
+    redirect('/auth/signin')
+  }
+
   const projects = await fetchProjectsAction()
 
   // Fetch clients & profiles for dropdowns
