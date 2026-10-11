@@ -135,6 +135,25 @@ export interface Subscription {
 
 export type OrganizationSubscription = Subscription;
 
+export type InvitationRole = "admin" | "member" | "viewer";
+export type InvitationStatus = "pending" | "accepted" | "revoked" | "expired";
+
+export interface Invitation {
+  id: UUID;
+  organization_id: UUID;
+  email: string;
+  role: InvitationRole;
+  token_hash: string;
+  status: InvitationStatus;
+  invited_by: UUID | null;
+  expires_at: Timestamp;
+  accepted_at?: Timestamp | null;
+  accepted_by?: UUID | null;
+  revoked_at?: Timestamp | null;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+}
+
 // -----------------------------------------------------------------------------
 // CRM: Clients, Leads & Communication Logs
 // -----------------------------------------------------------------------------
