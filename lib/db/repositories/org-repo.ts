@@ -75,6 +75,14 @@ export class OrganizationRepository {
         );
       }
 
+      // Automatically provision default free organization plan
+      await client.query(
+        `INSERT INTO organization_plans (organization_id, plan_id, status)
+         VALUES ($1, 'free', 'active')
+         ON CONFLICT (organization_id) DO NOTHING`,
+        [org.id]
+      );
+
       return org;
     });
   }
