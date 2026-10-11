@@ -8,6 +8,7 @@
 import { query, queryOne, transaction } from '../index';
 import { buildSelectQuery, buildInsertQuery, buildUpdateQuery } from '../query-builder';
 import { Organization, OrganizationMember, OrganizationSubscription, MembershipRole } from '../../types/database';
+import { invitationRepo } from './invitation-repo';
 
 export class OrganizationRepository {
   /**
@@ -308,6 +309,32 @@ export class OrganizationRepository {
       throw error;
     }
   }
+
+  /**
+   * Count total members belonging to an organization
+   */
+  async countMembers(orgId: string): Promise<number> {
+    try {
+      const res = await queryOne<{ count: string }>(
+        'SELECT count(*) as count FROM organization_members WHERE organization_id = $1',
+        [orgId]
+      );
+      return parseInt(res?.count || '0', 10);
+    } catch (error) {
+      console.error(`[OrganizationRepository.countMembers] Error counting members for ${orgId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Count total seats used (active members plus pending invitations)
+   */
+  async countSeatsUsed(orgId: string): Promise<number> {
+    const memberCount = await this.countMembers(orgId);
+    const pendingInvites = await invitationRepo.countPending(orgId);
+    return memberCount + pendingInvites;
+  }
 }
 
 export const orgRepo = new OrganizationRepository();
+export const memberRepo = orgRepo;
