@@ -138,6 +138,19 @@ export interface Subscription {
 
 export type OrganizationSubscription = Subscription;
 
+export type PlanTier = 'free' | 'pro' | 'enterprise';
+export type PlanStatus = 'active' | 'past_due' | 'canceled';
+
+export interface OrganizationPlan {
+  organization_id: UUID;
+  plan_id: PlanTier;
+  status: PlanStatus;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
+  current_period_end?: Timestamp | null;
+  updated_at: Timestamp;
+}
+
 export type InvitationRole = "admin" | "member" | "viewer";
 export type InvitationStatus = "pending" | "accepted" | "revoked" | "expired";
 
