@@ -1,16 +1,16 @@
 import { test, expect } from '@playwright/test'
 
+const E2E_EMAIL = process.env.E2E_EMAIL || process.env.ADMIN_EMAIL || 'admin@innoventix.io'
+const E2E_PASSWORD = process.env.E2E_PASSWORD || process.env.ADMIN_PASSWORD || 'AdminTestPassword123!'
+
 test.describe('Prompt 34: Team Settings — Invite Member Dialog', () => {
   test.beforeEach(async ({ page }) => {
-    // Authenticate with dev session cookie for organization owner access
-    await page.context().addCookies([
-      {
-        name: 'dev_super_admin',
-        value: 'true',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
+    // Authenticate via standard session login
+    await page.goto('/login?redirectTo=/settings/team')
+    await page.fill('input[type="email"]', E2E_EMAIL)
+    await page.fill('input[type="password"]', E2E_PASSWORD)
+    await page.click('button[type="submit"]')
+    await page.waitForURL('**/settings/team', { timeout: 15000 })
   })
 
   test('owner sees the dialog, invalid email shows an error, valid email creates a pending invite', async ({ page }) => {
