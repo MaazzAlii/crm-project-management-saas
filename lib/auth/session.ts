@@ -76,7 +76,7 @@ export function getDefaultSessionConfig(
     cookieSecure: getCookieSecure(requestHeaders),
     cookieHttpOnly: true,
     cookieSameSite: 'lax',
-    maxAge: 3600, // Short-lived access token session (1 hour)
+    maxAge: 1800, // Short-lived access token session (30 minutes)
   };
 }
 
@@ -125,7 +125,7 @@ export async function getRefreshTokenFromCookie(
 ): Promise<string | undefined> {
   try {
     const cookieStore = await cookies();
-    return cookieStore.get(cookieName)?.value || cookieStore.get('innoventix_session')?.value;
+    return cookieStore.get(cookieName)?.value;
   } catch (err) {
     return undefined;
   }
@@ -140,7 +140,7 @@ export async function deleteRefreshTokenCookie(
   try {
     const cookieStore = await cookies();
     cookieStore.delete(cookieName);
-    cookieStore.delete('innoventix_session');
+    cookieStore.delete(process.env.COOKIE_NAME || 'innoventix_session');
   } catch (err) {
     // Gracefully handle contexts where cookies() is not available
   }
@@ -152,8 +152,12 @@ export async function deleteRefreshTokenCookie(
 export async function isSessionValid(
   cookieName: string = process.env.COOKIE_NAME || 'innoventix_session'
 ): Promise<boolean> {
-  const token = await getRefreshTokenFromCookie(cookieName);
-  return !!token;
+  try {
+    const cookieStore = await cookies();
+    return !!cookieStore.get(cookieName)?.value;
+  } catch (err) {
+    return false;
+  }
 }
 
 export interface SessionContext {
@@ -207,24 +211,15 @@ export async function getCurrentSessionContext(): Promise<SessionContext | null>
     }
 
     // Dynamic import to prevent circular dependency
-    const { verifyAccessToken, verifyRefreshToken } = await import('./jwt');
+    const { verifyAccessToken } = await import('./jwt');
     const { userRepo } = await import('../db/repositories/user-repo');
     const { orgRepo } = await import('../db/repositories/org-repo');
 
-    let userId: string | null = null;
     const accessPayload = verifyAccessToken(token);
-    if (accessPayload?.userId) {
-      userId = accessPayload.userId;
-    } else {
-      const refreshPayload = verifyRefreshToken(token);
-      if (refreshPayload?.userId) {
-        userId = refreshPayload.userId;
-      }
-    }
-
-    if (!userId) {
+    if (!accessPayload?.userId) {
       return null;
     }
+    const userId = accessPayload.userId;
 
     const user = await userRepo.findById(userId);
     if (!user) {

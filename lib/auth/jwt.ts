@@ -38,10 +38,10 @@ export interface RefreshTokenPayload {
 }
 
 /**
- * Generate a new access token (expires in 1 hour by default)
+ * Generate a new access token (expires in 30 minutes by default)
  */
 export function generateAccessToken(payload: Omit<TokenPayload, 'iat' | 'exp'>): string {
-  const expiresIn = process.env.JWT_EXPIRES_IN ? parseInt(process.env.JWT_EXPIRES_IN, 10) : 3600;
+  const expiresIn = process.env.JWT_EXPIRES_IN ? parseInt(process.env.JWT_EXPIRES_IN, 10) : 1800;
   const options: SignOptions = {
     expiresIn,
     algorithm: 'HS256',

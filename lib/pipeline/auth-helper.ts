@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { verifyAccessToken, verifyRefreshToken } from '@/lib/auth/jwt';
+import { verifyAccessToken } from '@/lib/auth/jwt';
 import { userRepo } from '@/lib/db/repositories/user-repo';
 import { orgRepo } from '@/lib/db/repositories/org-repo';
 import { SessionContext, getDefaultSessionConfig } from '@/lib/auth/session';
@@ -19,7 +19,7 @@ export async function getPipelineSession(request: NextRequest): Promise<SessionC
     }
   }
 
-  // 2. Fallback to session cookie
+  // 2. Fallback to session cookie (access token only)
   if (!userId) {
     const config = getDefaultSessionConfig(request.headers);
     const cookieToken = request.cookies.get(config.cookieName)?.value;
@@ -28,12 +28,6 @@ export async function getPipelineSession(request: NextRequest): Promise<SessionC
       if (accessPayload?.userId) {
         userId = accessPayload.userId;
         tokenOrgId = accessPayload.orgId;
-      } else {
-        const refreshPayload = verifyRefreshToken(cookieToken);
-        if (refreshPayload?.userId) {
-          userId = refreshPayload.userId;
-          tokenOrgId = (refreshPayload as any)?.orgId;
-        }
       }
     }
   }

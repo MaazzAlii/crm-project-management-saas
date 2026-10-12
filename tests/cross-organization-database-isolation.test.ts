@@ -17,6 +17,22 @@ describe('Real Database Multi-Tenant Isolation Integration Test', () => {
   let tokenB: string;
 
   beforeAll(async () => {
+    // 0. Safety Guard: Refuse to execute against production or non-local database
+    const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || '';
+    const host = process.env.DB_HOST || 'localhost';
+    const isLocalhost =
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      dbUrl.includes('localhost') ||
+      dbUrl.includes('127.0.0.1') ||
+      dbUrl.includes('@postgres:') ||
+      dbUrl.includes('@db:');
+    if (process.env.NODE_ENV === 'production' || !isLocalhost) {
+      throw new Error(
+        `Safety guard triggered: Refusing to run database tests against non-local or production environment (NODE_ENV=${process.env.NODE_ENV}).`
+      );
+    }
+
     // 1. Clean up any existing test records
     await query('DELETE FROM projects WHERE id = $1', [projectAId]);
     await query('DELETE FROM clients WHERE id = $1', [clientAId]);

@@ -31,7 +31,7 @@ async function processDeadlineChecks(req: NextRequest): Promise<NextResponse> {
   // 1. Authenticate cron trigger via secret header
   const authHeader = req.headers.get('authorization')
   const cronSecretHeader = req.headers.get('x-cron-secret')
-  const expectedSecret = process.env.CRON_SECRET || process.env.AUTOMATION_WEBHOOK_SECRET || ''
+  const expectedSecret = process.env.CRON_SECRET || ''
 
   const providedSecret =
     cronSecretHeader || (authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : '')
