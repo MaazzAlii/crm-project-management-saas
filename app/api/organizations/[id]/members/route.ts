@@ -35,34 +35,6 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const auth = getAuthFromRequest(request);
-    if (!auth) {
-      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
-    }
-
-    const { id } = await params;
-    const body = await request.json();
-    if (!body.email) {
-      return apiError('Email is required', 400, 'VALIDATION_ERROR');
-    }
-
-    const member = await orgService.addMember(
-      id,
-      auth.userId,
-      body.email,
-      body.role || 'member'
-    );
-
-    return apiSuccess(member, 201);
-  } catch (error) {
-    return handleApiError(error);
-  }
-}
 
 export async function PATCH(
   request: NextRequest,
