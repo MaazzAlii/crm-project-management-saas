@@ -2,17 +2,18 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { query, queryOne } from '@/lib/db'
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { getPlanUsage } from '@/lib/billing/usage'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { QuickActions } from '@/components/dashboard/QuickActions'
 import { RecentActivity, type ActivityItem } from '@/components/dashboard/RecentActivity'
+import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner'
+import { DashboardTeamWidgets, type RecentMember, type RecentInvitation } from '@/components/dashboard/DashboardTeamWidgets'
 import { WeeklyReportButton } from '@/components/reports/WeeklyReportButton'
 import { fetchWeeklyReportMetricsAction } from '@/app/(dashboard)/reports/actions'
 import {
   Briefcase,
   CheckSquare,
   AlertTriangle,
-  DollarSign,
-  Inbox,
   Users,
   Plus,
   Building2,
@@ -36,64 +37,99 @@ export default async function DashboardPage() {
 
   const org = sessionContext.organization
 
-  let activeProjectsCount = 0
-  let pendingTasksCount = 0
-  let overdueProjectsCount = 0
-  let clientsCount = 0
-  let unreadInboxCount = 0
+  // 1. Fetch Active Projects Count
+  const pRes = await queryOne<{ count: number }>(
+    `SELECT COUNT(*)::int as count FROM projects WHERE organization_id = $1 AND status != 'completed'`,
+    [org.id]
+  )
+  const activeProjectsCount = pRes?.count || 0
+
+  // 2. Fetch Pending Tasks Count
+  const tRes = await queryOne<{ count: number }>(
+    `SELECT COUNT(*)::int as count FROM tasks WHERE organization_id = $1 AND status != 'completed'`,
+    [org.id]
+  )
+  const pendingTasksCount = tRes?.count || 0
+
+  // 3. Fetch Overdue Projects Count
+  const oRes = await queryOne<{ count: number }>(
+    `SELECT COUNT(*)::int as count FROM projects
+     WHERE organization_id = $1 AND status != 'completed' AND deadline < CURRENT_DATE`,
+    [org.id]
+  )
+  const overdueProjectsCount = oRes?.count || 0
+
+  // 4. Fetch Clients Count
+  const cRes = await queryOne<{ count: number }>(
+    `SELECT COUNT(*)::int as count FROM clients WHERE organization_id = $1`,
+    [org.id]
+  )
+  const clientsCount = cRes?.count || 0
+
+  // 5. Fetch Team Capacity & Usage (Prompt 40, 42, 44)
+  const usage = await getPlanUsage(org.id)
+
+  // 6. Fetch 3 Most Recent Members (Prompt 44)
+  const memberRows = await query<any>(
+    `SELECT om.id, om.role, om.joined_at, u.full_name, u.email
+     FROM organization_members om
+     JOIN users u ON u.id = om.user_id
+     WHERE om.organization_id = $1
+     ORDER BY om.joined_at DESC
+     LIMIT 3`,
+    [org.id]
+  )
+
+  const recentMembers: RecentMember[] = (memberRows.rows || []).map((m: any) => ({
+    id: m.id,
+    fullName: m.full_name || null,
+    email: m.email,
+    role: m.role,
+    joinedAt: m.joined_at,
+  }))
+
+  // 7. Fetch 3 Most Recent Pending Invitations (Prompt 44)
+  const inviteRows = await query<any>(
+    `SELECT id, email, role, status, send_failed, token_expires_at
+     FROM invitations
+     WHERE organization_id = $1 AND status = 'pending'
+     ORDER BY created_at DESC
+     LIMIT 3`,
+    [org.id]
+  )
+
+  const recentInvitations: RecentInvitation[] = (inviteRows.rows || []).map((i: any) => ({
+    id: i.id,
+    email: i.email,
+    role: i.role,
+    status: i.status,
+    sendFailed: i.send_failed,
+    expiresAt: i.token_expires_at,
+  }))
+
+  // 8. Fetch Real Audit Activity rows (Prompt 42)
   let recentActivities: ActivityItem[] = []
-
   try {
-    // 1. Fetch Active Projects Count
-    const pRes = await queryOne<{ count: number }>(
-        `SELECT COUNT(*)::int as count FROM projects WHERE organization_id = $1 AND status != 'completed'`,
-        [org.id]
-      )
-      activeProjectsCount = pRes?.count || 0
+    const auditRows = await query<any>(
+      `SELECT id, action, details, created_at
+       FROM audit_logs
+       WHERE organization_id = $1
+       ORDER BY created_at DESC
+       LIMIT 5`,
+      [org.id]
+    )
 
-      // 2. Fetch Pending Tasks Count
-      const tRes = await queryOne<{ count: number }>(
-        `SELECT COUNT(*)::int as count FROM tasks WHERE organization_id = $1 AND status != 'completed'`,
-        [org.id]
-      )
-      pendingTasksCount = tRes?.count || 0
-
-      // 3. Fetch Overdue Projects Count
-      const oRes = await queryOne<{ count: number }>(
-        `SELECT COUNT(*)::int as count FROM projects
-         WHERE organization_id = $1 AND status != 'completed' AND deadline < CURRENT_DATE`,
-        [org.id]
-      )
-      overdueProjectsCount = oRes?.count || 0
-
-      // 4. Fetch Clients Count
-      const cRes = await queryOne<{ count: number }>(
-        `SELECT COUNT(*)::int as count FROM clients WHERE organization_id = $1`,
-        [org.id]
-      )
-      clientsCount = cRes?.count || 0
-
-      // 5. Fetch Recent Projects as Recent Activity feed
-      const recentProjects = await query<any>(
-        `SELECT id, title as project_title, status, created_at
-         FROM projects
-         WHERE organization_id = $1
-         ORDER BY created_at DESC
-         LIMIT 5`,
-        [org.id]
-      )
-
-      if (recentProjects.rows && recentProjects.rows.length > 0) {
-        recentActivities = recentProjects.rows.map((p: any) => ({
-          id: p.id,
-          title: `Project Created: ${p.project_title}`,
-          description: `Status: ${(p.status || '').toUpperCase()} · Org: ${org.name}`,
-          timestamp: p.created_at,
-          type: 'project',
-        }))
-      }
-  } catch (err) {
-    console.warn('[DASHBOARD_QUERY_WARN] Using fallback metric calculation:', err)
+    if (auditRows.rows && auditRows.rows.length > 0) {
+      recentActivities = auditRows.rows.map((a: any) => ({
+        id: a.id,
+        title: a.action.replace(/_/g, ' '),
+        description: a.details ? JSON.stringify(a.details).slice(0, 80) : `Tenant: ${org.name}`,
+        timestamp: a.created_at,
+        type: a.action.includes('PROJECT') ? 'project' : a.action.includes('CLIENT') ? 'client' : a.action.includes('TASK') ? 'task' : 'general',
+      }))
+    }
+  } catch {
+    // If audit_logs table is empty, recentActivities stays empty
   }
 
   const isBrandNewOrg = clientsCount === 0 && activeProjectsCount === 0
@@ -101,6 +137,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Email Verification Banner (Prompt 39) */}
+      <EmailVerificationBanner
+        isVerified={sessionContext.user.email_verified}
+        userEmail={sessionContext.user.email}
+      />
+
       {/* Header Banner */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-800/80 pb-6">
         <div>
@@ -133,7 +175,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Brand New Organization Onboarding Banner */}
+      {/* Brand New Organization Onboarding Banner (Prompt 42) */}
       {isBrandNewOrg && (
         <div className="relative overflow-hidden rounded-2xl border border-sky-500/30 bg-gradient-to-br from-sky-950/60 via-slate-900 to-indigo-950/40 p-6 shadow-2xl">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -161,7 +203,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* Metrics Stat Cards Grid */}
+      {/* Metrics Stat Cards Grid (Prompt 42: real numbers from DB) */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {/* Active Projects */}
         <StatCard
@@ -204,7 +246,17 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Quick Actions & Recent Activity Layout */}
+      {/* Team & Invitation Widgets (Prompt 44) */}
+      <DashboardTeamWidgets
+        seatsUsed={usage.seatsUsed}
+        seatsMax={usage.maxMembers}
+        isFreePlan={usage.planTier === 'free'}
+        recentMembers={recentMembers}
+        pendingCount={usage.pendingInvites}
+        recentInvitations={recentInvitations}
+      />
+
+      {/* Quick Actions & Recent Activity Layout (Prompt 43) */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="space-y-8 lg:col-span-2">
           <QuickActions />
