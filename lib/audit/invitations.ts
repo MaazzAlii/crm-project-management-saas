@@ -7,6 +7,7 @@ export const INVITATION_AUDIT_EVENTS = {
   INVITE_ACCEPTED: 'invite.accepted',
   INVITE_EXPIRED: 'invite.expired',
   INVITE_DECLINED: 'invite.declined',
+  INVITE_SEND_FAILED: 'invite.send_failed',
   MEMBER_ROLE_CHANGED: 'member.role_changed',
   MEMBER_REMOVED: 'member.removed',
   EMAIL_VERIFICATION_SENT: 'email.verification_sent',
@@ -22,6 +23,7 @@ export type InvitationAuditEventType =
   | 'invite.accepted'
   | 'invite.expired'
   | 'invite.declined'
+  | 'invite.send_failed'
   | 'member.role_changed'
   | 'member.removed'
   | 'email.verification_sent'
