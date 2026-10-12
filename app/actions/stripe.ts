@@ -64,20 +64,27 @@ export async function createCustomerPortalSession() {
     return { error: 'Unauthorized' }
   }
 
+  const org = await queryOne<{ stripe_customer_id: string }>(
+    `SELECT stripe_customer_id FROM organizations WHERE id = $1`,
+    [session.organization.id]
+  )
+
   const sub = await queryOne<{ stripe_customer_id: string }>(
     `SELECT stripe_customer_id FROM organization_subscriptions WHERE organization_id = $1`,
     [session.organization.id]
   )
 
-  if (!sub || !sub.stripe_customer_id) {
+  const customerId = org?.stripe_customer_id || sub?.stripe_customer_id
+
+  if (!customerId) {
     return { error: 'No active Stripe customer found for this organization.' }
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const appUrl = (process.env.APP_PUBLIC_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '')
 
   try {
     const portalSession = await stripe.billingPortal.sessions.create({
-      customer: sub.stripe_customer_id,
+      customer: customerId,
       return_url: `${appUrl}/settings/billing`,
     })
 
@@ -87,8 +94,8 @@ export async function createCustomerPortalSession() {
         organizationId: session.organization.id,
         action: 'BILLING_PORTAL_OPENED',
         targetType: 'billing',
-        targetId: sub.stripe_customer_id,
-        details: { customerId: sub.stripe_customer_id },
+        targetId: customerId,
+        details: { customerId },
       })
     } catch (e) {}
 
