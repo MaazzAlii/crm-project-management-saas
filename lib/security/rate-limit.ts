@@ -44,12 +44,16 @@ export const RATE_LIMIT_TIERS = {
   WEBHOOKS: { maxRequests: 120, windowMs: 60 * 1000 },
   // Automation / n8n endpoints: 120 requests / minute
   AUTOMATION: { maxRequests: 120, windowMs: 60 * 1000 },
-  // Auth & Magic Links: 20 requests / minute
+  // Auth API endpoints (login, refresh, etc.): 20 requests / minute per IP
   AUTH: { maxRequests: 20, windowMs: 60 * 1000 },
   // Super Admin & Sensitive management APIs: 30 requests / minute
   ADMIN: { maxRequests: 30, windowMs: 60 * 1000 },
   // General API routes: 60 requests / minute
   DEFAULT_API: { maxRequests: 60, windowMs: 60 * 1000 },
+  // Login by email: 10 attempts per 15 minutes per email address
+  LOGIN_BY_EMAIL: { maxRequests: 10, windowMs: 15 * 60 * 1000 },
+  // Login by IP: 50 attempts per 15 minutes per IP address
+  LOGIN_BY_IP: { maxRequests: 50, windowMs: 15 * 60 * 1000 },
 }
 
 /**
@@ -69,6 +73,28 @@ export const INVITE_RATE_LIMITS = {
  */
 export function resetRateLimitStore(): void {
   rateLimitStore.clear()
+}
+
+/**
+ * Resets the per-email login rate limit counter after a successful login.
+ * This means a user who previously had failed attempts gets a clean slate.
+ */
+export function resetLoginRateLimit(email: string): void {
+  const key = `rl:login:email:${email.toLowerCase()}`
+  rateLimitStore.delete(key)
+}
+
+/**
+ * Check login rate limits for both email and IP.
+ * Returns a 429 result if either limit is exceeded.
+ */
+export function checkLoginRateLimit(email: string, ip: string): RateLimitResult {
+  const emailKey = `rl:login:email:${email.toLowerCase()}`
+  const ipKey = `rl:login:ip:${ip}`
+  const emailResult = checkRateLimit(emailKey, RATE_LIMIT_TIERS.LOGIN_BY_EMAIL)
+  if (!emailResult.allowed) return emailResult
+  const ipResult = checkRateLimit(ipKey, RATE_LIMIT_TIERS.LOGIN_BY_IP)
+  return ipResult
 }
 
 /**
