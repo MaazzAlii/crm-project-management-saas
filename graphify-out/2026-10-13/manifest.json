@@ -60,9 +60,9 @@
     "semantic_hash": ""
   },
   "app/(auth)/login/page.tsx": {
-    "mtime": 1791640190.0067248,
-    "seen": 1791772540.8368368,
-    "ast_hash": "50cbe10cdd725066088ca9e6c5adb61b",
+    "mtime": 1791833687.5550272,
+    "seen": 1791835213.527884,
+    "ast_hash": "d5b98fd4d94dff9851a54669fc753682",
     "semantic_hash": ""
   },
   "app/(auth)/signup/page.tsx": {
@@ -1338,9 +1338,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/dashboard/page.tsx": {
-    "mtime": 1791785326.2435384,
-    "seen": 1791785735.6727896,
-    "ast_hash": "3783ca65bdf866b9a5e67279b5b61766",
+    "mtime": 1791835052.9548519,
+    "seen": 1791835213.5279398,
+    "ast_hash": "37481e868e689053e0914c20eea2434d",
     "semantic_hash": ""
   },
   "app/(dashboard)/inbox/actions.ts": {
@@ -1356,9 +1356,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/layout.tsx": {
-    "mtime": 1789721627.584073,
-    "seen": 1791772540.8368824,
-    "ast_hash": "418028c463e43068922f43aee429ec6b",
+    "mtime": 1791835015.0763178,
+    "seen": 1791835213.527945,
+    "ast_hash": "ba28a02ecc1b461bc42e3721bba3fc07",
     "semantic_hash": ""
   },
   "app/(dashboard)/leads/actions.ts": {
@@ -1626,9 +1626,9 @@
     "semantic_hash": ""
   },
   "app/api/auth/login/route.ts": {
-    "mtime": 1791825134.144054,
-    "seen": 1791825409.8119655,
-    "ast_hash": "c6eaa14e4017ded88e1f97aafa999de2",
+    "mtime": 1791833645.6626384,
+    "seen": 1791835213.5280287,
+    "ast_hash": "9287733e2967bbdb2313d19d1c5ede00",
     "semantic_hash": ""
   },
   "app/api/auth/logout/route.ts": {
@@ -2952,9 +2952,9 @@
     "semantic_hash": ""
   },
   "lib/billing/current-plan.ts": {
-    "mtime": 1791824198.023672,
-    "seen": 1791824299.6167827,
-    "ast_hash": "88658293822fadc60247bd3e6e491f7c",
+    "mtime": 1791834977.2450635,
+    "seen": 1791835213.5284958,
+    "ast_hash": "8934c2d64d7ad3876fe91977517aaab8",
     "semantic_hash": ""
   },
   "lib/clients/communication-mode.ts": {
@@ -2964,9 +2964,9 @@
     "semantic_hash": ""
   },
   "lib/db/auto-migrate.ts": {
-    "mtime": 1791824579.9854648,
-    "seen": 1791824719.0452466,
-    "ast_hash": "c70beafb0007a73286d8c4e74cfe15d1",
+    "mtime": 1791834960.4093304,
+    "seen": 1791835213.5285025,
+    "ast_hash": "1b3a2150cc059b6b21f9b977b0fb5982",
     "semantic_hash": ""
   },
   "lib/db/cache.ts": {
@@ -2976,9 +2976,9 @@
     "semantic_hash": ""
   },
   "lib/db/embedded-migrations.ts": {
-    "mtime": 1791622479.9487174,
-    "seen": 1791772540.8373404,
-    "ast_hash": "1e50e31fb06f240ab5be643b464e1edd",
+    "mtime": 1791834930.1598098,
+    "seen": 1791835213.5285056,
+    "ast_hash": "d1aa91b2261cbe6dfb65871a3ba93528",
     "semantic_hash": ""
   },
   "lib/db/index.ts": {
@@ -3216,9 +3216,9 @@
     "semantic_hash": ""
   },
   "lib/security/rate-limit.ts": {
-    "mtime": 1791779797.8439155,
-    "seen": 1791780986.2204368,
-    "ast_hash": "5130185fb6e950804655ed5082647b7a",
+    "mtime": 1791833594.036385,
+    "seen": 1791835213.528583,
+    "ast_hash": "09fda56d5f97e738767b4f5086001170",
     "semantic_hash": ""
   },
   "lib/services/audit-service.ts": {
@@ -3330,9 +3330,9 @@
     "semantic_hash": ""
   },
   "middleware/rate-limit.ts": {
-    "mtime": 1789806578.6722922,
-    "seen": 1791772540.8374243,
-    "ast_hash": "318e583bcf2638095cbf25d6f37fdf5e",
+    "mtime": 1791832893.1436121,
+    "seen": 1791835213.528626,
+    "ast_hash": "09feb937cfe4630fb029bf7754ae567d",
     "semantic_hash": ""
   },
   "n8n/workflows/project-delivered-invoice.json": {
@@ -6462,9 +6462,9 @@
     "semantic_hash": ""
   },
   "lib/billing/usage.ts": {
-    "mtime": 1791785203.6526413,
-    "seen": 1791785735.6731894,
-    "ast_hash": "e63c24e1c1b0e9cf05ecd911ef04fc3d",
+    "mtime": 1791834995.3527765,
+    "seen": 1791835213.5284994,
+    "ast_hash": "b019f6a573f8508b113cf843ff89da3f",
     "semantic_hash": ""
   },
   "lib/email/sender.ts": {
@@ -6771,6 +6771,78 @@
     "mtime": 1791829888.5012622,
     "seen": 1791831904.3709004,
     "ast_hash": "0e55f86655025c56ccc5cd0e93bd6641",
+    "semantic_hash": ""
+  },
+  "docs/signin-diagnosis.md": {
+    "mtime": 1791833075.7702417,
+    "seen": 1791835213.5292416,
+    "ast_hash": "06be04a3c0cf35de4b660f14d3553da5",
+    "semantic_hash": ""
+  },
+  "innoventix-signin-fix-prompts/signin-fix/00-CONTEXT.md": {
+    "mtime": 1791832769.0,
+    "seen": 1791835213.5296443,
+    "ast_hash": "4f24c3e24e88192b5703ea9c0a19c6f5",
+    "semantic_hash": ""
+  },
+  "innoventix-signin-fix-prompts/signin-fix/README.md": {
+    "mtime": 1791832769.0,
+    "seen": 1791835213.5296464,
+    "ast_hash": "66f6eb0ca7a92864f4653d4f0849351b",
+    "semantic_hash": ""
+  },
+  "innoventix-signin-fix-prompts/signin-fix/prompts/01-diagnose-signin-request.md": {
+    "mtime": 1791832769.0,
+    "seen": 1791835213.529648,
+    "ast_hash": "a9933bbbd37aad3f5d72a4923f034484",
+    "semantic_hash": ""
+  },
+  "innoventix-signin-fix-prompts/signin-fix/prompts/02-confirm-deployed-commit.md": {
+    "mtime": 1791832769.0,
+    "seen": 1791835213.5296497,
+    "ast_hash": "c06b1d3166210c8cd043604ca4c91f3a",
+    "semantic_hash": ""
+  },
+  "innoventix-signin-fix-prompts/signin-fix/prompts/03-login-page-only-calls-login.md": {
+    "mtime": 1791832769.0,
+    "seen": 1791835213.5296514,
+    "ast_hash": "ebadec8b5042bc69d1e6a7edb872f09c",
+    "semantic_hash": ""
+  },
+  "innoventix-signin-fix-prompts/signin-fix/prompts/04-no-raw-json-pages.md": {
+    "mtime": 1791832769.0,
+    "seen": 1791835213.529653,
+    "ast_hash": "3bfba00c135c830b38caf98e8428b206",
+    "semantic_hash": ""
+  },
+  "innoventix-signin-fix-prompts/signin-fix/prompts/05-rate-limit-policy.md": {
+    "mtime": 1791832769.0,
+    "seen": 1791835213.5296545,
+    "ast_hash": "ead6c5643f2fc77c3c6d50a4d8f437d6",
+    "semantic_hash": ""
+  },
+  "innoventix-signin-fix-prompts/signin-fix/prompts/06-landing-page-honest-content.md": {
+    "mtime": 1791832769.0,
+    "seen": 1791835213.5296562,
+    "ast_hash": "a3c1c0a024ce0053cc99ba0c831595fe",
+    "semantic_hash": ""
+  },
+  "innoventix-signin-fix-prompts/signin-fix/prompts/07-single-canonical-host.md": {
+    "mtime": 1791832769.0,
+    "seen": 1791835213.5296574,
+    "ast_hash": "97888377c982c4d71ea93d790121079b",
+    "semantic_hash": ""
+  },
+  "innoventix-signin-fix-prompts/signin-fix/prompts/08-signin-e2e-tests.md": {
+    "mtime": 1791832769.0,
+    "seen": 1791835213.5296588,
+    "ast_hash": "2ae29792553e565fdd79cdc65a4ed053",
+    "semantic_hash": ""
+  },
+  "innoventix-signin-fix-prompts/signin-fix/prompts/09-deploy-gate.md": {
+    "mtime": 1791832769.0,
+    "seen": 1791835213.5296605,
+    "ast_hash": "29989e346cb9cdd5f65a2bf872bce4b0",
     "semantic_hash": ""
   }
 }
