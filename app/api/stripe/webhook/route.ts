@@ -1,150 +1,234 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/client'
 import { query, queryOne } from '@/lib/db'
-import { readValidatedBody } from '@/lib/security/payload'
+import { setOrganizationPlan } from '@/lib/billing/current-plan'
 import { logAuditEvent } from '@/lib/audit/logger'
 import type Stripe from 'stripe'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * POST /api/stripe/webhook (Prompt 47)
+ * - Verifies cryptographic signature with STRIPE_WEBHOOK_SECRET.
+ * - Deduplicates processed events via stripe_processed_events table.
+ * - Handles checkout.session.completed, customer.subscription.updated, customer.subscription.deleted.
+ * - Updates organization_plans and logs audit events.
+ */
 export async function POST(req: NextRequest) {
-  const { body, error: bodyError, status: bodyStatus } = await readValidatedBody(req)
-  if (bodyError || !body) {
-    return NextResponse.json({ error: bodyError || 'Empty payload' }, { status: bodyStatus || 400 })
+  let body: string
+  try {
+    body = await req.text()
+  } catch {
+    return NextResponse.json({ error: 'Failed to read request body' }, { status: 400 })
   }
 
   const signature = req.headers.get('stripe-signature') || ''
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
   let event: Stripe.Event
 
   try {
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
     if (!webhookSecret) {
       if (process.env.NODE_ENV === 'production') {
-        console.error('[StripeWebhook] STRIPE_WEBHOOK_SECRET is not configured in production!')
+        console.error('[STRIPE_WEBHOOK_ERROR] STRIPE_WEBHOOK_SECRET is unconfigured in production.')
         return NextResponse.json({ error: 'Webhook secret unconfigured' }, { status: 500 })
       }
-      console.warn('STRIPE_WEBHOOK_SECRET not configured. Skipping signature verification in dev mode.')
+      // Dev mode fallback only if no secret set
       event = JSON.parse(body) as Stripe.Event
     } else {
       if (!signature) {
-        return NextResponse.json({ error: 'Missing Stripe-Signature header' }, { status: 401 })
+        return NextResponse.json({ error: 'Missing Stripe-Signature header' }, { status: 400 })
       }
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
     }
-  } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : 'Unknown webhook error'
-    console.error(`Webhook signature verification failed: ${errorMessage}`)
-    return NextResponse.json({ error: `Webhook Error: ${errorMessage}` }, { status: 401 })
+  } catch (err: any) {
+    const errorMessage = err instanceof Error ? err.message : 'Invalid signature'
+    console.error(`[STRIPE_WEBHOOK_VERIFY_FAILED] ${errorMessage}`)
+    return NextResponse.json({ error: `Webhook Error: ${errorMessage}` }, { status: 400 })
   }
 
-  switch (event.type) {
-    case 'checkout.session.completed': {
-      const session = event.data.object as Stripe.Checkout.Session
-      const organizationId = session.metadata?.organizationId
-      const subscriptionId = session.subscription as string
+  // Idempotency check: skip already processed event IDs (Prompt 47)
+  const existingEvent = await queryOne<{ id: string }>(
+    'SELECT id FROM stripe_processed_events WHERE id = $1',
+    [event.id]
+  )
 
-      if (organizationId && subscriptionId) {
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-        const subData = subscription as unknown as { current_period_start: number; current_period_end: number }
+  if (existingEvent) {
+    return NextResponse.json({ received: true, idempotent: true }, { status: 200 })
+  }
 
-        await query(
-          `INSERT INTO organization_subscriptions (
-             organization_id, stripe_customer_id, stripe_subscription_id, status,
-             current_period_start, current_period_end, updated_at
-           ) VALUES ($1, $2, $3, $4, $5, $6, NOW())
-           ON CONFLICT (organization_id) DO UPDATE SET
-             stripe_customer_id = EXCLUDED.stripe_customer_id,
-             stripe_subscription_id = EXCLUDED.stripe_subscription_id,
-             status = EXCLUDED.status,
-             current_period_start = EXCLUDED.current_period_start,
-             current_period_end = EXCLUDED.current_period_end,
-             updated_at = NOW()`,
-          [
-            organizationId,
-            session.customer as string,
-            subscriptionId,
-            subscription.status,
-            new Date((subData.current_period_start || Date.now() / 1000) * 1000).toISOString(),
-            new Date((subData.current_period_end || Date.now() / 1000) * 1000).toISOString(),
-          ]
-        )
+  let matchedOrgId: string | null = null
 
-        try {
-          await logAuditEvent({
-            organizationId,
-            action: 'STRIPE_CHECKOUT_COMPLETED',
-            targetType: 'subscription',
-            targetId: subscriptionId,
-            details: { customerId: session.customer, status: subscription.status },
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session
+        const organizationId =
+          (session.metadata?.organization_id as string) ||
+          (session.metadata?.organizationId as string)
+        const subscriptionId = session.subscription as string
+        const customerId = session.customer as string
+
+        if (organizationId) {
+          matchedOrgId = organizationId
+
+          let currentPeriodEnd: Date | undefined
+          if (subscriptionId) {
+            try {
+              const sub = await stripe.subscriptions.retrieve(subscriptionId)
+              currentPeriodEnd = new Date(((sub as any).current_period_end || Date.now() / 1000) * 1000)
+            } catch (err) {
+              console.warn('Could not retrieve subscription details during checkout completion:', err)
+            }
+          }
+
+          // 1. Update organization_plans to Pro
+          await setOrganizationPlan(organizationId, 'pro', 'active', {
+            stripeCustomerId: customerId,
+            stripeSubscriptionId: subscriptionId,
+            currentPeriodEnd,
           })
-        } catch (e) {}
+
+          // 2. Sync tenant organization record
+          await query(
+            `UPDATE organizations
+             SET plan_tier = 'pro',
+                 stripe_customer_id = COALESCE($1, stripe_customer_id),
+                 updated_at = NOW()
+             WHERE id = $2`,
+            [customerId, organizationId]
+          )
+
+          // 3. Audit log
+          try {
+            await logAuditEvent({
+              organizationId,
+              action: 'STRIPE_CHECKOUT_COMPLETED',
+              targetType: 'subscription',
+              targetId: subscriptionId || session.id,
+              details: { customerId, plan: 'pro', status: 'active' },
+            })
+          } catch (e) {}
+        }
+        break
       }
-      break
+
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription
+        const customerId = subscription.customer as string
+        const subData = subscription as unknown as { current_period_end: number }
+        const currentPeriodEnd = new Date((subData.current_period_end || Date.now() / 1000) * 1000)
+
+        // Find organization by customer ID or subscription metadata
+        const orgMeta = subscription.metadata?.organization_id
+        let orgId: string | undefined = orgMeta
+
+        if (!orgId) {
+          const orgRow = await queryOne<{ id: string }>(
+            'SELECT organization_id as id FROM organization_plans WHERE stripe_customer_id = $1 OR stripe_subscription_id = $2',
+            [customerId, subscription.id]
+          )
+          orgId = orgRow?.id
+        }
+
+        if (orgId) {
+          matchedOrgId = orgId
+
+          // Map Stripe status to PlanStatus ('active', 'past_due', 'canceled')
+          const mappedStatus =
+            subscription.status === 'past_due'
+              ? 'past_due'
+              : subscription.status === 'canceled' || subscription.status === 'unpaid'
+              ? 'canceled'
+              : 'active'
+
+          const planTier = mappedStatus === 'active' ? 'pro' : 'free'
+
+          await setOrganizationPlan(orgId, planTier, mappedStatus, {
+            stripeCustomerId: customerId,
+            stripeSubscriptionId: subscription.id,
+            currentPeriodEnd,
+          })
+
+          await query(
+            `UPDATE organizations
+             SET billing_status = $1,
+                 updated_at = NOW()
+             WHERE id = $2`,
+            [mappedStatus, orgId]
+          )
+
+          try {
+            await logAuditEvent({
+              organizationId: orgId,
+              action: 'STRIPE_SUBSCRIPTION_UPDATED',
+              targetType: 'subscription',
+              targetId: subscription.id,
+              details: { status: subscription.status, mappedStatus, planTier },
+            })
+          } catch (e) {}
+        }
+        break
+      }
+
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription
+        const customerId = subscription.customer as string
+
+        const orgMeta = subscription.metadata?.organization_id
+        let orgId: string | undefined = orgMeta
+
+        if (!orgId) {
+          const orgRow = await queryOne<{ id: string }>(
+            'SELECT organization_id as id FROM organization_plans WHERE stripe_customer_id = $1 OR stripe_subscription_id = $2',
+            [customerId, subscription.id]
+          )
+          orgId = orgRow?.id
+        }
+
+        if (orgId) {
+          matchedOrgId = orgId
+
+          // Plan falls back to free. Existing members remain intact, but new invites will be constrained by free limits.
+          await setOrganizationPlan(orgId, 'free', 'canceled', {
+            stripeCustomerId: customerId,
+            stripeSubscriptionId: subscription.id,
+          })
+
+          await query(
+            `UPDATE organizations
+             SET plan_tier = 'free',
+                 billing_status = 'canceled',
+                 updated_at = NOW()
+             WHERE id = $1`,
+            [orgId]
+          )
+
+          try {
+            await logAuditEvent({
+              organizationId: orgId,
+              action: 'STRIPE_SUBSCRIPTION_CANCELED',
+              targetType: 'subscription',
+              targetId: subscription.id,
+              details: { status: 'canceled', fallbackPlan: 'free' },
+            })
+          } catch (e) {}
+        }
+        break
+      }
     }
 
-    case 'customer.subscription.updated':
-    case 'customer.subscription.deleted': {
-      const subscription = event.data.object as Stripe.Subscription
-      const subData = subscription as unknown as { current_period_start: number; current_period_end: number }
-      const customerId = subscription.customer as string
+    // Record idempotency token in stripe_processed_events table (Prompt 47)
+    await query(
+      `INSERT INTO stripe_processed_events (id, event_type, organization_id)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (id) DO NOTHING`,
+      [event.id, event.type, matchedOrgId]
+    )
 
-      // Sync database subscription status with Stripe source of truth
-      const updatedSub = await queryOne<{ organization_id: string }>(
-        `UPDATE organization_subscriptions
-         SET status = $1,
-             current_period_start = $2,
-             current_period_end = $3,
-             cancel_at_period_end = $4,
-             updated_at = NOW()
-         WHERE stripe_customer_id = $5
-         RETURNING organization_id`,
-        [
-          subscription.status,
-          new Date((subData.current_period_start || Date.now() / 1000) * 1000).toISOString(),
-          new Date((subData.current_period_end || Date.now() / 1000) * 1000).toISOString(),
-          subscription.cancel_at_period_end,
-          customerId,
-        ]
-      )
-
-      try {
-        await logAuditEvent({
-          organizationId: updatedSub?.organization_id,
-          action: event.type === 'customer.subscription.deleted' ? 'STRIPE_SUBSCRIPTION_CANCELED' : 'STRIPE_SUBSCRIPTION_UPDATED',
-          targetType: 'subscription',
-          targetId: subscription.id,
-          details: { customerId, status: subscription.status, cancelAtPeriodEnd: subscription.cancel_at_period_end },
-        })
-      } catch (e) {}
-      break
-    }
-
-    case 'invoice.payment_failed': {
-      const invoice = event.data.object as Stripe.Invoice
-      const customerId = invoice.customer as string
-
-      const subOrg = await queryOne<{ organization_id: string }>(
-        `UPDATE organization_subscriptions
-         SET status = 'past_due',
-             updated_at = NOW()
-         WHERE stripe_customer_id = $1
-         RETURNING organization_id`,
-        [customerId]
-      )
-
-      try {
-        await logAuditEvent({
-          organizationId: subOrg?.organization_id,
-          action: 'STRIPE_PAYMENT_FAILED',
-          targetType: 'invoice',
-          targetId: invoice.id,
-          details: { customerId, amountDue: invoice.amount_due, currency: invoice.currency },
-        })
-      } catch (e) {}
-      break
-    }
+    return NextResponse.json({ received: true }, { status: 200 })
+  } catch (error: any) {
+    console.error('[STRIPE_WEBHOOK_PROCESSING_EXCEPTION]', error)
+    return NextResponse.json({ error: error.message || 'Webhook processing error' }, { status: 500 })
   }
-
-  return NextResponse.json({ received: true })
 }
