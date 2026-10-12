@@ -12,7 +12,7 @@ const COOKIE_NAME = 'impersonation_session'
 const ONE_HOUR_MS = 60 * 60 * 1000
 
 export async function getImpersonationContext(): Promise<ImpersonationContext> {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const rawCookie = cookieStore.get(COOKIE_NAME)?.value
 
   if (!rawCookie) {
@@ -54,7 +54,7 @@ export async function setImpersonationCookie(orgId: string, orgName: string): Pr
   const expiresAt = new Date(Date.now() + ONE_HOUR_MS).toISOString()
   const payload = JSON.stringify({ orgId, orgName, expiresAt })
 
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   cookieStore.set(COOKIE_NAME, payload, {
     httpOnly: true,
     secure: getCookieSecure(),
@@ -68,6 +68,6 @@ export async function setImpersonationCookie(orgId: string, orgName: string): Pr
 }
 
 export async function clearImpersonationCookie(): Promise<void> {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   cookieStore.delete(COOKIE_NAME)
 }

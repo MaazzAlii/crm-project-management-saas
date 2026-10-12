@@ -23,7 +23,7 @@ export async function setActiveOrgAction(orgId: string) {
     }
   }
 
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   cookieStore.set('active_org_id', orgId, {
     path: '/',
     maxAge: 30 * 24 * 60 * 60, // 30 days
