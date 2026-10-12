@@ -51,7 +51,10 @@ describe('Prompt 16: Email Normalization and Validation', () => {
       expect(email.length).toBeGreaterThan(254);
       expect(isValidEmail(email)).toBe(false);
 
-      const validLengthEmail = `${'a'.repeat(240)}@example.com`;
+      // Local part max 64, domain max 255, total max 254
+      const localPart = 'a'.repeat(64);
+      const domainPart = `${'b'.repeat(60)}.${'c'.repeat(60)}.com`;
+      const validLengthEmail = `${localPart}@${domainPart}`;
       expect(validLengthEmail.length).toBeLessThanOrEqual(254);
       expect(isValidEmail(validLengthEmail)).toBe(true);
     });
