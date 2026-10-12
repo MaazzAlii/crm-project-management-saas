@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test'
+const { loadEnvConfig } = require('@next/env')
+
+loadEnvConfig(process.cwd(), true)
 
 const E2E_EMAIL = process.env.E2E_EMAIL || process.env.ADMIN_EMAIL || 'admin@innoventix.io'
 const E2E_PASSWORD = process.env.E2E_PASSWORD || process.env.ADMIN_PASSWORD || 'AdminTestPassword123!'
