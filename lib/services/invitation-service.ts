@@ -459,7 +459,7 @@ export interface AcceptInvitationWrongAccount {
 
 export interface AcceptInvitationGeneralError {
   success: false;
-  error: 'invalid_or_expired' | 'revoked' | 'already_accepted';
+  error: 'invalid_or_expired' | 'revoked' | 'already_accepted' | 'seat_limit_reached';
   status: number;
   message: string;
 }
@@ -589,6 +589,31 @@ export async function acceptInvitation(
       return { error: 'invalid_or_expired' as const, invitation: locked };
     }
 
+    // Check if user is ALREADY a member
+    const existingMemberRes = await client.query(
+      `SELECT 1 FROM organization_members WHERE organization_id = $1 AND user_id = $2`,
+      [locked.organization_id, actorUserId]
+    );
+
+    // If NOT already a member, check if organization seat limit is reached!
+    if (existingMemberRes.rows.length === 0) {
+      const planInfo = await getCurrentPlan(locked.organization_id);
+      const planConfig = planInfo.planConfig;
+      const memberCountRes = await client.query(
+        `SELECT count(*) as count FROM organization_members WHERE organization_id = $1`,
+        [locked.organization_id]
+      );
+      const currentMembers = parseInt(memberCountRes.rows[0].count, 10);
+      if (currentMembers >= planConfig.maxMembers) {
+        return {
+          error: 'seat_limit_reached' as const,
+          maxMembers: planConfig.maxMembers,
+          planName: planConfig.name,
+          invitation: locked,
+        };
+      }
+    }
+
     // Insert into organization_members (idempotent with ON CONFLICT)
     await client.query(
       `INSERT INTO organization_members (organization_id, user_id, role, invited_by)
@@ -613,6 +638,14 @@ export async function acceptInvitation(
     return { error: null, invitation: updatedRes.rows[0] };
   });
 
+  if (txResult.error === 'seat_limit_reached') {
+    return {
+      success: false,
+      error: 'seat_limit_reached',
+      status: 403,
+      message: `This organization has reached its maximum seat limit (${txResult.maxMembers} members) for the ${txResult.planName} plan. Please contact an organization administrator or owner to upgrade the plan.`,
+    };
+  }
   if (txResult.error === 'already_accepted') {
     return {
       success: false,
