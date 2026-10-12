@@ -1290,3 +1290,30 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - Push freeze strictly maintained: zero commits pushed to `origin` or `deploy`.
 - **Status**: ✅ Completed.
 
+---
+
+### [2026-10-13 01:00] Dashboard Crash Fix: Register Embedded Migrations 0035-0044 & Defensive Query Boundaries
+
+- **Phase / Task ID**: Dashboard SSR Crash Fix (Digest 2893197446)
+- **Rationale**: 
+  - Production SSR crash occurred on `/dashboard` after login because migrations `0035_invitations.sql` through `0044_plan_override.sql` were not registered in `EMBEDDED_MIGRATIONS`, causing runtime DB errors when querying `invitations` or `organization_plans`.
+  - In `app/(dashboard)/dashboard/page.tsx`, the invitation query referenced non-existent column `token_expires_at` instead of `expires_at`.
+  - Queries on the dashboard were missing error boundaries, causing an unhandled server exception when any secondary table was missing or empty.
+- **Action Performed**:
+  1. Updated `lib/db/embedded-migrations.ts`: Registered migrations 0035 to 0044 in `EMBEDDED_MIGRATIONS`.
+  2. Updated `app/(dashboard)/layout.tsx`: Trigger `ensureAutoMigrated()` on dashboard layout load.
+  3. Updated `app/(dashboard)/dashboard/page.tsx`: Fixed column query `expires_at as token_expires_at` and wrapped all metrics, capacity, recent members, invitations, and report metrics queries in defensive try/catch error boundaries.
+  4. Updated `lib/billing/current-plan.ts` & `lib/billing/usage.ts`: Added resilient query fallbacks.
+  5. Updated `lib/db/auto-migrate.ts`: Added defensive error handler around `organization_plans` seeding.
+- **Files Modified**:
+  - `lib/db/embedded-migrations.ts`
+  - `lib/db/auto-migrate.ts`
+  - `lib/billing/current-plan.ts`
+  - `lib/billing/usage.ts`
+  - `app/(dashboard)/layout.tsx`
+  - `app/(dashboard)/dashboard/page.tsx`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - `npm run build`: Exit code 0 (all routes compiled cleanly).
+- **Status**: ✅ Completed.
+
