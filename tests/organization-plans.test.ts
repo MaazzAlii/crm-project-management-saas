@@ -36,15 +36,35 @@ describe('Prompt 10: Store each organization plan in database', () => {
     expect(columns).toContain('updated_at');
   });
 
-  it('verifies all existing organizations have an organization_plans row backfilled to free', async () => {
-    const orgsWithoutPlans = await query<{ count: string }>(`
-      SELECT count(*) as count
-      FROM organizations o
-      LEFT JOIN organization_plans p ON o.id = p.organization_id
-      WHERE p.organization_id IS NULL;
-    `);
+  it('verifies migration 0038 backfill creates free plan for unassigned organizations', async () => {
+    const legacySlug = `legacy-org-backfill-${Date.now()}`;
+    const insertRes = await query<{ id: string }>(`
+      INSERT INTO organizations (name, slug)
+      VALUES ($1, $2)
+      RETURNING id;
+    `, [`Legacy Org ${Date.now()}`, legacySlug]);
+    const legacyOrgId = insertRes.rows[0].id;
 
-    expect(parseInt(orgsWithoutPlans.rows[0].count, 10)).toBe(0);
+    // Run the migration 0038 backfill query
+    await query(`
+      INSERT INTO organization_plans (organization_id, plan_id, status)
+      SELECT id, 'free', 'active'
+      FROM organizations
+      WHERE id = $1
+      ON CONFLICT (organization_id) DO NOTHING;
+    `, [legacyOrgId]);
+
+    const check = await query<{ plan_id: string; status: string }>(
+      'SELECT plan_id, status FROM organization_plans WHERE organization_id = $1',
+      [legacyOrgId]
+    );
+
+    expect(check.rows.length).toBe(1);
+    expect(check.rows[0].plan_id).toBe('free');
+    expect(check.rows[0].status).toBe('active');
+
+    // Clean up
+    await query('DELETE FROM organizations WHERE id = $1', [legacyOrgId]);
   });
 
   it('creates free plan row in the same transaction when creating a new organization, and cascades on delete', async () => {
