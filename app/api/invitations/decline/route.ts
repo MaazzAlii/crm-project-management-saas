@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { declineInvitation } from '@/lib/services/invitation-service';
+import { checkRateLimit, createRateLimitExceededResponse, getClientIp, INVITE_RATE_LIMITS } from '@/lib/security/rate-limit';
 import { apiSuccess, apiError, handleApiError } from '@/lib/utils/response';
 
 /**
@@ -11,6 +12,12 @@ import { apiSuccess, apiError, handleApiError } from '@/lib/utils/response';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 30 per hour per IP
+    const ip = getClientIp(request);
+    const rateLimit = checkRateLimit(`invite:accept_decline:${ip}`, INVITE_RATE_LIMITS.ACCEPT_DECLINE);
+    if (!rateLimit.allowed) {
+      return createRateLimitExceededResponse(rateLimit);
+    }
     let body: any;
     try {
       body = await request.json();
