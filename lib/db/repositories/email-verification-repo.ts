@@ -73,6 +73,19 @@ export class EmailVerificationRepository {
 
     return res.rowCount ?? 0;
   }
+
+  /**
+   * Fetch latest email verification record for a user to enforce rate limits
+   */
+  async getLatest(userId: string): Promise<EmailVerification | null> {
+    return await queryOne<EmailVerification>(
+      `SELECT * FROM email_verifications 
+       WHERE user_id = $1 
+       ORDER BY created_at DESC 
+       LIMIT 1`,
+      [userId]
+    );
+  }
 }
 
 export const emailVerificationRepo = new EmailVerificationRepository();
