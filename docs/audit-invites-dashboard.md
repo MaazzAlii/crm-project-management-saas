@@ -28,9 +28,9 @@
 
 ## 3. Email Infrastructure & Providers
 
-| Component | Current State | Provider / Library | Environment Variables | Deficiencies |
+| Component | Current State | Provider / Library | Environment Variables | Deficiencies / Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Transactional Invites** | **MISSING** | None configured | `EMAIL_FROM`, `RESEND_API_KEY` (placeholder in `.env.example`) | Zero transactional mail dispatch logic exists for invitations or verification. |
+| **Transactional Invites** | **ACTIVE (Mailcow SMTP)** | Dedicated Mailcow SMTP on Contabo (`https://mail.innoventixhub.tech/admin/mailbox`) | `EMAIL_PROVIDER=smtp`<br>`EMAIL_FROM="Innoventix <invites@innoventixhub.tech>"`<br>`EMAIL_FROM_ADDRESS=invites@innoventixhub.tech`<br>`EMAIL_REPLY_TO=support@innoventixhub.tech`<br>`SMTP_HOST=mail.innoventixhub.tech`<br>`SMTP_PORT=587`<br>`SMTP_USER=invites@innoventixhub.tech` | Dispatches directly via Mailcow SMTP over STARTTLS. Lifetime Super Admins: `innoventixhub@gmail.com` and `maazalisshahid@gmail.com`. |
 | **Outbound Messaging** | Implemented for CRM inbox | SendGrid Web API (`lib/providers/email.ts`) | Provider API key stored in encrypted channel integrations table | Strictly designed for client communications, not team auth/invites. |
 
 ---
@@ -89,13 +89,14 @@ All 10 sidebar links point to real, existing Next.js App Router routes.
 
 ## 7. Master Deficiency & Action Matrix
 
-| Item | File | Line | Status | What It Needs |
+| Item | File | Line | Status | Implementation Details |
 | :--- | :--- | :--- | :--- | :--- |
-| **Database Schema** | `supabase/migrations/` | N/A | **MISSING** | Create dedicated `invitations` table (`id`, `organization_id`, `email`, `role`, `token_hash`, `invited_by`, `status`, `expires_at`, `created_at`). |
-| **Email Verification** | `supabase/migrations/` | N/A | **MISSING** | Create `email_verifications` table for organization and user email proofing. |
-| **Invite Email Delivery** | `lib/email/` | N/A | **MISSING** | Implement provider abstraction (Resend / SMTP) with HTML email templates and console dev-mode fallback. |
-| **Invite Acceptance** | `app/invite/[token]` | N/A | **MISSING** | Dedicated public accept-invitation landing page and authentication linking flow. |
-| **Seat Limit Gate** | `lib/team/actions.ts` | 95 | **MISSING** | Enforce plan seat quota check before allowing new invitations. |
-| **Quick Action Auto-Open** | `TeamMemberList.tsx` | 67 | **BROKEN** | Add `useSearchParams().get('action') === 'invite'` to initialize `showInviteModal` to `true`. |
-| **Pending Invites List** | `TeamMemberList.tsx` | 210 | **MISSING** | UI tab or list displaying pending invites with "Resend" and "Revoke" controls. |
-| **Dashboard Team Widget** | `app/(dashboard)/dashboard/page.tsx` | 224 | **MISSING** | Display active member count, pending invites count, and plan seat limits. |
+| **Database Schema** | `supabase/migrations/0035_invitations.sql` | 1 | ✅ **RESOLVED** | Dedicated `invitations` table with `organization_id`, `email`, `role`, `token_hash`, `status`, `expires_at`. |
+| **Email Verification** | `supabase/migrations/0036_email_verifications.sql` | 1 | ✅ **RESOLVED** | `email_verifications` table for organization and user email proofing. |
+| **Invite Email Delivery** | `lib/email/` | 1 | ✅ **RESOLVED** | Mailcow SMTP (`invites@innoventixhub.tech`, `support@innoventixhub.tech`) with HTML & plain-text templates. |
+| **Invite Acceptance** | `app/invite/[token]` | 1 | ✅ **RESOLVED** | Public accept-invitation landing page, signup routing, and session linking. |
+| **Seat Limit Gate** | `lib/services/invitation-service.ts` | 1 | ✅ **RESOLVED** | Real-time plan seat quota check blocking invites when seat limit is reached (Free tier 3-seat cap). |
+| **Quick Action Auto-Open** | `TeamMemberList.tsx` | 67 | ✅ **RESOLVED** | Auto-opens modal when query param `action=invite` is present, `/team` route 307 redirects cleanly. |
+| **Pending Invites List** | `components/settings/PendingInvitationsList.tsx` | 1 | ✅ **RESOLVED** | Pending invites list with Resend, Revoke, and real-time status. |
+| **Dashboard Team Widget** | `components/dashboard/DashboardTeamWidgets.tsx` | 1 | ✅ **RESOLVED** | Team widgets displaying active members, pending invites, and seat quotas. |
+

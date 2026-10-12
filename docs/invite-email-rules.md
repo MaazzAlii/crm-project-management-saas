@@ -6,9 +6,10 @@ Guidelines for team invitations and transactional notifications in Innoventix Hu
 
 ## 1. Sender Identity & Domain Alignment
 
-- **From Address**: Always sent from the official platform mailbox (`EMAIL_FROM_ADDRESS`, e.g. `invites@innoventix.io`). Invitations are never sent from personal addresses or an inviter's private mailbox. This guarantees strict SPF and DKIM authentication alignment.
+- **From Address**: Always sent from the official platform mailbox (`EMAIL_FROM_ADDRESS`, e.g. `invites@innoventixhub.tech`). Invitations are never sent from personal addresses or an inviter's private mailbox. This guarantees strict SPF and DKIM authentication alignment.
 - **Display Name**: Displays as `"{Inviter name} via Innoventix"` (e.g. `Maaz Ali via Innoventix`), ensuring the invitee immediately recognizes who invited them. System alerts (email confirmation, domain codes) use the platform name alone.
-- **Reply-To**: Set to the inviter's email address **only if** their email is verified. If unverified, it falls back to the platform support mailbox (`EMAIL_REPLY_TO`, e.g. `support@innoventix.io`).
+- **Reply-To**: Set to the inviter's email address **only if** their email is verified. If unverified, it falls back to the platform support mailbox (`EMAIL_REPLY_TO`, e.g. `support@innoventixhub.tech`).
+- **Platform Super Administrators (Lifetime VIP)**: `innoventixhub@gmail.com` and `maazalisshahid@gmail.com` possess permanent full-access privileges across the entire software platform.
 
 ## 2. Content & Privacy Standards
 

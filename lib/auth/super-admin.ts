@@ -1,12 +1,20 @@
 import { queryOne } from '@/lib/db'
 import { getCurrentSessionContext } from '@/lib/auth/session'
 
+export const SUPER_ADMIN_EMAILS = [
+  'innoventixhub@gmail.com',
+  'maazalisshahid@gmail.com',
+]
+
 export async function isSuperAdmin(userId?: string): Promise<boolean> {
   try {
     let targetUserId = userId
     if (!targetUserId) {
       const session = await getCurrentSessionContext()
       if (!session || !session.user) return false
+      if (session.user.email && SUPER_ADMIN_EMAILS.includes(session.user.email.toLowerCase())) {
+        return true
+      }
       if (session.isSuperAdmin) return true
       targetUserId = session.user.id
     }

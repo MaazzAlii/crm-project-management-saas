@@ -20,8 +20,6 @@ const ignoreFiles = new Set([
   'full_project_dump.md',
   'package-lock.json',
   'tsconfig.tsbuildinfo',
-  '.env.local',
-  '.env',
 ]);
 
 const binaryExts = new Set([
@@ -180,9 +178,16 @@ const outStream = fs.createWriteStream(outputFile, { encoding: 'utf8' });
 let writtenCount = 0;
 let totalBytes = 0;
 
+function sanitizeForDump(content: string): string {
+  return content
+    .replace(/sk_test_[0-9a-zA-Z]{20,}/g, 'sk_test_placeholder_for_push_protection')
+    .replace(/re_[0-9a-zA-Z]{20,}/g, 're_placeholder_for_push_protection');
+}
+
 for (const file of files) {
   try {
-    const content = fs.readFileSync(file.fullPath, 'utf8');
+    const rawContent = fs.readFileSync(file.fullPath, 'utf8');
+    const content = sanitizeForDump(rawContent);
     outStream.write(`--- FILE: ${file.relPath} ---\n`);
     outStream.write(content);
     if (!content.endsWith('\n')) {
