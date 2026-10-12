@@ -244,18 +244,20 @@ export async function getCurrentSessionContext(): Promise<SessionContext | null>
       role = primary.role || role;
     }
 
-    const isSuperAdminUser: boolean =
-      user.role === 'super_admin' ||
-      Boolean(
-        user.email &&
-        ['innoventixhub@gmail.com', 'maazalisshahid@gmail.com'].includes(
-          user.email.toLowerCase()
-        )
-      )
-
-    if (isSuperAdminUser && organization) {
-      organization.plan_tier = 'enterprise'
-      organization.billing_status = 'active'
+    let isSuperAdminUser: boolean = user.role === 'super_admin';
+    if (!isSuperAdminUser) {
+      try {
+        const { queryOne: dbQueryOne } = await import('../db');
+        const saRecord = await dbQueryOne<{ id: string }>(
+          'SELECT id FROM super_admins WHERE user_id = $1',
+          [user.id]
+        );
+        if (saRecord) {
+          isSuperAdminUser = true;
+        }
+      } catch {
+        // Ignore if query fails
+      }
     }
 
     return {

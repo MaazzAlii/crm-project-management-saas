@@ -61,10 +61,15 @@ export async function getCurrentPlan(orgId: string): Promise<CurrentPlanResult> 
     stripeCustomerId = row.stripe_customer_id || null;
     stripeSubscriptionId = row.stripe_subscription_id || null;
     currentPeriodEnd = row.current_period_end || null;
+
+    if ((row as any).plan_override === 'lifetime') {
+      planId = 'enterprise';
+      status = 'active';
+    }
   }
 
-  // If status is past_due or canceled, treat as free for limits but show a banner
-  const isRestricted = status === 'past_due' || status === 'canceled';
+  // If status is past_due or canceled and no lifetime override exists, treat as free for limits
+  const isRestricted = (status === 'past_due' || status === 'canceled') && (row as any)?.plan_override !== 'lifetime';
   const effectivePlanId: PlanTier = isRestricted ? 'free' : planId;
   const planConfig: PlanConfig = PLANS[effectivePlanId as PlanId] || PLANS.free;
 
