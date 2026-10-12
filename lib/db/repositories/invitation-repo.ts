@@ -116,6 +116,7 @@ export class InvitationRepository {
       acceptedAt?: Date | null;
       acceptedBy?: string | null;
       revokedAt?: Date | null;
+      declinedAt?: Date | null;
     }
   ): Promise<Invitation | null> {
     return await queryOne<Invitation>(
@@ -125,14 +126,16 @@ export class InvitationRepository {
          accepted_at = COALESCE($2, accepted_at),
          accepted_by = COALESCE($3, accepted_by),
          revoked_at = COALESCE($4, revoked_at),
+         declined_at = COALESCE($5, declined_at),
          updated_at = NOW()
-       WHERE id = $5 AND organization_id = $6
+       WHERE id = $6 AND organization_id = $7
        RETURNING *`,
       [
         fields.status,
         fields.acceptedAt || null,
         fields.acceptedBy || null,
         fields.revokedAt || null,
+        fields.declinedAt || null,
         id,
         orgId,
       ]
