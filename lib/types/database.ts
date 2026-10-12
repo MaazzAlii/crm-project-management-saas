@@ -181,6 +181,19 @@ export interface EmailVerification {
   created_at: Timestamp;
 }
 
+export interface DomainVerification {
+  id: UUID;
+  organization_id: UUID;
+  user_id: UUID;
+  domain: string;
+  target_email: string;
+  token_hash: string;
+  code_hash: string;
+  expires_at: Timestamp;
+  consumed_at?: Timestamp | null;
+  created_at: Timestamp;
+}
+
 // -----------------------------------------------------------------------------
 // CRM: Clients, Leads & Communication Logs
 // -----------------------------------------------------------------------------
