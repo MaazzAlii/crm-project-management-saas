@@ -2700,9 +2700,9 @@
     "semantic_hash": ""
   },
   "config/plans.ts": {
-    "mtime": 1791744853.4324324,
-    "seen": 1791772540.8372688,
-    "ast_hash": "661adac998025a08374af7b84dbf5f66",
+    "mtime": 1791772936.2859566,
+    "seen": 1791773155.8513048,
+    "ast_hash": "66f9bf4ebe638e0360b0ca14126edddc",
     "semantic_hash": ""
   },
   "e2e/billing.spec.ts": {
@@ -3768,9 +3768,9 @@
     "semantic_hash": ""
   },
   "tests/organization-plans.test.ts": {
-    "mtime": 1791746122.195801,
-    "seen": 1791772540.8375344,
-    "ast_hash": "e09abca3f93d17084101fccf91b37f9f",
+    "mtime": 1791772824.4113808,
+    "seen": 1791773155.8517249,
+    "ast_hash": "03def44d262d56b50bf959c210c022a8",
     "semantic_hash": ""
   },
   "tests/phase5-api-services.test.ts": {
@@ -6291,6 +6291,18 @@
     "mtime": 1791746148.2830505,
     "seen": 1791772579.4843245,
     "ast_hash": "e050d168668af97144865902ec573b44",
+    "semantic_hash": ""
+  },
+  "lib/validation/email.ts": {
+    "mtime": 1791773026.2641354,
+    "seen": 1791773155.85149,
+    "ast_hash": "99758508d58fed30c3d4a2b18d52dd8f",
+    "semantic_hash": ""
+  },
+  "tests/email-validation.test.ts": {
+    "mtime": 1791772736.0291028,
+    "seen": 1791773155.8517022,
+    "ast_hash": "81942e977b34f7c76810f5d897e9e531",
     "semantic_hash": ""
   }
 }

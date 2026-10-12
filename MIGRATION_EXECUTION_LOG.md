@@ -663,5 +663,35 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - All migrations applied successfully (`0035`, `0036`, `0037`, `0038`).
 - **Status**: ✅ Phase 1 complete, Phase 2 in progress. Ready for Prompt 16 upon resumption.
 
+---
 
-
+### Step 20: Innoventix Invite System & Seat Limits — Prompts 16 to 26
+- **Timestamp**: 2026-10-12T09:20:00+05:00
+- **Task ID**: `INVITE-SYSTEM-PROMPTS-16-TO-26`
+- **Actions Performed**:
+  1. **Prompt 16: Email Normalization**: Implemented `normalizeEmail` and validation helpers in `lib/validation/email.ts` with comprehensive unit tests (`tests/email-validation.test.ts`).
+  2. **Prompt 17: Business Email Check**: Implemented free consumer provider blocking (e.g. Gmail, Yahoo, Hotmail, Outlook) for business email claims (`lib/validation/business-email.ts`, `tests/business-email.test.ts`).
+  3. **Prompt 18: Service: Create Invitation**: Implemented `createInvitation` in `lib/services/invitation-service.ts` enforcing free tier pending invite caps (2), seat limits (3), RBAC, case-insensitive collision checks, token hashing, audit logs (`invite.created`), and zero token hash leaks (`tests/invitation-service-create.test.ts`).
+  4. **Prompt 19: Service: Resend & Revoke**: Extended repository with `findById` and `updateTokenAndExpiry`. Implemented `resendInvitation` and `revokeInvitation` with `invite.resent` and `invite.revoked` audit events (`tests/invitation-service-resend-revoke.test.ts`).
+  5. **Prompt 20: Service: Accept Invitation**: Added `viewer` role to `org_member_role` enum via migration `0039_add_viewer_role.sql`. Implemented `acceptInvitation` with row-level locking (`FOR UPDATE`), atomic single-transaction membership creation, idempotency (`ON CONFLICT DO NOTHING`), case-insensitive email match, `wrong_account` (403), `needs_account` (401), and `invite.accepted` audit trail (`tests/invitation-service-accept.test.ts`).
+  6. **Prompt 21: Seat Limit Enforcement Everywhere**: Added seat limit verification during invitation redemption inside transaction. Removed deprecated direct member addition endpoint (`app/api/organizations/[id]/members/route.ts`). Added `tests/seat-limit-enforcement.test.ts`.
+  7. **Prompt 22: Free Tier Rules Documentation**: Authored `docs/plan-rules.md` formalizing full core platform access for free tier (clients, projects, tasks, pipeline, inbox, analytics) and team-size/pending caps (3 members, 2 pending invites). Added `tests/free-tier-rules.test.ts`.
+  8. **Prompt 23: API Invitations Collection Route**: Implemented `GET /api/invitations` (filtering by status/cursor/limit) and `POST /api/invitations` (strict body validation rejecting unknown keys, 401/403/409/402/201 status mapping, 100% token_hash stripping) with `tests/api-invitations.test.ts`.
+  9. **Prompt 24: API Resend & Revoke Routes**: Implemented `POST /api/invitations/[id]/resend` and `POST /api/invitations/[id]/revoke` with 404 tenant isolation, 403 RBAC guard, and 409 status conflicts (`tests/api-resend-revoke.test.ts`).
+  10. **Prompt 25: API Accept & Decline Routes**: Applied migration `0040_invitations_add_declined_status.sql` adding `declined` to `invitation_status`. Implemented `GET /api/invitations/accept-info`, `POST /api/invitations/accept`, and `POST /api/invitations/decline` with `tests/api-accept-decline.test.ts`.
+  11. **Prompt 26: API Email Verification & Business Domain Codes**:
+      - Applied migration `0041_domain_verifications.sql` creating `domain_verifications` table.
+      - Added `DomainVerification` interface to `lib/types/database.ts`.
+      - Added `getLatest` to `EmailVerificationRepository` and `verifyEmail` to `UserRepository`.
+      - Implemented `DomainVerificationRepository` (`lib/db/repositories/domain-verification-repo.ts`) with atomic consumption and lookups.
+      - Implemented `POST /api/auth/verify-email/send` (60s rate limit, older unconsumed code invalidation).
+      - Implemented `POST /api/auth/verify-email/confirm` (atomic consumption, sets `email_verified_at`).
+      - Implemented `POST /api/organizations/domain/send-code` (owner only, Pro tier requirement, email domain match, generates hashed code/link).
+      - Implemented `POST /api/organizations/domain/confirm` (owner only, validates code, enforces user identity, one-time consumption, updates `verified_domain`).
+      - Created comprehensive test suite `tests/api-email-verification.test.ts` (15/15 passing).
+- **Verification / Test Result**:
+  - `tests/api-email-verification.test.ts`: **15/15 passing (100%)**.
+  - `tests/step2-commit-e-cross-tenant-isolation.test.ts`: **9/9 passing (100%)**.
+  - `npm run build`: **Next.js production build succeeded with 0 errors (code 0)**.
+  - All migrations applied up to `0041_domain_verifications.sql`.
+- **Status**: ✅ Prompts 16 to 26 complete. Ready for Prompt 27 (`27-api-plan-and-usage.md`).
