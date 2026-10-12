@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Users,
   UserPlus,
@@ -15,8 +16,11 @@ import {
   CheckCircle2,
   AlertCircle,
   Mail,
+  Copy,
+  Check,
 } from 'lucide-react'
-import { inviteTeamMember, updateMemberRole, removeMember } from '@/lib/team/actions'
+import { updateMemberRole, removeMember } from '@/lib/team/actions'
+import { InviteMemberDialog } from './InviteMemberDialog'
 
 export interface MemberItem {
   id: string
@@ -61,13 +65,13 @@ const ROLE_LABELS: Record<string, { label: string; badge: string; icon: any }> =
 }
 
 export function TeamMemberList({ members, currentUserId, currentUserRole, isSuperAdmin }: TeamMemberListProps) {
+  const router = useRouter()
   const canManage = currentUserRole === 'owner' || currentUserRole === 'admin' || isSuperAdmin
 
   // Modal States
   const [showInviteModal, setShowInviteModal] = useState(false)
-  const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState<'owner' | 'admin' | 'member' | 'billing_manager'>('member')
-  const [inviting, setInviting] = useState(false)
+  const [copiedLink, setCopiedLink] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   // Remove Modal State
   const [memberToRemove, setMemberToRemove] = useState<MemberItem | null>(null)
@@ -79,31 +83,6 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
 
   // Calculate Owner Count
   const ownerCount = members.filter((m) => m.role === 'owner').length
-
-  // Action: Handle Invite
-  const handleInviteSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!canManage) return
-
-    setInviting(true)
-    setMessage(null)
-
-    try {
-      const res = await inviteTeamMember({ email: inviteEmail, role: inviteRole })
-      if (res.success) {
-        setMessage({ type: 'success', text: res.message || 'Invitation sent successfully!' })
-        setShowInviteModal(false)
-        setInviteEmail('')
-        setInviteRole('member')
-      } else {
-        setMessage({ type: 'error', text: res.error || 'Failed to send invitation.' })
-      }
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Unexpected error occurred.' })
-    } finally {
-      setInviting(false)
-    }
-  }
 
   // Action: Handle Role Change
   const handleRoleChange = async (memberId: string, newRole: 'owner' | 'admin' | 'member' | 'billing_manager') => {
@@ -185,21 +164,39 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
         )}
       </div>
 
-      {/* Global Message Feedback */}
+      {/* Global Message Feedback / Toast */}
       {message && (
         <div
-          className={`flex items-center gap-3 rounded-xl border p-4 text-xs font-semibold ${
+          data-testid="invite-toast"
+          className={`flex items-center justify-between gap-3 rounded-xl border p-4 text-xs font-semibold ${
             message.type === 'success'
               ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
               : 'border-rose-500/30 bg-rose-500/10 text-rose-300'
           }`}
         >
-          {message.type === 'success' ? (
-            <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
-          ) : (
-            <AlertCircle className="h-5 w-5 text-rose-400 shrink-0" />
+          <div className="flex items-center gap-2.5">
+            {message.type === 'success' ? (
+              <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-rose-400 shrink-0" />
+            )}
+            <span>{message.text}</span>
+          </div>
+
+          {copiedLink && (
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(copiedLink)
+                setCopied(true)
+                setTimeout(() => setCopied(false), 2500)
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600/30 border border-emerald-500/40 px-2.5 py-1 text-[11px] font-bold text-emerald-200 hover:bg-emerald-600/50 transition cursor-pointer shrink-0"
+            >
+              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? 'Link Copied!' : 'Copy Invite Link'}
+            </button>
           )}
-          <span>{message.text}</span>
         </div>
       )}
 
@@ -381,76 +378,22 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
         })}
       </div>
 
-      {/* Invite Member Modal */}
-      {showInviteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <UserPlus className="h-4 w-4 text-sky-400" />
-                Invite Team Member
-              </h3>
-              <button
-                onClick={() => setShowInviteModal(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleInviteSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5 text-slate-400" />
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  placeholder="colleague@agency.com"
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none font-mono"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">Assign Role</label>
-                <select
-                  value={inviteRole}
-                  onChange={(e) =>
-                    setInviteRole(e.target.value as 'owner' | 'admin' | 'member' | 'billing_manager')
-                  }
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:border-sky-500 focus:outline-none"
-                >
-                  <option value="member">Member — Standard workspace contributor</option>
-                  <option value="admin">Admin — Full operational & management access</option>
-                  <option value="billing_manager">Billing Manager — Manage plan & billing only</option>
-                  <option value="owner">Owner — Full administrative authority</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setShowInviteModal(false)}
-                  className="rounded-xl border border-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={inviting}
-                  className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-xs font-bold text-white hover:bg-sky-500 disabled:opacity-50"
-                >
-                  {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
-                  Send Invite
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Invite Member Dialog (Prompt 34) */}
+      <InviteMemberDialog
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        currentUserRole={currentUserRole}
+        onSuccess={(invitation, inviteLink) => {
+          setMessage({
+            type: 'success',
+            text: `Invitation sent successfully to ${invitation.email}!`,
+          })
+          if (inviteLink) {
+            setCopiedLink(inviteLink)
+          }
+          router.refresh()
+        }}
+      />
 
       {/* Remove Member Confirmation Modal */}
       {memberToRemove && (
