@@ -152,6 +152,39 @@ export class InvitationRepository {
     );
     return parseInt(res?.count || '0', 10);
   }
+
+  /**
+   * Find an invitation by ID within an organization (strict multi-tenant isolation).
+   */
+  async findById(orgId: string, id: string): Promise<Invitation | null> {
+    return await queryOne<Invitation>(
+      `SELECT * FROM invitations 
+       WHERE organization_id = $1 AND id = $2`,
+      [orgId, id]
+    );
+  }
+
+  /**
+   * Replace token hash and reset expiry date for resending an invitation.
+   */
+  async updateTokenAndExpiry(
+    orgId: string,
+    id: string,
+    tokenHash: string,
+    expiresAt: Date | string
+  ): Promise<Invitation | null> {
+    return await queryOne<Invitation>(
+      `UPDATE invitations
+       SET 
+         token_hash = $1,
+         expires_at = $2,
+         status = 'pending',
+         updated_at = NOW()
+       WHERE id = $3 AND organization_id = $4
+       RETURNING *`,
+      [tokenHash, new Date(expiresAt), id, orgId]
+    );
+  }
 }
 
 export const invitationRepo = new InvitationRepository();
