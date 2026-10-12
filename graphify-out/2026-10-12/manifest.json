@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791782646.4838583,
-    "seen": 1791785735.673503,
-    "ast_hash": "80c2250fb316e99ce83db94c704170b5",
+    "mtime": 1791788408.7010665,
+    "seen": 1791788431.9658773,
+    "ast_hash": "220d3a333f8dd2291f1cd819fa514059",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1110,9 +1110,9 @@
     "semantic_hash": ""
   },
   "full_project_dump.md": {
-    "mtime": 1791741256.6584408,
-    "seen": 1791772540.8378248,
-    "ast_hash": "5d3b7a677209c61dfdce9c7dcf6485ad",
+    "mtime": 1791788285.8107738,
+    "seen": 1791788431.9661164,
+    "ast_hash": "ad06e5ea481014bc3ce753e278ebfffb",
     "semantic_hash": ""
   },
   "infra/kong/kong.local.yml": {
@@ -3570,9 +3570,9 @@
     "semantic_hash": ""
   },
   "scripts/generate-full-dump.ts": {
-    "mtime": 1791741247.6129408,
-    "seen": 1791772540.8374817,
-    "ast_hash": "865765f4e7c54087eb08fb238df66200",
+    "mtime": 1791788276.9319756,
+    "seen": 1791788431.965687,
+    "ast_hash": "1f125fada82a7d8bf0a91c545817c305",
     "semantic_hash": ""
   },
   "scripts/generate-production-secrets.ts": {
@@ -3930,9 +3930,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791782603.2454607,
-    "seen": 1791785735.673509,
-    "ast_hash": "b18105c94a06c2e5923f31b3ef28e10e",
+    "mtime": 1791788368.5519345,
+    "seen": 1791788431.965884,
+    "ast_hash": "56af50217908bd91e3a2e524095c6ecb",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6657,6 +6657,36 @@
     "mtime": 1791784828.3572032,
     "seen": 1791785735.6740568,
     "ast_hash": "1483e023e071f733abfa87fdbeb2899a",
+    "semantic_hash": ""
+  },
+  "e2e/invite-full-flow.spec.ts": {
+    "mtime": 1791786809.2558558,
+    "seen": 1791788431.965456,
+    "ast_hash": "18332a9f65363ed3bec6c54c3692df0b",
+    "semantic_hash": ""
+  },
+  "scripts/grant-enterprise-access.ts": {
+    "mtime": 1791787547.373825,
+    "seen": 1791788431.96569,
+    "ast_hash": "e47c8cdbb06038b05aea7071e6fe7f31",
+    "semantic_hash": ""
+  },
+  "tests/cross-tenant-invites.test.ts": {
+    "mtime": 1791786678.1425893,
+    "seen": 1791788431.9658027,
+    "ast_hash": "4edecc863972da64d48318788ddedbcb",
+    "semantic_hash": ""
+  },
+  "tests/dashboard-counts.test.ts": {
+    "mtime": 1791786751.3492005,
+    "seen": 1791788431.9658055,
+    "ast_hash": "dfa35633de7607c40653ece130c961ae",
+    "semantic_hash": ""
+  },
+  "tests/free-limits.test.ts": {
+    "mtime": 1791786720.031485,
+    "seen": 1791788431.9658186,
+    "ast_hash": "ce3db2ba286c211bc4d323886cf95d5b",
     "semantic_hash": ""
   }
 }
