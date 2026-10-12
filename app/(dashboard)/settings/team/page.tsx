@@ -2,6 +2,8 @@ import { getCurrentSessionContext } from '@/lib/auth/session'
 import { query } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import { TeamMemberList, MemberItem } from '@/components/settings/TeamMemberList'
+import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner'
+import { PlanUsageCard } from '@/components/billing/PlanUsageCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,11 +41,23 @@ export default async function TeamSettingsPage() {
   }))
 
   return (
-    <TeamMemberList
-      members={members}
-      currentUserId={session.user.id}
-      currentUserRole={session.role || 'member'}
-      isSuperAdmin={session.isSuperAdmin}
-    />
+    <div className="space-y-6">
+      {/* Email Verification Banner (Prompt 39) */}
+      <EmailVerificationBanner
+        isVerified={session.user.email_verified}
+        userEmail={session.user.email}
+      />
+
+      {/* Plan Usage & Seat Capacity Card (Prompt 40 & 41) */}
+      <PlanUsageCard />
+
+      {/* Team Member List & Pending Invitations (Prompts 34, 35, 36) */}
+      <TeamMemberList
+        members={members}
+        currentUserId={session.user.id}
+        currentUserRole={session.role || 'member'}
+        isSuperAdmin={session.isSuperAdmin}
+      />
+    </div>
   )
 }

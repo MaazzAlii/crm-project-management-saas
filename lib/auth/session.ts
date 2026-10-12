@@ -148,6 +148,8 @@ export interface SessionContext {
     email: string;
     full_name?: string | null;
     avatar_url?: string | null;
+    email_verified?: boolean;
+    email_verified_at?: string | null;
   };
   userId: string;
   organization: {
@@ -248,6 +250,8 @@ export async function getCurrentSessionContext(): Promise<SessionContext | null>
         email: user.email,
         full_name: user.full_name,
         avatar_url: user.avatar_url,
+        email_verified: (user as any).email_verified ?? !!(user as any).email_verified_at,
+        email_verified_at: (user as any).email_verified_at ? String((user as any).email_verified_at) : null,
       },
       userId: user.id,
       organization,
