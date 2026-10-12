@@ -12,7 +12,6 @@ const ignoreDirs = new Set([
   'test-results',
   'playwright-report',
   'coverage',
-  '.agents',
   '.gemini',
 ]);
 
@@ -151,8 +150,18 @@ function scanDir(dir: string, fileList: FileEntry[] = []): FileEntry[] {
   return fileList;
 }
 
-console.log('Scanning repository from:', rootDir);
 const files = scanDir(rootDir);
+
+const graphReportPath = path.join(rootDir, 'graphify-out', 'GRAPH_REPORT.md');
+if (fs.existsSync(graphReportPath)) {
+  const stat = fs.statSync(graphReportPath);
+  files.push({
+    fullPath: graphReportPath,
+    relPath: 'graphify-out/GRAPH_REPORT.md',
+    level: 5,
+    size: stat.size,
+  });
+}
 
 // Sort by level ascending (1 to 5), then by relative path alphabetically
 files.sort((a, b) => {
