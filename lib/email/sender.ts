@@ -60,15 +60,23 @@ export function sanitizeRecipientForLog(to: string): string {
   return `[hash:${hash}@${domain}]`;
 }
 
-/**
- * Development & Local Console Email Provider
- */
 export class ConsoleEmailProvider implements EmailProvider {
   name = 'console';
 
   async send(options: SendEmailOptions): Promise<SendEmailResult> {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('[EMAIL_SECURITY_ERROR] Console email provider is strictly forbidden in production.');
+    }
+
     const recipient = sanitizeRecipientForLog(options.to);
-    console.log(`[EMAIL_DISPATCH_CONSOLE] To: ${recipient}, Subject: "${options.subject}"`);
+    console.log('\n====================== [DEV CONSOLE EMAIL] ======================');
+    console.log(`To: ${recipient}`);
+    console.log(`Subject: ${options.subject}`);
+    if (options.replyTo) console.log(`Reply-To: ${options.replyTo}`);
+    console.log('--------------------------- Content ---------------------------');
+    console.log(options.text);
+    console.log('=================================================================\n');
+
     return {
       success: true,
       messageId: `console-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
