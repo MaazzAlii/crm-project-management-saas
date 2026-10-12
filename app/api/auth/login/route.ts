@@ -5,6 +5,7 @@ import { generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt';
 import { setRefreshTokenCookie, getDefaultSessionConfig, getRefreshSessionConfig } from '@/lib/auth/session';
 import { query } from '@/lib/db';
 import { ensureAutoMigrated } from '@/lib/db/auto-migrate';
+import { checkLoginRateLimit, resetLoginRateLimit, getClientIp } from '@/lib/security/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,6 +26,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Email and password are required' },
         { status: 400 }
+      );
+    }
+
+    // Per-email (10/15min) and per-IP (50/15min) login rate limiting
+    const clientIp = getClientIp(request);
+    const loginRateResult = checkLoginRateLimit(email, clientIp);
+    if (!loginRateResult.allowed) {
+      const retryAfter = loginRateResult.retryAfterSeconds || 60;
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Too many login attempts. Try again in ${retryAfter} seconds.`,
+          retryAfterSeconds: retryAfter,
+        },
+        {
+          status: 429,
+          headers: { 'Retry-After': retryAfter.toString() },
+        }
       );
     }
 
@@ -96,6 +115,9 @@ export async function POST(request: NextRequest) {
       'UPDATE users SET last_login_at = NOW() WHERE id = $1',
       [user.id]
     );
+
+    // Successful login — reset the per-email failed attempt counter
+    resetLoginRateLimit(user.email);
 
     // Get session config adapted to request headers (x-forwarded-proto, etc.)
     const sessionConfig = getDefaultSessionConfig(request.headers);
