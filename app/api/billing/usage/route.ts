@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest, getTenantOrgId } from '@/lib/auth/middleware';
-import { billingService } from '@/lib/services/billing-service';
+import { getBillingUsage } from '@/lib/billing/usage';
 import { apiSuccess, handleApiError, apiError } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     }
     const orgId = tenant.orgId;
 
-    const usage = await billingService.getUsageAndLimits(orgId);
+    const usage = await getBillingUsage(orgId, auth?.userId);
     return apiSuccess(usage);
   } catch (error) {
     return handleApiError(error);
