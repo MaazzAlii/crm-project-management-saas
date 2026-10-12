@@ -1163,3 +1163,33 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm run build`: **Compiled successfully with exit code 0, 138/138 routes mapped**.
   - Push freeze maintained: Zero commits pushed to `origin` or `deploy`.
 - **Status**: ✅ All audits complete; invite-full-flow test passing 100%. Ready for user review.
+
+---
+
+### [2026-10-12 21:58] Security Audit Review: Auth & Billing Hardening
+
+- **Phase / Task ID**: Security Hardening & Pre-Push Review
+- **Rationale**: 
+  - Ensure tenant isolation cannot be bypassed by client-supplied cookies or headers in `lib/auth/middleware.ts`.
+  - Consolidate lifetime subscription handling to a single source of truth (`organization_plans.plan_override`) and eliminate the duplicate `organizations.plan_tier = 'lifetime'` path.
+- **Action Performed**:
+  1. Audited git history with precise secret regex patterns:
+     - `pas#123`: 15 commits
+     - `sk_live_[A-Za-z0-9]{20,}`: 0 commits
+     - `sk_test_[A-Za-z0-9]{20,}`: 0 commits
+     - `whsec_[A-Za-z0-9]{20,}`: 0 commits
+     - `re_[A-Za-z0-9]{24,}`: 0 commits
+     - `full_project_dump.md`: 14 commits
+  2. Hardened `lib/auth/middleware.ts`: Removed untrusted `orgIdHeader || orgIdCookie` fallback. `getAuthFromRequest` now strictly derives `orgId` from the cryptographically verified JWT (`payload.orgId`), which is established at login time via a database query against `organization_members`.
+  3. Consolidated lifetime subscription truth in `lib/billing/current-plan.ts`: Removed redundant `orgRow` query and `orgRow?.plan_tier === 'lifetime'` check. Single source of truth is `organization_plans.plan_override === 'lifetime'`.
+  4. Updated `lib/db/auto-migrate.ts` to set `organizations.plan_tier = 'enterprise'` and persist `organization_plans.plan_override = 'lifetime'`.
+- **Files Modified**:
+  - `lib/auth/middleware.ts`
+  - `lib/billing/current-plan.ts`
+  - `lib/db/auto-migrate.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - `npm test`: **64/64 test suites passed, 433/433 tests green (100%)**.
+  - `npx tsx scripts/audit-tenancy.ts`: Completed with 0 token leaks and 0 DEV_FALLBACK instances.
+  - `npm run lint`: 0 errors.
+- **Status**: ✅ Auth hardened, single source of truth established. Ready for user inspection.

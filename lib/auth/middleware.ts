@@ -41,14 +41,11 @@ export function getAuthFromRequest(request: NextRequest): AuthContext | null {
     return null;
   }
 
-  const orgIdHeader = request.headers?.get('x-organization-id');
-  const orgIdCookie = request.cookies?.get('organization_id')?.value || request.cookies?.get('current_org_id')?.value;
-
   return {
     userId: payload.userId,
     email: payload.email,
     role: payload.role,
-    orgId: orgIdHeader || orgIdCookie || payload.orgId,
+    orgId: payload.orgId,
   };
 }
 

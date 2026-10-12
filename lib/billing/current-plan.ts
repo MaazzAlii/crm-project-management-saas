@@ -44,16 +44,10 @@ export async function getCurrentPlan(orgId: string): Promise<CurrentPlanResult> 
     return cached.result;
   }
 
-  const [row, orgRow] = await Promise.all([
-    queryOne<OrganizationPlan>(
-      'SELECT * FROM organization_plans WHERE organization_id = $1',
-      [orgId]
-    ),
-    queryOne<{ plan_tier?: string }>(
-      'SELECT plan_tier FROM organizations WHERE id = $1',
-      [orgId]
-    ),
-  ]);
+  const row = await queryOne<OrganizationPlan>(
+    'SELECT * FROM organization_plans WHERE organization_id = $1',
+    [orgId]
+  );
 
   let planId: PlanTier = 'free';
   let status: PlanStatus = 'active';
@@ -69,7 +63,7 @@ export async function getCurrentPlan(orgId: string): Promise<CurrentPlanResult> 
     currentPeriodEnd = row.current_period_end || null;
   }
 
-  const isLifetime = (row as any)?.plan_override === 'lifetime' || orgRow?.plan_tier === 'lifetime';
+  const isLifetime = (row as any)?.plan_override === 'lifetime';
   if (isLifetime) {
     planId = 'enterprise';
     status = 'active';
