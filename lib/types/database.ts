@@ -152,7 +152,7 @@ export interface OrganizationPlan {
 }
 
 export type InvitationRole = "admin" | "member" | "viewer";
-export type InvitationStatus = "pending" | "accepted" | "revoked" | "expired";
+export type InvitationStatus = "pending" | "accepted" | "revoked" | "expired" | "declined";
 
 export interface Invitation {
   id: UUID;
@@ -166,6 +166,7 @@ export interface Invitation {
   accepted_at?: Timestamp | null;
   accepted_by?: UUID | null;
   revoked_at?: Timestamp | null;
+  declined_at?: Timestamp | null;
   created_at: Timestamp;
   updated_at: Timestamp;
 }
