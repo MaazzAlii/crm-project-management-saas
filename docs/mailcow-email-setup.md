@@ -77,9 +77,9 @@ Value: v=DMARC1; p=none; rua=mailto:dmarc@innoventixhub.tech; ruf=mailto:dmarc@i
 Verify that outbound TCP traffic on port `587` is open from the Coolify application container to Mailcow:
 ```bash
 # Test connectivity from application server / container:
-nc -zv mail.innoventix.io 587
+nc -zv mail.innoventixhub.tech 587
 # Or via curl:
-curl -v telnet://mail.innoventix.io:587
+curl -v telnet://mail.innoventixhub.tech:587
 ```
 
 ---
@@ -107,7 +107,7 @@ npx tsx scripts/send-test-email.ts <admin-destination@example.com>
    ```
 2. In Gmail, open the message > Click three dots (More) > **Show original**:
    - Check **SPF**: `PASS` with IP of Mailcow server.
-   - Check **DKIM**: `PASS` with domain `innoventix.io`.
+   - Check **DKIM**: `PASS` with domain `innoventixhub.tech`.
    - Check **DMARC**: `PASS`.
 3. In Outlook, view Message Source and confirm the same `Authentication-Results` headers.
 4. Verify the email lands in the Primary inbox, NOT the Spam / Junk folder.

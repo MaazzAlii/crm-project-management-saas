@@ -1,0 +1,27 @@
+{
+  "_comment": "Non-secret settings only. Passwords and keys must come from environment variables, never from this file.",
+  "emailProvider": "smtp",
+  "from": {
+    "address": "invites@innoventixhub.tech",
+    "name": "Innoventix"
+  },
+  "replyTo": "support@innoventixhub.tech",
+  "smtp": {
+    "host": "mail.innoventixhub.tech",
+    "port": 587,
+    "secure": false,
+    "requireTLS": true,
+    "user": "SET_IN_ENV:SMTP_USER",
+    "password": "SET_IN_ENV:SMTP_PASSWORD"
+  },
+  "invitation": {
+    "expiresDays": 7,
+    "subjectTemplate": "{inviterName} invited you to {organizationName}",
+    "displayNameTemplate": "{inviterName} via Innoventix",
+    "replyToWhenInviterVerified": true
+  },
+  "verification": {
+    "emailLinkExpiresHours": 24,
+    "domainCodeExpiresMinutes": 30
+  }
+}
