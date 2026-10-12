@@ -116,10 +116,13 @@ export async function POST(request: NextRequest) {
         return apiError(result.message, 409, 'ALREADY_MEMBER');
       }
 
+      const errStr = result.error as string;
       if (
-        result.error === 'LIMIT_REACHED' ||
-        result.error === 'seat_limit' ||
-        result.error === 'pending_limit'
+        errStr === 'LIMIT_REACHED' ||
+        errStr === 'seat_limit' ||
+        errStr === 'pending_limit' ||
+        errStr === 'seat_limit_reached' ||
+        errStr === 'pending_limit_reached'
       ) {
         return apiError(result.message, 402, 'LIMIT_REACHED', {
           limit: (result as any).limit,
