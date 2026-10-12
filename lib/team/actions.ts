@@ -5,6 +5,9 @@ import { getCurrentSessionContext } from '@/lib/auth/session'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
 
+import { sendEmail } from '@/lib/email/sender'
+import { renderRoleChangedEmail } from '@/lib/email/templates'
+
 export interface UpdateOrgProfileInput {
   organizationId: string
   name: string
@@ -15,12 +18,12 @@ export interface UpdateOrgProfileInput {
 
 export interface InviteMemberInput {
   email: string
-  role: 'owner' | 'admin' | 'member' | 'billing_manager'
+  role: 'owner' | 'admin' | 'member' | 'viewer' | 'billing_manager'
 }
 
 export interface UpdateRoleInput {
   memberId: string
-  newRole: 'owner' | 'admin' | 'member' | 'billing_manager'
+  newRole: 'owner' | 'admin' | 'member' | 'viewer' | 'billing_manager'
 }
 
 export interface RemoveMemberInput {
@@ -157,8 +160,13 @@ export async function inviteTeamMember(input: InviteMemberInput) {
 }
 
 /**
- * Server Action: Update Member Role
- * Restricted to 'owner' or 'admin' roles. Cannot demote the last owner.
+ * Server Action: Update Member Role (Prompt 36)
+ * Rules:
+ * - Owner can change any role except their own.
+ * - Admin can change member and viewer roles only, and cannot touch owner or admin.
+ * - Admin cannot promote a member to admin or owner.
+ * - Demoting the last owner is forbidden.
+ * - Sends email notification and records audit event.
  */
 export async function updateMemberRole(input: UpdateRoleInput) {
   const session = await getCurrentSessionContext()
@@ -167,8 +175,10 @@ export async function updateMemberRole(input: UpdateRoleInput) {
     return { success: false, error: 'Unauthorized: No active session.' }
   }
 
-  // Server-side Role Check
-  if (session.role !== 'owner' && session.role !== 'admin' && !session.isSuperAdmin) {
+  const isOwner = session.role === 'owner' || session.isSuperAdmin
+  const isAdmin = session.role === 'admin'
+
+  if (!isOwner && !isAdmin) {
     return { success: false, error: 'Forbidden: Only owners and admins can update member roles.' }
   }
 
@@ -181,6 +191,21 @@ export async function updateMemberRole(input: UpdateRoleInput) {
 
     if (!targetMember) {
       return { success: false, error: 'Target member record not found.' }
+    }
+
+    // Rule: Owner cannot change their own role
+    if (targetMember.user_id === session.user.id) {
+      return { success: false, error: 'Cannot change your own role.' }
+    }
+
+    // Rule: Admin can change member and viewer roles only, and cannot touch owner or admin
+    if (isAdmin) {
+      if (targetMember.role === 'owner' || targetMember.role === 'admin') {
+        return { success: false, error: 'Forbidden: Admins cannot change owner or admin roles.' }
+      }
+      if (input.newRole === 'owner' || input.newRole === 'admin') {
+        return { success: false, error: 'Forbidden: Admins cannot promote members to admin or owner.' }
+      }
     }
 
     // Prevent demoting the last owner of the organization
@@ -204,6 +229,7 @@ export async function updateMemberRole(input: UpdateRoleInput) {
       [input.newRole, input.memberId, session.organization.id]
     )
 
+    // Audit log
     await logAuditEvent({
       actorId: session.user.id,
       action: 'TEAM_MEMBER_ROLE_UPDATED',
@@ -211,6 +237,30 @@ export async function updateMemberRole(input: UpdateRoleInput) {
       targetId: input.memberId,
       details: { oldRole: targetMember.role, newRole: input.newRole },
     })
+
+    // Transactional email notification to the member (Prompt 30 & 36)
+    try {
+      const targetUser = await queryOne<{ email: string; full_name?: string }>(
+        'SELECT email, full_name FROM users WHERE id = $1',
+        [targetMember.user_id]
+      )
+
+      if (targetUser?.email) {
+        const emailTemplate = renderRoleChangedEmail({
+          organizationName: session.organization.name,
+          newRole: input.newRole,
+          memberName: targetUser.full_name || undefined,
+        })
+        await sendEmail({
+          to: targetUser.email,
+          subject: emailTemplate.subject,
+          html: emailTemplate.html,
+          text: emailTemplate.text,
+        })
+      }
+    } catch (emailErr) {
+      console.warn('Role change email dispatch notice:', emailErr)
+    }
 
     revalidatePath('/settings/team')
     return { success: true }
@@ -221,8 +271,12 @@ export async function updateMemberRole(input: UpdateRoleInput) {
 }
 
 /**
- * Server Action: Remove Member
- * Restricted to 'owner' or 'admin' roles. Cannot remove the last owner.
+ * Server Action: Remove Member (Prompt 36)
+ * Rules:
+ * - Owner and admin can remove members, with confirm.
+ * - Cannot remove the owner.
+ * - Admin cannot remove owner or admin.
+ * - Writes audit events.
  */
 export async function removeMember(input: RemoveMemberInput) {
   const session = await getCurrentSessionContext()
@@ -231,8 +285,10 @@ export async function removeMember(input: RemoveMemberInput) {
     return { success: false, error: 'Unauthorized: No active session.' }
   }
 
-  // Server-side Role Check
-  if (session.role !== 'owner' && session.role !== 'admin' && !session.isSuperAdmin) {
+  const isOwner = session.role === 'owner' || session.isSuperAdmin
+  const isAdmin = session.role === 'admin'
+
+  if (!isOwner && !isAdmin) {
     return { success: false, error: 'Forbidden: Only owners and admins can remove team members.' }
   }
 
@@ -247,20 +303,17 @@ export async function removeMember(input: RemoveMemberInput) {
       return { success: false, error: 'Target member record not found.' }
     }
 
-    // Prevent removing the last owner of the organization
+    // Rule: Cannot remove the owner
     if (targetMember.role === 'owner') {
-      const ownerCountRes = await queryOne<{ count: string }>(
-        "SELECT COUNT(*) as count FROM organization_members WHERE organization_id = $1 AND role = 'owner'",
-        [session.organization.id]
-      )
-      const ownerCount = parseInt(ownerCountRes?.count || '0', 10)
-
-      if (ownerCount <= 1) {
-        return { success: false, error: 'Cannot remove the last owner of an organization.' }
-      }
+      return { success: false, error: 'Cannot remove the organization owner.' }
     }
 
-    // Delete member record
+    // Rule: Admin cannot remove other admins
+    if (isAdmin && targetMember.role === 'admin') {
+      return { success: false, error: 'Forbidden: Admins cannot remove other admins.' }
+    }
+
+    // Delete member record (seat count drops automatically)
     await query(
       'DELETE FROM organization_members WHERE id = $1 AND organization_id = $2',
       [input.memberId, session.organization.id]
