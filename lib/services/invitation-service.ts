@@ -16,6 +16,8 @@ import { normalizeEmail, isValidEmail } from '../validation/email';
 import { generateToken, hashToken } from '../security/invite-token';
 import { logInvitationAudit } from '../audit/invitations';
 import { canResend, canRevoke } from '../invitations/status';
+import { sendEmail } from '../email/sender';
+import { renderInviteEmail } from '../email/templates';
 import { Invitation, InvitationRole } from '../types/database';
 
 export interface InvitationSessionContext {
@@ -205,17 +207,52 @@ export async function createInvitation(
     },
   });
 
-  // 10. Send the email (Prompt 29). If sending fails, retain the invite row with send_failed flag
+  // 10. Send the email. If sending fails, retain the invite row with send_failed flag
   let sendWarning: string | undefined;
   let sendFailed = false;
 
   try {
-    // Console / mock delivery until full abstraction in Prompt 29
-    console.log(`[INVITATION_EMAIL_DISPATCH] To: ${normalizedEmail}, Org: ${orgId}, Token: [SECURE]`);
-  } catch (error) {
+    const org = await orgRepo.findById(orgId);
+    const inviter = await userRepo.findById(actorUserId);
+    const emailTemplate = renderInviteEmail({
+      inviterName: (inviter as any)?.full_name || (inviter as any)?.name || 'A team member',
+      organizationName: org?.name || 'Your organization',
+      role: input.role,
+      rawToken,
+      expiresAt,
+      inviterEmail: inviter?.email,
+      inviterEmailVerified: (inviter as any)?.email_verified ?? false,
+    });
+
+    const sendRes = await sendEmail({
+      to: normalizedEmail,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
+      displayName: emailTemplate.displayName,
+      replyTo: emailTemplate.replyTo,
+    });
+
+    if (!sendRes.success) {
+      throw new Error(sendRes.error || 'Failed to dispatch email');
+    }
+  } catch (error: any) {
     console.warn(`[INVITATION_EMAIL_FAILED] Failed to send email to ${normalizedEmail}:`, error);
     sendFailed = true;
     sendWarning = 'Invitation created, but notification email could not be delivered.';
+    await invitationRepo.markSendFailed(orgId, invitation.id, true);
+    invitation.send_failed = true;
+    await logInvitationAudit({
+      action: 'invite.send_failed',
+      organizationId: orgId,
+      actorId: actorUserId,
+      targetEmail: normalizedEmail,
+      role: input.role,
+      details: {
+        invitationId: invitation.id,
+        error: error?.message || String(error),
+      },
+    });
   }
 
   return {
@@ -231,6 +268,8 @@ export interface ResendInvitationSuccess {
   success: true;
   invitation: Invitation;
   rawToken: string;
+  sendFailed?: boolean;
+  warning?: string;
 }
 
 export interface ResendInvitationError {
@@ -322,12 +361,59 @@ export async function resendInvitation(
     },
   });
 
-  console.log(`[INVITATION_EMAIL_RESEND] To: ${updated.email}, Org: ${orgId}, Token: [SECURE]`);
+  let sendFailed = false;
+  let sendWarning: string | undefined;
+
+  try {
+    const org = await orgRepo.findById(orgId);
+    const inviter = await userRepo.findById(actorUserId);
+    const emailTemplate = renderInviteEmail({
+      inviterName: (inviter as any)?.full_name || (inviter as any)?.name || 'A team member',
+      organizationName: org?.name || 'Your organization',
+      role: updated.role,
+      rawToken,
+      expiresAt,
+      inviterEmail: inviter?.email,
+      inviterEmailVerified: (inviter as any)?.email_verified ?? false,
+    });
+
+    const sendRes = await sendEmail({
+      to: updated.email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
+      displayName: emailTemplate.displayName,
+      replyTo: emailTemplate.replyTo,
+    });
+
+    if (!sendRes.success) {
+      throw new Error(sendRes.error || 'Failed to dispatch email');
+    }
+  } catch (error: any) {
+    console.warn(`[INVITATION_RESEND_FAILED] Failed to resend email to ${updated.email}:`, error);
+    sendFailed = true;
+    sendWarning = 'Invitation refreshed, but notification email could not be delivered.';
+    await invitationRepo.markSendFailed(orgId, updated.id, true);
+    updated.send_failed = true;
+    await logInvitationAudit({
+      action: 'invite.send_failed',
+      organizationId: orgId,
+      actorId: actorUserId,
+      targetEmail: updated.email,
+      role: updated.role,
+      details: {
+        invitationId: updated.id,
+        error: error?.message || String(error),
+      },
+    });
+  }
 
   return {
     success: true,
     invitation: updated,
     rawToken,
+    sendFailed,
+    warning: sendWarning,
   };
 }
 
