@@ -134,6 +134,25 @@ export class UserRepository {
   }
 
   /**
+   * Mark user email as verified
+   */
+  async verifyEmail(id: string): Promise<User | null> {
+    try {
+      const res = await query<User>(
+        `UPDATE users 
+         SET email_verified = true, email_verified_at = NOW(), updated_at = NOW() 
+         WHERE id = $1 
+         RETURNING *`,
+        [id]
+      );
+      return res.rows[0] || null;
+    } catch (error) {
+      console.error(`[UserRepository.verifyEmail] Error verifying email for user ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Deactivate a user (soft delete)
    */
   async deactivate(id: string): Promise<boolean> {
