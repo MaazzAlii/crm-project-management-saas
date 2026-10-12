@@ -53,6 +53,25 @@ export const RATE_LIMIT_TIERS = {
 }
 
 /**
+ * Rate limit thresholds for invite and verification endpoints (Prompt 28)
+ * NOTE: Rate limits are held in-memory and reset on server restart.
+ */
+export const INVITE_RATE_LIMITS = {
+  INVITE_CREATE: { maxRequests: 20, windowMs: 60 * 60 * 1000 }, // 20 per hour per user
+  INVITE_RESEND: { maxRequests: 5, windowMs: 60 * 60 * 1000 }, // 5 per hour per invitation
+  ACCEPT_DECLINE: { maxRequests: 30, windowMs: 60 * 60 * 1000 }, // 30 per hour per IP
+  VERIFY_EMAIL_SEND: { maxRequests: 1, windowMs: 60 * 1000 }, // 1 per 60 seconds per user
+  DOMAIN_CODE_SEND: { maxRequests: 3, windowMs: 60 * 60 * 1000 }, // 3 per hour per organization
+}
+
+/**
+ * Resets the in-memory rate limit store (useful for testing or server reboot)
+ */
+export function resetRateLimitStore(): void {
+  rateLimitStore.clear()
+}
+
+/**
  * Extracts client IP identifier from Next.js request headers or socket.
  */
 export function getClientIp(req: NextRequest): string {
@@ -136,11 +155,21 @@ export function applyRateLimitHeaders(
 /**
  * Creates standard HTTP 429 Too Many Requests response.
  */
-export function createRateLimitExceededResponse(result: RateLimitResult): NextResponse {
+export function createRateLimitExceededResponse(
+  result: RateLimitResult,
+  customMessage?: string
+): NextResponse {
   const retryAfter = result.retryAfterSeconds || 60
+  const message =
+    customMessage ||
+    `Rate limit exceeded. Please wait ${retryAfter} seconds before requesting another verification email.`
   return NextResponse.json(
     {
-      error: 'Too Many Requests: Rate limit exceeded. Please try again later.',
+      success: false,
+      error: {
+        message,
+        code: 'RATE_LIMIT_EXCEEDED',
+      },
       retryAfterSeconds: retryAfter,
       statusCode: 429,
     },
