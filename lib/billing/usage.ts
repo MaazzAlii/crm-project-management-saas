@@ -92,3 +92,5 @@ export async function getBillingUsage(orgId: string, userId?: string): Promise<P
     usage: legacyUsage?.usage,
   };
 }
+
+export const getPlanUsage = getBillingUsage;
