@@ -1078,12 +1078,33 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm run build`: **Next.js production build succeeded with exit code 0**.
 - **Status**: ✅ All 8 fixes implemented and committed locally per instructions.
 
+---
 
-
-
-
-
-
-
-
-
+### Step: Email Test Pack Prompts 01 & 03 — Resend SMTP & Invitation Test Checklist
+- **Timestamp**: 2026-10-12T15:48:00+05:00
+- **Task ID**: `EMAIL-TEST-PACK-PROMPTS-01-AND-03`
+- **Actions Performed**:
+  - **Prompt 01 (`01-test-invites-now-with-resend.md`)**:
+    - Verified Resend SMTP configuration compatibility (`smtp.resend.com:465` with `SMTP_SECURE=true` or `587` with STARTTLS).
+    - Updated `lib/email/config.ts` to support both `SMTP_PASSWORD` and `SMTP_PASS` seamlessly without breaking existing scripts or test mocks.
+    - Verified `scripts/send-test-email.ts` with typed error handling and zero credential leak guarantees.
+  - **Prompt 03 (`03-invitation-test-checklist.md`) — Part 1: Local Test Checklist**:
+    - Created dedicated end-to-end integration test `tests/invitation-checklist-part1.test.ts` implementing all 11 steps of the local invitation lifecycle:
+      - **Step 1 & 2**: Created fresh organization owner in isolated test tenant workspace.
+      - **Step 3 & 4**: Dispatched team invite to `maazalisshahid+invite1@gmail.com` with role `member`. Persisted with status `pending`.
+      - **Step 5**: Verified invite URL printed in server console log with sanitized headers.
+      - **Step 6**: Retrieved invitation details via `getInvitationAcceptInfo`, verifying organization name, member role, masked email, and `accountExists: false`.
+      - **Step 7 & 8**: Tested `handleSignUpWithInviteAction` with read-only locked recipient address, successfully joining organization and redirecting to `/dashboard`.
+      - **Step 9**: Verified organization members list contains newly joined member exactly once, and pending invitations list no longer contains the consumed row.
+      - **Step 10**: Verified token reuse returns clear `invalid_or_expired` status without throwing unhandled exceptions.
+      - **Step 11**: Dispatched second invite (`maazalisshahid+invite2@gmail.com`), revoked it via `revokeInvitation`, and confirmed token invalidated immediately (`getInvitationAcceptInfo` and `acceptInvitation` reject with `invalid_or_expired` and `revoked`).
+  - **Prompt 03 — Parts 2 & 3 Status**:
+    - Parts 2 (Resend live delivery) and 3 (Production live URL checks) documented as ready for live execution once user configures API key in Coolify.
+- **Files Modified / Created**:
+  - `lib/email/config.ts`
+  - `tests/invitation-checklist-part1.test.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - `npm test`: **64/64 test files passed, 433/433 tests green (100%)**.
+  - `npm run build`: **Next.js production build succeeded with exit code 0**.
+- **Status**: ✅ Prompts 01 and 03 (Part 1) verified and automated.

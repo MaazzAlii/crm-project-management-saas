@@ -132,15 +132,15 @@
     "semantic_hash": ""
   },
   "lib/auth/session.ts": {
-    "mtime": 1791791602.6980321,
-    "seen": 1791791813.896425,
-    "ast_hash": "825a4c268e273901ff08bee47e7cb116",
+    "mtime": 1791800349.8479192,
+    "seen": 1791801427.6751108,
+    "ast_hash": "3e178b4d1ab03a4812a0fad93a7da547",
     "semantic_hash": ""
   },
   "lib/auth/super-admin.ts": {
-    "mtime": 1791791523.4967601,
-    "seen": 1791791813.896427,
-    "ast_hash": "6090e58b2769b2504e0d7d847da09f06",
+    "mtime": 1791793732.3800006,
+    "seen": 1791801427.675114,
+    "ast_hash": "22ba0f80d13dc705c34e670729605c6d",
     "semantic_hash": ""
   },
   "lib/billing/plan-limits.ts": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791792336.2240624,
-    "seen": 1791793530.1906965,
-    "ast_hash": "d190afc4ef79fdcff2054bc32445f95f",
+    "mtime": 1791800865.3004935,
+    "seen": 1791801427.6757646,
+    "ast_hash": "ed2a968cb33840db8b3d2e3e818595f6",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1107,12 +1107,6 @@
     "mtime": 1789721627.6243036,
     "seen": 1791772540.837823,
     "ast_hash": "b1766ab98848292a055bba1c675a007f",
-    "semantic_hash": ""
-  },
-  "full_project_dump.md": {
-    "mtime": 1791792344.6133223,
-    "seen": 1791793530.190998,
-    "ast_hash": "9136e987149966cea02b4e933011cad7",
     "semantic_hash": ""
   },
   "infra/kong/kong.local.yml": {
@@ -2958,9 +2952,9 @@
     "semantic_hash": ""
   },
   "lib/billing/current-plan.ts": {
-    "mtime": 1791746322.882537,
-    "seen": 1791772540.8373332,
-    "ast_hash": "f02b91819e61bc83cf33aab9d03553d4",
+    "mtime": 1791800397.884276,
+    "seen": 1791801427.6751208,
+    "ast_hash": "be2bb732eab85555a19fd3d944bf2e4c",
     "semantic_hash": ""
   },
   "lib/clients/communication-mode.ts": {
@@ -3288,9 +3282,9 @@
     "semantic_hash": ""
   },
   "lib/types/database.ts": {
-    "mtime": 1791780363.4727097,
-    "seen": 1791780986.220458,
-    "ast_hash": "276fde97b63cbf8026c1baf752223a35",
+    "mtime": 1791800422.8929412,
+    "seen": 1791801427.6753063,
+    "ast_hash": "9bca7bd685bc4f5b25e2127ef606f29d",
     "semantic_hash": ""
   },
   "lib/types/pipeline.ts": {
@@ -3570,9 +3564,9 @@
     "semantic_hash": ""
   },
   "scripts/generate-full-dump.ts": {
-    "mtime": 1791792286.6006308,
-    "seen": 1791793530.190445,
-    "ast_hash": "30c513f433310da18f278fe7f48befde",
+    "mtime": 1791800627.7771978,
+    "seen": 1791801427.6754508,
+    "ast_hash": "327184eba98fa19332b612d5f39ba10f",
     "semantic_hash": ""
   },
   "scripts/generate-production-secrets.ts": {
@@ -3930,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791792327.684159,
-    "seen": 1791793530.1907058,
-    "ast_hash": "6baea899f3326d5882c9458769b26835",
+    "mtime": 1791801174.219712,
+    "seen": 1791801427.6757731,
+    "ast_hash": "78f861afb1dd1831ee2f41cb13e68238",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6666,9 +6660,9 @@
     "semantic_hash": ""
   },
   "scripts/grant-enterprise-access.ts": {
-    "mtime": 1791787547.373825,
-    "seen": 1791788431.96569,
-    "ast_hash": "e47c8cdbb06038b05aea7071e6fe7f31",
+    "mtime": 1791800453.456532,
+    "seen": 1791801427.6754575,
+    "ast_hash": "20ca92e8e396489f1815639ee82e6ca8",
     "semantic_hash": ""
   },
   "tests/cross-tenant-invites.test.ts": {
@@ -6729,6 +6723,30 @@
     "mtime": 1791792931.0,
     "seen": 1791793530.1910672,
     "ast_hash": "b50ca4a1ae830743a40deae6e382cf14",
+    "semantic_hash": ""
+  },
+  "scripts/grant-lifetime-access.ts": {
+    "mtime": 1791800438.297735,
+    "seen": 1791801427.6754603,
+    "ast_hash": "73847deb997456822b1bb3d15b72f245",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0040_invitation_declined.sql": {
+    "mtime": 1791800376.6085608,
+    "seen": 1791801427.6756124,
+    "ast_hash": "3082b4829fc1bfa152748c12228fbf08",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0044_plan_override.sql": {
+    "mtime": 1791800362.9487438,
+    "seen": 1791801427.6756227,
+    "ast_hash": "e831edc7e7110897a0b617a7605e9774",
+    "semantic_hash": ""
+  },
+  "tests/lifetime-access-db.test.ts": {
+    "mtime": 1791800530.7194974,
+    "seen": 1791801427.6757097,
+    "ast_hash": "6531400b10297335303a964978b90dba",
     "semantic_hash": ""
   }
 }

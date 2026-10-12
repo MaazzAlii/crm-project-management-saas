@@ -3078,9 +3078,9 @@
     "semantic_hash": ""
   },
   "lib/email/config.ts": {
-    "mtime": 1791791255.2331307,
-    "seen": 1791791813.8964612,
-    "ast_hash": "0669ec2dde033c092b3fb52f1ee76a85",
+    "mtime": 1791801894.9299102,
+    "seen": 1791802032.8927908,
+    "ast_hash": "e56b0833b26ad5291408585852bb530e",
     "semantic_hash": ""
   },
   "lib/inbox/ingest.ts": {
@@ -3912,9 +3912,9 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1791788629.8991163,
-    "seen": 1791791813.896783,
-    "ast_hash": "de8a94c034efb683592d9832049ebd27",
+    "mtime": 1791801477.9307067,
+    "seen": 1791802032.8932593,
+    "ast_hash": "e92e929dbec5678295806aa92deb42a6",
     "semantic_hash": ""
   },
   "DEPLOYMENT_CHECKLIST.md": {
@@ -6747,6 +6747,12 @@
     "mtime": 1791800530.7194974,
     "seen": 1791801427.6757097,
     "ast_hash": "6531400b10297335303a964978b90dba",
+    "semantic_hash": ""
+  },
+  "tests/invitation-checklist-part1.test.ts": {
+    "mtime": 1791801867.685916,
+    "seen": 1791802032.8931613,
+    "ast_hash": "4ff766046ea7170e653673b399dce3f4",
     "semantic_hash": ""
   }
 }
