@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791791731.4245403,
-    "seen": 1791791813.8967795,
-    "ast_hash": "8b309c660641e34d9658e8500b814073",
+    "mtime": 1791792336.2240624,
+    "seen": 1791793530.1906965,
+    "ast_hash": "d190afc4ef79fdcff2054bc32445f95f",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1110,9 +1110,9 @@
     "semantic_hash": ""
   },
   "full_project_dump.md": {
-    "mtime": 1791791778.7507076,
-    "seen": 1791791813.8970098,
-    "ast_hash": "10b21236c3b480b55925b9c8f22f7bec",
+    "mtime": 1791792344.6133223,
+    "seen": 1791793530.190998,
+    "ast_hash": "9136e987149966cea02b4e933011cad7",
     "semantic_hash": ""
   },
   "infra/kong/kong.local.yml": {
@@ -3570,9 +3570,9 @@
     "semantic_hash": ""
   },
   "scripts/generate-full-dump.ts": {
-    "mtime": 1791790735.299653,
-    "seen": 1791791813.896583,
-    "ast_hash": "fb1963bc0a87ef64835991dd8a06359d",
+    "mtime": 1791792286.6006308,
+    "seen": 1791793530.190445,
+    "ast_hash": "30c513f433310da18f278fe7f48befde",
     "semantic_hash": ""
   },
   "scripts/generate-production-secrets.ts": {
@@ -3930,9 +3930,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791791704.911025,
-    "seen": 1791791813.8967855,
-    "ast_hash": "3a2427b4b427bf784281aaed10fea533",
+    "mtime": 1791792327.684159,
+    "seen": 1791793530.1907058,
+    "ast_hash": "6baea899f3326d5882c9458769b26835",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6480,9 +6480,9 @@
     "semantic_hash": ""
   },
   "lib/email/templates.ts": {
-    "mtime": 1791791088.7083602,
-    "seen": 1791791813.896464,
-    "ast_hash": "eb72f986b501ab9f152ae0a54544bf31",
+    "mtime": 1791791987.6404514,
+    "seen": 1791793530.1902852,
+    "ast_hash": "5a7c3c80a421a24eaf521e6e3760ac31",
     "semantic_hash": ""
   },
   "scripts/print-latest-invite.ts": {
@@ -6522,9 +6522,9 @@
     "semantic_hash": ""
   },
   "tests/email-templates.test.ts": {
-    "mtime": 1791780079.6225982,
-    "seen": 1791780986.2207148,
-    "ast_hash": "a616373569619c06fbfa497f7d9a12ed",
+    "mtime": 1791791974.593638,
+    "seen": 1791793530.1906137,
+    "ast_hash": "b429a680fb061dc55be826881e226438",
     "semantic_hash": ""
   },
   "tests/rate-limits.test.ts": {
@@ -6630,9 +6630,9 @@
     "semantic_hash": ""
   },
   "docs/mailcow-email-setup.md": {
-    "mtime": 1791789645.0685365,
-    "seen": 1791791813.896978,
-    "ast_hash": "dcfdb20a4c45249ad20276b545e568a5",
+    "mtime": 1791792039.8587248,
+    "seen": 1791793530.1909559,
+    "ast_hash": "26509a72dbf1c9a64c9e7572f8cef093",
     "semantic_hash": ""
   },
   "docs/page-errors.md": {
@@ -6687,6 +6687,48 @@
     "mtime": 1791786720.031485,
     "seen": 1791788431.9658186,
     "ast_hash": "ce3db2ba286c211bc4d323886cf95d5b",
+    "semantic_hash": ""
+  },
+  "config/invite-email-config.json": {
+    "mtime": 1791791913.7185347,
+    "seen": 1791793530.190156,
+    "ast_hash": "382e40832aeb67ebe5db273b243eb180",
+    "semantic_hash": ""
+  },
+  "innoventix-email-test-pack/email-test-pack/01-test-invites-now-with-resend.md": {
+    "mtime": 1791792931.0,
+    "seen": 1791793530.1910055,
+    "ast_hash": "aebbbf6267015d7eb71c89dd24dab84b",
+    "semantic_hash": ""
+  },
+  "innoventix-email-test-pack/email-test-pack/02-mailcow-install-guide.md": {
+    "mtime": 1791792931.0,
+    "seen": 1791793530.1910071,
+    "ast_hash": "18ac3b8e5b3809587d9f824c9f8cf04f",
+    "semantic_hash": ""
+  },
+  "innoventix-email-test-pack/email-test-pack/03-invitation-test-checklist.md": {
+    "mtime": 1791792931.0,
+    "seen": 1791793530.191009,
+    "ast_hash": "66f68a3da84dfa19fad9778ea37602fc",
+    "semantic_hash": ""
+  },
+  "innoventix-email-test-pack/email-test-pack/04-coolify-env-list.md": {
+    "mtime": 1791792931.0,
+    "seen": 1791793530.1910641,
+    "ast_hash": "6b8af766879a1edbe485807a95fd198e",
+    "semantic_hash": ""
+  },
+  "innoventix-email-test-pack/email-test-pack/05-antigravity-security-fixes.md": {
+    "mtime": 1791792931.0,
+    "seen": 1791793530.1910658,
+    "ast_hash": "9416e6dec85aa7e4546f97061f2f7909",
+    "semantic_hash": ""
+  },
+  "innoventix-email-test-pack/email-test-pack/README.md": {
+    "mtime": 1791792931.0,
+    "seen": 1791793530.1910672,
+    "ast_hash": "b50ca4a1ae830743a40deae6e382cf14",
     "semantic_hash": ""
   }
 }

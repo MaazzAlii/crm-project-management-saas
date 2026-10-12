@@ -132,15 +132,15 @@
     "semantic_hash": ""
   },
   "lib/auth/session.ts": {
-    "mtime": 1791784243.3276565,
-    "seen": 1791785735.673182,
-    "ast_hash": "e5f5d8015ef92c96879729f7636a1067",
+    "mtime": 1791791602.6980321,
+    "seen": 1791791813.896425,
+    "ast_hash": "825a4c268e273901ff08bee47e7cb116",
     "semantic_hash": ""
   },
   "lib/auth/super-admin.ts": {
-    "mtime": 1791642056.4082377,
-    "seen": 1791772540.837329,
-    "ast_hash": "4edeb73b86563a524529f78061576f4e",
+    "mtime": 1791791523.4967601,
+    "seen": 1791791813.896427,
+    "ast_hash": "6090e58b2769b2504e0d7d847da09f06",
     "semantic_hash": ""
   },
   "lib/billing/plan-limits.ts": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791788408.7010665,
-    "seen": 1791788431.9658773,
-    "ast_hash": "220d3a333f8dd2291f1cd819fa514059",
+    "mtime": 1791791731.4245403,
+    "seen": 1791791813.8967795,
+    "ast_hash": "8b309c660641e34d9658e8500b814073",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1110,9 +1110,9 @@
     "semantic_hash": ""
   },
   "full_project_dump.md": {
-    "mtime": 1791788285.8107738,
-    "seen": 1791788431.9661164,
-    "ast_hash": "ad06e5ea481014bc3ce753e278ebfffb",
+    "mtime": 1791791778.7507076,
+    "seen": 1791791813.8970098,
+    "ast_hash": "10b21236c3b480b55925b9c8f22f7bec",
     "semantic_hash": ""
   },
   "infra/kong/kong.local.yml": {
@@ -3084,9 +3084,9 @@
     "semantic_hash": ""
   },
   "lib/email/config.ts": {
-    "mtime": 1791744995.8827507,
-    "seen": 1791772540.8373635,
-    "ast_hash": "a1e23845237c3b0e2b996c2acccc8df7",
+    "mtime": 1791791255.2331307,
+    "seen": 1791791813.8964612,
+    "ast_hash": "0669ec2dde033c092b3fb52f1ee76a85",
     "semantic_hash": ""
   },
   "lib/inbox/ingest.ts": {
@@ -3570,9 +3570,9 @@
     "semantic_hash": ""
   },
   "scripts/generate-full-dump.ts": {
-    "mtime": 1791788276.9319756,
-    "seen": 1791788431.965687,
-    "ast_hash": "1f125fada82a7d8bf0a91c545817c305",
+    "mtime": 1791790735.299653,
+    "seen": 1791791813.896583,
+    "ast_hash": "fb1963bc0a87ef64835991dd8a06359d",
     "semantic_hash": ""
   },
   "scripts/generate-production-secrets.ts": {
@@ -3690,9 +3690,9 @@
     "semantic_hash": ""
   },
   "tests/email-config.test.ts": {
-    "mtime": 1791745039.8857384,
-    "seen": 1791772540.837516,
-    "ast_hash": "f59a0ab188073eb5e696eb09fcd419df",
+    "mtime": 1791791018.6405022,
+    "seen": 1791791813.8967144,
+    "ast_hash": "0197c8150669bf3c4ac11382c1c548a5",
     "semantic_hash": ""
   },
   "tests/email-verification-repo.test.ts": {
@@ -3852,9 +3852,9 @@
     "semantic_hash": ""
   },
   "tests/setup.ts": {
-    "mtime": 1791633020.1820564,
-    "seen": 1791772540.8375545,
-    "ast_hash": "95b4c37bc60fe6a934be593ab8eee9c6",
+    "mtime": 1791789920.8609312,
+    "seen": 1791791813.8967667,
+    "ast_hash": "affe918960eac477b4e52886cf4457ca",
     "semantic_hash": ""
   },
   "tests/step2-commit-a-page-scoping.test.ts": {
@@ -3918,9 +3918,9 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1790344626.216925,
-    "seen": 1791772540.837573,
-    "ast_hash": "dcb0935bc689c2bb665b767134dbde5f",
+    "mtime": 1791788629.8991163,
+    "seen": 1791791813.896783,
+    "ast_hash": "de8a94c034efb683592d9832049ebd27",
     "semantic_hash": ""
   },
   "DEPLOYMENT_CHECKLIST.md": {
@@ -3930,9 +3930,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791788368.5519345,
-    "seen": 1791788431.965884,
-    "ast_hash": "56af50217908bd91e3a2e524095c6ecb",
+    "mtime": 1791791704.911025,
+    "seen": 1791791813.8967855,
+    "ast_hash": "3a2427b4b427bf784281aaed10fea533",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -3948,9 +3948,9 @@
     "semantic_hash": ""
   },
   "docs/audit-invites-dashboard.md": {
-    "mtime": 1791744645.7259803,
-    "seen": 1791772540.8377895,
-    "ast_hash": "6ea531565485952b679078f307b4fd74",
+    "mtime": 1791789574.9144144,
+    "seen": 1791791813.8969703,
+    "ast_hash": "68bba21007e75855561aab402f0ee17c",
     "semantic_hash": ""
   },
   "docs/audit-tenancy-and-mock-data.md": {
@@ -3960,9 +3960,9 @@
     "semantic_hash": ""
   },
   "docs/email-setup.md": {
-    "mtime": 1791745014.0897453,
-    "seen": 1791772540.8377924,
-    "ast_hash": "76c68cc54793606fd99224963afe09b3",
+    "mtime": 1791791485.7026463,
+    "seen": 1791791813.896974,
+    "ast_hash": "84d51b44748f4f3bfb2b8db9fa6ff015",
     "semantic_hash": ""
   },
   "docs/env-coolify.md": {
@@ -6480,9 +6480,9 @@
     "semantic_hash": ""
   },
   "lib/email/templates.ts": {
-    "mtime": 1791780108.699886,
-    "seen": 1791780986.2203982,
-    "ast_hash": "8af4117f53484fa7800b98aec2ec9b31",
+    "mtime": 1791791088.7083602,
+    "seen": 1791791813.896464,
+    "ast_hash": "eb72f986b501ab9f152ae0a54544bf31",
     "semantic_hash": ""
   },
   "scripts/print-latest-invite.ts": {
@@ -6534,9 +6534,9 @@
     "semantic_hash": ""
   },
   "docs/invite-email-rules.md": {
-    "mtime": 1791780120.1408908,
-    "seen": 1791780986.221045,
-    "ast_hash": "8ee130a28068c7c316dab1074ff98ae8",
+    "mtime": 1791789679.6380448,
+    "seen": 1791791813.896977,
+    "ast_hash": "58df157d7e2ac650a358de3927bdc8eb",
     "semantic_hash": ""
   },
   "app/api/stripe/checkout/route.ts": {
@@ -6630,9 +6630,9 @@
     "semantic_hash": ""
   },
   "docs/mailcow-email-setup.md": {
-    "mtime": 1791781202.015374,
-    "seen": 1791785735.6736937,
-    "ast_hash": "4516a8eaf7381ca64c0307d554891e07",
+    "mtime": 1791789645.0685365,
+    "seen": 1791791813.896978,
+    "ast_hash": "dcfdb20a4c45249ad20276b545e568a5",
     "semantic_hash": ""
   },
   "docs/page-errors.md": {
