@@ -14,6 +14,7 @@ import { getCurrentPlan } from '../billing/current-plan';
 import { normalizeEmail, isValidEmail } from '../validation/email';
 import { generateToken, hashToken } from '../security/invite-token';
 import { logInvitationAudit } from '../audit/invitations';
+import { canResend, canRevoke } from '../invitations/status';
 import { Invitation, InvitationRole } from '../types/database';
 
 export interface InvitationSessionContext {
@@ -221,5 +222,208 @@ export async function createInvitation(
     rawToken,
     sendFailed,
     warning: sendWarning,
+  };
+}
+
+export interface ResendInvitationSuccess {
+  success: true;
+  invitation: Invitation;
+  rawToken: string;
+}
+
+export interface ResendInvitationError {
+  success: false;
+  error: 'unauthorized' | 'forbidden' | 'not_found' | 'invalid_status';
+  status: number;
+  message: string;
+}
+
+export type ResendInvitationResult = ResendInvitationSuccess | ResendInvitationError;
+
+/**
+ * Resends an existing invitation:
+ * - Requires owner or admin permissions.
+ * - Enforces allowed states from Prompt 07 (pending or expired).
+ * - Replaces old token hash so previous invitation links immediately stop working.
+ * - Resets expiry to 7 days from now.
+ * - Writes invite.resent audit event.
+ */
+export async function resendInvitation(
+  session: InvitationSessionContext | null | undefined,
+  inviteId: string
+): Promise<ResendInvitationResult> {
+  const actorUserId = session?.userId || session?.user?.id;
+  const orgId = session?.orgId;
+
+  if (!session || !actorUserId || !orgId) {
+    return {
+      success: false,
+      error: 'unauthorized',
+      status: 401,
+      message: 'Authentication and active organization context required',
+    };
+  }
+
+  const actorRole = await orgRepo.getMemberRole(orgId, actorUserId);
+  if (!actorRole || (actorRole !== 'owner' && actorRole !== 'admin')) {
+    return {
+      success: false,
+      error: 'forbidden',
+      status: 403,
+      message: 'Forbidden: Only organization owners and admins can resend invitations',
+    };
+  }
+
+  const invite = await invitationRepo.findById(orgId, inviteId);
+  if (!invite) {
+    return {
+      success: false,
+      error: 'not_found',
+      status: 404,
+      message: 'Invitation not found in this organization',
+    };
+  }
+
+  if (!canResend(invite)) {
+    return {
+      success: false,
+      error: 'invalid_status',
+      status: 400,
+      message: `Cannot resend invitation with status ${invite.status}`,
+    };
+  }
+
+  const rawToken = generateToken();
+  const tokenHash = hashToken(rawToken);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+  const updated = await invitationRepo.updateTokenAndExpiry(orgId, inviteId, tokenHash, expiresAt);
+  if (!updated) {
+    return {
+      success: false,
+      error: 'not_found',
+      status: 404,
+      message: 'Invitation not found in this organization',
+    };
+  }
+
+  // Audit event
+  await logInvitationAudit({
+    action: 'invite.resent',
+    organizationId: orgId,
+    actorId: actorUserId,
+    targetEmail: updated.email,
+    role: updated.role,
+    details: {
+      invitationId: updated.id,
+      expiresAt: updated.expires_at,
+    },
+  });
+
+  console.log(`[INVITATION_EMAIL_RESEND] To: ${updated.email}, Org: ${orgId}, Token: [SECURE]`);
+
+  return {
+    success: true,
+    invitation: updated,
+    rawToken,
+  };
+}
+
+export interface RevokeInvitationSuccess {
+  success: true;
+  invitation: Invitation;
+}
+
+export interface RevokeInvitationError {
+  success: false;
+  error: 'unauthorized' | 'forbidden' | 'not_found' | 'invalid_status';
+  status: number;
+  message: string;
+}
+
+export type RevokeInvitationResult = RevokeInvitationSuccess | RevokeInvitationError;
+
+/**
+ * Revokes a pending invitation:
+ * - Requires owner or admin permissions.
+ * - Only pending invitations may be revoked.
+ * - Sets status=revoked and revoked_at=now so the link stops working immediately.
+ * - Writes invite.revoked audit event.
+ */
+export async function revokeInvitation(
+  session: InvitationSessionContext | null | undefined,
+  inviteId: string
+): Promise<RevokeInvitationResult> {
+  const actorUserId = session?.userId || session?.user?.id;
+  const orgId = session?.orgId;
+
+  if (!session || !actorUserId || !orgId) {
+    return {
+      success: false,
+      error: 'unauthorized',
+      status: 401,
+      message: 'Authentication and active organization context required',
+    };
+  }
+
+  const actorRole = await orgRepo.getMemberRole(orgId, actorUserId);
+  if (!actorRole || (actorRole !== 'owner' && actorRole !== 'admin')) {
+    return {
+      success: false,
+      error: 'forbidden',
+      status: 403,
+      message: 'Forbidden: Only organization owners and admins can revoke invitations',
+    };
+  }
+
+  const invite = await invitationRepo.findById(orgId, inviteId);
+  if (!invite) {
+    return {
+      success: false,
+      error: 'not_found',
+      status: 404,
+      message: 'Invitation not found in this organization',
+    };
+  }
+
+  if (!canRevoke(invite)) {
+    return {
+      success: false,
+      error: 'invalid_status',
+      status: 400,
+      message: `Only pending invitations can be revoked. Current status is ${invite.status}.`,
+    };
+  }
+
+  const updated = await invitationRepo.updateStatus(orgId, inviteId, {
+    status: 'revoked',
+    revokedAt: new Date(),
+  });
+
+  if (!updated) {
+    return {
+      success: false,
+      error: 'not_found',
+      status: 404,
+      message: 'Invitation not found in this organization',
+    };
+  }
+
+  // Audit event
+  await logInvitationAudit({
+    action: 'invite.revoked',
+    organizationId: orgId,
+    actorId: actorUserId,
+    targetEmail: updated.email,
+    role: updated.role,
+    details: {
+      invitationId: updated.id,
+      revokedAt: updated.revoked_at,
+    },
+  });
+
+  return {
+    success: true,
+    invitation: updated,
   };
 }
