@@ -31,7 +31,7 @@ describe('Mailcow P3 / Prompt 33: send-test-email script and deliverability veri
     process.env.SMTP_PASS = 'super_secret_smtp_pass_123';
 
     // Must return a typed failure result, NEVER throw unhandled exception or expose password
-    const result = await sendTestEmail('recipient@example.com');
+    const result = await sendTestEmail('recipient@example.com', { timeoutMs: 500 });
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
     expect(result.error).not.toContain('super_secret_smtp_pass_123');
@@ -39,12 +39,7 @@ describe('Mailcow P3 / Prompt 33: send-test-email script and deliverability veri
   });
 
   it('3. Successfully dispatches when SMTP server is functional and returns messageId', async () => {
-    // Mock nodemailer transport to simulate successful SMTP transaction
-    const nodemailer = await import('nodemailer');
     const sendMailMock = vi.fn().mockResolvedValue({ messageId: '<test-p3-msg-999@mailcow.local>' });
-    vi.spyOn(nodemailer, 'createTransport').mockReturnValue({
-      sendMail: sendMailMock,
-    } as any);
 
     process.env.EMAIL_PROVIDER = 'smtp';
     process.env.SMTP_HOST = 'mail.innoventix.io';
@@ -52,7 +47,9 @@ describe('Mailcow P3 / Prompt 33: send-test-email script and deliverability veri
     process.env.SMTP_USER = 'invites@innoventix.io';
     process.env.SMTP_PASS = 'valid_secret_pass';
 
-    const result = await sendTestEmail('admin.testing@gmail.com');
+    const result = await sendTestEmail('admin.testing@gmail.com', {
+      customTransporter: { sendMail: sendMailMock },
+    });
     expect(result.success).toBe(true);
     expect(result.messageId).toBe('<test-p3-msg-999@mailcow.local>');
     expect(sendMailMock).toHaveBeenCalledTimes(1);
