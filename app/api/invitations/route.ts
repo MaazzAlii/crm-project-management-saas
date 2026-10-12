@@ -3,6 +3,7 @@ import { getAuthFromRequest } from '@/lib/auth/middleware';
 import { createInvitation } from '@/lib/services/invitation-service';
 import { invitationRepo } from '@/lib/db/repositories/invitation-repo';
 import { isValidEmail } from '@/lib/validation/email';
+import { checkRateLimit, createRateLimitExceededResponse, INVITE_RATE_LIMITS } from '@/lib/security/rate-limit';
 import { apiSuccess, apiError, handleApiError } from '@/lib/utils/response';
 import { InvitationRole, InvitationStatus } from '@/lib/types/database';
 
@@ -60,6 +61,12 @@ export async function POST(request: NextRequest) {
     const auth = getAuthFromRequest(request);
     if (!auth || !auth.orgId) {
       return apiError('Unauthorized: Active organization session required', 401, 'UNAUTHORIZED');
+    }
+
+    // Rate limiting: 20 per hour per user
+    const rateLimit = checkRateLimit(`invite:create:${auth.userId}`, INVITE_RATE_LIMITS.INVITE_CREATE);
+    if (!rateLimit.allowed) {
+      return createRateLimitExceededResponse(rateLimit);
     }
 
     let body: any;
