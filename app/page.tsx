@@ -86,7 +86,7 @@ export default function HomePage() {
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-md mb-8 hover:bg-indigo-500/15 transition-all">
           <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-xs font-semibold text-indigo-300">
-            Enterprise PostgreSQL Architecture Live v2.0
+            Agency Project Management & CRM Workspace
           </span>
           <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
         </div>
@@ -115,11 +115,11 @@ export default function HomePage() {
           </Link>
 
           <Link
-            href="/login"
+            href="/signup"
             className="w-full sm:w-auto px-8 py-4 text-base font-semibold text-slate-200 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 rounded-xl hover:border-slate-600 transition-all flex items-center justify-center gap-2"
           >
             <Play className="w-4 h-4 text-sky-400 fill-sky-400" />
-            <span>Launch Live Demo Workspace</span>
+            <span>Explore Workspace Demo</span>
           </Link>
         </div>
 
@@ -139,36 +139,36 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Interactive Hero UI Preview Card */}
+        {/* Interactive Hero UI Preview Card (Example Workspace) */}
         <div className="mt-16 relative rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-xl p-3 shadow-2xl shadow-indigo-950/50">
           <div className="absolute -top-3 left-6 px-3 py-1 bg-slate-800 border border-slate-700 rounded-md text-[11px] font-mono text-slate-300 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>Live Organization Workspace: Innoventix Agency</span>
+            <div className="w-2 h-2 rounded-full bg-indigo-400" />
+            <span>Example workspace</span>
           </div>
 
           <div className="rounded-xl overflow-hidden bg-slate-950/90 border border-slate-800 p-6 text-left">
-            {/* Mock Header */}
+            {/* Example Header */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-800/80">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
                   <Briefcase className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Q4 Enterprise Campaigns & Pipeline</h3>
-                  <p className="text-xs text-slate-400">14 Active Client Deals • $142,500 Pipeline Value</p>
+                  <h3 className="text-base font-bold text-white">Campaigns & Sales Pipeline</h3>
+                  <p className="text-xs text-slate-400">Visual Pipeline • Agile Projects • Connected Channels</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  +28.4% MRR Growth
+                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  Example Preview
                 </span>
-                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                  99.8% On-Time Delivery
+                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
+                  Interactive Features
                 </span>
               </div>
             </div>
 
-            {/* Mock Dashboard Grid */}
+            {/* Example Dashboard Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6">
               {/* Card 1: Pipeline */}
               <div className="rounded-lg bg-slate-900/80 border border-slate-800 p-4 space-y-3">
@@ -180,17 +180,17 @@ export default function HomePage() {
                 </div>
                 <div className="space-y-2">
                   <div className="p-2.5 rounded bg-slate-800/80 border border-slate-700/60 text-xs">
-                    <div className="font-semibold text-slate-200">Apex Global Cloud Migration</div>
+                    <div className="font-semibold text-slate-200">Cloud Migration Project</div>
                     <div className="flex justify-between text-[11px] text-slate-400 mt-1">
-                      <span>$45,000</span>
-                      <span className="text-indigo-400 font-medium">92% Win Prob</span>
+                      <span>Proposal Sent</span>
+                      <span className="text-indigo-400 font-medium">In Review</span>
                     </div>
                   </div>
                   <div className="p-2.5 rounded bg-slate-800/80 border border-slate-700/60 text-xs">
-                    <div className="font-semibold text-slate-200">HyperScale AI Integration</div>
+                    <div className="font-semibold text-slate-200">AI Integration Sprint</div>
                     <div className="flex justify-between text-[11px] text-slate-400 mt-1">
-                      <span>$28,000</span>
-                      <span className="text-emerald-400 font-medium">Closing Today</span>
+                      <span>Scope Finalized</span>
+                      <span className="text-emerald-400 font-medium">Ready</span>
                     </div>
                   </div>
                 </div>
@@ -211,12 +211,12 @@ export default function HomePage() {
                       <span className="h-1.5 flex-1 bg-slate-700 rounded-full overflow-hidden">
                         <span className="block h-full bg-sky-400 w-4/5 rounded-full" />
                       </span>
-                      <span className="text-[10px] text-sky-400 font-mono">80%</span>
+                      <span className="text-[10px] text-sky-400 font-mono">In Progress</span>
                     </div>
                   </div>
                   <div className="p-2.5 rounded bg-slate-800/80 border border-slate-700/60 text-xs">
-                    <div className="font-semibold text-slate-200">Client Portal Payment Approval</div>
-                    <div className="text-[11px] text-emerald-400 mt-1">Invoice #INV-2026-08 Paid</div>
+                    <div className="font-semibold text-slate-200">Client Portal Deliverable Approval</div>
+                    <div className="text-[11px] text-emerald-400 mt-1">Milestone Completed</div>
                   </div>
                 </div>
               </div>
@@ -227,25 +227,25 @@ export default function HomePage() {
                   <span className="flex items-center gap-1.5 text-purple-400">
                     <MessageSquare className="w-4 h-4" /> Omni-Channel Hub
                   </span>
-                  <span className="text-emerald-400 text-[11px]">3 Unread</span>
+                  <span className="text-indigo-400 text-[11px]">Synced</span>
                 </div>
                 <div className="space-y-2">
                   <div className="p-2.5 rounded bg-slate-800/80 border border-slate-700/60 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-slate-200">Slack • #calara-agency</span>
-                      <span className="text-[10px] text-slate-500">2m ago</span>
+                      <span className="font-semibold text-slate-200">Slack • #agency-team</span>
+                      <span className="text-[10px] text-slate-500">Just now</span>
                     </div>
                     <p className="text-[11px] text-slate-400 mt-1 truncate">
-                      Sarah: Latest Figma deliverable has been signed off!
+                      Team: Latest design deliverable has been shared.
                     </p>
                   </div>
                   <div className="p-2.5 rounded bg-slate-800/80 border border-slate-700/60 text-xs">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold text-slate-200">WhatsApp Inbound</span>
-                      <span className="text-[10px] text-slate-500">14m ago</span>
+                      <span className="text-[10px] text-slate-500">Earlier today</span>
                     </div>
                     <p className="text-[11px] text-slate-400 mt-1 truncate">
-                      David: Thanks for the rapid sprint turnaround.
+                      Client: Feedback sent via portal.
                     </p>
                   </div>
                 </div>
