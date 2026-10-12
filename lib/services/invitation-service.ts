@@ -690,3 +690,187 @@ export async function acceptInvitation(
     role: invite.role,
   };
 }
+
+export interface InvitationAcceptInfoSuccess {
+  success: true;
+  organizationName: string;
+  organizationSlug?: string;
+  domain: string;
+  maskedEmail: string;
+  accountExists: boolean;
+  role: string;
+}
+
+export interface InvitationAcceptInfoError {
+  success: false;
+  error: 'invalid_or_expired';
+  status: 400;
+  message: string;
+}
+
+export type InvitationAcceptInfoResult = InvitationAcceptInfoSuccess | InvitationAcceptInfoError;
+
+/**
+ * Returns masked metadata for the unauthenticated invite acceptance screen:
+ * - Never reveals full email address (masks local part).
+ * - Reveals organization name and domain.
+ * - Indicates if account exists in database for this email.
+ * - Returns generic invalid_or_expired on invalid or expired token.
+ */
+export async function getInvitationAcceptInfo(
+  rawToken: string
+): Promise<InvitationAcceptInfoResult> {
+  if (!rawToken || typeof rawToken !== 'string') {
+    return {
+      success: false,
+      error: 'invalid_or_expired',
+      status: 400,
+      message: 'This invitation is invalid or has expired',
+    };
+  }
+
+  const tokenHash = hashToken(rawToken);
+  const invite = await invitationRepo.findByTokenHash(tokenHash);
+
+  if (!invite) {
+    return {
+      success: false,
+      error: 'invalid_or_expired',
+      status: 400,
+      message: 'This invitation is invalid or has expired',
+    };
+  }
+
+  // Check if invitation is expired, revoked, or accepted
+  if (
+    invite.status === 'revoked' ||
+    invite.revoked_at ||
+    invite.status === 'accepted' ||
+    invite.accepted_at ||
+    invite.status === 'declined' ||
+    invite.declined_at ||
+    new Date(invite.expires_at) <= new Date()
+  ) {
+    return {
+      success: false,
+      error: 'invalid_or_expired',
+      status: 400,
+      message: 'This invitation is invalid or has expired',
+    };
+  }
+
+  const org = await orgRepo.findById(invite.organization_id);
+  const existingUser = await userRepo.findByEmail(invite.email);
+
+  // Mask email: e.g. "john.doe@example.com" -> "j***@example.com"
+  const atIndex = invite.email.indexOf('@');
+  const localPart = atIndex > 0 ? invite.email.slice(0, atIndex) : '';
+  const domain = atIndex > 0 ? invite.email.slice(atIndex + 1) : '';
+  const firstChar = localPart.length > 0 ? localPart[0] : '';
+  const maskedEmail = `${firstChar}***@${domain}`;
+
+  return {
+    success: true,
+    organizationName: org?.name || 'Innoventix Workspace',
+    organizationSlug: org?.slug,
+    domain,
+    maskedEmail,
+    accountExists: !!existingUser,
+    role: invite.role,
+  };
+}
+
+export interface DeclineInvitationSuccess {
+  success: true;
+  invitation: Invitation;
+}
+
+export interface DeclineInvitationError {
+  success: false;
+  error: 'invalid_or_expired' | 'invalid_status';
+  status: number;
+  message: string;
+}
+
+export type DeclineInvitationResult = DeclineInvitationSuccess | DeclineInvitationError;
+
+/**
+ * Declines an invitation by token:
+ * - Only pending invitations may be declined.
+ * - Sets status=declined and declined_at=now.
+ * - Writes invite.declined audit event.
+ */
+export async function declineInvitation(
+  rawToken: string
+): Promise<DeclineInvitationResult> {
+  if (!rawToken || typeof rawToken !== 'string') {
+    return {
+      success: false,
+      error: 'invalid_or_expired',
+      status: 400,
+      message: 'This invitation is invalid or has expired',
+    };
+  }
+
+  const tokenHash = hashToken(rawToken);
+  const invite = await invitationRepo.findByTokenHash(tokenHash);
+
+  if (!invite) {
+    return {
+      success: false,
+      error: 'invalid_or_expired',
+      status: 400,
+      message: 'This invitation is invalid or has expired',
+    };
+  }
+
+  if (new Date(invite.expires_at) <= new Date() || invite.status === 'expired') {
+    return {
+      success: false,
+      error: 'invalid_or_expired',
+      status: 400,
+      message: 'This invitation is invalid or has expired',
+    };
+  }
+
+  if (invite.status !== 'pending') {
+    return {
+      success: false,
+      error: 'invalid_status',
+      status: 400,
+      message: `Cannot decline invitation that is currently ${invite.status}`,
+    };
+  }
+
+  const updated = await invitationRepo.updateStatus(invite.organization_id, invite.id, {
+    status: 'declined',
+    declinedAt: new Date(),
+  });
+
+  if (!updated) {
+    return {
+      success: false,
+      error: 'invalid_or_expired',
+      status: 400,
+      message: 'This invitation is invalid or has expired',
+    };
+  }
+
+  // Audit event
+  await logInvitationAudit({
+    action: 'invite.declined',
+    organizationId: invite.organization_id,
+    targetEmail: updated.email,
+    role: updated.role,
+    details: {
+      invitationId: updated.id,
+      declinedAt: updated.declined_at,
+    },
+  });
+
+  return {
+    success: true,
+    invitation: updated,
+  };
+}
+
