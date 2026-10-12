@@ -21,6 +21,7 @@ documentation
 
 # --- Application ---
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+APP_PUBLIC_URL=https://project-manager.calara.agency
 PORT=3000
 NODE_ENV=development
 
@@ -75,6 +76,7 @@ SMTP_PASSWORD=replace_with_mailcow_mailbox_password
 
 # --- Application ---
 NEXT_PUBLIC_APP_URL=http://mspxxqi8itcxqfdkkkqxzfr6.85.239.246.243.sslip.io
+APP_PUBLIC_URL=http://mspxxqi8itcxqfdkkkqxzfr6.85.239.246.243.sslip.io
 PORT=3000
 NODE_ENV=production
 
@@ -269,6 +271,35 @@ graphify-out/cache/
   "singleQuote": true,
   "tabWidth": 2,
   "trailingComma": "es5"
+}
+
+--- FILE: config/invite-email-config.json ---
+{
+  "_comment": "Non-secret settings only. Passwords and keys must come from environment variables, never from this file.",
+  "emailProvider": "smtp",
+  "from": {
+    "address": "invites@innoventixhub.tech",
+    "name": "Innoventix"
+  },
+  "replyTo": "support@innoventixhub.tech",
+  "smtp": {
+    "host": "mail.innoventixhub.tech",
+    "port": 587,
+    "secure": false,
+    "requireTLS": true,
+    "user": "SET_IN_ENV:SMTP_USER",
+    "password": "SET_IN_ENV:SMTP_PASSWORD"
+  },
+  "invitation": {
+    "expiresDays": 7,
+    "subjectTemplate": "{inviterName} invited you to {organizationName}",
+    "displayNameTemplate": "{inviterName} via Innoventix",
+    "replyToWhenInviterVerified": true
+  },
+  "verification": {
+    "emailLinkExpiresHours": 24,
+    "domainCodeExpiresMinutes": 30
+  }
 }
 
 --- FILE: config/plans.ts ---
@@ -25218,7 +25249,7 @@ If you did not expect this, ignore this email.`;
     subject,
     html,
     text,
-    displayName: `${params.inviterName} via ${fromName}`,
+    displayName: `${safeInviter} via ${fromName}`,
     replyTo,
   };
 }
@@ -69304,7 +69335,7 @@ export function TemplateList({ initialTemplates }: TemplateListProps) {
 - [x] **Prompt 54: Zero Page Errors Audit Matrix** (`docs/page-errors.md`)
 - [x] **Prompt 55: Audit Tenancy Scanner & Token Log Verification** (`scripts/audit-tenancy.ts`, `lib/services/invitation-service.ts`)
 - [x] **Mailcow Patch Prompts Integration**: All prompts (P1 to P4) completed, Resend removed, SMTP startup guards verified.
-- [x] **Full Repository Consolidation**: Generated structured `full_project_dump.md` containing 997 files across 5 architectural levels (112,492+ lines, 3.97 MB).
+- [x] **Full Repository Consolidation**: Generated structured `full_project_dump.md` containing 998 files across 5 architectural levels (112,492+ lines, 3.97 MB).
 
 
 
@@ -70614,9 +70645,9 @@ Value: v=DMARC1; p=none; rua=mailto:dmarc@innoventixhub.tech; ruf=mailto:dmarc@i
 Verify that outbound TCP traffic on port `587` is open from the Coolify application container to Mailcow:
 ```bash
 # Test connectivity from application server / container:
-nc -zv mail.innoventix.io 587
+nc -zv mail.innoventixhub.tech 587
 # Or via curl:
-curl -v telnet://mail.innoventix.io:587
+curl -v telnet://mail.innoventixhub.tech:587
 ```
 
 ---
@@ -70644,7 +70675,7 @@ npx tsx scripts/send-test-email.ts <admin-destination@example.com>
    ```
 2. In Gmail, open the message > Click three dots (More) > **Show original**:
    - Check **SPF**: `PASS` with IP of Mailcow server.
-   - Check **DKIM**: `PASS` with domain `innoventix.io`.
+   - Check **DKIM**: `PASS` with domain `innoventixhub.tech`.
    - Check **DMARC**: `PASS`.
 3. In Outlook, view Message Source and confirm the same `Authentication-Results` headers.
 4. Verify the email lands in the Primary inbox, NOT the Spam / Junk folder.
@@ -77294,6 +77325,31 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm test`: **62/62 test files passed, 429/429 tests green (100%)**.
   - `npm run build`: **Next.js production build succeeded with exit code 0**.
 - **Status**: ✅ Complete and verified.
+
+---
+
+### Step: Mailcow Patch Prompts Full Alignment & Config Example
+- **Timestamp**: 2026-10-12T13:02:00+05:00
+- **Task ID**: `MAILCOW-PATCH-CONFIG-AND-TESTS`
+- **Actions Performed**:
+  - Created `config/invite-email-config.json` adhering to `innoventix-mailcow-patch-prompts/mailcow-patch/invite-email-config.example.json` with production non-secret defaults.
+  - Added `APP_PUBLIC_URL` to `.env.example` and `.env.local` to mirror `ENV-TEMPLATE.txt`.
+  - Enforced HTML escaping in `displayName` inside `lib/email/templates.ts`.
+  - Expanded `tests/email-templates.test.ts` to test P2 sender identity and XSS protection rules.
+  - Corrected all host and domain references to `mail.innoventixhub.tech` and `innoventixhub.tech` in `docs/mailcow-email-setup.md`.
+  - Regenerated `full_project_dump.md` (998 files, 3.97 MB).
+- **Files Modified**:
+  - `config/invite-email-config.json`
+  - `.env.example`
+  - `lib/email/templates.ts`
+  - `tests/email-templates.test.ts`
+  - `docs/mailcow-email-setup.md`
+  - `full_project_dump.md`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - `npm test`: **62/62 test files passed, 429/429 tests green (100%)**.
+- **Status**: ✅ Complete and verified.
+
 
 
 
@@ -99018,26 +99074,31 @@ describe('Prompt 30: Email Templates', () => {
     expect(email.text).toContain('admin');
   });
 
-  it('3. buildInviteEmail (P2 Mailcow Patch): sets From, DisplayName, and Reply-To rules', () => {
+  it('3. buildInviteEmail (P2 Mailcow Patch): sets From, DisplayName, Reply-To, escaped HTML, and APP_PUBLIC_URL', () => {
     // Unverified inviter falls back to EMAIL_REPLY_TO
     const emailUnverified = buildInviteEmail(
-      { name: 'Maaz Ali', email: 'maaz@personal.com', isVerified: false },
-      { name: 'Innoventix Hub' },
+      { name: '<b>Maaz Ali</b>', email: 'maaz@personal.com', isVerified: false },
+      { name: '<i>Innoventix Hub</i>' },
       { email: 'invitee@client.com' },
       'tok_456'
     );
-    expect(emailUnverified.displayName).toContain('Maaz Ali via');
+    expect(emailUnverified.displayName).toContain('&lt;b&gt;Maaz Ali&lt;/b&gt; via');
+    expect(emailUnverified.from).not.toBe('maaz@personal.com');
     expect(emailUnverified.replyTo).not.toBe('maaz@personal.com');
+    expect(emailUnverified.html).toContain('&lt;b&gt;Maaz Ali&lt;/b&gt;');
+    expect(emailUnverified.html).toContain('&lt;i&gt;Innoventix Hub&lt;/i&gt;');
+    expect(emailUnverified.html).toContain('https://custom.innoventix.io/invite/tok_456');
+    expect(emailUnverified.text).toContain('https://custom.innoventix.io/invite/tok_456');
 
     // Verified inviter uses their email as Reply-To
     const emailVerified = buildInviteEmail(
-      { name: 'Maaz Ali', email: 'maaz@innoventix.io', isVerified: true },
+      { name: 'Maaz Ali', email: 'maaz@innoventixhub.tech', isVerified: true },
       { name: 'Innoventix Hub' },
       { email: 'invitee@client.com' },
       'tok_456'
     );
-    expect(emailVerified.replyTo).toBe('maaz@innoventix.io');
-    expect(emailVerified.from).not.toBe('maaz@innoventix.io'); // From is platform address
+    expect(emailVerified.replyTo).toBe('maaz@innoventixhub.tech');
+    expect(emailVerified.from).not.toBe('maaz@innoventixhub.tech'); // From is platform address
   });
 
   it('4. verify-email template: includes 24-hour notice, APP_PUBLIC_URL link, and plain text', () => {
