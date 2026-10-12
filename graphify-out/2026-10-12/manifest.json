@@ -2922,9 +2922,9 @@
     "semantic_hash": ""
   },
   "lib/auth/middleware.ts": {
-    "mtime": 1791809148.6791022,
-    "seen": 1791810373.4787009,
-    "ast_hash": "de0d850f3d3850cf3e170ad7d7bb4a65",
+    "mtime": 1791824175.447957,
+    "seen": 1791824299.6167731,
+    "ast_hash": "027fb04941b1e242aaf88fc1b1d65cc9",
     "semantic_hash": ""
   },
   "lib/auth/password-reset.ts": {
@@ -2952,9 +2952,9 @@
     "semantic_hash": ""
   },
   "lib/billing/current-plan.ts": {
-    "mtime": 1791809837.0668695,
-    "seen": 1791810373.478734,
-    "ast_hash": "c264f118495625704800ff59ec23bc37",
+    "mtime": 1791824198.023672,
+    "seen": 1791824299.6167827,
+    "ast_hash": "88658293822fadc60247bd3e6e491f7c",
     "semantic_hash": ""
   },
   "lib/clients/communication-mode.ts": {
@@ -2964,9 +2964,9 @@
     "semantic_hash": ""
   },
   "lib/db/auto-migrate.ts": {
-    "mtime": 1791633272.2560031,
-    "seen": 1791772540.8373375,
-    "ast_hash": "fd97ffc2ae64a05e7d56684175805c62",
+    "mtime": 1791824210.4978304,
+    "seen": 1791824299.616788,
+    "ast_hash": "1b9277769bdb5a89dfb9672a2d6e1d28",
     "semantic_hash": ""
   },
   "lib/db/cache.ts": {

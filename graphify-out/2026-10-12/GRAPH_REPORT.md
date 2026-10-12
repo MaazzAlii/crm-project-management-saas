@@ -1,12 +1,12 @@
 # Graph Report - 91-crm-project-management-saas  (2026-10-12)
 
 ## Corpus Check
-- 978 files · ~1,538,601 words
+- 978 files · ~1,538,606 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 17 file(s) not represented in the graph (top: .conf 7, (none) 4, .example 4)
 
 ## Summary
-- 6985 nodes · 12189 edges · 572 communities (359 shown, 213 thin omitted)
+- 6985 nodes · 12188 edges · 572 communities (359 shown, 213 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 168 edges (avg confidence: 0.94)
 - Token cost: 0 input · 0 output
 
@@ -548,7 +548,7 @@
 5. `getAuthFromRequest()` - 120 edges
 6. `handleApiError()` - 120 edges
 7. `apiError()` - 119 edges
-8. `queryOne()` - 116 edges
+8. `queryOne()` - 115 edges
 9. `apiSuccess()` - 113 edges
 10. `react` - 95 edges
 

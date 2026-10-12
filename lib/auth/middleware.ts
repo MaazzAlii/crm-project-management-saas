@@ -130,5 +130,11 @@ export function getTenantOrgId(
     }
   }
 
+  // Check header for cross-tenant probe
+  const hOrg = request.headers?.get('x-organization-id');
+  if (hOrg && hOrg !== sessionOrgId) {
+    return { error: 'Organization not found', status: 404 };
+  }
+
   return { orgId: sessionOrgId };
 }

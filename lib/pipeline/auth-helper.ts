@@ -56,6 +56,9 @@ export async function getPipelineSession(request: NextRequest): Promise<SessionC
     const isMemberOfRequested = memberships.some((m) => m.organizationId === requestedOrgId);
     if (isMemberOfRequested || user.role === 'super_admin') {
       activeOrgId = requestedOrgId;
+    } else {
+      // User is not a member of the requested org: reject context switch
+      return null;
     }
   }
 

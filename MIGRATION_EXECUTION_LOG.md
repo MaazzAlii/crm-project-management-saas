@@ -1193,3 +1193,35 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npx tsx scripts/audit-tenancy.ts`: Completed with 0 token leaks and 0 DEV_FALLBACK instances.
   - `npm run lint`: 0 errors.
 - **Status**: ✅ Auth hardened, single source of truth established. Ready for user inspection.
+
+---
+
+### [2026-10-12 22:05] Security Audit Review: Strict Isolation & Lifetime Decoupling
+
+- **Phase / Task ID**: Security Review Cycle 2
+- **Rationale**: 
+  - Ensure any mismatched `x-organization-id` header explicitly returns 404 and is rejected across pipeline session handlers.
+  - Strictly remove automatic lifetime assignment from startup (`auto-migrate.ts`), enforcing that lifetime access can only be granted via explicit manual invocation of `scripts/grant-lifetime-access.ts <email>`.
+  - Validate that Stripe webhooks can never overwrite or clear `plan_override`.
+- **Action Performed**:
+  1. Updated `lib/pipeline/auth-helper.ts`: When `x-organization-id` header is sent for an organization where the user is not an active member, returns `null` immediately.
+  2. Updated `lib/auth/middleware.ts`: `getTenantOrgId` rejects any request where `x-organization-id` header does not match `sessionOrgId` with `{ error: 'Organization not found', status: 404 }`.
+  3. Updated `lib/db/auto-migrate.ts`: Removed all automatic assignment of lifetime plans and enterprise tier. Default organizations initialize with standard `free` plan and `plan_override = NULL`.
+  4. Tested `scripts/grant-lifetime-access.ts <email>` on PostgreSQL database: verified successful output and confirmed database records for role and `plan_override = 'lifetime'`.
+  5. Added `tests/security-tenancy-and-override.test.ts` with 5 targeted tests:
+     - Header mismatch rejected with 404
+     - Context switch rejected for non-members
+     - Untrusted org cookies completely ignored in favor of signed token claims
+     - Stripe checkout preserves `plan_override = 'lifetime'`
+     - Stripe subscription cancellation preserves `plan_override = 'lifetime'` and does not restrict account
+- **Files Modified**:
+  - `lib/pipeline/auth-helper.ts`
+  - `lib/auth/middleware.ts`
+  - `lib/db/auto-migrate.ts`
+  - `tests/security-tenancy-and-override.test.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - `npx vitest run tests/security-tenancy-and-override.test.ts`: **5/5 passed (100%)**.
+  - `npm test`: **65/65 test suites passed, 438/438 tests green (100%)**.
+  - Push freeze maintained: Zero commits pushed to `origin` or `deploy`.
+- **Status**: ✅ Completed.

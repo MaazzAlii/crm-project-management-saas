@@ -271,16 +271,11 @@ export async function bootstrapAdminUser() {
   if (!orgId) {
     const orgRes = await query<{ id: string }>(
       `INSERT INTO organizations (name, slug, plan_tier, billing_status, onboarding_completed)
-       VALUES ($1, $2, 'enterprise', 'active', true)
+       VALUES ($1, $2, 'free', 'active', true)
        RETURNING id`,
       ['Maaz Ali Enterprise', 'maaz-ali-enterprise']
     );
     orgId = orgRes.rows?.[0]?.id;
-  } else {
-    await query(
-      "UPDATE organizations SET plan_tier = 'enterprise', billing_status = 'active', onboarding_completed = true, updated_at = NOW() WHERE id = $1",
-      [orgId]
-    );
   }
 
   if (orgId) {
@@ -290,34 +285,15 @@ export async function bootstrapAdminUser() {
        ON CONFLICT (organization_id, user_id) DO NOTHING`,
       [orgId, user.id]
     );
-  }
 
-  // 5. Ensure organization subscription and plans have lifetime override
-  if (orgId) {
+    // Default organization plan to standard free tier without lifetime override
     await query(
       `INSERT INTO organization_plans (organization_id, plan_id, status, plan_override, updated_at)
-       VALUES ($1, 'enterprise', 'active', 'lifetime', NOW())
-       ON CONFLICT (organization_id) DO UPDATE SET
-         plan_id = 'enterprise',
-         status = 'active',
-         plan_override = 'lifetime',
-         updated_at = NOW()`,
+       VALUES ($1, 'free', 'active', NULL, NOW())
+       ON CONFLICT (organization_id) DO NOTHING`,
       [orgId]
     );
-
-    if (lifetimePlan) {
-      await query(
-        `INSERT INTO organization_subscriptions (organization_id, plan_id, status, current_period_end)
-         VALUES ($1, $2, 'active', NOW() + INTERVAL '100 years')
-         ON CONFLICT (organization_id) DO UPDATE SET
-           plan_id = EXCLUDED.plan_id,
-           status = 'active',
-           current_period_end = NOW() + INTERVAL '100 years',
-           updated_at = NOW()`,
-        [orgId, lifetimePlan.id]
-      );
-    }
   }
 
-  console.log(`[AutoMigrate] 🚀 Admin user ${adminEmail} ready with Lifetime VIP subscription.`);
+  console.log(`[AutoMigrate] 🚀 Admin user ${adminEmail} initialized.`);
 }
