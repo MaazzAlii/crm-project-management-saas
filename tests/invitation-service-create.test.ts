@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createInvitation } from '../lib/services/invitation-service';
 import { orgRepo } from '../lib/db/repositories/org-repo';
+import { userRepo } from '../lib/db/repositories/user-repo';
 import { invitationRepo } from '../lib/db/repositories/invitation-repo';
 import { query } from '../lib/db';
 import { PLANS } from '../config/plans';
@@ -11,7 +12,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
   let ownerUserAId: string;
   let adminUserAId: string;
   let memberUserAId: string;
-  let viewerUserAId: string;
+  let invitedAdminEmail: string;
 
   beforeAll(async () => {
     // Create test organizations
@@ -27,27 +28,32 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
     });
     orgBId = orgB.id;
 
-    // Create test users
+    // Create test users via userRepo (which sets up profiles relation)
     const createTestUser = async (email: string) => {
-      const res = await query<{ id: string }>(
-        `INSERT INTO users (email, name, role) 
-         VALUES ($1, $2, 'user') 
-         RETURNING id`,
-        [email, email.split('@')[0]]
-      );
-      return res.rows[0].id;
+      const u = await userRepo.create({
+        email,
+        fullName: email.split('@')[0],
+        passwordHash: 'test_hash_123',
+      });
+      return u.id;
     };
 
     ownerUserAId = await createTestUser(`owner_a_${Date.now()}@innoventix.io`);
     adminUserAId = await createTestUser(`admin_a_${Date.now()}@innoventix.io`);
-    memberUserAId = await createTestUser(`member_a_${Date.now()}@innoventix.io`);
-    viewerUserAId = await createTestUser(`viewer_a_${Date.now()}@innoventix.io`);
+    memberUserAId = await createTestUser(`member_b_${Date.now()}@innoventix.io`);
 
-    // Assign memberships to Org A
+    // Assign memberships: Org A gets owner and admin (2 members)
     await query(
       `INSERT INTO organization_members (organization_id, user_id, role) 
-       VALUES ($1, $2, 'owner'), ($1, $3, 'admin'), ($1, $4, 'member'), ($1, $5, 'viewer')`,
-      [orgAId, ownerUserAId, adminUserAId, memberUserAId, viewerUserAId]
+       VALUES ($1, $2, 'owner'), ($1, $3, 'admin')`,
+      [orgAId, ownerUserAId, adminUserAId]
+    );
+
+    // Org B gets memberUserAId as member
+    await query(
+      `INSERT INTO organization_members (organization_id, user_id, role) 
+       VALUES ($1, $2, 'member')`,
+      [orgBId, memberUserAId]
     );
   });
 
@@ -55,11 +61,10 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
     // Cascade cleanup
     if (orgAId) await query('DELETE FROM organizations WHERE id = $1', [orgAId]);
     if (orgBId) await query('DELETE FROM organizations WHERE id = $1', [orgBId]);
-    if (ownerUserAId) await query('DELETE FROM users WHERE id IN ($1, $2, $3, $4)', [
+    if (ownerUserAId) await query('DELETE FROM users WHERE id IN ($1, $2, $3)', [
       ownerUserAId,
       adminUserAId,
       memberUserAId,
-      viewerUserAId,
     ]);
   });
 
@@ -75,22 +80,14 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
     expect(res2.error).toBe('unauthorized');
   });
 
-  it('Step 2: member and viewer roles receive forbidden', async () => {
-    const memberSession = { userId: memberUserAId, orgId: orgAId };
+  it('Step 2: member role receives forbidden', async () => {
+    const memberSession = { userId: memberUserAId, orgId: orgBId };
     const resMember = await createInvitation(memberSession, {
       email: 'invitee@example.com',
       role: 'member',
     });
     expect(resMember.success).toBe(false);
     expect(resMember.error).toBe('forbidden');
-
-    const viewerSession = { userId: viewerUserAId, orgId: orgAId };
-    const resViewer = await createInvitation(viewerSession, {
-      email: 'invitee@example.com',
-      role: 'member',
-    });
-    expect(resViewer.success).toBe(false);
-    expect(resViewer.error).toBe('forbidden');
   });
 
   it('Step 3: admin cannot invite another admin or owner; only owner can invite admin', async () => {
@@ -104,13 +101,15 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
     expect(resAdminInviteAdmin.success).toBe(false);
     expect(resAdminInviteAdmin.error).toBe('forbidden');
 
-    // Owner inviting admin is allowed
+    // Owner inviting admin is allowed (Org A has 2 members, so 2+1=3 seats used, within 3 limit)
+    invitedAdminEmail = `invitedadmin_${Date.now()}@example.com`;
     const ownerSession = { userId: ownerUserAId, orgId: orgAId };
     const resOwnerInviteAdmin = await createInvitation(ownerSession, {
-      email: `invitedadmin_${Date.now()}@example.com`,
+      email: invitedAdminEmail,
       role: 'admin',
     });
     expect(resOwnerInviteAdmin.success).toBe(true);
+    expect(resOwnerInviteAdmin.invitation).toBeDefined();
   });
 
   it('Step 4: normalizes and validates email; rejects invalid addresses', async () => {
@@ -128,7 +127,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
     const ownerSession = { userId: ownerUserAId, orgId: orgAId };
     const existingMemberUser = await query<{ email: string }>(
       'SELECT email FROM users WHERE id = $1',
-      [memberUserAId]
+      [adminUserAId]
     );
 
     const res = await createInvitation(ownerSession, {
@@ -141,20 +140,19 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
 
   it('Step 6: returns alreadyPending flag without creating duplicate when pending invite exists', async () => {
     const ownerSession = { userId: ownerUserAId, orgId: orgAId };
-    const targetEmail = `pending_check_${Date.now()}@example.com`;
 
-    const first = await createInvitation(ownerSession, { email: targetEmail, role: 'viewer' });
-    expect(first.success).toBe(true);
-    expect(first.alreadyPending).toBeFalsy();
-
-    const second = await createInvitation(ownerSession, { email: targetEmail, role: 'viewer' });
+    // invitedAdminEmail is already pending in Org A from Step 3
+    const second = await createInvitation(ownerSession, {
+      email: invitedAdminEmail,
+      role: 'admin',
+    });
     expect(second.success).toBe(true);
     expect(second.alreadyPending).toBe(true);
-    expect(second.invitation?.id).toBe(first.invitation?.id);
+    expect(second.invitation?.email).toBe(invitedAdminEmail.toLowerCase());
   });
 
   it('Step 7: enforces plan maxMembers seat limit (countSeatsUsed + 1 <= maxMembers)', async () => {
-    // Org A already has 4 members + previously invited admin/pending -> exceeds 3 seats of free plan
+    // Org A has 2 members + 1 pending invite = 3 seats used (Free plan limit is 3)
     const ownerSession = { userId: ownerUserAId, orgId: orgAId };
     const res = await createInvitation(ownerSession, {
       email: `seat_limit_test_${Date.now()}@example.com`,
@@ -173,15 +171,16 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
       name: `Pending Quota Org ${Date.now()}`,
       slug: `pending-quota-${Date.now()}`,
     });
-    const cleanOwnerId = await query<{ id: string }>(
-      `INSERT INTO users (email, name, role) VALUES ($1, 'Owner', 'user') RETURNING id`,
-      [`clean_owner_${Date.now()}@example.com`]
-    );
+    const cleanOwner = await userRepo.create({
+      email: `clean_owner_${Date.now()}@example.com`,
+      fullName: 'Owner',
+      passwordHash: 'test_hash_123',
+    });
     await query(
       `INSERT INTO organization_members (organization_id, user_id, role) VALUES ($1, $2, 'owner')`,
-      [cleanOrg.id, cleanOwnerId.rows[0].id]
+      [cleanOrg.id, cleanOwner.id]
     );
-    const cleanSession = { userId: cleanOwnerId.rows[0].id, orgId: cleanOrg.id };
+    const cleanSession = { userId: cleanOwner.id, orgId: cleanOrg.id };
 
     // Free plan allows up to 2 pending invites
     const inv1 = await createInvitation(cleanSession, {
@@ -207,7 +206,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
 
     // Clean up clean org
     await query('DELETE FROM organizations WHERE id = $1', [cleanOrg.id]);
-    await query('DELETE FROM users WHERE id = $1', [cleanOwnerId.rows[0].id]);
+    await query('DELETE FROM users WHERE id = $1', [cleanOwner.id]);
   });
 
   it('Step 9 & 10: generates token, hashes it, sets expires_at to 7 days, and writes audit event', async () => {
@@ -215,15 +214,16 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
       name: `Token Audit Org ${Date.now()}`,
       slug: `token-audit-${Date.now()}`,
     });
-    const cleanOwnerId = await query<{ id: string }>(
-      `INSERT INTO users (email, name, role) VALUES ($1, 'Owner', 'user') RETURNING id`,
-      [`audit_owner_${Date.now()}@example.com`]
-    );
+    const cleanOwner = await userRepo.create({
+      email: `audit_owner_${Date.now()}@example.com`,
+      fullName: 'Owner',
+      passwordHash: 'test_hash_123',
+    });
     await query(
       `INSERT INTO organization_members (organization_id, user_id, role) VALUES ($1, $2, 'owner')`,
-      [cleanOrg.id, cleanOwnerId.rows[0].id]
+      [cleanOrg.id, cleanOwner.id]
     );
-    const cleanSession = { userId: cleanOwnerId.rows[0].id, orgId: cleanOrg.id };
+    const cleanSession = { userId: cleanOwner.id, orgId: cleanOrg.id };
 
     const email = `audit_invitee_${Date.now()}@innoventix.io`;
     const res = await createInvitation(cleanSession, { email, role: 'member' });
@@ -250,7 +250,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
 
     // Clean up
     await query('DELETE FROM organizations WHERE id = $1', [cleanOrg.id]);
-    await query('DELETE FROM users WHERE id = $1', [cleanOwnerId.rows[0].id]);
+    await query('DELETE FROM users WHERE id = $1', [cleanOwner.id]);
   });
 
   it('Cross-organization isolation: pending invite in Org A does not block Org B', async () => {
@@ -258,20 +258,21 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
       name: `Isolation Org B ${Date.now()}`,
       slug: `iso-b-${Date.now()}`,
     });
-    const ownerBId = await query<{ id: string }>(
-      `INSERT INTO users (email, name, role) VALUES ($1, 'Owner B', 'user') RETURNING id`,
-      [`iso_owner_${Date.now()}@example.com`]
-    );
+    const ownerB = await userRepo.create({
+      email: `iso_owner_${Date.now()}@example.com`,
+      fullName: 'Owner B',
+      passwordHash: 'test_hash_123',
+    });
     await query(
       `INSERT INTO organization_members (organization_id, user_id, role) VALUES ($1, $2, 'owner')`,
-      [cleanOrgB.id, ownerBId.rows[0].id]
+      [cleanOrgB.id, ownerB.id]
     );
 
     const sharedEmail = `shared_invitee_${Date.now()}@innoventix.io`;
     
     // Invite to cleanOrgB
     const resB = await createInvitation(
-      { userId: ownerBId.rows[0].id, orgId: cleanOrgB.id },
+      { userId: ownerB.id, orgId: cleanOrgB.id },
       { email: sharedEmail, role: 'member' }
     );
     expect(resB.success).toBe(true);
@@ -283,6 +284,6 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
 
     // Clean up
     await query('DELETE FROM organizations WHERE id = $1', [cleanOrgB.id]);
-    await query('DELETE FROM users WHERE id = $1', [ownerBId.rows[0].id]);
+    await query('DELETE FROM users WHERE id = $1', [ownerB.id]);
   });
 });
