@@ -13,6 +13,7 @@ export function getInvitationExpiry(baseDate: Date | string | number = new Date(
 export interface StatusEvaluationInvite {
   accepted_at?: Date | string | null;
   revoked_at?: Date | string | null;
+  declined_at?: Date | string | null;
   expires_at: Date | string | number;
 }
 
@@ -21,8 +22,9 @@ export interface StatusEvaluationInvite {
  * Rule:
  * 1. If accepted_at is set -> 'accepted'
  * 2. If revoked_at is set -> 'revoked'
- * 3. If expires_at <= now -> 'expired'
- * 4. Otherwise -> 'pending'
+ * 3. If declined_at is set -> 'declined'
+ * 4. If expires_at <= now -> 'expired'
+ * 5. Otherwise -> 'pending'
  */
 export function computeStatus(
   invite: StatusEvaluationInvite,
@@ -34,6 +36,10 @@ export function computeStatus(
 
   if (invite.revoked_at) {
     return 'revoked';
+  }
+
+  if (invite.declined_at || (invite as any).status === 'declined') {
+    return 'declined';
   }
 
   const nowDate = new Date(now).getTime();
