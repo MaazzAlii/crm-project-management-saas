@@ -151,10 +151,16 @@ export async function POST(request: NextRequest) {
     // Sanitize: never return rawToken or token_hash in response payload
     const { token_hash, ...safeInvitation } = result.invitation as any;
 
+    const baseUrl = (process.env.APP_PUBLIC_URL || 'http://localhost:3000').replace(/\/$/, '');
+    const inviteLink = result.rawToken ? `${baseUrl}/invite/${result.rawToken}` : undefined;
+
     return apiSuccess(
       {
         invitation: safeInvitation,
         alreadyPending: result.alreadyPending || false,
+        sendFailed: result.sendFailed || false,
+        warning: result.warning,
+        ...(inviteLink ? { inviteLink } : {}),
       },
       201
     );
