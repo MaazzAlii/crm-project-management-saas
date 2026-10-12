@@ -287,12 +287,16 @@ export async function bootstrapAdminUser() {
     );
 
     // Default organization plan to standard free tier without lifetime override
-    await query(
-      `INSERT INTO organization_plans (organization_id, plan_id, status, plan_override, updated_at)
-       VALUES ($1, 'free', 'active', NULL, NOW())
-       ON CONFLICT (organization_id) DO NOTHING`,
-      [orgId]
-    );
+    try {
+      await query(
+        `INSERT INTO organization_plans (organization_id, plan_id, status, plan_override, updated_at)
+         VALUES ($1, 'free', 'active', NULL, NOW())
+         ON CONFLICT (organization_id) DO NOTHING`,
+        [orgId]
+      );
+    } catch (opErr: any) {
+      console.warn('[AutoMigrate] organization_plans seed notice:', opErr.message);
+    }
   }
 
   console.log(`[AutoMigrate] 🚀 Admin user ${adminEmail} initialized.`);
