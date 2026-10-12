@@ -13,18 +13,21 @@
  * =============================================================================
  */
 
-export type EmailProviderType = 'resend' | 'smtp' | 'console'
+export type EmailProviderType = 'smtp' | 'console'
 
 export interface EmailConfig {
   provider: EmailProviderType
+  fromAddress: string
+  fromName: string
+  replyTo: string
   from: string
-  resendApiKey?: string
   smtp?: {
     host: string
     port: number
     user?: string
     password?: string
     secure?: boolean
+    requireTls?: boolean
   }
   appPublicUrl: string
 }
@@ -33,39 +36,40 @@ export interface EmailConfig {
  * Retrieve current email configuration from environment variables
  */
 export function getEmailConfig(): EmailConfig {
-  const isProd = process.env.NODE_ENV === 'production'
   const rawProvider = (process.env.EMAIL_PROVIDER || '').toLowerCase()
   
   let provider: EmailProviderType = 'console'
-  if (rawProvider === 'resend') {
-    provider = 'resend'
-  } else if (rawProvider === 'smtp') {
+  if (rawProvider === 'smtp') {
     provider = 'smtp'
   } else if (rawProvider === 'console' || !rawProvider) {
     provider = 'console'
   }
 
-  const from = process.env.EMAIL_FROM || 'Innoventix <invites@innoventixhub.tech>'
+  const fromAddress = process.env.EMAIL_FROM_ADDRESS || 'invites@innoventixhub.tech'
+  const fromName = process.env.EMAIL_FROM_NAME || 'Innoventix'
+  const replyTo = process.env.EMAIL_REPLY_TO || 'support@innoventixhub.tech'
+  const rawFrom = process.env.EMAIL_FROM || `${fromName} <${fromAddress}>`
   const appPublicUrl = process.env.APP_PUBLIC_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+  const port = parseInt(process.env.SMTP_PORT || '587', 10)
+  const secure = process.env.SMTP_SECURE === 'true' || port === 465
+  const requireTls = process.env.SMTP_REQUIRE_TLS !== 'false'
 
   const config: EmailConfig = {
     provider,
-    from,
+    fromAddress,
+    fromName,
+    replyTo,
+    from: rawFrom,
     appPublicUrl: appPublicUrl.replace(/\/$/, ''),
-  }
-
-  if (provider === 'resend') {
-    config.resendApiKey = process.env.RESEND_API_KEY
-  }
-
-  if (provider === 'smtp') {
-    config.smtp = {
+    smtp: {
       host: process.env.SMTP_HOST || '',
-      port: parseInt(process.env.SMTP_PORT || '587', 10),
+      port,
       user: process.env.SMTP_USER,
       password: process.env.SMTP_PASSWORD,
-      secure: process.env.SMTP_PORT === '465',
-    }
+      secure,
+      requireTls,
+    },
   }
 
   return config
@@ -80,10 +84,9 @@ export function formatSenderAddress(organizationName?: string): string {
   const config = getEmailConfig()
   const rawFrom = config.from.trim()
 
-  // Extract platform email inside angle brackets: e.g. "Innoventix <invites@innoventix.io>"
   const emailMatch = rawFrom.match(/<([^>]+)>/)
-  const platformEmail = emailMatch ? emailMatch[1] : rawFrom
-  const platformName = rawFrom.includes('<') ? rawFrom.split('<')[0].trim() : 'Innoventix'
+  const platformEmail = emailMatch ? emailMatch[1] : (config.fromAddress || rawFrom)
+  const platformName = rawFrom.includes('<') ? rawFrom.split('<')[0].trim() : config.fromName
 
   if (!organizationName || organizationName.trim() === '') {
     return `${platformName} <${platformEmail}>`
@@ -94,36 +97,49 @@ export function formatSenderAddress(organizationName?: string): string {
 
 /**
  * Validates email configuration for production readiness.
- * Throws a descriptive error if environment variables are missing or unsafe.
+ * Strict Mailcow P1 rules: In production, EMAIL_PROVIDER must be 'smtp'
+ * and all required SMTP variables must be set.
  */
 export function validateEmailConfig(): EmailConfig {
   const isProd = process.env.NODE_ENV === 'production'
   const config = getEmailConfig()
 
-  if (isProd && config.provider === 'console') {
-    throw new Error(
-      '[EMAIL_CONFIG_ERROR] The "console" email provider is not allowed in production. ' +
-      'Please configure EMAIL_PROVIDER=resend or EMAIL_PROVIDER=smtp with valid credentials.'
-    )
-  }
-
-  if (config.provider === 'resend') {
-    if (!config.resendApiKey || config.resendApiKey.trim() === '') {
+  if (isProd) {
+    if (config.provider !== 'smtp') {
       throw new Error(
-        '[EMAIL_CONFIG_ERROR] RESEND_API_KEY is required when EMAIL_PROVIDER is resend. ' +
-        'Please supply your Resend API key in environment variables.'
+        '[EMAIL_CONFIG_ERROR] The console email provider is not allowed in production. ' +
+        'In production, EMAIL_PROVIDER must be set to "smtp". Console provider is strictly forbidden in production.'
       )
     }
-  }
 
-  if (config.provider === 'smtp') {
-    if (!config.smtp?.host || config.smtp.host.trim() === '') {
+    const missingVars: string[] = []
+    if (!config.smtp?.host || config.smtp.host.trim() === '') missingVars.push('SMTP_HOST')
+    if (!config.smtp?.user || config.smtp.user.trim() === '') missingVars.push('SMTP_USER')
+    if (!config.smtp?.password || config.smtp.password.trim() === '') missingVars.push('SMTP_PASSWORD')
+
+    if (missingVars.length > 0) {
       throw new Error(
-        '[EMAIL_CONFIG_ERROR] SMTP_HOST is required when EMAIL_PROVIDER is smtp. ' +
-        'Please configure SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASSWORD.'
+        `[EMAIL_CONFIG_ERROR] Missing required SMTP environment variables in production: ${missingVars.join(', ')}.`
       )
     }
   }
 
   return config
+}
+
+/**
+ * Safe status check that prints whether email variables are set without leaking values.
+ */
+export function printEmailConfigStatus(): Record<string, boolean> {
+  return {
+    EMAIL_PROVIDER: !!process.env.EMAIL_PROVIDER,
+    EMAIL_FROM_ADDRESS: !!process.env.EMAIL_FROM_ADDRESS,
+    EMAIL_FROM_NAME: !!process.env.EMAIL_FROM_NAME,
+    EMAIL_REPLY_TO: !!process.env.EMAIL_REPLY_TO,
+    SMTP_HOST: !!process.env.SMTP_HOST,
+    SMTP_PORT: !!process.env.SMTP_PORT,
+    SMTP_USER: !!process.env.SMTP_USER,
+    SMTP_PASSWORD: !!process.env.SMTP_PASSWORD,
+    APP_PUBLIC_URL: !!process.env.APP_PUBLIC_URL,
+  }
 }

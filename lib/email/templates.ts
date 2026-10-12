@@ -105,7 +105,7 @@ This invitation link will expire on ${formattedExpiry}.
 If you did not expect this, ignore this email.`;
 
   const fromName = process.env.EMAIL_FROM_NAME || 'Innoventix';
-  const defaultReplyTo = process.env.EMAIL_REPLY_TO || 'support@innoventix.io';
+  const defaultReplyTo = process.env.EMAIL_REPLY_TO || 'support@innoventixhub.tech';
   const replyTo =
     params.inviterEmailVerified && params.inviterEmail ? params.inviterEmail : defaultReplyTo;
 

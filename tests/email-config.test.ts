@@ -35,44 +35,40 @@ describe('Prompt 04: Email Sender Configuration', () => {
     process.env.NODE_ENV = 'production'
     process.env.EMAIL_PROVIDER = 'console'
     expect(() => validateEmailConfig()).toThrow(
-      /console.*email provider is not allowed in production/i
+      /EMAIL_PROVIDER must be set to "smtp"/i
     )
   })
 
-  it('throws in production when resend provider is selected but RESEND_API_KEY is missing', () => {
-    process.env.NODE_ENV = 'production'
-    process.env.EMAIL_PROVIDER = 'resend'
-    delete process.env.RESEND_API_KEY
-    expect(() => validateEmailConfig()).toThrow(
-      /RESEND_API_KEY is required when EMAIL_PROVIDER is resend/i
-    )
-  })
-
-  it('throws in production when smtp provider is selected but SMTP credentials are missing', () => {
+  it('throws in production when smtp provider is selected but SMTP_HOST is missing', () => {
     process.env.NODE_ENV = 'production'
     process.env.EMAIL_PROVIDER = 'smtp'
     delete process.env.SMTP_HOST
+    process.env.SMTP_USER = 'invites@innoventixhub.tech'
+    process.env.SMTP_PASSWORD = 'secret_password'
     expect(() => validateEmailConfig()).toThrow(
-      /SMTP_HOST.*required/i
+      /SMTP_HOST/i
     )
   })
 
-  it('validates successfully when resend is configured with key in production', () => {
-    process.env.NODE_ENV = 'production'
-    process.env.EMAIL_PROVIDER = 'resend'
-    process.env.RESEND_API_KEY = 're_test_123456789'
-    process.env.EMAIL_FROM = 'Innoventix <invites@innoventix.io>'
-    expect(() => validateEmailConfig()).not.toThrow()
-  })
-
-  it('validates successfully when smtp is configured with host and port in production', () => {
+  it('throws in production when SMTP_PASSWORD is missing', () => {
     process.env.NODE_ENV = 'production'
     process.env.EMAIL_PROVIDER = 'smtp'
-    process.env.SMTP_HOST = 'smtp.mailcow.email'
+    process.env.SMTP_HOST = 'mail.innoventixhub.tech'
+    process.env.SMTP_USER = 'invites@innoventixhub.tech'
+    delete process.env.SMTP_PASSWORD
+    expect(() => validateEmailConfig()).toThrow(
+      /SMTP_PASSWORD/i
+    )
+  })
+
+  it('validates successfully when smtp is configured with all required variables in production', () => {
+    process.env.NODE_ENV = 'production'
+    process.env.EMAIL_PROVIDER = 'smtp'
+    process.env.SMTP_HOST = 'mail.innoventixhub.tech'
     process.env.SMTP_PORT = '587'
-    process.env.SMTP_USER = 'invites@innoventix.io'
+    process.env.SMTP_USER = 'invites@innoventixhub.tech'
     process.env.SMTP_PASSWORD = 'secret_smtp_password'
-    process.env.EMAIL_FROM = 'Innoventix <invites@innoventix.io>'
+    process.env.EMAIL_FROM = 'Innoventix <invites@innoventixhub.tech>'
     expect(() => validateEmailConfig()).not.toThrow()
   })
 })
