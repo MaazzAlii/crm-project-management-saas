@@ -182,10 +182,28 @@ export class InvitationRepository {
          token_hash = $1,
          expires_at = $2,
          status = 'pending',
+         send_failed = false,
          updated_at = NOW()
        WHERE id = $3 AND organization_id = $4
        RETURNING *`,
       [tokenHash, new Date(expiresAt), id, orgId]
+    );
+  }
+
+  /**
+   * Mark send_failed status on an invitation.
+   */
+  async markSendFailed(
+    orgId: string,
+    id: string,
+    sendFailed: boolean = true
+  ): Promise<Invitation | null> {
+    return await queryOne<Invitation>(
+      `UPDATE invitations
+       SET send_failed = $1, updated_at = NOW()
+       WHERE id = $2 AND organization_id = $3
+       RETURNING *`,
+      [sendFailed, id, orgId]
     );
   }
 }
