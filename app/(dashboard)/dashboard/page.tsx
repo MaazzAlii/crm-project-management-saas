@@ -38,74 +38,114 @@ export default async function DashboardPage() {
   const org = sessionContext.organization
 
   // 1. Fetch Active Projects Count
-  const pRes = await queryOne<{ count: number }>(
-    `SELECT COUNT(*)::int as count FROM projects WHERE organization_id = $1 AND status != 'completed'`,
-    [org.id]
-  )
-  const activeProjectsCount = pRes?.count || 0
+  let activeProjectsCount = 0
+  try {
+    const pRes = await queryOne<{ count: number }>(
+      `SELECT COUNT(*)::int as count FROM projects WHERE organization_id = $1 AND status != 'completed'`,
+      [org.id]
+    )
+    activeProjectsCount = pRes?.count || 0
+  } catch (err: any) {
+    console.warn('[Dashboard] Error fetching active projects:', err?.message)
+  }
 
   // 2. Fetch Pending Tasks Count
-  const tRes = await queryOne<{ count: number }>(
-    `SELECT COUNT(*)::int as count FROM tasks WHERE organization_id = $1 AND status != 'completed'`,
-    [org.id]
-  )
-  const pendingTasksCount = tRes?.count || 0
+  let pendingTasksCount = 0
+  try {
+    const tRes = await queryOne<{ count: number }>(
+      `SELECT COUNT(*)::int as count FROM tasks WHERE organization_id = $1 AND status != 'completed'`,
+      [org.id]
+    )
+    pendingTasksCount = tRes?.count || 0
+  } catch (err: any) {
+    console.warn('[Dashboard] Error fetching pending tasks:', err?.message)
+  }
 
   // 3. Fetch Overdue Projects Count
-  const oRes = await queryOne<{ count: number }>(
-    `SELECT COUNT(*)::int as count FROM projects
-     WHERE organization_id = $1 AND status != 'completed' AND deadline < CURRENT_DATE`,
-    [org.id]
-  )
-  const overdueProjectsCount = oRes?.count || 0
+  let overdueProjectsCount = 0
+  try {
+    const oRes = await queryOne<{ count: number }>(
+      `SELECT COUNT(*)::int as count FROM projects
+       WHERE organization_id = $1 AND status != 'completed' AND deadline < CURRENT_DATE`,
+      [org.id]
+    )
+    overdueProjectsCount = oRes?.count || 0
+  } catch (err: any) {
+    console.warn('[Dashboard] Error fetching overdue projects:', err?.message)
+  }
 
   // 4. Fetch Clients Count
-  const cRes = await queryOne<{ count: number }>(
-    `SELECT COUNT(*)::int as count FROM clients WHERE organization_id = $1`,
-    [org.id]
-  )
-  const clientsCount = cRes?.count || 0
+  let clientsCount = 0
+  try {
+    const cRes = await queryOne<{ count: number }>(
+      `SELECT COUNT(*)::int as count FROM clients WHERE organization_id = $1`,
+      [org.id]
+    )
+    clientsCount = cRes?.count || 0
+  } catch (err: any) {
+    console.warn('[Dashboard] Error fetching clients count:', err?.message)
+  }
 
   // 5. Fetch Team Capacity & Usage (Prompt 40, 42, 44)
-  const usage = await getPlanUsage(org.id)
+  let usage: any = {
+    seatsUsed: 1,
+    maxMembers: 5,
+    planTier: org.plan_tier || 'free',
+    pendingInvites: 0,
+    emailVerified: !!sessionContext.user.email_verified,
+    domainVerified: false,
+  }
+  try {
+    usage = await getPlanUsage(org.id)
+  } catch (err: any) {
+    console.warn('[Dashboard] Error fetching plan usage:', err?.message)
+  }
 
   // 6. Fetch 3 Most Recent Members (Prompt 44)
-  const memberRows = await query<any>(
-    `SELECT om.id, om.role, om.joined_at, u.full_name, u.email
-     FROM organization_members om
-     JOIN users u ON u.id = om.user_id
-     WHERE om.organization_id = $1
-     ORDER BY om.joined_at DESC
-     LIMIT 3`,
-    [org.id]
-  )
-
-  const recentMembers: RecentMember[] = (memberRows.rows || []).map((m: any) => ({
-    id: m.id,
-    fullName: m.full_name || null,
-    email: m.email,
-    role: m.role,
-    joinedAt: m.joined_at,
-  }))
+  let recentMembers: RecentMember[] = []
+  try {
+    const memberRows = await query<any>(
+      `SELECT om.id, om.role, om.joined_at, u.full_name, u.email
+       FROM organization_members om
+       JOIN users u ON u.id = om.user_id
+       WHERE om.organization_id = $1
+       ORDER BY om.joined_at DESC
+       LIMIT 3`,
+      [org.id]
+    )
+    recentMembers = (memberRows.rows || []).map((m: any) => ({
+      id: m.id,
+      fullName: m.full_name || null,
+      email: m.email,
+      role: m.role,
+      joinedAt: m.joined_at,
+    }))
+  } catch (err: any) {
+    console.warn('[Dashboard] Error fetching recent members:', err?.message)
+  }
 
   // 7. Fetch 3 Most Recent Pending Invitations (Prompt 44)
-  const inviteRows = await query<any>(
-    `SELECT id, email, role, status, send_failed, token_expires_at
-     FROM invitations
-     WHERE organization_id = $1 AND status = 'pending'
-     ORDER BY created_at DESC
-     LIMIT 3`,
-    [org.id]
-  )
-
-  const recentInvitations: RecentInvitation[] = (inviteRows.rows || []).map((i: any) => ({
-    id: i.id,
-    email: i.email,
-    role: i.role,
-    status: i.status,
-    sendFailed: i.send_failed,
-    expiresAt: i.token_expires_at,
-  }))
+  let recentInvitations: RecentInvitation[] = []
+  try {
+    const inviteRows = await query<any>(
+      `SELECT id, email, role, status, send_failed, expires_at as token_expires_at
+       FROM invitations
+       WHERE organization_id = $1 AND status = 'pending'
+       ORDER BY created_at DESC
+       LIMIT 3`,
+      [org.id]
+    )
+    recentInvitations = (inviteRows.rows || []).map((i: any) => ({
+      id: i.id,
+      email: i.email,
+      role: i.role,
+      status: i.status,
+      sendFailed: i.send_failed,
+      expiresAt: i.token_expires_at,
+    }))
+  } catch (err: any) {
+    console.warn('[Dashboard] Error fetching recent invitations:', err?.message)
+  }
 
   // 8. Fetch Real Audit Activity rows (Prompt 42)
   let recentActivities: ActivityItem[] = []
@@ -133,7 +173,27 @@ export default async function DashboardPage() {
   }
 
   const isBrandNewOrg = clientsCount === 0 && activeProjectsCount === 0
-  const reportData = await fetchWeeklyReportMetricsAction()
+  let reportData: any = {
+    figures: {
+      organizationName: org.name,
+      weekDateRange: '',
+      completedTasksCount: 0,
+      activeProjectsCount: 0,
+      newClientsCount: 0,
+      revenueGenerated: 0,
+      currency: 'USD',
+      communicationVolume: 0,
+      overdueItemsCount: 0,
+      completedDeliverables: [],
+      inProgressProjects: [],
+    },
+    aiEnabled: false,
+  }
+  try {
+    reportData = await fetchWeeklyReportMetricsAction()
+  } catch (err: any) {
+    console.warn('[Dashboard] Error fetching weekly report metrics:', err?.message)
+  }
 
   return (
     <div className="space-y-8">
