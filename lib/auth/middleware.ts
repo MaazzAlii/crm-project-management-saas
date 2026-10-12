@@ -13,22 +13,30 @@ export interface AuthContext {
  */
 export function getAuthFromRequest(request: NextRequest): AuthContext | null {
   const authHeader = request.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  let token: string | null = null;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.substring(7);
+  } else {
+    token = request.cookies?.get('innoventix_session')?.value || request.cookies?.get('session')?.value || null;
+  }
+
+  if (!token) {
     return null;
   }
 
-  const token = authHeader.substring(7);
   const payload = verifyAccessToken(token);
 
   if (!payload) {
     return null;
   }
 
+  const orgIdHeader = request.headers?.get('x-organization-id');
+
   return {
     userId: payload.userId,
     email: payload.email,
     role: payload.role,
-    orgId: payload.orgId,
+    orgId: orgIdHeader || payload.orgId,
   };
 }
 
