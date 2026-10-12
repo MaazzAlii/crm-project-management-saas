@@ -7,9 +7,10 @@
  * =============================================================================
  */
 
-import { queryOne } from '../db';
+import { queryOne, transaction } from '../db';
 import { invitationRepo } from '../db/repositories/invitation-repo';
 import { orgRepo } from '../db/repositories/org-repo';
+import { userRepo } from '../db/repositories/user-repo';
 import { getCurrentPlan } from '../billing/current-plan';
 import { normalizeEmail, isValidEmail } from '../validation/email';
 import { generateToken, hashToken } from '../security/invite-token';
@@ -20,6 +21,7 @@ import { Invitation, InvitationRole } from '../types/database';
 export interface InvitationSessionContext {
   userId?: string | null;
   orgId?: string | null;
+  email?: string | null;
   user?: {
     id: string;
     email?: string;
@@ -425,5 +427,233 @@ export async function revokeInvitation(
   return {
     success: true,
     invitation: updated,
+  };
+}
+
+export interface AcceptInvitationSuccess {
+  success: true;
+  invitation: Invitation;
+  organizationId: string;
+  role: string;
+}
+
+export interface AcceptInvitationNeedsAccount {
+  success: false;
+  error: 'needs_account';
+  needsAccount: true;
+  status: 401;
+  email: string;
+  organizationId: string;
+  role: string;
+  message: string;
+}
+
+export interface AcceptInvitationWrongAccount {
+  success: false;
+  error: 'wrong_account';
+  status: 403;
+  expectedEmail: string;
+  currentEmail: string;
+  message: string;
+}
+
+export interface AcceptInvitationGeneralError {
+  success: false;
+  error: 'invalid_or_expired' | 'revoked' | 'already_accepted';
+  status: number;
+  message: string;
+}
+
+export type AcceptInvitationResult =
+  | AcceptInvitationSuccess
+  | AcceptInvitationNeedsAccount
+  | AcceptInvitationWrongAccount
+  | AcceptInvitationGeneralError;
+
+/**
+ * Accepts an invitation using a raw plaintext token:
+ * 1. Hashes token and finds the invitation (unscoped). Invalid/not found returns invalid_or_expired.
+ * 2. Checks status: revoked, already accepted, or expired returns matching error.
+ * 3. If there is no session: returns needsAccount with invited email so UI locks email input.
+ * 4. If session exists: enforces email matches the invitation email (case-insensitive); else wrongAccount.
+ * 5. Adds the user to organization_members with the invited role and marks invitation accepted in one transaction.
+ * 6. If already a member: marks invitation accepted and succeeds without duplicate errors.
+ * 7. Writes invite.accepted audit log.
+ */
+export async function acceptInvitation(
+  rawToken: string,
+  session: InvitationSessionContext | null | undefined
+): Promise<AcceptInvitationResult> {
+  if (!rawToken || typeof rawToken !== 'string') {
+    return {
+      success: false,
+      error: 'invalid_or_expired',
+      status: 400,
+      message: 'This invitation is invalid or has expired',
+    };
+  }
+
+  const tokenHash = hashToken(rawToken);
+  const invite = await invitationRepo.findByTokenHash(tokenHash);
+
+  // 1. Not found returns invalid_or_expired (same as expired so attackers cannot tell)
+  if (!invite) {
+    return {
+      success: false,
+      error: 'invalid_or_expired',
+      status: 400,
+      message: 'This invitation is invalid or has expired',
+    };
+  }
+
+  // 2. Status checks
+  if (invite.status === 'revoked' || invite.revoked_at) {
+    return {
+      success: false,
+      error: 'revoked',
+      status: 400,
+      message: 'This invitation has been revoked',
+    };
+  }
+
+  if (invite.status === 'accepted' || invite.accepted_at) {
+    return {
+      success: false,
+      error: 'already_accepted',
+      status: 400,
+      message: 'This invitation has already been accepted',
+    };
+  }
+
+  const now = new Date();
+  if (new Date(invite.expires_at) <= now || invite.status === 'expired') {
+    return {
+      success: false,
+      error: 'invalid_or_expired',
+      status: 400,
+      message: 'This invitation is invalid or has expired',
+    };
+  }
+
+  // 3. If there is no session: return needsAccount
+  const actorUserId = session?.userId || session?.user?.id;
+  if (!session || !actorUserId) {
+    return {
+      success: false,
+      error: 'needs_account',
+      needsAccount: true,
+      status: 401,
+      email: invite.email.toLowerCase(),
+      organizationId: invite.organization_id,
+      role: invite.role,
+      message: 'Authentication required. Please sign up or log in with the invited email address.',
+    };
+  }
+
+  // 4. If session exists: enforce email match
+  let userEmail = session.email || session.user?.email;
+  if (!userEmail) {
+    const user = await userRepo.findById(actorUserId);
+    userEmail = user?.email;
+  }
+
+  if (!userEmail || normalizeEmail(userEmail) !== normalizeEmail(invite.email)) {
+    return {
+      success: false,
+      error: 'wrong_account',
+      status: 403,
+      expectedEmail: invite.email.toLowerCase(),
+      currentEmail: (userEmail || '').toLowerCase(),
+      message: 'Logged in with the wrong account. Please switch to the account associated with this invitation.',
+    };
+  }
+
+  // 5 & 6. Transaction: lock invitation, add member, mark accepted
+  const txResult = await transaction(async (client) => {
+    const lockedRes = await client.query<Invitation>(
+      `SELECT * FROM invitations WHERE id = $1 FOR UPDATE`,
+      [invite.id]
+    );
+    const locked = lockedRes.rows[0];
+    if (!locked) {
+      throw new Error('INVITATION_NOT_FOUND');
+    }
+
+    if (locked.status === 'accepted' || locked.accepted_at) {
+      return { error: 'already_accepted' as const, invitation: locked };
+    }
+    if (locked.status === 'revoked' || locked.revoked_at) {
+      return { error: 'revoked' as const, invitation: locked };
+    }
+    if (new Date(locked.expires_at) <= new Date()) {
+      return { error: 'invalid_or_expired' as const, invitation: locked };
+    }
+
+    // Insert into organization_members (idempotent with ON CONFLICT)
+    await client.query(
+      `INSERT INTO organization_members (organization_id, user_id, role, invited_by)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (organization_id, user_id) DO NOTHING`,
+      [locked.organization_id, actorUserId, locked.role, locked.invited_by || null]
+    );
+
+    // Mark invitation accepted
+    const updatedRes = await client.query<Invitation>(
+      `UPDATE invitations
+       SET 
+         status = 'accepted',
+         accepted_at = NOW(),
+         accepted_by = $1,
+         updated_at = NOW()
+       WHERE id = $2
+       RETURNING *`,
+      [actorUserId, locked.id]
+    );
+
+    return { error: null, invitation: updatedRes.rows[0] };
+  });
+
+  if (txResult.error === 'already_accepted') {
+    return {
+      success: false,
+      error: 'already_accepted',
+      status: 400,
+      message: 'This invitation has already been accepted',
+    };
+  }
+  if (txResult.error === 'revoked') {
+    return {
+      success: false,
+      error: 'revoked',
+      status: 400,
+      message: 'This invitation has been revoked',
+    };
+  }
+  if (txResult.error === 'invalid_or_expired') {
+    return {
+      success: false,
+      error: 'invalid_or_expired',
+      status: 400,
+      message: 'This invitation is invalid or has expired',
+    };
+  }
+
+  // 7. Write invite.accepted audit log
+  await logInvitationAudit({
+    action: 'invite.accepted',
+    organizationId: invite.organization_id,
+    actorId: actorUserId,
+    targetEmail: invite.email,
+    role: invite.role,
+    details: {
+      invitationId: invite.id,
+    },
+  });
+
+  return {
+    success: true,
+    invitation: txResult.invitation,
+    organizationId: invite.organization_id,
+    role: invite.role,
   };
 }
