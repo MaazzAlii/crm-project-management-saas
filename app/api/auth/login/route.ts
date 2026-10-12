@@ -8,7 +8,18 @@ import { ensureAutoMigrated } from '@/lib/db/auto-migrate';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    let email = '';
+    let password = '';
+    try {
+      const body = await request.json();
+      email = body?.email;
+      password = body?.password;
+    } catch {
+      return NextResponse.json(
+        { error: 'Email and password are required' },
+        { status: 400 }
+      );
+    }
 
     if (!email || !password) {
       return NextResponse.json(
