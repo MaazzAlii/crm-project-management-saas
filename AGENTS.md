@@ -15,9 +15,16 @@ This repository (`crm-project-management-saas`) is undergoing a complete archite
 
 ## 📜 Agent Operating Rules
 
-### 1. Atomic Commits & Immediate Push
+### 1. Atomic Commits & Dual-Repository Immediate Push (MANDATORY)
 - **Every change must be committed individually** with clear, descriptive commit messages adhering to Conventional Commits (e.g. `feat(...)`, `refactor(...)`, `fix(...)`, `docs(...)`).
-- Immediately push every commit to `origin main`.
+- **MUST PUSH EVERY COMMIT TO BOTH REPOSITORIES IMMEDIATELY**:
+  1. **Repo 1 (`origin`)**: `https://github.com/MaazzAlii/crm-project-management-saas.git`
+  2. **Repo 2 (`deploy`)**: `https://github.com/Urk-Khan/Project-Management-CRM.git`
+- `origin` is configured with dual push URLs, and agents must always ensure both remotes are updated:
+  ```bash
+  git push origin main && git push deploy main
+  ```
+- Both repositories belong to the user and must stay 100% in sync at all times with every commit.
 
 ### 2. Mandatory Work & State Logging
 - Before and after every major step or phase, update `MIGRATION_EXECUTION_LOG.md` with:
