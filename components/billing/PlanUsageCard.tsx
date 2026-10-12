@@ -62,8 +62,48 @@ export function PlanUsageCard({
         setLoading(true)
         const res = await fetch('/api/billing/usage', { cache: 'no-store' })
         if (!res.ok) throw new Error('Failed to load plan usage data')
-        const json = await res.json()
-        setData(json)
+        const resJson = await res.json()
+        const raw = resJson.data || resJson
+        if (!raw) throw new Error('No data')
+
+        const planTier = raw.planTier || raw.plan?.id || 'free'
+        const maxSeats = raw.seats?.max ?? raw.maxMembers ?? 5
+        const seatsUsed = raw.seats?.used ?? raw.seatsUsed ?? raw.membersUsed ?? 1
+        const maxPending = raw.pendingInvitations?.max ?? raw.maxPendingInvites ?? 2
+        const pendingUsed = raw.pendingInvitations?.used ?? raw.pendingInvites ?? 0
+
+        const normalized: PlanUsageData = {
+          plan: {
+            id: planTier,
+            name: raw.plan?.name || raw.planName || 'Free Plan',
+            price: raw.plan?.priceMonthlyUsd ?? raw.plan?.price ?? 0,
+            formattedPrice:
+              raw.plan?.formattedPrice ||
+              (raw.plan?.priceMonthlyUsd ? `$${raw.plan.priceMonthlyUsd}/mo` : '$0/mo'),
+            isFree: planTier === 'free',
+            isPro: planTier === 'pro',
+            isEnterprise: planTier === 'enterprise' || planTier === 'lifetime',
+          },
+          seats: {
+            used: seatsUsed,
+            max: maxSeats,
+            remaining: Math.max(0, maxSeats - seatsUsed),
+            isLimitReached: raw.seatLimitReached ?? seatsUsed >= maxSeats,
+          },
+          pendingInvitations: {
+            used: pendingUsed,
+            max: maxPending,
+            remaining: Math.max(0, maxPending - pendingUsed),
+            isLimitReached: raw.pendingLimitReached ?? pendingUsed >= maxPending,
+          },
+          domain: {
+            verified: !!(raw.domainVerified || raw.domain?.verified),
+            domainName: raw.verifiedDomain || raw.domain?.domainName || null,
+            status: raw.domainVerified || raw.domain?.verified ? 'Verified' : 'Unverified',
+          },
+        }
+
+        setData(normalized)
       } catch (err: any) {
         setError(err.message || 'Error loading usage')
       } finally {

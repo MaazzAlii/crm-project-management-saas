@@ -457,11 +457,12 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
         onClose={() => setShowInviteModal(false)}
         currentUserRole={currentUserRole}
         onSuccess={(invitation, inviteLink) => {
+          const emailTarget = invitation?.email || 'team member'
           setMessage({
             type: 'success',
-            text: `Invitation sent successfully to ${invitation.email}!`,
+            text: `Invitation sent successfully to ${emailTarget}!`,
           })
-          if (inviteLink) {
+          if (inviteLink && invitation?.id) {
             setCopiedLink(inviteLink)
             setRecentInviteLink({ id: invitation.id, link: inviteLink })
           }

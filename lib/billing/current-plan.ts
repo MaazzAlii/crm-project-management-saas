@@ -44,10 +44,16 @@ export async function getCurrentPlan(orgId: string): Promise<CurrentPlanResult> 
     return cached.result;
   }
 
-  const row = await queryOne<OrganizationPlan>(
-    'SELECT * FROM organization_plans WHERE organization_id = $1',
-    [orgId]
-  );
+  const [row, orgRow] = await Promise.all([
+    queryOne<OrganizationPlan>(
+      'SELECT * FROM organization_plans WHERE organization_id = $1',
+      [orgId]
+    ),
+    queryOne<{ plan_tier?: string }>(
+      'SELECT plan_tier FROM organizations WHERE id = $1',
+      [orgId]
+    ),
+  ]);
 
   let planId: PlanTier = 'free';
   let status: PlanStatus = 'active';
@@ -61,15 +67,16 @@ export async function getCurrentPlan(orgId: string): Promise<CurrentPlanResult> 
     stripeCustomerId = row.stripe_customer_id || null;
     stripeSubscriptionId = row.stripe_subscription_id || null;
     currentPeriodEnd = row.current_period_end || null;
+  }
 
-    if ((row as any).plan_override === 'lifetime') {
-      planId = 'enterprise';
-      status = 'active';
-    }
+  const isLifetime = (row as any)?.plan_override === 'lifetime' || orgRow?.plan_tier === 'lifetime';
+  if (isLifetime) {
+    planId = 'enterprise';
+    status = 'active';
   }
 
   // If status is past_due or canceled and no lifetime override exists, treat as free for limits
-  const isRestricted = (status === 'past_due' || status === 'canceled') && (row as any)?.plan_override !== 'lifetime';
+  const isRestricted = (status === 'past_due' || status === 'canceled') && !isLifetime;
   const effectivePlanId: PlanTier = isRestricted ? 'free' : planId;
   const planConfig: PlanConfig = PLANS[effectivePlanId as PlanId] || PLANS.free;
 

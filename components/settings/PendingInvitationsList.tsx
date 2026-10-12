@@ -59,7 +59,8 @@ export function PendingInvitationsList({
       const res = await fetch('/api/invitations?status=pending', { cache: 'no-store' })
       if (!res.ok) throw new Error('Failed to load pending invitations')
       const data = await res.json()
-      setInvitations(data.invitations || [])
+      const list = data.data?.invitations || data.invitations || []
+      setInvitations(list)
     } catch {
       // Non-blocking error handling
       setInvitations([])
@@ -181,7 +182,7 @@ export function PendingInvitationsList({
   }
 
   return (
-    <div className="space-y-4 pt-6 border-t border-slate-800" data-testid="pending-invitations-section">
+    <div className="space-y-4 pt-6 border-t border-slate-800" data-testid="pending-invitations-list">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-base font-bold text-white flex items-center gap-2">

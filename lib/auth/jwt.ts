@@ -32,6 +32,7 @@ export interface RefreshTokenPayload {
   tokenFamily: string;
   email?: string;
   role?: 'user' | 'org_admin' | 'super_admin' | string;
+  orgId?: string;
   iat?: number;
   exp?: number;
 }

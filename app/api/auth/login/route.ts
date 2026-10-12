@@ -55,12 +55,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Find primary organization for user
+    const memberRes = await query(
+      'SELECT organization_id FROM organization_members WHERE user_id = $1 ORDER BY created_at ASC LIMIT 1',
+      [user.id]
+    );
+    const orgId = memberRes.rows[0]?.organization_id;
+
     // Generate tokens
     const tokenFamily = crypto.randomUUID();
     const accessToken = generateAccessToken({
       userId: user.id,
       email: user.email,
       role: user.role,
+      orgId,
     });
 
     const refreshToken = generateRefreshToken({
@@ -68,6 +76,7 @@ export async function POST(request: NextRequest) {
       tokenFamily,
       email: user.email,
       role: user.role,
+      orgId,
     });
 
     // Store refresh token hash
@@ -97,7 +106,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json(
       {
         accessToken,
-        user: { id: user.id, email: user.email, role: user.role },
+        user: { id: user.id, email: user.email, role: user.role, orgId },
       },
       { status: 200 }
     );
@@ -111,6 +120,17 @@ export async function POST(request: NextRequest) {
       domain: sessionConfig.cookieDomain,
       path: '/',
     });
+
+    if (orgId) {
+      response.cookies.set('organization_id', orgId, {
+        httpOnly: false,
+        secure: sessionConfig.cookieSecure,
+        sameSite: sessionConfig.cookieSameSite,
+        maxAge: sessionConfig.maxAge,
+        domain: sessionConfig.cookieDomain,
+        path: '/',
+      });
+    }
 
     return response;
   } catch (error) {

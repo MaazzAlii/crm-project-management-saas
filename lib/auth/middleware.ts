@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccessToken } from './jwt';
+import { verifyAccessToken, verifyRefreshToken } from './jwt';
 
 export interface AuthContext {
   userId: string;
@@ -24,19 +24,31 @@ export function getAuthFromRequest(request: NextRequest): AuthContext | null {
     return null;
   }
 
-  const payload = verifyAccessToken(token);
+  let payload = verifyAccessToken(token);
+  if (!payload) {
+    const refreshPayload = verifyRefreshToken(token);
+    if (refreshPayload) {
+      payload = {
+        userId: refreshPayload.userId,
+        email: refreshPayload.email || '',
+        role: (refreshPayload.role as any) || 'user',
+        orgId: refreshPayload.orgId,
+      };
+    }
+  }
 
   if (!payload) {
     return null;
   }
 
   const orgIdHeader = request.headers?.get('x-organization-id');
+  const orgIdCookie = request.cookies?.get('organization_id')?.value || request.cookies?.get('current_org_id')?.value;
 
   return {
     userId: payload.userId,
     email: payload.email,
     role: payload.role,
-    orgId: orgIdHeader || payload.orgId,
+    orgId: orgIdHeader || orgIdCookie || payload.orgId,
   };
 }
 

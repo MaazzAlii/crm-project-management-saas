@@ -1108,3 +1108,58 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm test`: **64/64 test files passed, 433/433 tests green (100%)**.
   - `npm run build`: **Next.js production build succeeded with exit code 0**.
 - **Status**: ✅ Prompts 01 and 03 (Part 1) verified and automated.
+
+---
+
+### Step 21: Security Audit, Git History Secret Scan, Route Reconciliation & Playwright E2E Verification
+- **Timestamp**: 2026-10-12T18:05:00+05:00
+- **Task ID**: `SECURITY-AUDIT-SECRET-SCAN-AND-E2E-VERIFICATION`
+- **Actions Performed**:
+  1. **Git Remote Unpushed Commits Check**:
+     - Verified `git log origin/main..HEAD --oneline` and `git log deploy/main..HEAD --oneline`. Both remotes are identical (5 local commits ahead). Zero commits pushed since push freeze.
+  2. **Public Repository Visibility Verification**:
+     - Verified `https://github.com/Urk-Khan/Project-Management-CRM` via HTTP check (returns 200 OK without authentication). Confirmed the `deploy` repo is currently public.
+     - Confirmed that `pas#123` exists in 13 historical commits that were pushed to `deploy/main` in earlier sessions.
+  3. **Git History Secret Counts**:
+     - Executed `git log --all --oneline -S "<term>"` across repository history:
+       - `pas#123`: 14 commits
+       - `SMTP_PASSWORD=`: 7 commits
+       - `sk_test_`: 16 commits
+       - `sk_live_`: 10 commits
+       - `whsec_`: 12 commits
+       - `re_`: 79 commits
+       - `JWT_SECRET=`: 13 commits
+       - `REFRESH_TOKEN_SECRET=`: 8 commits
+       - `ENCRYPTION_SECRET=`: 7 commits
+       - `postgres_dev_password`: 21 commits
+  4. **Full Project Dump Secret Check**:
+     - Executed secret checks on `full_project_dump.md`:
+       - `grep -c "pas#123" full_project_dump.md`: 2 (found only in instruction prompts for Prompt 05)
+       - `grep -cE "sk_(test|live)_|whsec_|re_[A-Za-z0-9]{16,}" full_project_dump.md`: 32 (found in documentation, type definitions, and test mock patterns)
+  5. **Route Count Reconciliation**:
+     - Compared `find app -name page.tsx -o -name route.ts` (138 files) with `npm run build` route table.
+     - Confirmed that Next.js build compiles exactly 138 routes (100% 1-to-1 match across all pages, dynamic routes, and API endpoints). The "90" figure represented only static SSG prerender candidates, not total route count.
+  6. **E2E Playwright Invite & Accept Multi-Browser Test**:
+     - Root element of `PendingInvitationsList.tsx` has `data-testid="pending-invitations-list"`.
+     - Fixed `app/api/auth/login/route.ts` to attach primary `orgId` to JWT tokens and `organization_id` cookie upon login.
+     - Fixed `lib/auth/middleware.ts` to verify refresh token in session cookie and extract `orgId` from cookies/headers.
+     - Fixed `components/billing/PlanUsageCard.tsx` to safely normalize API response envelope avoiding client-side undefined exceptions.
+     - Fixed `components/settings/PendingInvitationsList.tsx` to correctly extract `data.data?.invitations`.
+     - Fixed `lib/billing/current-plan.ts` to recognize `organizations.plan_tier = 'lifetime'` as lifetime plan.
+     - Updated `e2e/invite-full-flow.spec.ts` to test complete multi-browser lifecycle: owner invite creation, pending table verification, invitee account registration, invitee acceptance API success, owner member list verification (showing invitee exactly once), second invite revocation via UI, and verification that revoked invite token is invalid.
+- **Files Modified**:
+  - `app/api/auth/login/route.ts`
+  - `lib/auth/jwt.ts`
+  - `lib/auth/middleware.ts`
+  - `lib/billing/current-plan.ts`
+  - `components/billing/PlanUsageCard.tsx`
+  - `components/settings/PendingInvitationsList.tsx`
+  - `components/settings/TeamMemberList.tsx`
+  - `e2e/invite-full-flow.spec.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - `npx playwright test e2e/invite-full-flow.spec.ts`: **1 passed (31.8s) with exit code 0**.
+  - `npm test`: **64/64 test suites passed, 433/433 tests green (100%)**.
+  - `npm run build`: **Compiled successfully with exit code 0, 138/138 routes mapped**.
+  - Push freeze maintained: Zero commits pushed to `origin` or `deploy`.
+- **Status**: ✅ All audits complete; invite-full-flow test passing 100%. Ready for user review.
