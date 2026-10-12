@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getCurrentSessionContext } from '@/lib/auth/session'
 import { DashboardShell } from '@/components/shell/DashboardShell'
+import { ensureAutoMigrated } from '@/lib/db/auto-migrate'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,6 +10,12 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  try {
+    await ensureAutoMigrated()
+  } catch (err) {
+    console.warn('[DashboardLayout] Auto-migrate check error:', err)
+  }
+
   const sessionContext = await getCurrentSessionContext()
 
   // Defensive Guard 1: Must be authenticated
