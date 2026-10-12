@@ -66,7 +66,7 @@ export function getEmailConfig(): EmailConfig {
       host: process.env.SMTP_HOST || '',
       port,
       user: process.env.SMTP_USER,
-      password: process.env.SMTP_PASSWORD,
+      password: process.env.SMTP_PASSWORD || process.env.SMTP_PASS,
       secure,
       requireTls,
     },
