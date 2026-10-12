@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Users,
   UserPlus,
@@ -71,6 +71,7 @@ const ROLE_LABELS: Record<string, { label: string; badge: string; icon: any }> =
 
 export function TeamMemberList({ members, currentUserId, currentUserRole, isSuperAdmin }: TeamMemberListProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const isOwner = currentUserRole === 'owner' || isSuperAdmin
   const isAdmin = currentUserRole === 'admin'
   const canManage = isOwner || isAdmin
@@ -81,6 +82,13 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
   const [copiedLink, setCopiedLink] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [pendingRefreshTrigger, setPendingRefreshTrigger] = useState(0)
+
+  // Auto-open modal if navigated via Quick Action (?action=invite or ?invite=1)
+  useEffect(() => {
+    if (searchParams?.get('action') === 'invite' || searchParams?.get('invite') === '1') {
+      setShowInviteModal(true)
+    }
+  }, [searchParams])
 
   // Remove Modal State
   const [memberToRemove, setMemberToRemove] = useState<MemberItem | null>(null)
