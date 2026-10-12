@@ -1258,3 +1258,35 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm test`: **66/66 test suites passed, 443/443 tests green (100%)**.
   - Push freeze maintained: Zero commits pushed to `origin` or `deploy`.
 - **Status**: ✅ Completed.
+
+---
+
+### [2026-10-12 23:36] Security Audit Review: 30-Minute JWT Expiry, Cookie Decoupling & Test Production Guards
+
+- **Phase / Task ID**: Security Review Cycle 4
+- **Rationale**: 
+  - Restrict access token lifetime to 30 minutes (1800s) default.
+  - Eliminate any remaining session refresh token fallbacks in `lib/auth/session.ts` and `lib/pipeline/auth-helper.ts`.
+  - Restrict cron endpoint authentication strictly to `CRON_SECRET` (removed fallback to webhook secret).
+  - Add explicit guard in `tests/cross-organization-database-isolation.test.ts` to refuse execution against production environments or non-local database hosts.
+- **Action Performed**:
+  1. Updated `lib/auth/jwt.ts`: Default `JWT_EXPIRES_IN` set to `1800` (30 minutes).
+  2. Updated `lib/auth/session.ts`: Default session maxAge set to `1800`.
+  3. Cleaned `getRefreshTokenFromCookie`: Strictly checks `innoventix_refresh` cookie without fallback to `innoventix_session`.
+  4. Cleaned `getCurrentSessionContext` & `getPipelineSession`: Strictly verify access token only, with zero refresh token fallbacks.
+  5. Updated `app/api/automation/cron/deadline-check/route.ts` & `app/api/automation/cron/weekly-summary/route.ts`: Removed fallback to `AUTOMATION_WEBHOOK_SECRET`; strictly accepts `CRON_SECRET`.
+  6. Added safety guard in `tests/cross-organization-database-isolation.test.ts`: Refuses execution if `process.env.NODE_ENV === 'production'` or host is not localhost.
+- **Files Modified**:
+  - `lib/auth/jwt.ts`
+  - `lib/auth/session.ts`
+  - `lib/pipeline/auth-helper.ts`
+  - `app/api/automation/cron/deadline-check/route.ts`
+  - `app/api/automation/cron/weekly-summary/route.ts`
+  - `tests/cross-organization-database-isolation.test.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - `npm test`: **66/66 test suites passed, 443/443 tests green (100%)**.
+  - `npm run lint`: **0 errors**.
+  - Push freeze strictly maintained: zero commits pushed to `origin` or `deploy`.
+- **Status**: ✅ Completed.
+
