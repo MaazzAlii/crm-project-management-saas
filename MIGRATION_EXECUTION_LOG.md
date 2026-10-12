@@ -694,4 +694,51 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `tests/step2-commit-e-cross-tenant-isolation.test.ts`: **9/9 passing (100%)**.
   - `npm run build`: **Next.js production build succeeded with 0 errors (code 0)**.
   - All migrations applied up to `0041_domain_verifications.sql`.
-- **Status**: ✅ Prompts 16 to 26 complete. Ready for Prompt 27 (`27-api-plan-and-usage.md`).
+- **Status**: ✅ Prompts 16 to 26 complete.
+
+---
+
+### Step 21: Innoventix Invite System & Seat Limits — Prompts 27 to 32
+- **Timestamp**: 2026-10-12T09:56:00+05:00
+- **Task ID**: `INVITE-SYSTEM-PROMPTS-27-TO-32`
+- **Actions Performed**:
+  1. **Prompt 27: Usage & Plan Endpoint**:
+     - Built `getBillingUsage(orgId)` in `lib/billing/usage.ts` querying member seats, pending invites, email verifications, and domain verification.
+     - Implemented `GET /api/billing/usage` strictly scoped to active session org.
+     - Added `tests/api-plan-and-usage.test.ts` (8/8 passing).
+  2. **Prompt 28: Rate Limits on Sensitive Routes**:
+     - Implemented `INVITE_RATE_LIMITS` and in-memory rate limiter with windowing and `Retry-After` headers in `lib/security/rate-limit.ts`.
+     - Protected:
+       - `POST /api/invitations` (20/hr/user)
+       - `POST /api/invitations/[id]/resend` (5/hr/invite)
+       - `POST /api/invitations/accept` & `POST /api/invitations/decline` (30/hr/IP)
+       - `POST /api/auth/verify-email/send` (1/60s/user)
+       - `POST /api/organizations/domain/send-code` (3/hr/org)
+     - Added `tests/rate-limits.test.ts` (5/5 passing).
+  3. **Prompt 29: Unified Email Provider Abstraction**:
+     - Implemented `sendEmail`, `EmailProvider` interface, `ConsoleEmailProvider`, and `SmtpEmailProvider` in `lib/email/sender.ts`.
+     - Enforced mandatory plain-text version (`text`), recipient domain/hash privacy masking for production logging, and timeout protection.
+     - Added `tests/email-sender.test.ts` (6/6 passing).
+  4. **Prompt 30: Transactional Email Templates**:
+     - Authored HTML-escaped templates with mandatory text counterparts in `lib/email/templates.ts` (`renderInviteEmail`, `buildInviteEmail` for Mailcow P2, `renderVerifyEmail`, `renderDomainCodeEmail`, `renderInviteAcceptedEmail`, `renderRoleChangedEmail`).
+     - Authored `docs/invite-email-rules.md` documenting platform sender identity, SPF/DKIM alignment, and privacy standards.
+     - Added `tests/email-templates.test.ts` (7/7 passing).
+  5. **Prompt 31: Development Console Delivery & Script**:
+     - Enforced production safety check in `lib/email/sender.ts` rejecting `console` provider in production.
+     - Added formatted development email log block and created `scripts/print-latest-invite.ts` for headless local testing without committing real emails.
+     - Added `tests/console-dev-mode.test.ts` (3/3 passing).
+  6. **Prompt 32: Email Failure Handling & Link Exclusivity**:
+     - Applied migration `supabase/migrations/0042_invitations_send_failed.sql` adding `send_failed BOOLEAN NOT NULL DEFAULT false` and index.
+     - Added `send_failed` field to `Invitation` in `lib/types/database.ts`.
+     - Added `markSendFailed` and reset `send_failed = false` in `updateTokenAndExpiry` in `lib/db/repositories/invitation-repo.ts`.
+     - Integrated `sendEmail` in `createInvitation` and `resendInvitation` in `lib/services/invitation-service.ts`. On delivery failure, rows are preserved with `send_failed = true` and `invite.send_failed` audit events recorded.
+     - Returned `inviteLink` exclusively in `POST /api/invitations` create response, never exposing tokens or links in list, detail, or resend endpoints.
+     - Installed `nodemailer` and `@types/nodemailer` for Mailcow SMTP delivery.
+     - Added `tests/email-failure-handling.test.ts` (3/3 passing).
+- **Verification / Test Result**:
+  - `npm test`: **58 test files, 416/416 tests passing (100%)**.
+  - `npm run build`: Production build succeeded with 0 errors (all routes bundled cleanly).
+  - `npm run lint`: 0 errors.
+  - `graphify update .`: Codebase knowledge graph updated (10,694 nodes, 15,789 edges).
+- **Status**: ✅ Prompts 27 to 32 complete. Ready for Prompt 33 (`33-deliverability-checklist.md` / Mailcow P3).
+
