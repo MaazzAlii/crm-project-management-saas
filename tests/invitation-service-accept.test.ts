@@ -189,7 +189,7 @@ describe('Prompt 20: Invitation Service - acceptInvitation', () => {
     // Verify audit log
     const auditRes = await query(
       `SELECT * FROM audit_logs 
-       WHERE organization_id = $1 AND action = 'invite.accepted' AND actor_id = $2`,
+       WHERE organization_id = $1 AND action = 'invite.accepted' AND actor_user_id = $2`,
       [testOrgId, inviteeUserId]
     );
     expect(auditRes.rows.length).toBeGreaterThanOrEqual(1);
@@ -224,15 +224,16 @@ describe('Prompt 20: Invitation Service - acceptInvitation', () => {
   });
 
   it('8. user already a member: marks invite accepted and returns success without duplicate row', async () => {
-    // Add invitee as member prior to accepting
-    await orgRepo.addMember(testOrgId, inviteeUserId, 'member');
-
+    // Create invitation first while user is not yet a member
     const created = await createInvitation(
       { userId: ownerUserId, orgId: testOrgId },
       { email: inviteeEmail, role: 'member' }
     );
     expect(created.success).toBe(true);
     if (!created.success) return;
+
+    // Simulate user added as member through another flow prior to clicking accept
+    await orgRepo.addMember(testOrgId, inviteeUserId, 'member');
 
     const res = await acceptInvitation(created.rawToken, {
       userId: inviteeUserId,
