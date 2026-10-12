@@ -5,6 +5,20 @@ import { handleRateLimiting } from '@/middleware/rate-limit'
 import { verifyTokenEdge, type EdgeTokenPayload } from '@/lib/auth/edge-jwt'
 
 export async function middleware(request: NextRequest) {
+  const host = request.headers.get('host') || request.nextUrl.host
+
+  // 0. Canonical Host Enforcement: Redirect www to non-www canonical host (301 Permanent Redirect)
+  if (host.startsWith('www.')) {
+    const canonicalHost = host.replace(/^www\./, '')
+    const url = request.nextUrl.clone()
+    url.host = canonicalHost
+    const forwardedProto = request.headers.get('x-forwarded-proto')
+    if (forwardedProto) {
+      url.protocol = forwardedProto.split(',')[0].trim()
+    }
+    return NextResponse.redirect(url, 301)
+  }
+
   const pathname = request.nextUrl.pathname
 
   // 1. CORS Preflight Handling for API routes
