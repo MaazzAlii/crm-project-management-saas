@@ -45,7 +45,7 @@ export function getEmailConfig(): EmailConfig {
     provider = 'console'
   }
 
-  const from = process.env.EMAIL_FROM || 'Innoventix <invites@innoventix.io>'
+  const from = process.env.EMAIL_FROM || 'Innoventix <invites@innoventixhub.tech>'
   const appPublicUrl = process.env.APP_PUBLIC_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
   const config: EmailConfig = {

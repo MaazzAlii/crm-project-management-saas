@@ -55,9 +55,18 @@ OPENAI_API_KEY=sk-placeholder
 ANTHROPIC_API_KEY=sk-ant-placeholder
 N8N_WEBHOOK_SECRET=placeholder_secret
 
-# --- Email Notifications (Optional) ---
-RESEND_API_KEY=re_placeholder
-EMAIL_FROM="Innoventix <notifications@example.com>"
+# --- Email Notifications (Mailcow SMTP) ---
+EMAIL_PROVIDER=smtp
+EMAIL_FROM="Innoventix <invites@innoventixhub.tech>"
+EMAIL_FROM_ADDRESS=invites@innoventixhub.tech
+EMAIL_FROM_NAME="Innoventix"
+EMAIL_REPLY_TO=support@innoventixhub.tech
+SMTP_HOST=mail.innoventixhub.tech
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_REQUIRE_TLS=true
+SMTP_USER=invites@innoventixhub.tech
+SMTP_PASSWORD=replace_with_mailcow_mailbox_password
 
 --- FILE: .env.local.example ---
 # Local Development Environment Variables Template
@@ -24683,7 +24692,7 @@ export function getEmailConfig(): EmailConfig {
     provider = 'console'
   }
 
-  const from = process.env.EMAIL_FROM || 'Innoventix <invites@innoventix.io>'
+  const from = process.env.EMAIL_FROM || 'Innoventix <invites@innoventixhub.tech>'
   const appPublicUrl = process.env.APP_PUBLIC_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
   const config: EmailConfig = {
@@ -25108,7 +25117,7 @@ export function buildInviteEmail(
   invitee: { email: string },
   rawToken: string
 ): EmailTemplateResult {
-  const fromAddress = process.env.EMAIL_FROM_ADDRESS || 'invites@innoventix.io';
+  const fromAddress = process.env.EMAIL_FROM_ADDRESS || 'invites@innoventixhub.tech';
   const result = renderInviteEmail({
     inviterName: inviter.name,
     organizationName: organization.name,
@@ -69118,6 +69127,7 @@ export function TemplateList({ initialTemplates }: TemplateListProps) {
 > - Repo 2 (`deploy`): `https://github.com/Urk-Khan/Project-Management-CRM.git`  
 > - Command: `git push origin main && git push deploy main`  
 > **Screenshots Destination**: `assets/screenshots/`  
+> **Platform Invite Sender**: `invites@innoventixhub.tech` (Mailcow SMTP on Contabo VPS)  
 > **Next Immediate Task upon Resumption**: Code implementation for all 56 prompts is **COMPLETE** and verified with zero compilation errors (`npm run build`). Provide the user with the requested API keys and setup guide (Resend, Mailcow/SMTP, Stripe test keys, etc.), then proceed with end-to-end verification tests when requested.
 
 ## 🎯 Current Milestone: Innoventix Invite System & Seat Limits (Prompts 01–56)
@@ -77070,6 +77080,33 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
 - **Verification / Test Result**:
   - Git remotes verified: `git remote -v` confirms dual push URLs.
 - **Status**: ✅ Permanent protocol active.
+
+---
+
+### Step: Configured Platform Invite Mailbox (`invites@innoventixhub.tech`)
+- **Timestamp**: 2026-10-12T12:12:00+05:00
+- **Task ID**: `MAILCOW-SENDER-CONFIGURATION`
+- **Actions Performed**:
+  - Configured `invites@innoventixhub.tech` as the official platform mailbox for team invitations and transactional notifications.
+  - Updated environment settings in `.env.local` and `.env.example`:
+    - `EMAIL_PROVIDER=smtp`
+    - `EMAIL_FROM="Innoventix <invites@innoventixhub.tech>"`
+    - `EMAIL_FROM_ADDRESS=invites@innoventixhub.tech`
+    - `SMTP_USER=invites@innoventixhub.tech`
+    - `SMTP_HOST=mail.innoventixhub.tech`
+  - Updated fallback sender configuration in `lib/email/config.ts` and `lib/email/templates.ts`.
+  - Saved `invites@innoventixhub.tech` in `.agent-state.md` header for persistent agent continuity.
+- **Files Modified**:
+  - `.env.local`
+  - `.env.example`
+  - `lib/email/config.ts`
+  - `lib/email/templates.ts`
+  - `.agent-state.md`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - `npm test tests/email-config.test.ts`: Passed (8/8 tests green).
+- **Status**: ✅ Platform invite sender saved.
+
 
 
 

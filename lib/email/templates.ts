@@ -127,7 +127,7 @@ export function buildInviteEmail(
   invitee: { email: string },
   rawToken: string
 ): EmailTemplateResult {
-  const fromAddress = process.env.EMAIL_FROM_ADDRESS || 'invites@innoventix.io';
+  const fromAddress = process.env.EMAIL_FROM_ADDRESS || 'invites@innoventixhub.tech';
   const result = renderInviteEmail({
     inviterName: inviter.name,
     organizationName: organization.name,

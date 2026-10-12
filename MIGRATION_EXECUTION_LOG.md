@@ -897,6 +897,33 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - Git remotes verified: `git remote -v` confirms dual push URLs.
 - **Status**: ✅ Permanent protocol active.
 
+---
+
+### Step: Configured Platform Invite Mailbox (`invites@innoventixhub.tech`)
+- **Timestamp**: 2026-10-12T12:12:00+05:00
+- **Task ID**: `MAILCOW-SENDER-CONFIGURATION`
+- **Actions Performed**:
+  - Configured `invites@innoventixhub.tech` as the official platform mailbox for team invitations and transactional notifications.
+  - Updated environment settings in `.env.local` and `.env.example`:
+    - `EMAIL_PROVIDER=smtp`
+    - `EMAIL_FROM="Innoventix <invites@innoventixhub.tech>"`
+    - `EMAIL_FROM_ADDRESS=invites@innoventixhub.tech`
+    - `SMTP_USER=invites@innoventixhub.tech`
+    - `SMTP_HOST=mail.innoventixhub.tech`
+  - Updated fallback sender configuration in `lib/email/config.ts` and `lib/email/templates.ts`.
+  - Saved `invites@innoventixhub.tech` in `.agent-state.md` header for persistent agent continuity.
+- **Files Modified**:
+  - `.env.local`
+  - `.env.example`
+  - `lib/email/config.ts`
+  - `lib/email/templates.ts`
+  - `.agent-state.md`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - `npm test tests/email-config.test.ts`: Passed (8/8 tests green).
+- **Status**: ✅ Platform invite sender saved.
+
+
 
 
 
