@@ -831,6 +831,7 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
 - **Actions Performed**:
   1. **Prompt 50: E2E Invite and Accept Flow**:
      - Created `e2e/invite-full-flow.spec.ts` covering multi-browser context workflow: owner authentication, invite modal trigger, pending invitation list rendering, invitee link retrieval, acceptance state, reload synchronization, and revoke confirmation.
+     - *Execution Audit Note (Fix 4)*: Running `npx playwright test e2e/invite-full-flow.spec.ts` failed at step 25 waiting for `getByRole('button', { name: /Invite Member/i })` due to missing seeded browser auth cookie in standalone context. Corrected status: Not verified in standalone headless run without prior session injection.
   2. **Prompt 51: Free Plan Limits (Seats & Pending Quota)**:
      - Created `tests/free-limits.test.ts` verifying:
        - 3-seat limit blocks 4th seat with 402 `LIMIT_REACHED`.
@@ -1027,6 +1028,56 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
 - **Verification / Test Result**:
   - Verified with automated zero-missing checker: 1,002/1,002 files captured.
 - **Status**: ✅ Complete and verified.
+
+---
+
+### Step: Email Test Pack Prompt 05 — Security Audit & Hardening Fixes
+- **Timestamp**: 2026-10-12T15:28:00+05:00
+- **Task ID**: `EMAIL-TEST-PACK-PROMPT-05-SECURITY-FIXES`
+- **Actions Performed**:
+  - **Fix 1 (Decouple Hardcoded Access)**:
+    - Removed hardcoded email addresses from `lib/auth/super-admin.ts`, `lib/auth/session.ts`, and `scripts/grant-enterprise-access.ts`.
+    - Added `plan_override` column via migration `0044_plan_override.sql` and supported `plan_override = 'lifetime'` in `lib/billing/current-plan.ts`.
+    - Created `scripts/grant-lifetime-access.ts` accepting email as CLI argument, setting database flags, and never logging passwords or hardcoding emails.
+    - Added test `tests/lifetime-access-db.test.ts` verifying limits without and with the database flag.
+  - **Fix 2 (Credentials Hygiene)**:
+    - Removed default passwords from tracked scripts.
+    - Verified `.env.local` is untracked and properly ignored.
+  - **Fix 3 (Full Project Dump Security)**:
+    - Added `full_project_dump.md` to `.gitignore` and removed it from git index (`git rm --cached`).
+    - Configured `scripts/generate-full-dump.ts` to strictly ignore all `.env*` files.
+    - Reported that historical commits in git history contain test secrets and should be rotated.
+  - **Fix 4 (Playwright Verification)**:
+    - Ran `npx playwright test e2e/invite-full-flow.spec.ts`. Reported exact failure point (waiting for `Invite Member` button at step 25 due to lack of seeded browser session cookies).
+    - Corrected previous log entries to reflect actual unverified status in headless CI.
+  - **Fix 5 (Idempotent Schema Migrations)**:
+    - Created `supabase/migrations/0040_invitation_declined.sql` with idempotent check constraints and columns.
+    - Applied migrations via `scripts/run-migrations.ts` and verified second run skips with zero changes.
+  - **Fix 6 (Email Failure Path Verification)**:
+    - Executed `tests/email-failure-handling.test.ts` verifying `send_failed = true` persistence, audit logging, and warning responses on delivery failure.
+  - **Fix 7 (Build Verification)**:
+    - Executed `npm run build` in foreground with successful compilation (exit code 0).
+  - **Fix 8 (Push Authorization Protocol)**:
+    - Enforced rule: Zero automatic pushes to `origin` or `deploy` without explicit written user approval in that session. Updated `.agent-state.md`.
+- **Files Modified / Created**:
+  - `lib/auth/super-admin.ts`
+  - `lib/auth/session.ts`
+  - `lib/billing/current-plan.ts`
+  - `lib/types/database.ts`
+  - `scripts/grant-lifetime-access.ts`
+  - `scripts/grant-enterprise-access.ts`
+  - `scripts/generate-full-dump.ts`
+  - `supabase/migrations/0040_invitation_declined.sql`
+  - `supabase/migrations/0044_plan_override.sql`
+  - `tests/lifetime-access-db.test.ts`
+  - `.gitignore`
+  - `.agent-state.md`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - `npm test`: **63/63 test files passed, 432/432 tests green (100%)**.
+  - `npm run build`: **Next.js production build succeeded with exit code 0**.
+- **Status**: ✅ All 8 fixes implemented and committed locally per instructions.
+
 
 
 
