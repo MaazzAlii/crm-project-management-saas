@@ -41,3 +41,6 @@ next-env.d.ts
 # Graphify Cache
 graphify-out/cache/
 
+# Project dump (security sensitive)
+full_project_dump.md
+

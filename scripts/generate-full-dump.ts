@@ -135,7 +135,8 @@ function scanDir(dir: string, fileList: FileEntry[] = []): FileEntry[] {
       }
     } else {
       const ext = path.extname(item.name).toLowerCase();
-      if (!ignoreFiles.has(item.name) && !binaryExts.has(ext)) {
+      const isEnvFile = item.name.startsWith('.env') || item.name.endsWith('.env');
+      if (!ignoreFiles.has(item.name) && !binaryExts.has(ext) && !isEnvFile) {
         const stat = fs.statSync(fullPath);
         fileList.push({
           fullPath,
