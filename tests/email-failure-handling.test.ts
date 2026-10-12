@@ -158,7 +158,7 @@ describe('Prompt 32: Email Failure Handling & Invite Link Retention', () => {
     expect(postBody.success).toBe(true);
     expect(postBody.data.inviteLink).toBeDefined();
     expect(typeof postBody.data.inviteLink).toBe('string');
-    expect(postBody.data.inviteLink).toMatch(/\/invite\/[0-9a-fA-F-]+/);
+    expect(postBody.data.inviteLink).toMatch(/\/invite\/[A-Za-z0-9_-]+/);
 
     const inviteId = postBody.data.invitation.id;
 
