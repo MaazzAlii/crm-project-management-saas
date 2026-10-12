@@ -657,8 +657,8 @@ export async function acceptInvitation(
   // 5 & 6. Transaction: lock invitation, add member, mark accepted
   const txResult = await transaction(async (client) => {
     const lockedRes = await client.query<Invitation>(
-      `SELECT * FROM invitations WHERE id = $1 FOR UPDATE`,
-      [invite.id]
+      `SELECT * FROM invitations WHERE id = $1 AND organization_id = $2 FOR UPDATE`,
+      [invite.id, invite.organization_id]
     );
     const locked = lockedRes.rows[0];
     if (!locked) {
@@ -716,9 +716,9 @@ export async function acceptInvitation(
          accepted_at = NOW(),
          accepted_by = $1,
          updated_at = NOW()
-       WHERE id = $2
+       WHERE id = $2 AND organization_id = $3
        RETURNING *`,
-      [actorUserId, locked.id]
+      [actorUserId, locked.id, locked.organization_id]
     );
 
     return { error: null, invitation: updatedRes.rows[0] };

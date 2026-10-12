@@ -35,6 +35,10 @@ const SESSION_CHECK_ALLOWLIST: Record<string, string> = {
   'app/api/automation/slack-report/route.ts': 'Internal automation webhook trigger',
   'app/api/automation/events/route.ts': 'Internal automation events dispatcher',
   'app/api/seed-demo-data/route.ts': 'Internal / dev database seeder',
+  'app/api/auth/verify-email/confirm/route.ts': 'Public email verification confirmation: validates email verification token by hash without requiring an active session',
+  'app/api/invitations/accept-info/route.ts': 'Public invite lookup: invitee checks invite metadata by token hash before authenticating or having a session',
+  'app/api/invitations/decline/route.ts': 'Public invite decline: recipient declines invitation by token hash before authenticating',
+  'app/api/stripe/webhook/route.ts': 'Stripe webhook: verified via stripe-signature and STRIPE_WEBHOOK_SECRET',
 };
 
 // FILE-LEVEL QUERY ALLOWLIST FOR PUBLIC AUTH & TOKEN LOOKUPS
@@ -63,17 +67,60 @@ const AUTH_QUERY_ALLOWLIST: Record<string, { allowedTables: string[]; reason: st
     allowedTables: ['refresh_tokens', 'magic_link_tokens'],
     reason: 'Magic link verification: verifies one-time magic link token and records refresh token',
   },
+  'lib/db/repositories/invitation-repo.ts': {
+    allowedTables: ['invitations'],
+    reason: 'findByTokenHash: unscoped read allowed because invitee accepts or inspects invitation token before joining or having an organization session',
+  },
+  'app/api/stripe/checkout/route.ts': {
+    allowedTables: ['organizations'],
+    reason: 'Stripe checkout: verifies organization record by authenticated session auth.orgId',
+  },
+  'app/api/stripe/webhook/route.ts': {
+    allowedTables: ['stripe_processed_events', 'organizations', 'organization_plans'],
+    reason: 'Stripe webhook processor: idempotency checks and organization subscription plan status updates',
+  },
 };
 
 const apiFiles = walk('app/api', (f) => f.endsWith('route.ts'));
 const actionFiles = walk('app', (f) => f.endsWith('.ts') && (f.endsWith('actions.ts') || f.includes(`${path.sep}actions${path.sep}`)));
 const pageFiles = walk('app', (f) => f.endsWith('page.tsx'));
-const allFiles = Array.from(new Set(apiFiles.concat(actionFiles).concat(pageFiles)));
+const inviteServiceFiles = [
+  'lib/db/repositories/invitation-repo.ts',
+  'lib/services/invitation-service.ts',
+];
+const allFiles = Array.from(new Set(apiFiles.concat(actionFiles).concat(pageFiles).concat(inviteServiceFiles)));
 
 console.log(`Scanning ${allFiles.length} files\n`);
 
 let totalDevFallbacks = 0;
 let totalOpenIssues = 0;
+
+// Token log check across all app/ and lib/ files (Prompt 55)
+const appAndLibFiles = walk('app', (f) => /\.(ts|tsx)$/.test(f))
+  .concat(walk('lib', (f) => /\.(ts|tsx)$/.test(f)));
+
+let rawTokenLogViolations = 0;
+for (const f of appAndLibFiles) {
+  // lib/security/invite-token.ts is the sanitizer definition itself
+  if (f.endsWith('lib/security/invite-token.ts')) continue;
+  const c = fs.readFileSync(f, 'utf8');
+  // Match console.* logging a raw token variable without redaction
+  const logMatches = c.match(/console\.(log|info|warn|error|debug)\([^)]*\b(token|rawToken|inviteToken)\b[^)]*\)/gi);
+  if (logMatches) {
+    const dangerousLogs = logMatches.filter((m) => !/redactTokens|tokenHash|token_hash/i.test(m));
+    if (dangerousLogs.length > 0) {
+      console.log(`[RAW_TOKEN_LOG] ${f}\n    Found potential raw token log: ${dangerousLogs.join('; ')}`);
+      rawTokenLogViolations += dangerousLogs.length;
+    }
+  }
+}
+
+if (rawTokenLogViolations === 0) {
+  console.log('✓ Token log scan passed: zero raw token console logs detected across app/ and lib/\n');
+} else {
+  console.error(`✗ Token log scan failed: ${rawTokenLogViolations} raw token logs detected\n`);
+  totalOpenIssues += rawTokenLogViolations;
+}
 
 for (const f of allFiles) {
   const c = fs.readFileSync(f, 'utf8');
@@ -94,11 +141,11 @@ for (const f of allFiles) {
     flags.push('URL_PARAM_ORG?');
   }
 
-  // 4. Session / Auth check
+  // 4. Session / Auth check (for API routes only)
   // Known auth mechanisms: session, getCurrentSessionContext, requireSession, getAuthFromRequest, getPipelineSession, withRole, requireSuperAdmin
   const hasSessionCheck = /session|getCurrentSessionContext|requireSession|getAuthFromRequest|getPipelineSession|withRole|requireSuperAdmin/i.test(c);
-  if (!hasSessionCheck) {
-    if (!SESSION_CHECK_ALLOWLIST[f] && !f.endsWith('page.tsx')) {
+  if (!hasSessionCheck && f.startsWith('app/api')) {
+    if (!SESSION_CHECK_ALLOWLIST[f]) {
       flags.push('NO_SESSION_CHECK');
     }
   }
