@@ -1317,3 +1317,34 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm run build`: Exit code 0 (all routes compiled cleanly).
 - **Status**: ✅ Completed.
 
+---
+
+### [2026-10-13 01:10] Sign-In Fix Pack Prompts 06–09: Honest Landing Page, 301 Canonical Host, E2E Browser Testing & Deploy Gate
+
+- **Phase / Task ID**: Sign-In Fix Pack (Prompts 06, 07, 08, 09)
+- **Rationale**: 
+  - Prompt 06: Remove unverified business metrics ($142,500, +28.4% MRR, 99.8%) from landing page and replace with clearly labelled example workspace illustration; update CTA link to signup.
+  - Prompt 07: Enforce single canonical host (`project-manager.calara.agency`) with 301 permanent redirect from `www.*` in `middleware.ts` to prevent session/cookie fragmentation.
+  - Prompt 08: Implement browser E2E test (`e2e/signin-landing-to-dashboard.spec.ts`) testing full landing-to-dashboard sign-in and logout repeated 3 times, network audit ensuring zero calls to verify-email, and wrong-password handling without raw JSON.
+  - Prompt 09: Complete deploy gate (`npm run lint`, `npm test`, `npm run build`, `npx playwright test`).
+- **Action Performed**:
+  1. Updated `app/page.tsx`: Labelled preview card as "Example workspace", replaced unverified pipeline values and metrics with example features, updated CTA to point to `/signup`.
+  2. Updated `middleware.ts`: Added 301 permanent redirect from `www.*` to non-www canonical host.
+  3. Created `tests/canonical-host-redirect.test.ts`: Added unit tests verifying 301 redirect behavior.
+  4. Created `e2e/signin-landing-to-dashboard.spec.ts`: Added Playwright E2E browser test for 3x login/logout loop and wrong password handling.
+  5. Ran deploy gate checks:
+     - `npm run lint`: 0 errors.
+     - `npm test`: 67/67 suites passed, 446/446 tests passed (100%).
+     - `npm run build`: Exit code 0.
+     - `npx playwright test e2e/signin-landing-to-dashboard.spec.ts`: 2/2 tests passed (32.4s).
+- **Files Modified / Created**:
+  - `app/page.tsx`
+  - `middleware.ts`
+  - `tests/canonical-host-redirect.test.ts`
+  - `e2e/signin-landing-to-dashboard.spec.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - All unit, integration, and browser E2E tests passing.
+- **Status**: ✅ Completed.
+
+
