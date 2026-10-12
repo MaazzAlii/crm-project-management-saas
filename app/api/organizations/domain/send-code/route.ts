@@ -5,6 +5,7 @@ import { domainVerificationRepo } from '@/lib/db/repositories/domain-verificatio
 import { getCurrentPlan } from '@/lib/billing/current-plan';
 import { generateToken, hashToken } from '@/lib/security/invite-token';
 import { isValidEmail } from '@/lib/validation/email';
+import { checkRateLimit, createRateLimitExceededResponse, INVITE_RATE_LIMITS } from '@/lib/security/rate-limit';
 import { apiSuccess, apiError, handleApiError } from '@/lib/utils/response';
 
 /**
@@ -23,6 +24,12 @@ export async function POST(request: NextRequest) {
     const orgId = auth.orgId;
     if (!orgId) {
       return apiError('Active organization context required', 400, 'ORG_ID_REQUIRED');
+    }
+
+    // Rate limiting: 3 per hour per organization
+    const rateLimit = checkRateLimit(`domain:send-code:${orgId}`, INVITE_RATE_LIMITS.DOMAIN_CODE_SEND);
+    if (!rateLimit.allowed) {
+      return createRateLimitExceededResponse(rateLimit);
     }
 
     // Role verification: Owner only
