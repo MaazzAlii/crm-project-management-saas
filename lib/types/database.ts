@@ -167,6 +167,7 @@ export interface Invitation {
   accepted_by?: UUID | null;
   revoked_at?: Timestamp | null;
   declined_at?: Timestamp | null;
+  send_failed?: boolean;
   created_at: Timestamp;
   updated_at: Timestamp;
 }
