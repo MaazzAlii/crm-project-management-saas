@@ -2,7 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { query, queryOne } from '@/lib/db'
 import { emitAutomationEvent } from '@/lib/automation/emitter'
 
+import crypto from 'crypto'
+
 export const dynamic = 'force-dynamic'
+
+function timingSafeCheck(provided: string, expected: string): boolean {
+  if (!provided || !expected) return false;
+  const bufProvided = Buffer.from(provided);
+  const bufExpected = Buffer.from(expected);
+  if (bufProvided.length !== bufExpected.length) return false;
+  return crypto.timingSafeEqual(bufProvided, bufExpected);
+}
 
 interface AlertSummary {
   organizations_processed: number
@@ -21,12 +31,12 @@ async function processDeadlineChecks(req: NextRequest): Promise<NextResponse> {
   // 1. Authenticate cron trigger via secret header
   const authHeader = req.headers.get('authorization')
   const cronSecretHeader = req.headers.get('x-cron-secret')
-  const expectedSecret = process.env.CRON_SECRET || process.env.AUTOMATION_WEBHOOK_SECRET
+  const expectedSecret = process.env.CRON_SECRET || process.env.AUTOMATION_WEBHOOK_SECRET || ''
 
   const providedSecret =
     cronSecretHeader || (authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : '')
 
-  if (!expectedSecret || providedSecret !== expectedSecret) {
+  if (!expectedSecret || !timingSafeCheck(providedSecret, expectedSecret)) {
     return NextResponse.json({ error: 'Unauthorized: Invalid cron secret' }, { status: 401 })
   }
 

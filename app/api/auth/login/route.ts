@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { verifyPassword } from '@/lib/auth/password';
 import { generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt';
-import { setRefreshTokenCookie, getDefaultSessionConfig } from '@/lib/auth/session';
+import { setRefreshTokenCookie, getDefaultSessionConfig, getRefreshSessionConfig } from '@/lib/auth/session';
 import { query } from '@/lib/db';
 import { ensureAutoMigrated } from '@/lib/db/auto-migrate';
 
@@ -99,9 +99,10 @@ export async function POST(request: NextRequest) {
 
     // Get session config adapted to request headers (x-forwarded-proto, etc.)
     const sessionConfig = getDefaultSessionConfig(request.headers);
+    const refreshConfig = getRefreshSessionConfig(request.headers);
 
     // Set refresh token cookie via helper
-    await setRefreshTokenCookie(refreshToken, sessionConfig, request.headers);
+    await setRefreshTokenCookie(refreshToken, refreshConfig, request.headers);
 
     const response = NextResponse.json(
       {
@@ -111,13 +112,23 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
-    // Also attach cookie directly to the outgoing NextResponse
-    response.cookies.set(sessionConfig.cookieName, refreshToken, {
+    // Attach access token directly to the outgoing NextResponse session cookie
+    response.cookies.set(sessionConfig.cookieName, accessToken, {
       httpOnly: sessionConfig.cookieHttpOnly,
       secure: sessionConfig.cookieSecure,
       sameSite: sessionConfig.cookieSameSite,
       maxAge: sessionConfig.maxAge,
       domain: sessionConfig.cookieDomain,
+      path: '/',
+    });
+
+    // Attach refresh token to dedicated refresh cookie
+    response.cookies.set(refreshConfig.cookieName, refreshToken, {
+      httpOnly: refreshConfig.cookieHttpOnly,
+      secure: refreshConfig.cookieSecure,
+      sameSite: refreshConfig.cookieSameSite,
+      maxAge: refreshConfig.maxAge,
+      domain: refreshConfig.cookieDomain,
       path: '/',
     });
 

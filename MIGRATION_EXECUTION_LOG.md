@@ -1220,8 +1220,41 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `lib/db/auto-migrate.ts`
   - `tests/security-tenancy-and-override.test.ts`
   - `MIGRATION_EXECUTION_LOG.md`
+- **Status**: ✅ Completed.
+
+---
+
+### [2026-10-12 22:15] Security Audit Review: Refresh Fallback Removal, Script Decoupling & DB Integration Tests
+
+- **Phase / Task ID**: Security Review Cycle 3
+- **Rationale**: 
+  - Ensure refresh tokens can never be used as access tokens across API routes.
+  - Split lifetime plan granting and platform super admin granting into distinct, isolated tools.
+  - Upgrade cron secret verification to timing-safe constant-time comparison.
+  - Validate multi-tenant isolation against the real database with cross-organization operations.
+- **Action Performed**:
+  1. Hardened `lib/auth/middleware.ts`: Removed refresh token fallback in `getAuthFromRequest`. Only access tokens signed with `JWT_SECRET` are accepted.
+  2. Separated session cookies in `lib/auth/session.ts`, `app/api/auth/login/route.ts`, and `app/api/auth/refresh/route.ts`:
+     - `innoventix_session`: stores short-lived access token (maxAge: 3600s / 1 hr).
+     - `innoventix_refresh`: stores refresh token (maxAge: 7 days).
+  3. Decoupled `scripts/grant-lifetime-access.ts`: Strictly grants `plan_override = 'lifetime'` and enterprise plan to organizations. Never grants super admin.
+  4. Created `scripts/grant-super-admin.ts`: Dedicated script requiring explicit `--confirm` flag to grant platform super admin.
+  5. Revoked super admin role on test account (`owner_accept_1791776091165@example.com`).
+  6. Added constant-time timing-safe secret check (`crypto.timingSafeEqual`) to both cron routes (`deadline-check` and `weekly-summary`).
+  7. Added real-database integration test `tests/cross-organization-database-isolation.test.ts` testing 2 real organizations and 2 users across list, read, update, delete, and header spoofing.
+- **Files Modified**:
+  - `lib/auth/middleware.ts`
+  - `lib/auth/session.ts`
+  - `app/api/auth/login/route.ts`
+  - `app/api/auth/refresh/route.ts`
+  - `scripts/grant-lifetime-access.ts`
+  - `scripts/grant-super-admin.ts`
+  - `app/api/automation/cron/deadline-check/route.ts`
+  - `app/api/automation/cron/weekly-summary/route.ts`
+  - `tests/cross-organization-database-isolation.test.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
 - **Verification / Test Result**:
-  - `npx vitest run tests/security-tenancy-and-override.test.ts`: **5/5 passed (100%)**.
-  - `npm test`: **65/65 test suites passed, 438/438 tests green (100%)**.
+  - `npx vitest run tests/cross-organization-database-isolation.test.ts`: **5/5 passed (100%) against real database**.
+  - `npm test`: **66/66 test suites passed, 443/443 tests green (100%)**.
   - Push freeze maintained: Zero commits pushed to `origin` or `deploy`.
 - **Status**: ✅ Completed.

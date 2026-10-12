@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { verifyRefreshToken, generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt';
-import { getRefreshTokenFromCookie, setRefreshTokenCookie, deleteRefreshTokenCookie, getDefaultSessionConfig } from '@/lib/auth/session';
+import { getRefreshTokenFromCookie, setRefreshTokenCookie, deleteRefreshTokenCookie, getDefaultSessionConfig, getRefreshSessionConfig } from '@/lib/auth/session';
 import { query } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
@@ -87,21 +87,33 @@ export async function POST(request: NextRequest) {
 
     // Get session config adapted to request headers (x-forwarded-proto, etc.)
     const sessionConfig = getDefaultSessionConfig(request.headers);
+    const refreshConfig = getRefreshSessionConfig(request.headers);
 
     // Set new refresh token cookie via helper
-    await setRefreshTokenCookie(newRefreshToken, sessionConfig, request.headers);
+    await setRefreshTokenCookie(newRefreshToken, refreshConfig, request.headers);
 
     const response = NextResponse.json(
       { accessToken: newAccessToken },
       { status: 200 }
     );
 
-    response.cookies.set(sessionConfig.cookieName, newRefreshToken, {
+    // Set access token in session cookie
+    response.cookies.set(sessionConfig.cookieName, newAccessToken, {
       httpOnly: sessionConfig.cookieHttpOnly,
       secure: sessionConfig.cookieSecure,
       sameSite: sessionConfig.cookieSameSite,
       maxAge: sessionConfig.maxAge,
       domain: sessionConfig.cookieDomain,
+      path: '/',
+    });
+
+    // Set refresh token in refresh cookie
+    response.cookies.set(refreshConfig.cookieName, newRefreshToken, {
+      httpOnly: refreshConfig.cookieHttpOnly,
+      secure: refreshConfig.cookieSecure,
+      sameSite: refreshConfig.cookieSameSite,
+      maxAge: refreshConfig.maxAge,
+      domain: refreshConfig.cookieDomain,
       path: '/',
     });
 

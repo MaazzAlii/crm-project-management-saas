@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccessToken, verifyRefreshToken } from './jwt';
+import { verifyAccessToken } from './jwt';
 
 export interface AuthContext {
   userId: string;
@@ -24,19 +24,7 @@ export function getAuthFromRequest(request: NextRequest): AuthContext | null {
     return null;
   }
 
-  let payload = verifyAccessToken(token);
-  if (!payload) {
-    const refreshPayload = verifyRefreshToken(token);
-    if (refreshPayload) {
-      payload = {
-        userId: refreshPayload.userId,
-        email: refreshPayload.email || '',
-        role: (refreshPayload.role as any) || 'user',
-        orgId: refreshPayload.orgId,
-      };
-    }
-  }
-
+  const payload = verifyAccessToken(token);
   if (!payload) {
     return null;
   }

@@ -76,7 +76,20 @@ export function getDefaultSessionConfig(
     cookieSecure: getCookieSecure(requestHeaders),
     cookieHttpOnly: true,
     cookieSameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 3600, // Short-lived access token session (1 hour)
+  };
+}
+
+export function getRefreshSessionConfig(
+  requestHeaders?: Headers | { get(name: string): string | null } | null
+): SessionConfig {
+  return {
+    cookieName: process.env.REFRESH_COOKIE_NAME || 'innoventix_refresh',
+    cookieDomain: getCookieDomain(),
+    cookieSecure: getCookieSecure(requestHeaders),
+    cookieHttpOnly: true,
+    cookieSameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60, // Refresh token lifetime (7 days)
   };
 }
 
@@ -88,7 +101,7 @@ export async function setRefreshTokenCookie(
   config: Partial<SessionConfig> = {},
   requestHeaders?: Headers | { get(name: string): string | null } | null
 ): Promise<void> {
-  const finalConfig = { ...getDefaultSessionConfig(requestHeaders), ...config };
+  const finalConfig = { ...getRefreshSessionConfig(requestHeaders), ...config };
   try {
     const cookieStore = await cookies();
     cookieStore.set(finalConfig.cookieName, token, {
@@ -108,11 +121,11 @@ export async function setRefreshTokenCookie(
  * Get refresh token from cookie
  */
 export async function getRefreshTokenFromCookie(
-  cookieName: string = process.env.COOKIE_NAME || 'innoventix_session'
+  cookieName: string = process.env.REFRESH_COOKIE_NAME || 'innoventix_refresh'
 ): Promise<string | undefined> {
   try {
     const cookieStore = await cookies();
-    return cookieStore.get(cookieName)?.value;
+    return cookieStore.get(cookieName)?.value || cookieStore.get('innoventix_session')?.value;
   } catch (err) {
     return undefined;
   }
@@ -122,11 +135,12 @@ export async function getRefreshTokenFromCookie(
  * Delete refresh token cookie
  */
 export async function deleteRefreshTokenCookie(
-  cookieName: string = process.env.COOKIE_NAME || 'innoventix_session'
+  cookieName: string = process.env.REFRESH_COOKIE_NAME || 'innoventix_refresh'
 ): Promise<void> {
   try {
     const cookieStore = await cookies();
     cookieStore.delete(cookieName);
+    cookieStore.delete('innoventix_session');
   } catch (err) {
     // Gracefully handle contexts where cookies() is not available
   }

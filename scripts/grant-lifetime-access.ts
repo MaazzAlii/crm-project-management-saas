@@ -41,26 +41,7 @@ async function main() {
     process.exit(1);
   }
 
-  // 2. Set user role to super_admin
-  await query(
-    `UPDATE users 
-     SET role = 'super_admin', 
-         is_active = true, 
-         email_verified = true,
-         updated_at = NOW() 
-     WHERE id = $1`,
-    [user.id]
-  );
-
-  // 3. Grant in super_admins table
-  await query(
-    `INSERT INTO public.super_admins (user_id)
-     VALUES ($1)
-     ON CONFLICT (user_id) DO NOTHING`,
-    [user.id]
-  );
-
-  // 4. Find organizations owned by or membered by this user
+  // 2. Find organizations owned by or membered by this user
   const memberships = await query<{ organization_id: string }>(
     `SELECT organization_id FROM organization_members WHERE user_id = $1`,
     [user.id]
@@ -109,7 +90,7 @@ async function main() {
     );
   }
 
-  console.log(`Success: Granted lifetime Enterprise & Super Admin access to ${targetEmail}`);
+  console.log(`Success: Granted lifetime Enterprise plan_override to organizations of ${targetEmail}`);
   process.exit(0);
 }
 

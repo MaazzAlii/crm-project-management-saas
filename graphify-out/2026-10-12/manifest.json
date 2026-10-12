@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791810308.3392076,
-    "seen": 1791810373.4801528,
-    "ast_hash": "47e27f82273897a378b0f48143c0e0ef",
+    "mtime": 1791824332.4458463,
+    "seen": 1791824719.0455987,
+    "ast_hash": "f44b85af5d802a4451abd93f650f6514",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -2922,9 +2922,9 @@
     "semantic_hash": ""
   },
   "lib/auth/middleware.ts": {
-    "mtime": 1791824175.447957,
-    "seen": 1791824299.6167731,
-    "ast_hash": "027fb04941b1e242aaf88fc1b1d65cc9",
+    "mtime": 1791824564.1270761,
+    "seen": 1791824719.045231,
+    "ast_hash": "46684e7905d05846c0ee11ee1b0b10f9",
     "semantic_hash": ""
   },
   "lib/auth/password-reset.ts": {
@@ -2964,9 +2964,9 @@
     "semantic_hash": ""
   },
   "lib/db/auto-migrate.ts": {
-    "mtime": 1791824210.4978304,
-    "seen": 1791824299.616788,
-    "ast_hash": "1b9277769bdb5a89dfb9672a2d6e1d28",
+    "mtime": 1791824579.9854648,
+    "seen": 1791824719.0452466,
+    "ast_hash": "c70beafb0007a73286d8c4e74cfe15d1",
     "semantic_hash": ""
   },
   "lib/db/cache.ts": {
@@ -3114,9 +3114,9 @@
     "semantic_hash": ""
   },
   "lib/pipeline/auth-helper.ts": {
-    "mtime": 1791623400.5407798,
-    "seen": 1791772540.8373716,
-    "ast_hash": "2caed5a326dcfbe8db6c2c700db68089",
+    "mtime": 1791824551.296348,
+    "seen": 1791824719.0452838,
+    "ast_hash": "f441fb0383e0571c93cee193a8ff410f",
     "semantic_hash": ""
   },
   "lib/pipeline/deal-service.ts": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791810271.8434103,
-    "seen": 1791810373.480178,
-    "ast_hash": "bea7d80ae6a6800dbcdb5db2737b538a",
+    "mtime": 1791824316.4624736,
+    "seen": 1791824719.0456054,
+    "ast_hash": "b101aa3723bcc345b4424f639dc104d8",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6753,6 +6753,12 @@
     "mtime": 1791801867.685916,
     "seen": 1791802032.8931613,
     "ast_hash": "4ff766046ea7170e653673b399dce3f4",
+    "semantic_hash": ""
+  },
+  "tests/security-tenancy-and-override.test.ts": {
+    "mtime": 1791824667.8439465,
+    "seen": 1791824719.0455801,
+    "ast_hash": "2dd84d08eddc4cb92e56cbed33e466f2",
     "semantic_hash": ""
   }
 }
