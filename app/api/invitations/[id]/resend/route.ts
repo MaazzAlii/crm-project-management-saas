@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth/middleware';
 import { resendInvitation } from '@/lib/services/invitation-service';
+import { checkRateLimit, createRateLimitExceededResponse, INVITE_RATE_LIMITS } from '@/lib/security/rate-limit';
 import { apiSuccess, apiError, handleApiError } from '@/lib/utils/response';
 
 /**
@@ -23,6 +24,12 @@ export async function POST(
     const { id } = await params;
     if (!id) {
       return apiError('Invitation ID is required', 400, 'INVALID_INPUT');
+    }
+
+    // Rate limiting: 5 per hour per invitation
+    const rateLimit = checkRateLimit(`invite:resend:${id}`, INVITE_RATE_LIMITS.INVITE_RESEND);
+    if (!rateLimit.allowed) {
+      return createRateLimitExceededResponse(rateLimit);
     }
 
     const result = await resendInvitation(
