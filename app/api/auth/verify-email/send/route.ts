@@ -3,6 +3,7 @@ import { getAuthFromRequest } from '@/lib/auth/middleware';
 import { userRepo } from '@/lib/db/repositories/user-repo';
 import { emailVerificationRepo } from '@/lib/db/repositories/email-verification-repo';
 import { generateToken, hashToken } from '@/lib/security/invite-token';
+import { checkRateLimit, createRateLimitExceededResponse, INVITE_RATE_LIMITS } from '@/lib/security/rate-limit';
 import { apiSuccess, apiError, handleApiError } from '@/lib/utils/response';
 
 /**
@@ -15,6 +16,12 @@ export async function POST(request: NextRequest) {
     const auth = getAuthFromRequest(request);
     if (!auth || !auth.userId) {
       return apiError('Unauthorized: Authentication required', 401, 'UNAUTHORIZED');
+    }
+
+    // Rate limiting: 1 send per 60 seconds per user
+    const rateLimit = checkRateLimit(`verify-email:send:${auth.userId}`, INVITE_RATE_LIMITS.VERIFY_EMAIL_SEND);
+    if (!rateLimit.allowed) {
+      return createRateLimitExceededResponse(rateLimit);
     }
 
     const user = await userRepo.findById(auth.userId);
