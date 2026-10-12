@@ -11,21 +11,21 @@ import {
   CreditCard,
   Trash2,
   AlertTriangle,
-  X,
   Loader2,
   CheckCircle2,
   AlertCircle,
-  Mail,
   Copy,
   Check,
+  Eye,
 } from 'lucide-react'
 import { updateMemberRole, removeMember } from '@/lib/team/actions'
 import { InviteMemberDialog } from './InviteMemberDialog'
+import { PendingInvitationsList } from './PendingInvitationsList'
 
 export interface MemberItem {
   id: string
   userId: string
-  role: 'owner' | 'admin' | 'member' | 'billing_manager'
+  role: 'owner' | 'admin' | 'member' | 'viewer' | 'billing_manager'
   joinedAt: string
   profile: {
     fullName: string | null
@@ -57,6 +57,11 @@ const ROLE_LABELS: Record<string, { label: string; badge: string; icon: any }> =
     badge: 'bg-slate-800 text-slate-300 border-slate-700',
     icon: User,
   },
+  viewer: {
+    label: 'Viewer',
+    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    icon: Eye,
+  },
   billing_manager: {
     label: 'Billing Manager',
     badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -66,12 +71,16 @@ const ROLE_LABELS: Record<string, { label: string; badge: string; icon: any }> =
 
 export function TeamMemberList({ members, currentUserId, currentUserRole, isSuperAdmin }: TeamMemberListProps) {
   const router = useRouter()
-  const canManage = currentUserRole === 'owner' || currentUserRole === 'admin' || isSuperAdmin
+  const isOwner = currentUserRole === 'owner' || isSuperAdmin
+  const isAdmin = currentUserRole === 'admin'
+  const canManage = isOwner || isAdmin
 
   // Modal States
   const [showInviteModal, setShowInviteModal] = useState(false)
+  const [recentInviteLink, setRecentInviteLink] = useState<{ id: string; link: string } | null>(null)
   const [copiedLink, setCopiedLink] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [pendingRefreshTrigger, setPendingRefreshTrigger] = useState(0)
 
   // Remove Modal State
   const [memberToRemove, setMemberToRemove] = useState<MemberItem | null>(null)
@@ -84,12 +93,30 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
   // Calculate Owner Count
   const ownerCount = members.filter((m) => m.role === 'owner').length
 
-  // Action: Handle Role Change
-  const handleRoleChange = async (memberId: string, newRole: 'owner' | 'admin' | 'member' | 'billing_manager') => {
+  // Action: Handle Role Change (Prompt 36)
+  const handleRoleChange = async (memberId: string, newRole: 'owner' | 'admin' | 'member' | 'viewer' | 'billing_manager') => {
     if (!canManage) return
 
     const targetMember = members.find((m) => m.id === memberId)
-    if (targetMember?.role === 'owner' && newRole !== 'owner' && ownerCount <= 1) {
+    if (!targetMember) return
+
+    if (targetMember.userId === currentUserId) {
+      setMessage({ type: 'error', text: 'Cannot change your own role.' })
+      return
+    }
+
+    if (isAdmin) {
+      if (targetMember.role === 'owner' || targetMember.role === 'admin') {
+        setMessage({ type: 'error', text: 'Admins cannot change owner or admin roles.' })
+        return
+      }
+      if (newRole === 'owner' || newRole === 'admin') {
+        setMessage({ type: 'error', text: 'Admins cannot promote members to admin or owner.' })
+        return
+      }
+    }
+
+    if (targetMember.role === 'owner' && newRole !== 'owner' && ownerCount <= 1) {
       setMessage({ type: 'error', text: 'Cannot demote the last owner of an organization.' })
       return
     }
@@ -101,6 +128,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
       const res = await updateMemberRole({ memberId, newRole })
       if (res.success) {
         setMessage({ type: 'success', text: 'Member role updated successfully.' })
+        router.refresh()
       } else {
         setMessage({ type: 'error', text: res.error || 'Failed to update member role.' })
       }
@@ -111,12 +139,18 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
     }
   }
 
-  // Action: Handle Member Removal
+  // Action: Handle Member Removal (Prompt 36)
   const handleRemoveConfirm = async () => {
     if (!memberToRemove || !canManage) return
 
-    if (memberToRemove.role === 'owner' && ownerCount <= 1) {
-      setMessage({ type: 'error', text: 'Cannot remove the last owner of an organization.' })
+    if (memberToRemove.role === 'owner') {
+      setMessage({ type: 'error', text: 'Cannot remove the organization owner.' })
+      setMemberToRemove(null)
+      return
+    }
+
+    if (isAdmin && memberToRemove.role === 'admin') {
+      setMessage({ type: 'error', text: 'Admins cannot remove other admins.' })
       setMemberToRemove(null)
       return
     }
@@ -129,6 +163,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
       if (res.success) {
         setMessage({ type: 'success', text: 'Member removed from organization.' })
         setMemberToRemove(null)
+        router.refresh()
       } else {
         setMessage({ type: 'error', text: res.error || 'Failed to remove member.' })
       }
@@ -137,6 +172,27 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
     } finally {
       setRemoving(false)
     }
+  }
+
+  // Permissions helper for role editing
+  const canEditMemberRole = (member: MemberItem) => {
+    if (member.userId === currentUserId) return false
+    if (isOwner) return true
+    if (isAdmin) {
+      return member.role === 'member' || member.role === 'viewer'
+    }
+    return false
+  }
+
+  // Permissions helper for member removal
+  const canRemoveMember = (member: MemberItem) => {
+    if (member.userId === currentUserId) return false
+    if (member.role === 'owner') return false
+    if (isOwner) return true
+    if (isAdmin) {
+      return member.role === 'member' || member.role === 'viewer'
+    }
+    return false
   }
 
   return (
@@ -156,7 +212,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
         {canManage && (
           <button
             onClick={() => setShowInviteModal(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-sky-600/20 hover:bg-sky-500 transition"
+            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-sky-600/20 hover:bg-sky-500 transition cursor-pointer"
           >
             <UserPlus className="h-4 w-4" />
             Invite Member
@@ -164,7 +220,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
         )}
       </div>
 
-      {/* Global Message Feedback / Toast */}
+      {/* Global Feedback Alert */}
       {message && (
         <div
           data-testid="invite-toast"
@@ -228,7 +284,8 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
             {members.map((member) => {
               const RoleIcon = ROLE_LABELS[member.role]?.icon || User
               const isCurrentUser = member.userId === currentUserId
-              const isLastOwner = member.role === 'owner' && ownerCount <= 1
+              const editable = canEditMemberRole(member)
+              const removable = canRemoveMember(member)
 
               return (
                 <tr key={member.id} className="hover:bg-slate-800/40 transition">
@@ -254,24 +311,24 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                     </div>
                   </td>
 
-                  {/* Role Selector / Badge */}
+                  {/* Role Selector / Badge (Prompt 36) */}
                   <td className="px-5 py-4">
-                    {canManage && !isLastOwner ? (
+                    {editable ? (
                       <select
                         disabled={updatingRoleMemberId === member.id}
                         value={member.role}
                         onChange={(e) =>
                           handleRoleChange(
                             member.id,
-                            e.target.value as 'owner' | 'admin' | 'member' | 'billing_manager'
+                            e.target.value as 'owner' | 'admin' | 'member' | 'viewer' | 'billing_manager'
                           )
                         }
                         className="rounded-lg border border-slate-800 bg-slate-950 px-2.5 py-1 text-xs font-semibold text-white focus:border-sky-500 focus:outline-none disabled:opacity-50"
                       >
-                        <option value="owner">Owner</option>
-                        <option value="admin">Admin</option>
+                        {isOwner && <option value="admin">Admin</option>}
                         <option value="member">Member</option>
-                        <option value="billing_manager">Billing Manager</option>
+                        <option value="viewer">Viewer</option>
+                        {isOwner && <option value="billing_manager">Billing Manager</option>}
                       </select>
                     ) : (
                       <span
@@ -280,7 +337,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                         }`}
                       >
                         <RoleIcon className="h-3.5 w-3.5" />
-                        {ROLE_LABELS[member.role]?.label}
+                        {ROLE_LABELS[member.role]?.label || member.role}
                       </span>
                     )}
                   </td>
@@ -294,14 +351,13 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                     })}
                   </td>
 
-                  {/* Actions */}
+                  {/* Actions (Prompt 36) */}
                   <td className="px-5 py-4 text-right">
-                    {canManage && (
+                    {removable && (
                       <button
-                        disabled={isLastOwner}
                         onClick={() => setMemberToRemove(member)}
-                        title={isLastOwner ? 'Cannot remove the last owner' : 'Remove member'}
-                        className="rounded-lg p-2 text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Remove member"
+                        className="rounded-lg p-2 text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition cursor-pointer"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -318,7 +374,8 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
       <div className="grid grid-cols-1 gap-3 sm:hidden">
         {members.map((member) => {
           const isCurrentUser = member.userId === currentUserId
-          const isLastOwner = member.role === 'owner' && ownerCount <= 1
+          const editable = canEditMemberRole(member)
+          const removable = canRemoveMember(member)
 
           return (
             <div key={member.id} className="rounded-xl border border-slate-800 bg-slate-900 p-4 space-y-3">
@@ -338,11 +395,10 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                   </div>
                 </div>
 
-                {canManage && (
+                {removable && (
                   <button
-                    disabled={isLastOwner}
                     onClick={() => setMemberToRemove(member)}
-                    className="p-1 text-slate-400 hover:text-rose-400 disabled:opacity-30"
+                    className="p-1 text-slate-400 hover:text-rose-400"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -351,25 +407,25 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
 
               <div className="flex items-center justify-between pt-2 border-t border-slate-800">
                 <span className="text-[11px] text-slate-400">Role:</span>
-                {canManage && !isLastOwner ? (
+                {editable ? (
                   <select
                     value={member.role}
                     onChange={(e) =>
                       handleRoleChange(
                         member.id,
-                        e.target.value as 'owner' | 'admin' | 'member' | 'billing_manager'
+                        e.target.value as 'owner' | 'admin' | 'member' | 'viewer' | 'billing_manager'
                       )
                     }
                     className="rounded-lg border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-white"
                   >
-                    <option value="owner">Owner</option>
-                    <option value="admin">Admin</option>
+                    {isOwner && <option value="admin">Admin</option>}
                     <option value="member">Member</option>
-                    <option value="billing_manager">Billing Manager</option>
+                    <option value="viewer">Viewer</option>
+                    {isOwner && <option value="billing_manager">Billing Manager</option>}
                   </select>
                 ) : (
                   <span className="text-xs font-semibold text-sky-400 uppercase font-mono">
-                    {member.role}
+                    {ROLE_LABELS[member.role]?.label || member.role}
                   </span>
                 )}
               </div>
@@ -377,6 +433,15 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
           )
         })}
       </div>
+
+      {/* Pending Invitations Table (Prompt 35) */}
+      <PendingInvitationsList
+        currentUserRole={currentUserRole}
+        isSuperAdmin={isSuperAdmin}
+        recentInviteLink={recentInviteLink}
+        refreshTrigger={pendingRefreshTrigger}
+        onInviteRevoked={() => router.refresh()}
+      />
 
       {/* Invite Member Dialog (Prompt 34) */}
       <InviteMemberDialog
@@ -390,12 +455,14 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
           })
           if (inviteLink) {
             setCopiedLink(inviteLink)
+            setRecentInviteLink({ id: invitation.id, link: inviteLink })
           }
+          setPendingRefreshTrigger((prev) => prev + 1)
           router.refresh()
         }}
       />
 
-      {/* Remove Member Confirmation Modal */}
+      {/* Remove Member Confirmation Modal (Prompt 36) */}
       {memberToRemove && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm animate-in fade-in">
           <div className="w-full max-w-md rounded-2xl border border-rose-500/30 bg-slate-900 p-6 shadow-2xl space-y-4">
