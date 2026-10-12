@@ -1,21 +1,39 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Mail, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
+import { Lock, Mail, ArrowRight, AlertCircle, Loader2, Clock } from 'lucide-react'
 
 function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [retryAfter, setRetryAfter] = useState<number>(0)
 
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectTo') || '/dashboard'
 
+  // Countdown timer for rate-limit lockout
+  useEffect(() => {
+    if (retryAfter <= 0) return
+    const interval = setInterval(() => {
+      setRetryAfter((s) => {
+        if (s <= 1) {
+          clearInterval(interval)
+          setError(null)
+          return 0
+        }
+        return s - 1
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [retryAfter])
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (retryAfter > 0) return
     setLoading(true)
     setError(null)
 
@@ -28,7 +46,11 @@ function LoginForm() {
 
       const data = await res.json()
 
-      if (!res.ok) {
+      if (res.status === 429) {
+        const seconds = data.retryAfterSeconds || 60
+        setRetryAfter(seconds)
+        setError(`Too many attempts. Try again in ${seconds} seconds.`)
+      } else if (!res.ok) {
         setError(data.error || 'Invalid email or password')
       } else {
         window.location.assign(redirectTo)
@@ -44,9 +66,17 @@ function LoginForm() {
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl py-8 px-4 shadow-2xl border border-slate-800/80 sm:rounded-2xl sm:px-10">
       {error && (
-        <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 text-red-400 text-sm">
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          <span>{error}</span>
+        <div className={`mb-6 border rounded-xl p-4 flex items-center gap-3 text-sm ${
+          retryAfter > 0
+            ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+            : 'bg-red-500/10 border-red-500/20 text-red-400'
+        }`}>
+          {retryAfter > 0 ? <Clock className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
+          <span>
+            {retryAfter > 0
+              ? `Too many attempts. Try again in ${retryAfter}s.`
+              : error}
+          </span>
         </div>
       )}
 
@@ -100,13 +130,18 @@ function LoginForm() {
         <div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || retryAfter > 0}
             className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg shadow-blue-600/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span>Signing in...</span>
+              </>
+            ) : retryAfter > 0 ? (
+              <>
+                <Clock className="w-4 h-4" />
+                <span>Locked — {retryAfter}s</span>
               </>
             ) : (
               <>
