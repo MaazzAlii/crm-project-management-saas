@@ -6,3 +6,4 @@ export * from './message-repo';
 export * from './audit-repo';
 export * from './invitation-repo';
 export * from './email-verification-repo';
+export * from './domain-verification-repo';
