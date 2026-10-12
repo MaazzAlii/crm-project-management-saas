@@ -38,9 +38,10 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
       return u.id;
     };
 
-    ownerUserAId = await createTestUser(`owner_a_${Date.now()}@innoventix.io`);
-    adminUserAId = await createTestUser(`admin_a_${Date.now()}@innoventix.io`);
-    memberUserAId = await createTestUser(`member_b_${Date.now()}@innoventix.io`);
+    const rand = () => `${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    ownerUserAId = await createTestUser(`owner_a_${rand()}@innoventix.io`);
+    adminUserAId = await createTestUser(`admin_a_${rand()}@innoventix.io`);
+    memberUserAId = await createTestUser(`member_b_${rand()}@innoventix.io`);
 
     // Assign memberships: Org A gets owner and admin (2 members)
     await query(
