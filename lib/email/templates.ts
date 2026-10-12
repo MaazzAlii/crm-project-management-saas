@@ -113,7 +113,7 @@ If you did not expect this, ignore this email.`;
     subject,
     html,
     text,
-    displayName: `${params.inviterName} via ${fromName}`,
+    displayName: `${safeInviter} via ${fromName}`,
     replyTo,
   };
 }

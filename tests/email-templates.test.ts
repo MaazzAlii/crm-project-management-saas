@@ -59,26 +59,31 @@ describe('Prompt 30: Email Templates', () => {
     expect(email.text).toContain('admin');
   });
 
-  it('3. buildInviteEmail (P2 Mailcow Patch): sets From, DisplayName, and Reply-To rules', () => {
+  it('3. buildInviteEmail (P2 Mailcow Patch): sets From, DisplayName, Reply-To, escaped HTML, and APP_PUBLIC_URL', () => {
     // Unverified inviter falls back to EMAIL_REPLY_TO
     const emailUnverified = buildInviteEmail(
-      { name: 'Maaz Ali', email: 'maaz@personal.com', isVerified: false },
-      { name: 'Innoventix Hub' },
+      { name: '<b>Maaz Ali</b>', email: 'maaz@personal.com', isVerified: false },
+      { name: '<i>Innoventix Hub</i>' },
       { email: 'invitee@client.com' },
       'tok_456'
     );
-    expect(emailUnverified.displayName).toContain('Maaz Ali via');
+    expect(emailUnverified.displayName).toContain('&lt;b&gt;Maaz Ali&lt;/b&gt; via');
+    expect(emailUnverified.from).not.toBe('maaz@personal.com');
     expect(emailUnverified.replyTo).not.toBe('maaz@personal.com');
+    expect(emailUnverified.html).toContain('&lt;b&gt;Maaz Ali&lt;/b&gt;');
+    expect(emailUnverified.html).toContain('&lt;i&gt;Innoventix Hub&lt;/i&gt;');
+    expect(emailUnverified.html).toContain('https://custom.innoventix.io/invite/tok_456');
+    expect(emailUnverified.text).toContain('https://custom.innoventix.io/invite/tok_456');
 
     // Verified inviter uses their email as Reply-To
     const emailVerified = buildInviteEmail(
-      { name: 'Maaz Ali', email: 'maaz@innoventix.io', isVerified: true },
+      { name: 'Maaz Ali', email: 'maaz@innoventixhub.tech', isVerified: true },
       { name: 'Innoventix Hub' },
       { email: 'invitee@client.com' },
       'tok_456'
     );
-    expect(emailVerified.replyTo).toBe('maaz@innoventix.io');
-    expect(emailVerified.from).not.toBe('maaz@innoventix.io'); // From is platform address
+    expect(emailVerified.replyTo).toBe('maaz@innoventixhub.tech');
+    expect(emailVerified.from).not.toBe('maaz@innoventixhub.tech'); // From is platform address
   });
 
   it('4. verify-email template: includes 24-hour notice, APP_PUBLIC_URL link, and plain text', () => {
