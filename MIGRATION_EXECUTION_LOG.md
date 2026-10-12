@@ -740,5 +740,29 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm run build`: Production build succeeded with 0 errors (all routes bundled cleanly).
   - `npm run lint`: 0 errors.
   - `graphify update .`: Codebase knowledge graph updated (10,694 nodes, 15,789 edges).
-- **Status**: ✅ Prompts 27 to 32 complete. Ready for Prompt 33 (`33-deliverability-checklist.md` / Mailcow P3).
+- **Status**: ✅ Prompts 27 to 32 complete.
+
+---
+
+### Step 22: Innoventix Invite System & Seat Limits — Prompt 33 / Mailcow P3
+- **Timestamp**: 2026-10-12T10:23:00+05:00
+- **Task ID**: `INVITE-SYSTEM-PROMPT-33-MAILCOW-P3`
+- **Actions Performed**:
+  1. **Mailcow Email Setup & Administrator Runbook** (`docs/mailcow-email-setup.md`):
+     - Documented step-by-step setup in Mailcow for mailbox provisioning (`invites@innoventix.io`).
+     - Documented 2048-bit DKIM key generation, SPF TXT records, DMARC `p=none` configuration, port 587 verification, and `mail-tester.com` scoring.
+  2. **Transactional Email Deliverability Guide** (`docs/email-deliverability.md`):
+     - Authored complete SPF, DKIM, and DMARC DNS guide and delivery matrix for Gmail, Outlook, and custom inboxes.
+  3. **Mailcow Deliverability Verification CLI Script** (`scripts/send-test-email.ts`):
+     - Implemented `sendTestEmail` with typed error handling, credential redaction (never logging passwords), connection timeouts, and strict TLS certificates (`rejectUnauthorized: true`).
+     - Added direct CLI execution runner (`npx tsx scripts/send-test-email.ts <dest>`).
+  4. **Automated Deliverability Tests** (`tests/send-test-email.test.ts`):
+     - Validated missing/invalid email input rejection.
+     - Validated unreachable SMTP host typed error handling without leaking credentials.
+     - Validated successful dispatch returning `messageId`.
+- **Verification / Test Result**:
+  - `tests/send-test-email.test.ts`: 3/3 passing.
+  - `npm test`: **59 test files, 419/419 tests passing (100%)**.
+- **Status**: ✅ Prompt 33 / Mailcow P3 complete. Ready for Prompt 34 (`34-ui-invite-dialog.md`).
+
 
