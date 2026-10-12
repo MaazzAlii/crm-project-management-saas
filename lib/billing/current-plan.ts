@@ -44,10 +44,15 @@ export async function getCurrentPlan(orgId: string): Promise<CurrentPlanResult> 
     return cached.result;
   }
 
-  const row = await queryOne<OrganizationPlan>(
-    'SELECT * FROM organization_plans WHERE organization_id = $1',
-    [orgId]
-  );
+  let row: OrganizationPlan | null = null;
+  try {
+    row = await queryOne<OrganizationPlan>(
+      'SELECT * FROM organization_plans WHERE organization_id = $1',
+      [orgId]
+    );
+  } catch (err: any) {
+    console.warn(`[getCurrentPlan] Error querying organization_plans for ${orgId}:`, err?.message);
+  }
 
   let planId: PlanTier = 'free';
   let status: PlanStatus = 'active';

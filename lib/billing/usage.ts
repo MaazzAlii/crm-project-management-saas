@@ -48,11 +48,18 @@ export interface PlanUsageResult {
  */
 export async function getBillingUsage(orgId: string, userId?: string): Promise<PlanUsageResult> {
   const [currentPlan, membersCount, pendingInvites, org, user, legacyUsage] = await Promise.all([
-    getCurrentPlan(orgId),
-    orgRepo.countMembers(orgId),
-    invitationRepo.countPending(orgId),
-    orgRepo.findById(orgId),
-    userId ? userRepo.findById(userId) : Promise.resolve(null),
+    getCurrentPlan(orgId).catch(() => ({
+      organizationId: orgId,
+      planId: 'free',
+      effectivePlanId: 'free',
+      status: 'active',
+      planConfig: { id: 'free', name: 'Free', priceMonthlyUsd: 0, maxMembers: 5, maxPendingInvites: 5 },
+      showBanner: false,
+    } as any)),
+    orgRepo.countMembers(orgId).catch(() => 1),
+    invitationRepo.countPending(orgId).catch(() => 0),
+    orgRepo.findById(orgId).catch(() => null),
+    userId ? userRepo.findById(userId).catch(() => null) : Promise.resolve(null),
     billingService.getUsageAndLimits(orgId).catch(() => null),
   ]);
 
