@@ -11,8 +11,10 @@
  * =============================================================================
  */
 
+export type PlanId = 'free' | 'pro' | 'enterprise'
+
 export interface PlanConfig {
-  id: 'free' | 'pro' | 'enterprise'
+  id: PlanId
   name: string
   priceMonthlyUsd: number | null
   maxMembers: number // Seats including the workspace owner
