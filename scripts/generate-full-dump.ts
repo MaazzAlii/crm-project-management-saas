@@ -44,6 +44,11 @@ const binaryExts = new Set([
 function getCategoryLevel(relPath: string): number {
   const norm = relPath.replace(/\\/g, '/');
 
+  // Level 1: Root configuration and dependency manifests
+  if (norm.startsWith('config/')) {
+    return 1;
+  }
+
   // Level 2: Main entry point / initialization files
   const level2Files = new Set([
     'middleware.ts',
@@ -51,6 +56,7 @@ function getCategoryLevel(relPath: string): number {
     'app/page.tsx',
     'app/globals.css',
     'lib/db/index.ts',
+    'lib/db/auto-migrate.ts',
     'lib/auth/session.ts',
     'lib/auth/jwt.ts',
     'lib/auth/edge-jwt.ts',
