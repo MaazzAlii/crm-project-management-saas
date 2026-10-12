@@ -24,7 +24,22 @@ export async function isSuperAdmin(userId?: string): Promise<boolean> {
       [targetUserId]
     )
 
-    return !!superAdminRecord
+    if (superAdminRecord) return true
+
+    const userRecord = await queryOne<{ email: string; role: string }>(
+      'SELECT email, role FROM users WHERE id = $1',
+      [targetUserId]
+    )
+
+    if (
+      userRecord &&
+      (userRecord.role === 'super_admin' ||
+        (userRecord.email && SUPER_ADMIN_EMAILS.includes(userRecord.email.toLowerCase())))
+    ) {
+      return true
+    }
+
+    return false
   } catch {
     return false
   }
