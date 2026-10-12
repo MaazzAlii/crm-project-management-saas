@@ -162,7 +162,7 @@ export function createRateLimitExceededResponse(
   const retryAfter = result.retryAfterSeconds || 60
   const message =
     customMessage ||
-    `Rate limit exceeded. Please wait ${retryAfter} seconds before requesting another verification email.`
+    `Too many requests. Please wait ${retryAfter} seconds before trying again.`
   return NextResponse.json(
     {
       success: false,

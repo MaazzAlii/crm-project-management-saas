@@ -18,12 +18,7 @@ export function resolveRateLimitTier(pathname: string): { tier: RateLimitOptions
   if (pathname.startsWith('/api/automation')) {
     return { tier: RATE_LIMIT_TIERS.AUTOMATION, prefix: 'rl:automation' }
   }
-  if (
-    pathname.startsWith('/client/auth') ||
-    pathname.startsWith('/client/login') ||
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/signup')
-  ) {
+  if (pathname.startsWith('/api/auth') || pathname.startsWith('/client/auth')) {
     return { tier: RATE_LIMIT_TIERS.AUTH, prefix: 'rl:auth' }
   }
   if (pathname.startsWith('/api/super-admin')) {
@@ -43,13 +38,9 @@ export function resolveRateLimitTier(pathname: string): { tier: RateLimitOptions
 export function handleRateLimiting(request: NextRequest): NextResponse | null {
   const pathname = request.nextUrl.pathname
 
-  // Apply rate limiting to all /api routes, auth routes, and client portal routes
-  const isTargetRoute =
-    pathname.startsWith('/api/') ||
-    pathname.startsWith('/client/auth') ||
-    pathname.startsWith('/client/login') ||
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/signup')
+  // Enforce rate limits exclusively on API endpoints and auth API routes.
+  // Never rate-limit browser navigation to HTML UI pages (e.g. /login, /signup).
+  const isTargetRoute = pathname.startsWith('/api/') || pathname.startsWith('/client/auth')
 
   if (!isTargetRoute) {
     return null
