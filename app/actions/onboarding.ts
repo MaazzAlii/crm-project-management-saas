@@ -17,6 +17,11 @@ export async function completeOnboarding(input: CompleteOnboardingInput) {
     return { success: false, error: 'Unauthorized' }
   }
 
+  const canManage = session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin
+  if (!canManage) {
+    return { success: false, error: 'Forbidden. Only organization owners and admins can complete onboarding.' }
+  }
+
   const { organizationId: requestedOrgId, industryType } = input
   if (requestedOrgId && requestedOrgId !== session.organization.id) {
     return { success: false, error: 'Organization not found' }
