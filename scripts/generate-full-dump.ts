@@ -41,6 +41,32 @@ const binaryExts = new Set([
 function getCategoryLevel(relPath: string): number {
   const norm = relPath.replace(/\\/g, '/');
 
+  // Level 2: Main entry point / initialization files
+  const level2Files = new Set([
+    'middleware.ts',
+    'instrumentation.ts',
+    'app/layout.tsx',
+    'app/page.tsx',
+    'app/globals.css',
+    'app/not-found.tsx',
+    'app/error.tsx',
+    'app/loading.tsx',
+    'lib/db/index.ts',
+    'lib/db/auto-migrate.ts',
+    'lib/db/embedded-migrations.ts',
+    'lib/auth/session.ts',
+    'lib/auth/jwt.ts',
+    'lib/auth/edge-jwt.ts',
+    'lib/auth/middleware.ts',
+    'lib/auth/password.ts',
+    'lib/auth/auth-service.ts',
+    'lib/auth/super-admin.ts',
+    'lib/portal/auth.ts',
+  ]);
+  if (level2Files.has(norm)) {
+    return 2;
+  }
+
   // Level 1: Root configuration and dependency manifests & env templates
   if (
     norm.startsWith('config/') ||
@@ -52,6 +78,7 @@ function getCategoryLevel(relPath: string): number {
     norm === 'postcss.config.js' ||
     norm === 'playwright.config.ts' ||
     norm === 'vitest.config.ts' ||
+    norm === 'vitest.config.mts' ||
     norm === 'Dockerfile' ||
     norm.startsWith('docker-compose') ||
     norm === '.dockerignore' ||
@@ -80,31 +107,6 @@ function getCategoryLevel(relPath: string): number {
         return 1;
       }
     }
-  }
-
-  // Level 2: Main entry point / initialization files
-  const level2Files = new Set([
-    'middleware.ts',
-    'app/layout.tsx',
-    'app/page.tsx',
-    'app/globals.css',
-    'app/not-found.tsx',
-    'app/error.tsx',
-    'app/loading.tsx',
-    'lib/db/index.ts',
-    'lib/db/auto-migrate.ts',
-    'lib/db/embedded-migrations.ts',
-    'lib/auth/session.ts',
-    'lib/auth/jwt.ts',
-    'lib/auth/edge-jwt.ts',
-    'lib/auth/middleware.ts',
-    'lib/auth/password.ts',
-    'lib/auth/auth-service.ts',
-    'lib/auth/super-admin.ts',
-    'lib/portal/auth.ts',
-  ]);
-  if (level2Files.has(norm)) {
-    return 2;
   }
 
   // Level 3: Core services, API handlers, backend logic, migrations, actions
