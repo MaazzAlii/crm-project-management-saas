@@ -8,6 +8,7 @@ try {
   // Ignore in browser/edge runtimes
 }
 
+
 declare global {
   var __postgres_pool__: Pool | undefined;
 }
@@ -62,27 +63,19 @@ export function initializePool(): Pool {
   const minSize = parseInt(process.env.DB_POOL_MIN || '2', 10);
   const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 
-  if (connectionString) {
-    pool = new Pool({
-      connectionString,
-      max: poolSize,
-      min: minSize,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
-    });
-  } else {
-    pool = new Pool({
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '54322', 10),
-      database: process.env.DB_NAME || 'innoventix',
-      user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD,
-      max: poolSize,
-      min: minSize,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
-    });
+  if (!connectionString) {
+    throw new Error(
+      'FATAL: DATABASE_URL (or POSTGRES_URL) environment variable is required to initialize PostgreSQL connection pool. Fallback connection disabled.'
+    );
   }
+
+  pool = new Pool({
+    connectionString,
+    max: poolSize,
+    min: minSize,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
+  });
 
   pool.on('error', (err) => {
     console.error('Unexpected error on idle PostgreSQL client', err);
