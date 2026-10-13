@@ -59,19 +59,23 @@ Innoventix uses a dual-engine design token system combining **CSS custom propert
 
 ### 2.3 Typography Scale
 
-- **Font Family Sans**: `system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif`
-- **Font Family Mono**: `ui-monospace, "SF Mono", Menlo, Consolas, monospace`
+- **Font Family Sans**: `var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, sans-serif` (`GeistSans`)
+- **Font Family Mono**: `var(--font-geist-mono), ui-monospace, monospace` (`GeistMono`)
+- **Typography Primitive**: `<Text variant="h1" | "h2" | "h3" | "h4" | "body" | "body-lg" | "caption" | "label" | "code">` in `components/ui/text.tsx`
 
 | Scale Token | Font Size | Line Height | Letter Spacing | Common Use |
 | :--- | :--- | :--- | :--- | :--- |
 | `--text-xs` | `12px` (0.75rem) | `16px` (1.33) | `+0.01em` | Badges, timestamps, small tags |
-| `--text-sm` | `13px` / `14px` | `20px` (1.42) | `0` | Table cells, secondary body copy |
-| `--text-base` | `15px` / `16px` | `24px` (1.5) | `-0.01em` | Standard paragraphs, form labels |
+| `--text-sm` | `13px` (0.8125rem) | `18px` (1.38) | `0` | Table cells, secondary body copy |
+| `--text-base` | `14px` (0.875rem) | `22px` (1.5) | `-0.01em` | Standard app paragraphs, forms |
+| `--text-md` | `16px` (1.0rem) | `24px` (1.5) | `-0.01em` | Marketing body copy |
 | `--text-lg` | `18px` (1.125rem)| `26px` (1.44) | `-0.015em` | Card titles, modal headers |
 | `--text-xl` | `20px` (1.25rem) | `28px` (1.4) | `-0.02em` | Section headers |
 | `--text-2xl` | `24px` (1.5rem) | `32px` (1.33) | `-0.025em` | Page titles |
 | `--text-3xl` | `30px` (1.875rem)| `38px` (1.26) | `-0.03em` | Metric values, dashboard stats |
-| `--text-4xl` | `36px` (2.25rem) | `44px` (1.22) | `-0.035em` | Hero displays |
+| `--text-4xl` | `36px` (2.25rem) | `44px` (1.22) | `-0.035em` | Section hero display |
+| `--text-5xl` | `48px` (3.0rem) | `56px` (1.16) | `-0.04em` | Major page hero displays |
+| `--text-6xl` | `60px` (3.75rem) | `68px` (1.13) | `-0.045em` | Large display numbers |
 
 ### 2.4 Spacing Scale (4px Base)
 
