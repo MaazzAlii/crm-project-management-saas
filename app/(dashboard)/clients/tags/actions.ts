@@ -78,6 +78,11 @@ export async function deleteTagAction(tagId: string) {
       return { error: 'Unauthorized.' }
     }
 
+    const canDelete = session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin
+    if (!canDelete) {
+      return { error: 'Forbidden. Only organization owners and admins can delete tags.' }
+    }
+
     try {
       await query(
         `DELETE FROM tags WHERE id = $1 AND organization_id = $2`,
