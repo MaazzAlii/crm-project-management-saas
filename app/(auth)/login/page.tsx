@@ -54,6 +54,10 @@ function LoginForm() {
       } else if (!res.ok) {
         setError(data.error || 'Invalid email or password')
       } else {
+        if (data.requirePasswordChange) {
+          window.location.assign(data.redirectTo || '/auth/change-password?required=1')
+          return
+        }
         window.location.assign(redirectTo)
         return
       }

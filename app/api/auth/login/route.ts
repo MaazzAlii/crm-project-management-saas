@@ -52,26 +52,74 @@ export async function POST(request: NextRequest) {
 
     // Find user
     const result = await query(
-      'SELECT id, email, password_hash, role FROM users WHERE email = $1 AND is_active = true',
-      [email.toLowerCase()]
+      'SELECT id, email, password_hash, role, require_password_change FROM users WHERE email = $1 AND is_active = true',
+      [email.toLowerCase().trim()]
     );
 
-    if (result.rows.length === 0) {
-      return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
-      );
-    }
+    let user = result.rows[0];
 
-    const user = result.rows[0];
-
-    // Verify password
-    const isValid = await verifyPassword(password, user.password_hash);
-    if (!isValid) {
-      return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
+    if (!user) {
+      // Check if there is an active pending invitation with a temporary password
+      const pendingInviteRes = await query(
+        `SELECT * FROM invitations 
+         WHERE lower(trim(email)) = $1 
+           AND status = 'pending' 
+           AND expires_at > NOW() 
+           AND temp_password_hash IS NOT NULL 
+         ORDER BY created_at DESC 
+         LIMIT 1`,
+        [email.toLowerCase().trim()]
       );
+
+      if (pendingInviteRes.rows.length > 0) {
+        const invite = pendingInviteRes.rows[0];
+        const isTempValid = await verifyPassword(password, invite.temp_password_hash);
+        if (!isTempValid) {
+          return NextResponse.json(
+            { error: 'Invalid password. Please use the invitation link sent to your email to set your password.' },
+            { status: 401 }
+          );
+        }
+
+        // Auto-provision user account with temporary password & require_password_change = true
+        const newUserRes = await query(
+          `INSERT INTO users (email, password_hash, role, is_active, email_verified, require_password_change)
+           VALUES ($1, $2, 'user', true, false, true)
+           RETURNING id, email, password_hash, role, require_password_change`,
+          [invite.email.toLowerCase().trim(), invite.temp_password_hash]
+        );
+        user = newUserRes.rows[0];
+
+        // Join the invited organization
+        await query(
+          `INSERT INTO organization_members (organization_id, user_id, role, invited_by)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (organization_id, user_id) DO NOTHING`,
+          [invite.organization_id, user.id, invite.role, invite.invited_by || null]
+        );
+
+        // Mark invitation as accepted
+        await query(
+          `UPDATE invitations
+           SET status = 'accepted', accepted_at = NOW(), accepted_by = $1, updated_at = NOW()
+           WHERE id = $2`,
+          [user.id, invite.id]
+        );
+      } else {
+        return NextResponse.json(
+          { error: 'Invalid email or password' },
+          { status: 401 }
+        );
+      }
+    } else {
+      // Verify password for existing user
+      const isValid = await verifyPassword(password, user.password_hash);
+      if (!isValid) {
+        return NextResponse.json(
+          { error: 'Invalid email or password' },
+          { status: 401 }
+        );
+      }
     }
 
     // Find primary organization for user
@@ -81,6 +129,8 @@ export async function POST(request: NextRequest) {
     );
     const orgId = memberRes.rows[0]?.organization_id;
 
+    const requirePasswordChange = Boolean(user.require_password_change);
+
     // Generate tokens
     const tokenFamily = crypto.randomUUID();
     const accessToken = generateAccessToken({
@@ -88,6 +138,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
       role: user.role,
       orgId,
+      requirePasswordChange,
     });
 
     const refreshToken = generateRefreshToken({
@@ -96,6 +147,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
       role: user.role,
       orgId,
+      requirePasswordChange,
     });
 
     // Store refresh token hash
@@ -126,13 +178,23 @@ export async function POST(request: NextRequest) {
     // Set refresh token cookie via helper
     await setRefreshTokenCookie(refreshToken, refreshConfig, request.headers);
 
-    const response = NextResponse.json(
-      {
-        accessToken,
-        user: { id: user.id, email: user.email, role: user.role, orgId },
+    const responsePayload: any = {
+      accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        orgId,
+        requirePasswordChange,
       },
-      { status: 200 }
-    );
+    };
+
+    if (requirePasswordChange) {
+      responsePayload.requirePasswordChange = true;
+      responsePayload.redirectTo = '/auth/change-password?required=1';
+    }
+
+    const response = NextResponse.json(responsePayload, { status: 200 });
 
     // Attach access token directly to the outgoing NextResponse session cookie
     response.cookies.set(sessionConfig.cookieName, accessToken, {
