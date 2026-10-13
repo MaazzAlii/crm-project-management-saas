@@ -156,9 +156,9 @@
     "semantic_hash": ""
   },
   "middleware.ts": {
-    "mtime": 1791863156.4063928,
-    "seen": 1791863207.4741201,
-    "ast_hash": "da85edf244340ef2dceee1271e348d99",
+    "mtime": 1791871579.4424803,
+    "seen": 1791879850.9156394,
+    "ast_hash": "6f88db3d5595dedeac1ec73b43c84d3b",
     "semantic_hash": ""
   },
   "scripts/infra/backup-postgres.sh": {
@@ -2982,9 +2982,9 @@
     "semantic_hash": ""
   },
   "lib/db/index.ts": {
-    "mtime": 1791633104.814714,
-    "seen": 1791772540.837342,
-    "ast_hash": "a20fef38bde54819ed3a5dfa85bde3c8",
+    "mtime": 1791873966.23388,
+    "seen": 1791879850.9155269,
+    "ast_hash": "dfca82446ae8a27a9a9f15d1e39d74ee",
     "semantic_hash": ""
   },
   "lib/db/migrations.ts": {
@@ -3360,9 +3360,9 @@
     "semantic_hash": ""
   },
   "next.config.mjs": {
-    "mtime": 1789826746.5993905,
-    "seen": 1791772540.837431,
-    "ast_hash": "e9df40b1db90d022eb049238f2b62472",
+    "mtime": 1791874273.9246938,
+    "seen": 1791879850.9156497,
+    "ast_hash": "04ee649ff1fc097dc99bfd2f63372b48",
     "semantic_hash": ""
   },
   "playwright.config.ts": {
@@ -3384,80 +3384,80 @@
     "semantic_hash": ""
   },
   "scratch/capture_client_detail_flow.js": {
-    "mtime": 1789721627.772622,
-    "seen": 1791772540.8374403,
+    "mtime": 1791874893.7299073,
+    "seen": 1791879850.9156625,
     "ast_hash": "10799d193d8fd299d2e2301271bb8b62",
     "semantic_hash": ""
   },
   "scratch/capture_clients_flow.js": {
-    "mtime": 1789721627.772622,
-    "seen": 1791772540.8374417,
+    "mtime": 1791874893.730018,
+    "seen": 1791879850.915664,
     "ast_hash": "76bca7bef2ab6d6a85cb7e717af87e61",
     "semantic_hash": ""
   },
   "scratch/capture_kanban_pipeline_flow.js": {
-    "mtime": 1789721627.772622,
-    "seen": 1791772540.8374434,
+    "mtime": 1791874893.730018,
+    "seen": 1791879850.9156654,
     "ast_hash": "b13937ebb0d274ce224817671e555902",
     "semantic_hash": ""
   },
   "scratch/capture_screens.js": {
-    "mtime": 1789721627.772622,
-    "seen": 1791772540.8374448,
+    "mtime": 1791874893.730018,
+    "seen": 1791879850.9156666,
     "ast_hash": "e68055462002e7c5cdf562df02c08a03",
     "semantic_hash": ""
   },
   "scratch/dump_project.js": {
-    "mtime": 1789721627.77296,
-    "seen": 1791772540.8374462,
+    "mtime": 1791874893.730018,
+    "seen": 1791879850.9156706,
     "ast_hash": "1b0a7a1acc67f5407cc5cef57bdbe6ee",
     "semantic_hash": ""
   },
   "scratch/generate_dump.js": {
-    "mtime": 1789721627.77296,
-    "seen": 1791772540.8374476,
+    "mtime": 1791874893.730018,
+    "seen": 1791879850.9156723,
     "ast_hash": "5865f79d591ae6fb0da6b17879e11ecf",
     "semantic_hash": ""
   },
   "scratch/generate_jwt.js": {
-    "mtime": 1789721627.77296,
-    "seen": 1791772540.837449,
+    "mtime": 1791874893.7303793,
+    "seen": 1791879850.9156735,
     "ast_hash": "8108b22dab74416b90ff6dcc0979e8e8",
     "semantic_hash": ""
   },
   "scratch/local_proxy.py": {
-    "mtime": 1790665986.4887946,
-    "seen": 1791772540.8374503,
+    "mtime": 1791874893.7303793,
+    "seen": 1791879850.9156752,
     "ast_hash": "e9e65a8129869f3d7acb1394e140c976",
     "semantic_hash": ""
   },
   "scratch/playwright_capture.js": {
-    "mtime": 1789721627.77296,
-    "seen": 1791772540.8374517,
+    "mtime": 1791874893.7303793,
+    "seen": 1791879850.9156764,
     "ast_hash": "e05a3f64b78f197bd121b8e477419f34",
     "semantic_hash": ""
   },
   "scratch/test_admin_upsert.js": {
-    "mtime": 1789721627.77296,
-    "seen": 1791772540.8374531,
+    "mtime": 1791874893.7303793,
+    "seen": 1791879850.91568,
     "ast_hash": "625aa988654ed215cba8467b7391a1e3",
     "semantic_hash": ""
   },
   "scratch/test_audit_logging.ts": {
-    "mtime": 1789807770.1523662,
-    "seen": 1791772540.8374543,
+    "mtime": 1791874893.7303793,
+    "seen": 1791879850.9156818,
     "ast_hash": "9ae4e0aa7adc8b672ab8f76d9c9fcf89",
     "semantic_hash": ""
   },
   "scratch/test_full_signup.js": {
-    "mtime": 1789721627.77296,
-    "seen": 1791772540.8374555,
+    "mtime": 1791874893.7303793,
+    "seen": 1791879850.9156833,
     "ast_hash": "a6dfe52fed96e35b43cc40979d130628",
     "semantic_hash": ""
   },
   "scratch/test_security_audit.ts": {
-    "mtime": 1789806731.2942069,
-    "seen": 1791772540.8374572,
+    "mtime": 1791874893.7303793,
+    "seen": 1791879850.9156847,
     "ast_hash": "529f6b2a2389d107afbc4e87a163b4fc",
     "semantic_hash": ""
   },
@@ -3564,9 +3564,9 @@
     "semantic_hash": ""
   },
   "scripts/generate-full-dump.ts": {
-    "mtime": 1791800627.7771978,
-    "seen": 1791801427.6754508,
-    "ast_hash": "327184eba98fa19332b612d5f39ba10f",
+    "mtime": 1791879740.9825099,
+    "seen": 1791879850.915715,
+    "ast_hash": "94415d156805cbaabb821c18118a9518",
     "semantic_hash": ""
   },
   "scripts/generate-production-secrets.ts": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791835855.3466332,
-    "seen": 1791863207.4744651,
-    "ast_hash": "b4482e28cce48e7a2a29d0684ab2f98c",
+    "mtime": 1791878123.361985,
+    "seen": 1791879850.915999,
+    "ast_hash": "335020bf7512ca1f2e75373e60259c7f",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6084,20 +6084,20 @@
     "semantic_hash": ""
   },
   "scratch/add_operator.sql": {
-    "mtime": 1789721627.772318,
-    "seen": 1791772579.484169,
+    "mtime": 1791874893.729687,
+    "seen": 1791879850.9156609,
     "ast_hash": "7c8d06690cbab17dc0914c660f6360e2",
     "semantic_hash": ""
   },
   "scratch/combined_migrations.sql": {
-    "mtime": 1789721627.772622,
-    "seen": 1791772579.4841795,
+    "mtime": 1791874893.730018,
+    "seen": 1791879850.9156687,
     "ast_hash": "6812a6fa0833c503cf5aa7a22e7b9df7",
     "semantic_hash": ""
   },
   "scratch/seed_platform_settings.sql": {
-    "mtime": 1789721627.77296,
-    "seen": 1791772579.48419,
+    "mtime": 1791874893.7303793,
+    "seen": 1791879850.9156785,
     "ast_hash": "1794b6b7cda8d6f0c81446d5e8f7c373",
     "semantic_hash": ""
   },
@@ -6552,9 +6552,9 @@
     "semantic_hash": ""
   },
   "app/team/route.ts": {
-    "mtime": 1791784372.5098667,
-    "seen": 1791785735.6729956,
-    "ast_hash": "96f29b5d482cb4004a41b08389757566",
+    "mtime": 1791870734.955504,
+    "seen": 1791879850.9152331,
+    "ast_hash": "7ac9be44951a74d1fcb9aa3a091bb7a3",
     "semantic_hash": ""
   },
   "components/auth/EmailVerificationBanner.tsx": {
@@ -6852,9 +6852,93 @@
     "semantic_hash": ""
   },
   "tests/canonical-host-redirect.test.ts": {
-    "mtime": 1791863140.3010743,
-    "seen": 1791863207.4743497,
-    "ast_hash": "ebeb69c40d4f283eaf243d79d5036fe1",
+    "mtime": 1791873262.1025217,
+    "seen": 1791879850.9158733,
+    "ast_hash": "6c15bf962f13fd0d7176edd77b1adbe4",
+    "semantic_hash": ""
+  },
+  "instrumentation.ts": {
+    "mtime": 1791873808.0051475,
+    "seen": 1791879850.915452,
+    "ast_hash": "a967cda5e9317d1072482fa46e592e9e",
+    "semantic_hash": ""
+  },
+  "docs/release/migration-runner-risk.md": {
+    "mtime": 1791876604.802721,
+    "seen": 1791879850.9162934,
+    "ast_hash": "c49d5056ab74c1510073972cfdf130dd",
+    "semantic_hash": ""
+  },
+  "innoventix-release-gate-prompts/release-gate/README.md": {
+    "mtime": 1791864161.0,
+    "seen": 1791879850.9165652,
+    "ast_hash": "bb43b0835430497c00169b51d34e1f59",
+    "semantic_hash": ""
+  },
+  "innoventix-release-gate-prompts/release-gate/prompts/00-CONTEXT.md": {
+    "mtime": 1791864161.0,
+    "seen": 1791879850.9165673,
+    "ast_hash": "eec5745b9ccf8d953b160425d8ba45df",
+    "semantic_hash": ""
+  },
+  "innoventix-release-gate-prompts/release-gate/prompts/01-freeze-and-push-audit.md": {
+    "mtime": 1791864161.0,
+    "seen": 1791879850.9165688,
+    "ast_hash": "22a7cafb0a84d9755f6198cb65f0099a",
+    "semantic_hash": ""
+  },
+  "innoventix-release-gate-prompts/release-gate/prompts/02-capture-production-error.md": {
+    "mtime": 1791864161.0,
+    "seen": 1791879850.9165707,
+    "ast_hash": "69754d47027d17b1482993235a3474af",
+    "semantic_hash": ""
+  },
+  "innoventix-release-gate-prompts/release-gate/prompts/03-framework-version-check.md": {
+    "mtime": 1791864161.0,
+    "seen": 1791879850.9165723,
+    "ast_hash": "feaa45e8d1ae0611b6c915c933e1fddd",
+    "semantic_hash": ""
+  },
+  "innoventix-release-gate-prompts/release-gate/prompts/04-route-inventory.md": {
+    "mtime": 1791864161.0,
+    "seen": 1791879850.9165738,
+    "ast_hash": "a33766798be5ca4989cc8dc92a337815",
+    "semantic_hash": ""
+  },
+  "innoventix-release-gate-prompts/release-gate/prompts/05-server-action-audit.md": {
+    "mtime": 1791864161.0,
+    "seen": 1791879850.9165752,
+    "ast_hash": "5faea8bcb1b7a0f339cb56016066d66d",
+    "semantic_hash": ""
+  },
+  "innoventix-release-gate-prompts/release-gate/prompts/06-env-and-startup-audit.md": {
+    "mtime": 1791864161.0,
+    "seen": 1791879850.9165766,
+    "ast_hash": "8a81750f3d72066a68b32193be8fd47c",
+    "semantic_hash": ""
+  },
+  "innoventix-release-gate-prompts/release-gate/prompts/07-migrations-and-schema.md": {
+    "mtime": 1791864161.0,
+    "seen": 1791879850.9165778,
+    "ast_hash": "9b04db3139bbd9c80f786cb6af5243ef",
+    "semantic_hash": ""
+  },
+  "innoventix-release-gate-prompts/release-gate/prompts/08-browser-smoke-matrix.md": {
+    "mtime": 1791864161.0,
+    "seen": 1791879850.9165792,
+    "ast_hash": "d67e311d32eb42d8a2770c8c2b5a9915",
+    "semantic_hash": ""
+  },
+  "innoventix-release-gate-prompts/release-gate/prompts/09-security-recheck.md": {
+    "mtime": 1791864161.0,
+    "seen": 1791879850.9165807,
+    "ast_hash": "9d2972f373d896c95bb51ddcf75062b4",
+    "semantic_hash": ""
+  },
+  "innoventix-release-gate-prompts/release-gate/prompts/10-release-gate.md": {
+    "mtime": 1791864161.0,
+    "seen": 1791879850.9165819,
+    "ast_hash": "5c65abb85856d77b6a63df202b0f32ec",
     "semantic_hash": ""
   }
 }
