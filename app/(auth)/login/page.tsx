@@ -3,7 +3,7 @@
 import { useState, Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Mail, ArrowRight, AlertCircle, Loader2, Clock } from 'lucide-react'
+import { Lock, Mail, ArrowRight, AlertCircle, CheckCircle2, Loader2, Clock } from 'lucide-react'
 
 function LoginForm() {
   const [email, setEmail] = useState('')
@@ -14,6 +14,7 @@ function LoginForm() {
 
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectTo') || '/dashboard'
+  const resetSuccess = searchParams.get('reset') === 'success'
 
   // Countdown timer for rate-limit lockout
   useEffect(() => {
@@ -65,6 +66,13 @@ function LoginForm() {
 
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl py-8 px-4 shadow-2xl border border-slate-800/80 sm:rounded-2xl sm:px-10">
+      {resetSuccess && !error && (
+        <div className="mb-6 border border-emerald-500/20 bg-emerald-500/10 rounded-xl p-4 flex items-center gap-3 text-sm text-emerald-400">
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
+          <span>Password reset successful! Please sign in with your new credentials.</span>
+        </div>
+      )}
+
       {error && (
         <div className={`mb-6 border rounded-xl p-4 flex items-center gap-3 text-sm ${
           retryAfter > 0

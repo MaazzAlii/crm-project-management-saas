@@ -78,6 +78,13 @@ export async function middleware(request: NextRequest) {
     applyCorsHeaders(response, request)
   }
 
+  // Rewrite /auth/reset-password to /reset-password for email link compatibility
+  if (pathname === '/auth/reset-password') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/reset-password'
+    return NextResponse.rewrite(url)
+  }
+
   // 3. Public API Endpoints (Explicitly bypass auth checks)
   // /api/health and /api/auth/* are public by specification
   const isPublicApi =

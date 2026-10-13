@@ -115,8 +115,9 @@ export async function resetPassword(
     );
 
     if (tokenRes.rows.length === 0) {
-      return { success: false, error: 'Invalid or expired password reset token' };
+      return { success: false, error: 'This reset link is invalid or has expired. Please request a new one.' };
     }
+
 
     const tokenRecord = tokenRes.rows[0];
 
