@@ -85,6 +85,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.rewrite(url)
   }
 
+  // Rewrite /auth/change-password to /change-password
+  if (pathname === '/auth/change-password') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/change-password'
+    return NextResponse.rewrite(url)
+  }
+
   // 3. Public API Endpoints (Explicitly bypass auth checks)
   // /api/health and /api/auth/* are public by specification
   const isPublicApi =
@@ -127,6 +134,23 @@ export async function middleware(request: NextRequest) {
     url.search = ''
     const redirectRes = NextResponse.redirect(url)
     return applySecurityHeaders(redirectRes)
+  }
+
+  // 5.5 Password Change Gate for First-Time Temporary Password
+  if (user && user.requirePasswordChange) {
+    const isChangePasswordPage =
+      pathname === '/change-password' ||
+      pathname === '/auth/change-password' ||
+      pathname === '/api/auth/change-password' ||
+      pathname === '/api/auth/logout'
+
+    if (!isChangePasswordPage && !pathname.startsWith('/_next')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/change-password'
+      url.searchParams.set('required', '1')
+      const redirectRes = NextResponse.redirect(url)
+      return applySecurityHeaders(redirectRes)
+    }
   }
 
   // 6. Protected Routes requiring Auth (org-member app)
