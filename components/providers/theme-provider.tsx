@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useMemo } from 'react'
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type ResolvedTheme = 'light' | 'dark'
@@ -77,7 +77,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [mounted, mode])
 
-  const setTheme = (nextMode: ThemeMode) => {
+  const setTheme = useCallback((nextMode: ThemeMode) => {
     setModeState(nextMode)
     const nextResolved = nextMode === 'system' ? getSystemTheme() : nextMode
     setResolvedTheme(nextResolved)
@@ -92,12 +92,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.warn('Failed to persist theme to localStorage', e)
     }
-  }
+  }, [])
 
-  const toggle = () => {
-    const nextTheme = resolvedTheme === 'dark' ? 'light' : 'dark'
-    setTheme(nextTheme)
-  }
+  const toggle = useCallback(() => {
+    setResolvedTheme((current) => {
+      const nextTheme = current === 'dark' ? 'light' : 'dark'
+      setTheme(nextTheme)
+      return nextTheme
+    })
+  }, [setTheme])
 
   const contextValue = useMemo<ThemeContextValue>(
     () => ({
@@ -106,7 +109,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setTheme,
       toggle,
     }),
-    [resolvedTheme, mode]
+    [resolvedTheme, mode, setTheme, toggle]
   )
 
   return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>

@@ -46,14 +46,17 @@ export const Text = forwardRef<HTMLElement, TextProps>(function Text(
   { variant = 'body', as, className = '', children, ...props },
   ref
 ) {
-  const Component = as || defaultElementMap[variant] || 'p'
+  const Component = (as || defaultElementMap[variant] || 'p') as ElementType
   const style = variantStyles[variant] || variantStyles.body
 
-  return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <Component ref={ref as any} className={`${style} ${className}`} {...props}>
-      {children}
-    </Component>
+  return React.createElement(
+    Component,
+    {
+      ref,
+      className: `${style} ${className}`,
+      ...props,
+    },
+    children
   )
 })
 
