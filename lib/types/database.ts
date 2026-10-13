@@ -54,6 +54,7 @@ export interface User {
   email_verified: boolean;
   email_verified_at?: Timestamp | null;
   last_login_at: Timestamp | null;
+  require_password_change?: boolean;
   preferences?: JSONObject | null;
   created_at: Timestamp;
   updated_at: Timestamp;
@@ -169,6 +170,8 @@ export interface Invitation {
   revoked_at?: Timestamp | null;
   declined_at?: Timestamp | null;
   send_failed?: boolean;
+  temp_password_hash?: string | null;
+  require_password_change?: boolean;
   created_at: Timestamp;
   updated_at: Timestamp;
 }
