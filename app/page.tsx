@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import {
   ArrowRight,
   BarChart3,
@@ -21,51 +22,52 @@ import {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-indigo-500 selection:text-white relative overflow-hidden transition-colors">
       {/* Dynamic Background Glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-tr from-indigo-600/20 via-sky-500/15 to-purple-600/20 blur-[130px] -z-10 pointer-events-none rounded-full" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-tr from-indigo-600/15 via-sky-500/10 to-purple-600/15 blur-[130px] -z-10 pointer-events-none rounded-full" />
       <div className="absolute top-[40%] right-[-10%] w-[600px] h-[600px] bg-sky-500/10 blur-[150px] -z-10 pointer-events-none rounded-full" />
       <div className="absolute top-[75%] left-[-10%] w-[600px] h-[600px] bg-indigo-500/10 blur-[150px] -z-10 pointer-events-none rounded-full" />
 
       {/* Modern Sticky Navigation */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/70 border-b border-slate-800/80 transition-all">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-950/70 border-b border-slate-200/80 dark:border-slate-800/80 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-200">
               IX
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
+              <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
                 Innoventix
               </span>
-              <span className="text-[10px] uppercase font-semibold tracking-wider text-indigo-400">
+              <span className="text-[10px] uppercase font-semibold tracking-wider text-indigo-500 dark:text-indigo-400">
                 Workspace Platform
               </span>
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-            <a href="#features" className="hover:text-white transition-colors">
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-300">
+            <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors">
               Features
             </a>
-            <a href="#crm" className="hover:text-white transition-colors">
+            <a href="#crm" className="hover:text-slate-900 dark:hover:text-white transition-colors">
               CRM & Pipeline
             </a>
-            <a href="#projects" className="hover:text-white transition-colors">
+            <a href="#projects" className="hover:text-slate-900 dark:hover:text-white transition-colors">
               Project Kanban
             </a>
-            <a href="#inbox" className="hover:text-white transition-colors">
+            <a href="#inbox" className="hover:text-slate-900 dark:hover:text-white transition-colors">
               Omni-Inbox
             </a>
-            <a href="#pricing" className="hover:text-white transition-colors">
+            <a href="#pricing" className="hover:text-slate-900 dark:hover:text-white transition-colors">
               Pricing
             </a>
           </nav>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link
               href="/login"
-              className="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors hover:bg-slate-800/60 rounded-lg"
+              className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60 transition-colors rounded-lg"
             >
               Sign In
             </Link>
