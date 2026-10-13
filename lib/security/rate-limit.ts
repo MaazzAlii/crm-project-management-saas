@@ -202,7 +202,7 @@ export function createRateLimitExceededResponse(
   const retryAfter = result.retryAfterSeconds || 60
   const message =
     customMessage ||
-    `Too many requests. Please wait ${retryAfter} seconds before trying again.`
+    'Too many requests. Please try again later.'
   return NextResponse.json(
     {
       success: false,
@@ -210,6 +210,7 @@ export function createRateLimitExceededResponse(
         message,
         code: 'RATE_LIMIT_EXCEEDED',
       },
+      message,
       retryAfterSeconds: retryAfter,
       statusCode: 429,
     },
@@ -223,3 +224,4 @@ export function createRateLimitExceededResponse(
     }
   )
 }
+
