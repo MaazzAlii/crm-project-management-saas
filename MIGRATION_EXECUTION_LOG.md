@@ -1347,4 +1347,31 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - All unit, integration, and browser E2E tests passing.
 - **Status**: ✅ Completed.
 
+---
+
+### [2026-10-13 01:25] Sign-In Fix Pack Refinement: Canonical Redirect Reverse Proxy Port Stripping & E2E Env Loading
+
+- **Phase / Task ID**: Sign-In Fix Pack (Prompts 07, 08 Verification Refinement)
+- **Rationale**: 
+  - When redirecting from `www.*` behind reverse proxies (Coolify / Traefik / Nginx), `x-forwarded-host` must be inspected in addition to `host`.
+  - When constructing the redirect URL from `request.nextUrl.clone()`, internal container ports (e.g. `:3000`) must be stripped if the canonical host has no explicit port.
+  - In Playwright E2E testing, ensure `.env.local` is read dynamically so test credentials automatically match the local database and dev server.
+- **Action Performed**:
+  1. Updated `middleware.ts`: Inspect `x-forwarded-host` first, cleanly split hostname and port on `canonicalHost` to prevent leaking internal port 3000 to public redirect URLs.
+  2. Updated `tests/canonical-host-redirect.test.ts`: Added test case verifying redirection when `x-forwarded-host` contains `www.` and `host` is internal (`127.0.0.1:3000`).
+  3. Updated `e2e/signin-landing-to-dashboard.spec.ts`: Added `.env.local` loader to read `ADMIN_EMAIL` and `ADMIN_PASSWORD` automatically.
+- **Files Modified**:
+  - `middleware.ts`
+  - `tests/canonical-host-redirect.test.ts`
+  - `e2e/signin-landing-to-dashboard.spec.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - `npx vitest run tests/canonical-host-redirect.test.ts`: **4/4 passed (100%)**.
+  - `npx playwright test e2e/signin-landing-to-dashboard.spec.ts`: **2/2 passed (24.0s)**.
+  - `npm test`: **67/67 suites passed, 447/447 tests passed (100%)**.
+  - `npm run lint`: **0 errors**.
+  - `npm run build`: **Compiled successfully (exit code 0)**.
+- **Status**: ✅ Completed.
+
+
 
