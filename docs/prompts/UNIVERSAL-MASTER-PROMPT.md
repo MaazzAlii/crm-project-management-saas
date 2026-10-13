@@ -235,6 +235,8 @@ AWAITING:
 15. Do not ignore accessibility, security, or performance.
 16. **Do not report a metric that moved without explaining the delta.** ⭐ NEW
 17. **Do not claim browser/device/runtime verification without an actual session.** ⭐ NEW
+18. **Never pipe `type-check`, `lint`, or `test` output through `tail`, `head`, or any truncating command.** ⭐ NEW  
+    Always capture full output: `npm run type-check 2>&1 | tee /tmp/tc.log`. A report that claims "pass" must include the exact exit code (`echo "EXIT: $?"`) and the full error count from the raw output file. Truncated output that hides errors is equivalent to fabrication.
 
 ---
 
