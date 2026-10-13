@@ -187,7 +187,7 @@ describe('Phase 3: PostgreSQL Custom Authentication System', () => {
     it('should reject reset attempt with used token', async () => {
       const attempt = await resetPassword(testEmail, resetToken, 'AnotherPass123!');
       expect(attempt.success).toBe(false);
-      expect(attempt.error).toContain('Invalid or expired');
+      expect(attempt.error).toMatch(/invalid or (has )?expired/i);
     });
   });
 

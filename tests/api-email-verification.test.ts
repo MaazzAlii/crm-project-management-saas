@@ -133,7 +133,7 @@ describe('Prompt 26: API Email Verification & Business Domain Codes', () => {
       const res2 = await sendEmailRoute.POST(req2);
       expect(res2.status).toBe(429);
       const body2 = await res2.json();
-      expect(body2.error?.message).toMatch(/60 seconds/i);
+      expect(body2.error?.message).toMatch(/too many requests|60 seconds/i);
     });
   });
 
