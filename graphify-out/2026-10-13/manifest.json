@@ -12,9 +12,9 @@
     "semantic_hash": ""
   },
   "app/page.tsx": {
-    "mtime": 1791444685.37858,
-    "seen": 1791772540.837089,
-    "ast_hash": "3b33800beec1cc4d1599e58a4f7f0d6e",
+    "mtime": 1791835486.4659605,
+    "seen": 1791835830.4101045,
+    "ast_hash": "96aaa76f7ca5e38cb9d4f89f95ead855",
     "semantic_hash": ""
   },
   "package.json": {
@@ -156,9 +156,9 @@
     "semantic_hash": ""
   },
   "middleware.ts": {
-    "mtime": 1791352376.1846771,
-    "seen": 1791772540.837423,
-    "ast_hash": "cb349b4eb5a1eeb56ea61f94d8c37f17",
+    "mtime": 1791835532.845699,
+    "seen": 1791835830.4105253,
+    "ast_hash": "e99b2d5c79bbd1521a72261ffb3f32c1",
     "semantic_hash": ""
   },
   "scripts/infra/backup-postgres.sh": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791830232.545551,
-    "seen": 1791831904.371043,
-    "ast_hash": "1018406c698907e91bfb9cfd2099dad3",
+    "mtime": 1791835239.0853288,
+    "seen": 1791835830.4108698,
+    "ast_hash": "e0eab3169b1f136ee04f47c1b3cbb649",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6843,6 +6843,18 @@
     "mtime": 1791832769.0,
     "seen": 1791835213.5296605,
     "ast_hash": "29989e346cb9cdd5f65a2bf872bce4b0",
+    "semantic_hash": ""
+  },
+  "e2e/signin-landing-to-dashboard.spec.ts": {
+    "mtime": 1791835615.6905193,
+    "seen": 1791835830.4103332,
+    "ast_hash": "249dac9a16568140f25ffdfca7888e4c",
+    "semantic_hash": ""
+  },
+  "tests/canonical-host-redirect.test.ts": {
+    "mtime": 1791835555.766087,
+    "seen": 1791835830.4107544,
+    "ast_hash": "6e94fe24f336c4ca510272c1f0cf36c9",
     "semantic_hash": ""
   }
 }
