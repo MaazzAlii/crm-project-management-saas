@@ -63,9 +63,9 @@ describe('Auth Hardening Item 4: Sign-In Rate Limiting (No 429 on HTML Pages)', 
 
   it('successful login resets the per-email rate limit counter', async () => {
     vi.spyOn(db, 'query').mockImplementation(async (sql: string) => {
-      if (sql.includes('SELECT id, email, password_hash, role FROM users')) {
+      if (sql.includes('FROM users WHERE email = $1')) {
         return {
-          rows: [{ id: 'u1', email: 'clean@innoventix.io', password_hash: 'valid_hash', role: 'member' }],
+          rows: [{ id: 'u1', email: 'clean@innoventix.io', password_hash: 'valid_hash', role: 'member', require_password_change: false }],
         } as any;
       }
       if (sql.includes('SELECT om.organization_id')) {
