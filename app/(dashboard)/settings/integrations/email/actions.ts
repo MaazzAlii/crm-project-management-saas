@@ -71,6 +71,11 @@ export async function saveEmailIntegrationAction(formData: FormData) {
       return { error: 'Unauthorized' }
     }
 
+    const canManage = session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin
+    if (!canManage) {
+      return { error: 'Forbidden. Only organization owners and admins can configure integrations.' }
+    }
+
     const channelName = formData.get('channel_name')?.toString().trim() || 'Support Email'
     const externalAccountId = formData.get('external_account_id')?.toString().trim().toLowerCase()
     const sendgridApiKey = formData.get('sendgrid_api_key')?.toString().trim()
@@ -111,8 +116,8 @@ export async function saveEmailIntegrationAction(formData: FormData) {
         `UPDATE communication_channels
          SET external_account_id = $1, channel_name = $2, status = 'active',
              connected_at = NOW(), metadata = $3, updated_at = NOW()
-         WHERE id = $4`,
-        [externalAccountId, channelName, JSON.stringify(metadataPayload), existingChannel.id]
+         WHERE id = $4 AND organization_id = $5`,
+        [externalAccountId, channelName, JSON.stringify(metadataPayload), existingChannel.id, session.organization.id]
       )
     } else {
       await query(
@@ -139,6 +144,11 @@ export async function disconnectEmailIntegrationAction(channelId: string) {
       return { error: 'Unauthorized' }
     }
 
+    const canManage = session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin
+    if (!canManage) {
+      return { error: 'Forbidden. Only organization owners and admins can configure integrations.' }
+    }
+
     await query(
       `UPDATE communication_channels
        SET status = 'disconnected', updated_at = NOW()
@@ -160,6 +170,11 @@ export async function testEmailConnectionAction(channelId: string, testRecipient
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) {
       return { error: 'Unauthorized' }
+    }
+
+    const canManage = session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin
+    if (!canManage) {
+      return { error: 'Forbidden. Only organization owners and admins can test integrations.' }
     }
 
     const channel = await queryOne<any>(
