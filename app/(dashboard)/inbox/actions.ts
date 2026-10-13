@@ -128,7 +128,7 @@ export async function markMessageReadAction(messageId: string) {
   try {
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) {
-      return { success: true }
+      return { success: false, error: 'Unauthorized' }
     }
 
     const ok = await markMessageRead(messageId, session.organization.id)
@@ -143,7 +143,7 @@ export async function markAllReadAction(channelId?: string) {
   try {
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) {
-      return { success: true }
+      return { success: false, error: 'Unauthorized' }
     }
 
     const ok = await markAllMessagesRead(session.organization.id, channelId)
@@ -158,7 +158,7 @@ export async function assignMessageClientAction(messageId: string, clientId: str
   try {
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) {
-      return { success: true }
+      return { success: false, error: 'Unauthorized' }
     }
 
     const ok = await assignMessageClient(messageId, clientId, session.organization.id)
