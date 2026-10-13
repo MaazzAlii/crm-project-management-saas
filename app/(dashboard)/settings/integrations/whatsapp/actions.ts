@@ -69,6 +69,11 @@ export async function saveWhatsAppIntegrationAction(formData: FormData) {
       return { error: 'Unauthorized' }
     }
 
+    const canManage = session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin
+    if (!canManage) {
+      return { error: 'Forbidden. Only organization owners and admins can configure integrations.' }
+    }
+
     const channelName = formData.get('channel_name')?.toString().trim() || 'WhatsApp Business'
     const rawPhone = formData.get('external_account_id')?.toString().trim()
     const accountSid = formData.get('account_sid')?.toString().trim()
@@ -109,8 +114,8 @@ export async function saveWhatsAppIntegrationAction(formData: FormData) {
         `UPDATE communication_channels
          SET external_account_id = $1, channel_name = $2, status = 'active',
              connected_at = NOW(), metadata = $3, updated_at = NOW()
-         WHERE id = $4`,
-        [formattedPhone, channelName, JSON.stringify(metadataPayload), existingChannel.id]
+         WHERE id = $4 AND organization_id = $5`,
+        [formattedPhone, channelName, JSON.stringify(metadataPayload), existingChannel.id, session.organization.id]
       )
     } else {
       await query(
@@ -137,6 +142,11 @@ export async function disconnectWhatsAppIntegrationAction(channelId: string) {
       return { error: 'Unauthorized' }
     }
 
+    const canManage = session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin
+    if (!canManage) {
+      return { error: 'Forbidden. Only organization owners and admins can configure integrations.' }
+    }
+
     await query(
       `UPDATE communication_channels
        SET status = 'disconnected', updated_at = NOW()
@@ -158,6 +168,11 @@ export async function testWhatsAppConnectionAction(channelId: string, testRecipi
     const session = await getCurrentSessionContext()
     if (!session || !session.organization) {
       return { error: 'Unauthorized' }
+    }
+
+    const canManage = session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin
+    if (!canManage) {
+      return { error: 'Forbidden. Only organization owners and admins can test integrations.' }
     }
 
     const channel = await queryOne<any>(
