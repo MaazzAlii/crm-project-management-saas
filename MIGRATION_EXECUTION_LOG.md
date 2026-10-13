@@ -1373,5 +1373,42 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm run build`: **Compiled successfully (exit code 0)**.
 - **Status**: ✅ Completed.
 
+---
+
+### [2026-10-13 12:00] Release Gate Fix Pack: Relative /team Redirect, Allowed Hosts Guard, Boot-time Instrumentation Check & Real-DB Verification
+
+- **Phase / Task ID**: Release Gate Hardening & Verification (Prompts 10 Release Gate)
+- **Rationale**:
+  - Prevent origin leaks behind reverse proxy by using pure relative `Location: /settings/team` header on `/team` route (`cd5ff8c`).
+  - Restrict canonical www-to-apex 301 redirects in `middleware.ts` to `ALLOWED_HOSTS` to prevent open redirect vulnerabilities when `x-forwarded-host` is forged (`ceaa612`).
+  - Assert presence of `DATABASE_URL` / `POSTGRES_URL` at server boot using Next.js `instrumentation.ts` `register()` hook, terminating before the HTTP listener opens with exit code 1 if missing; remove `localhost:54322` fallback from `lib/db/index.ts` (`aa89561`).
+  - Stop tracking hardcoded `postgres_dev_password` in `.env.example` template (`4aceff5`).
+- **Action Performed**:
+  1. Updated `app/team/route.ts`: Used `new NextResponse(null, { status: 307, headers: { Location: '/settings/team' + search } })`.
+  2. Updated `middleware.ts`: Compared incoming host against `ALLOWED_HOSTS` before redirecting.
+  3. Updated `tests/canonical-host-redirect.test.ts`: Added test cases for external untrusted host fall-through and reverse proxy upstream port 443 normalization (6/6 passing).
+  4. Created `instrumentation.ts`: Added boot-time assertion in `register()` when `NEXT_RUNTIME === 'nodejs'`.
+  5. Updated `lib/db/index.ts`: Removed localhost fallback pool; `initializePool` throws on missing connection string.
+  6. Updated `next.config.mjs`: Enabled `experimental.instrumentationHook: true` required for Next 14.2.
+  7. Updated `.env.example`: Replaced `postgres_dev_password` with `your_dev_postgres_password` placeholder.
+  8. Verified boot-time behavior with `node .next/standalone/server.js`:
+     - Missing database env var: Process halts immediately during boot (`register()`), never prints "Ready", exits with code 1.
+     - With live PostgreSQL container (`ix-pg` on port 5432): Process prints `✓ Ready in 58ms`, applies 47 migrations, and `GET /api/health` returns `200 OK` (`{"status":"healthy","database":"connected","migration":"migrated"}`).
+- **Files Modified / Created**:
+  - `app/team/route.ts`
+  - `middleware.ts`
+  - `tests/canonical-host-redirect.test.ts`
+  - `instrumentation.ts`
+  - `lib/db/index.ts`
+  - `next.config.mjs`
+  - `.env.example`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - `npx vitest run tests/canonical-host-redirect.test.ts`: **6/6 passed (100%)**.
+  - `curl -si http://localhost:3000/api/health` against standalone server with live Postgres container: **200 OK**.
+  - `git log -4`: All 4 atomic commits committed locally. Zero pushes to remotes.
+- **Status**: ✅ All 4 local commits verified and ready. Pushing remains blocked awaiting user written authorization and Coolify password rotation.
+
+
 
 
