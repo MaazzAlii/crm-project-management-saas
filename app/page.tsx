@@ -22,7 +22,7 @@ import {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-indigo-500 selection:text-white relative overflow-hidden transition-colors">
+    <div className="min-h-screen bg-slate-50 text-foreground dark:bg-slate-950 selection:bg-indigo-500 selection:text-primary-foreground relative overflow-hidden transition-colors">
       {/* Dynamic Background Glows */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-tr from-indigo-600/15 via-sky-500/10 to-purple-600/15 blur-[130px] -z-10 pointer-events-none rounded-full" />
       <div className="absolute top-[40%] right-[-10%] w-[600px] h-[600px] bg-sky-500/10 blur-[150px] -z-10 pointer-events-none rounded-full" />
@@ -32,33 +32,33 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-950/70 border-b border-slate-200/80 dark:border-slate-800/80 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-200">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 flex items-center justify-center font-bold text-primary-foreground shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-200">
               IX
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+              <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-muted-foreground bg-clip-text text-transparent">
                 Innoventix
               </span>
-              <span className="text-[10px] uppercase font-semibold tracking-wider text-indigo-500 dark:text-indigo-400">
+              <span className="text-[10px] uppercase font-semibold tracking-wider text-primary">
                 Workspace Platform
               </span>
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-300">
-            <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
+            <a href="#features" className="hover:text-foreground transition-colors">
               Features
             </a>
-            <a href="#crm" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+            <a href="#crm" className="hover:text-foreground transition-colors">
               CRM & Pipeline
             </a>
-            <a href="#projects" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+            <a href="#projects" className="hover:text-foreground transition-colors">
               Project Kanban
             </a>
-            <a href="#inbox" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+            <a href="#inbox" className="hover:text-foreground transition-colors">
               Omni-Inbox
             </a>
-            <a href="#pricing" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+            <a href="#pricing" className="hover:text-foreground transition-colors">
               Pricing
             </a>
           </nav>
@@ -67,13 +67,13 @@ export default function HomePage() {
             <ThemeToggle />
             <Link
               href="/login"
-              className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60 transition-colors rounded-lg"
+              className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-colors rounded-lg"
             >
               Sign In
             </Link>
             <Link
               href="/signup"
-              className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-500 hover:from-indigo-500 hover:to-sky-400 rounded-lg shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center gap-2"
+              className="px-5 py-2.5 text-sm font-semibold text-primary-foreground bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-500 hover:from-indigo-500 hover:to-sky-400 rounded-lg shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center gap-2"
             >
               <span>Get Started</span>
               <ArrowRight className="w-4 h-4" />
@@ -87,22 +87,22 @@ export default function HomePage() {
         {/* Release Pill Badge */}
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-md mb-8 hover:bg-indigo-500/15 transition-all">
           <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-300">
+          <span className="text-xs font-semibold text-primary">
             Agency Project Management & CRM Workspace
           </span>
-          <ChevronRight className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+          <ChevronRight className="w-3.5 h-3.5 text-primary" />
         </div>
 
-        {/* Hero Title */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white max-w-5xl mx-auto leading-[1.15]">
+        {/* Hero Title with theme-aware gradient tokens */}
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-foreground max-w-5xl mx-auto leading-[1.15]">
           Unify Your Sales Pipeline, Projects & Client Hub in{' '}
-          <span className="bg-gradient-to-r from-indigo-600 via-sky-600 to-indigo-500 dark:from-indigo-400 dark:via-sky-300 dark:to-indigo-200 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-brand-gradient-from to-brand-gradient-to bg-clip-text text-transparent">
             One Unified Workspace
           </span>
         </h1>
 
         {/* Hero Subtitle */}
-        <p className="mt-6 text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed">
+        <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto font-normal leading-relaxed">
           The high-performance SaaS suite built for modern agencies & teams. Combining visual CRM deal tracking, agile Kanban delivery, client approval portals, and multi-channel messaging.
         </p>
 
@@ -110,7 +110,7 @@ export default function HomePage() {
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             href="/signup"
-            className="w-full sm:w-auto px-8 py-4 text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group"
+            className="w-full sm:w-auto px-8 py-4 text-base font-semibold text-primary-foreground bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group"
           >
             <span>Start 14-Day Free Trial</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -118,7 +118,7 @@ export default function HomePage() {
 
           <Link
             href="/signup"
-            className="w-full sm:w-auto px-8 py-4 text-base font-semibold text-slate-700 dark:text-slate-200 bg-white hover:bg-slate-50 dark:bg-slate-900/90 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl hover:border-slate-400 dark:hover:border-slate-600 transition-all flex items-center justify-center gap-2 shadow-sm"
+            className="w-full sm:w-auto px-8 py-4 text-base font-semibold text-foreground bg-white hover:bg-slate-50 dark:bg-slate-900/90 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl hover:border-slate-400 dark:hover:border-slate-600 transition-all flex items-center justify-center gap-2 shadow-sm"
           >
             <Play className="w-4 h-4 text-sky-500 dark:text-sky-400 fill-sky-500 dark:fill-sky-400" />
             <span>Explore Workspace Demo</span>
@@ -126,7 +126,7 @@ export default function HomePage() {
         </div>
 
         {/* Trust Badges */}
-        <div className="mt-8 flex items-center justify-center gap-6 text-xs text-slate-600 dark:text-slate-400">
+        <div className="mt-8 flex items-center justify-center gap-6 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
             <span>No credit card required</span>
@@ -143,7 +143,7 @@ export default function HomePage() {
 
         {/* Interactive Hero UI Preview Card (Example Workspace) */}
         <div className="mt-16 relative rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-xl p-3 shadow-2xl shadow-indigo-950/50">
-          <div className="absolute -top-3 left-6 px-3 py-1 bg-slate-800 border border-slate-700 rounded-md text-[11px] font-mono text-slate-300 flex items-center gap-2">
+          <div className="absolute -top-3 left-6 px-3 py-1 bg-slate-800 border border-slate-700 rounded-md text-[11px] font-mono text-slate-300 flex items-center gap-2">{/* intentional: simulated dark preview mockup */}
             <div className="w-2 h-2 rounded-full bg-indigo-400" />
             <span>Example workspace</span>
           </div>
@@ -156,15 +156,15 @@ export default function HomePage() {
                   <Briefcase className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Campaigns & Sales Pipeline</h3>
-                  <p className="text-xs text-slate-400">Visual Pipeline • Agile Projects • Connected Channels</p>
+                  <h3 className="text-base font-bold text-white">{/* intentional: simulated dark workspace preview UI title */}Campaigns & Sales Pipeline</h3>
+                  <p className="text-xs text-slate-400">{/* intentional: simulated dark preview metadata */}Visual Pipeline • Agile Projects • Connected Channels</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                   Example Preview
                 </span>
-                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
+                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">{/* intentional: simulated dark preview mockup */}
                   Interactive Features
                 </span>
               </div>
@@ -174,23 +174,23 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6">
               {/* Card 1: Pipeline */}
               <div className="rounded-lg bg-slate-900/80 border border-slate-800 p-4 space-y-3">
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-300">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-300">{/* intentional: simulated dark preview mockup */}
                   <span className="flex items-center gap-1.5 text-indigo-400">
                     <KanbanSquare className="w-4 h-4" /> CRM Pipeline
                   </span>
-                  <span className="text-slate-500">Proposal Stage</span>
+                  <span className="text-slate-500">{/* intentional: simulated dark preview mockup */}Proposal Stage</span>
                 </div>
                 <div className="space-y-2">
                   <div className="p-2.5 rounded bg-slate-800/80 border border-slate-700/60 text-xs">
-                    <div className="font-semibold text-slate-200">Cloud Migration Project</div>
-                    <div className="flex justify-between text-[11px] text-slate-400 mt-1">
+                    <div className="font-semibold text-slate-200">{/* intentional: simulated dark preview mockup */}Cloud Migration Project</div>
+                    <div className="flex justify-between text-[11px] text-slate-400 mt-1">{/* intentional: simulated dark preview mockup */}
                       <span>Proposal Sent</span>
                       <span className="text-indigo-400 font-medium">In Review</span>
                     </div>
                   </div>
                   <div className="p-2.5 rounded bg-slate-800/80 border border-slate-700/60 text-xs">
-                    <div className="font-semibold text-slate-200">AI Integration Sprint</div>
-                    <div className="flex justify-between text-[11px] text-slate-400 mt-1">
+                    <div className="font-semibold text-slate-200">{/* intentional: simulated dark preview mockup */}AI Integration Sprint</div>
+                    <div className="flex justify-between text-[11px] text-slate-400 mt-1">{/* intentional: simulated dark preview mockup */}
                       <span>Scope Finalized</span>
                       <span className="text-emerald-400 font-medium">Ready</span>
                     </div>
@@ -200,15 +200,15 @@ export default function HomePage() {
 
               {/* Card 2: Active Kanban Tasks */}
               <div className="rounded-lg bg-slate-900/80 border border-slate-800 p-4 space-y-3">
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-300">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-300">{/* intentional: simulated dark preview mockup */}
                   <span className="flex items-center gap-1.5 text-sky-400">
                     <Layers className="w-4 h-4" /> Agile Project Delivery
                   </span>
-                  <span className="text-slate-500">In Review</span>
+                  <span className="text-slate-500">{/* intentional: simulated dark preview mockup */}In Review</span>
                 </div>
                 <div className="space-y-2">
                   <div className="p-2.5 rounded bg-slate-800/80 border border-slate-700/60 text-xs">
-                    <div className="font-semibold text-slate-200">Deliverable: Brand Identity System</div>
+                    <div className="font-semibold text-slate-200">{/* intentional: simulated dark preview mockup */}Deliverable: Brand Identity System</div>
                     <div className="flex items-center gap-2 mt-1.5">
                       <span className="h-1.5 flex-1 bg-slate-700 rounded-full overflow-hidden">
                         <span className="block h-full bg-sky-400 w-4/5 rounded-full" />
@@ -217,7 +217,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="p-2.5 rounded bg-slate-800/80 border border-slate-700/60 text-xs">
-                    <div className="font-semibold text-slate-200">Client Portal Deliverable Approval</div>
+                    <div className="font-semibold text-slate-200">{/* intentional: simulated dark preview mockup */}Client Portal Deliverable Approval</div>
                     <div className="text-[11px] text-emerald-400 mt-1">Milestone Completed</div>
                   </div>
                 </div>
@@ -225,7 +225,7 @@ export default function HomePage() {
 
               {/* Card 3: Omni-Channel Hub */}
               <div className="rounded-lg bg-slate-900/80 border border-slate-800 p-4 space-y-3">
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-300">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-300">{/* intentional: simulated dark preview mockup */}
                   <span className="flex items-center gap-1.5 text-purple-400">
                     <MessageSquare className="w-4 h-4" /> Omni-Channel Hub
                   </span>
@@ -234,19 +234,19 @@ export default function HomePage() {
                 <div className="space-y-2">
                   <div className="p-2.5 rounded bg-slate-800/80 border border-slate-700/60 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-slate-200">Slack • #agency-team</span>
-                      <span className="text-[10px] text-slate-500">Just now</span>
+                      <span className="font-semibold text-slate-200">{/* intentional: simulated dark preview mockup */}Slack • #agency-team</span>
+                      <span className="text-[10px] text-slate-500">{/* intentional: simulated dark preview mockup */}Just now</span>
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-1 truncate">
+                    <p className="text-[11px] text-slate-400 mt-1 truncate">{/* intentional: simulated dark preview mockup */}
                       Team: Latest design deliverable has been shared.
                     </p>
                   </div>
                   <div className="p-2.5 rounded bg-slate-800/80 border border-slate-700/60 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-slate-200">WhatsApp Inbound</span>
-                      <span className="text-[10px] text-slate-500">Earlier today</span>
+                      <span className="font-semibold text-slate-200">{/* intentional: simulated dark preview mockup */}WhatsApp Inbound</span>
+                      <span className="text-[10px] text-slate-500">{/* intentional: simulated dark preview mockup */}Earlier today</span>
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-1 truncate">
+                    <p className="text-[11px] text-slate-400 mt-1 truncate">{/* intentional: simulated dark preview mockup */}
                       Client: Feedback sent via portal.
                     </p>
                   </div>
@@ -261,8 +261,8 @@ export default function HomePage() {
       <section id="features" className="py-20 bg-slate-100/70 dark:bg-slate-900/40 border-y border-slate-200 dark:border-slate-800/60 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Complete SaaS Capabilities</h2>
-            <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-primary">Complete SaaS Capabilities</h2>
+            <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground">
               Built to Scale Fast-Growing Agencies & High-Performance Teams
             </p>
           </div>
@@ -270,66 +270,66 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Feature 1 */}
             <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none hover:border-indigo-500/40 transition-all group hover:-translate-y-1">
-              <div className="h-12 w-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-5 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+              <div className="h-12 w-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-primary flex items-center justify-center mb-5 group-hover:bg-indigo-600 group-hover:text-primary-foreground transition-all">
                 <KanbanSquare className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Visual Sales & CRM Pipeline</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              <h3 className="text-lg font-bold text-foreground mb-2">Visual Sales & CRM Pipeline</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Manage high-ticket deals, lead stages, contacts, custom tags, and deal valuations with drag-and-drop Kanban simplicity.
               </p>
             </div>
 
             {/* Feature 2 */}
             <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none hover:border-sky-500/40 transition-all group hover:-translate-y-1">
-              <div className="h-12 w-12 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-5 group-hover:bg-sky-500 group-hover:text-white transition-all">
+              <div className="h-12 w-12 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-5 group-hover:bg-sky-500 group-hover:text-primary-foreground transition-all">
                 <Layers className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Agile Project & Task Delivery</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              <h3 className="text-lg font-bold text-foreground mb-2">Agile Project & Task Delivery</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Track deliverables, assign team workloads, define sprint milestones, and monitor real-time completion status across projects.
               </p>
             </div>
 
             {/* Feature 3 */}
             <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none hover:border-purple-500/40 transition-all group hover:-translate-y-1">
-              <div className="h-12 w-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-5 group-hover:bg-purple-500 group-hover:text-white transition-all">
+              <div className="h-12 w-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-5 group-hover:bg-purple-500 group-hover:text-primary-foreground transition-all">
                 <Inbox className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Unified Omni-Channel Inbox</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              <h3 className="text-lg font-bold text-foreground mb-2">Unified Omni-Channel Inbox</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Consolidate conversations from Slack, Discord, WhatsApp, Email, and Upwork into one unified real-time inbox.
               </p>
             </div>
 
             {/* Feature 4 */}
             <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none hover:border-emerald-500/40 transition-all group hover:-translate-y-1">
-              <div className="h-12 w-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-5 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+              <div className="h-12 w-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-5 group-hover:bg-emerald-500 group-hover:text-primary-foreground transition-all">
                 <Bot className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">AI Workflow Automation</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              <h3 className="text-lg font-bold text-foreground mb-2">AI Workflow Automation</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Auto-generate smart client replies, calculate predictive lead scores, auto-extract tasks from messages, and compose weekly executive reports.
               </p>
             </div>
 
             {/* Feature 5 */}
             <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none hover:border-amber-500/40 transition-all group hover:-translate-y-1">
-              <div className="h-12 w-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-5 group-hover:bg-amber-500 group-hover:text-white transition-all">
+              <div className="h-12 w-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-5 group-hover:bg-amber-500 group-hover:text-primary-foreground transition-all">
                 <Globe2 className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Branded Client Portal</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              <h3 className="text-lg font-bold text-foreground mb-2">Branded Client Portal</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Provide clients with a white-labeled dashboard to approve deliverable files, track project progress, and view live invoice payments.
               </p>
             </div>
 
             {/* Feature 6 */}
             <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none hover:border-indigo-500/40 transition-all group hover:-translate-y-1">
-              <div className="h-12 w-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-5 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+              <div className="h-12 w-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-primary flex items-center justify-center mb-5 group-hover:bg-indigo-600 group-hover:text-primary-foreground transition-all">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Multi-Tenant Isolation</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              <h3 className="text-lg font-bold text-foreground mb-2">Multi-Tenant Isolation</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Self-hosted PostgreSQL backend with strict organization isolation, secure HTTP-only Edge JWT authentication, and full audit logs.
               </p>
             </div>
@@ -340,8 +340,8 @@ export default function HomePage() {
       {/* Pricing Section */}
       <section id="pricing" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Transparent Pricing</h2>
-          <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-primary">Transparent Pricing</h2>
+          <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground">
             Simple Plans for Teams of Every Size
           </p>
         </div>
@@ -350,13 +350,13 @@ export default function HomePage() {
           {/* Starter Plan */}
           <div className="p-8 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none flex flex-col justify-between">
             <div>
-              <div className="font-bold text-lg text-slate-900 dark:text-white">Starter</div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">For boutique agencies & freelancers</p>
+              <div className="font-bold text-lg text-foreground">Starter</div>
+              <p className="text-xs text-muted-foreground mt-1">For boutique agencies & freelancers</p>
               <div className="mt-6 flex items-baseline gap-1">
-                <span className="text-4xl font-extrabold text-slate-900 dark:text-white">$29</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">/ month</span>
+                <span className="text-4xl font-extrabold text-foreground">$29</span>
+                <span className="text-xs text-muted-foreground">/ month</span>
               </div>
-              <ul className="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+              <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Up to 5 Team Members
                 </li>
@@ -373,7 +373,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/signup"
-              className="mt-8 block text-center py-3 px-4 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white dark:border-slate-700 transition-colors"
+              className="mt-8 block text-center py-3 px-4 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-foreground border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 transition-colors"
             >
               Start Free Trial
             </Link>
@@ -381,17 +381,17 @@ export default function HomePage() {
 
           {/* Pro Plan (Featured) */}
           <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border-2 border-indigo-500/80 relative flex flex-col justify-between shadow-xl shadow-indigo-500/10">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-indigo-600 rounded-full text-[11px] font-bold tracking-wide uppercase text-white shadow-md">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-indigo-600 rounded-full text-[11px] font-bold tracking-wide uppercase text-primary-foreground shadow-md">
               Most Popular
             </div>
             <div>
-              <div className="font-bold text-lg text-slate-900 dark:text-white">Professional</div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">For growing multi-client agencies</p>
+              <div className="font-bold text-lg text-foreground">Professional</div>
+              <p className="text-xs text-muted-foreground mt-1">For growing multi-client agencies</p>
               <div className="mt-6 flex items-baseline gap-1">
-                <span className="text-4xl font-extrabold text-slate-900 dark:text-white">$79</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">/ month</span>
+                <span className="text-4xl font-extrabold text-foreground">$79</span>
+                <span className="text-xs text-muted-foreground">/ month</span>
               </div>
-              <ul className="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+              <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-indigo-500" /> Up to 25 Team Members
                 </li>
@@ -411,7 +411,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/signup"
-              className="mt-8 block text-center py-3 px-4 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02]"
+              className="mt-8 block text-center py-3 px-4 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-primary-foreground shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02]"
             >
               Get Started with Pro
             </Link>
@@ -420,13 +420,13 @@ export default function HomePage() {
           {/* Enterprise Plan */}
           <div className="p-8 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none flex flex-col justify-between">
             <div>
-              <div className="font-bold text-lg text-slate-900 dark:text-white">Enterprise</div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">For high-volume operations & scale</p>
+              <div className="font-bold text-lg text-foreground">Enterprise</div>
+              <p className="text-xs text-muted-foreground mt-1">For high-volume operations & scale</p>
               <div className="mt-6 flex items-baseline gap-1">
-                <span className="text-4xl font-extrabold text-slate-900 dark:text-white">$199</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">/ month</span>
+                <span className="text-4xl font-extrabold text-foreground">$199</span>
+                <span className="text-xs text-muted-foreground">/ month</span>
               </div>
-              <ul className="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+              <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Unlimited Team Workspaces
                 </li>
@@ -443,7 +443,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/signup"
-              className="mt-8 block text-center py-3 px-4 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white dark:border-slate-700 transition-colors"
+              className="mt-8 block text-center py-3 px-4 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-foreground border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 transition-colors"
             >
               Contact Enterprise
             </Link>
@@ -455,22 +455,22 @@ export default function HomePage() {
       <section className="py-20 relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="rounded-3xl p-10 sm:p-16 bg-gradient-to-r from-indigo-900/80 via-slate-900 to-indigo-950/90 border border-indigo-500/30 text-center relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 blur-[100px] pointer-events-none" />
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white max-w-3xl mx-auto">
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-primary-foreground max-w-3xl mx-auto">
             Ready to Streamline Your Client Pipeline & Deliverables?
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto">
+          <p className="mt-4 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto">{/* intentional: fixed high-contrast subtitle on dark banner */}
             Join modern agencies and scale client retention with effortless CRM tracking and project transparency.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
             <Link
               href="/signup"
-              className="px-8 py-4 text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-xl shadow-indigo-600/30 transition-all hover:scale-[1.02]"
+              className="px-8 py-4 text-base font-semibold text-primary-foreground bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-xl shadow-indigo-600/30 transition-all hover:scale-[1.02]"
             >
               Create Free Workspace
             </Link>
             <Link
               href="/login"
-              className="px-8 py-4 text-base font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all"
+              className="px-8 py-4 text-base font-semibold text-primary-foreground bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all"
             >
               Sign In to Existing Workspace
             </Link>
@@ -480,24 +480,24 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-800/80 bg-slate-100/80 dark:bg-slate-950 py-12 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-600 dark:text-slate-400">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-muted-foreground">
           <div className="flex items-center gap-3">
-            <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white text-xs">
+            <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-primary-foreground text-xs">
               IX
             </div>
-            <span className="font-semibold text-slate-800 dark:text-slate-300">Innoventix SaaS Workspace Platform</span>
+            <span className="font-semibold text-foreground">Innoventix SaaS Workspace Platform</span>
             <span>•</span>
             <span>© {new Date().getFullYear()} All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-6">
-            <Link href="/login" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+            <Link href="/login" className="hover:text-foreground transition-colors">
               Sign In
             </Link>
-            <Link href="/signup" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+            <Link href="/signup" className="hover:text-foreground transition-colors">
               Create Account
             </Link>
-            <Link href="/client/login" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+            <Link href="/client/login" className="hover:text-foreground transition-colors">
               Client Portal
             </Link>
             <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
