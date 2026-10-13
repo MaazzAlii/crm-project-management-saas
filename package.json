@@ -20,6 +20,7 @@
     "@stripe/stripe-js": "^9.15.0",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
+    "geist": "^1.7.2",
     "jose": "^6.2.12",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.475.0",
