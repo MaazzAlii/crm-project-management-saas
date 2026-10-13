@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791824332.4458463,
-    "seen": 1791824719.0455987,
-    "ast_hash": "f44b85af5d802a4451abd93f650f6514",
+    "mtime": 1791885633.1938422,
+    "seen": 1791885763.574468,
+    "ast_hash": "7a011b40c8d23c1a91e9e57e173a0640",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791878123.361985,
-    "seen": 1791879850.915999,
-    "ast_hash": "335020bf7512ca1f2e75373e60259c7f",
+    "mtime": 1791885612.5068552,
+    "seen": 1791885763.574478,
+    "ast_hash": "bb9f87fab9439d436d36fa169cdc3b53",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6939,6 +6939,90 @@
     "mtime": 1791864161.0,
     "seen": 1791879850.9165819,
     "ast_hash": "5c65abb85856d77b6a63df202b0f32ec",
+    "semantic_hash": ""
+  },
+  "docs/adr/001-postgresql-and-jwt-migration.md": {
+    "mtime": 1791885570.2258682,
+    "seen": 1791885763.5747275,
+    "ast_hash": "f14c22c65af80701ed503f3a914a5653",
+    "semantic_hash": ""
+  },
+  "docs/design/DESIGN-SYSTEM.md": {
+    "mtime": 1791885333.0385296,
+    "seen": 1791885763.574733,
+    "ast_hash": "45b37050ddce857e77dcb87833839ee9",
+    "semantic_hash": ""
+  },
+  "docs/design/MOTION-GUIDELINES.md": {
+    "mtime": 1791885398.885704,
+    "seen": 1791885763.574735,
+    "ast_hash": "becdf7f25ca44d6e18eac9e5c7c1273c",
+    "semantic_hash": ""
+  },
+  "docs/design/SURFACE-HIERARCHY.md": {
+    "mtime": 1791885376.7576532,
+    "seen": 1791885763.5747364,
+    "ast_hash": "150c05f2ebd8313da67760b833e54fa8",
+    "semantic_hash": ""
+  },
+  "docs/design/THEME-SYSTEM.md": {
+    "mtime": 1791885355.3605967,
+    "seen": 1791885763.5747383,
+    "ast_hash": "9f865fe76be0057908b8be0be812762d",
+    "semantic_hash": ""
+  },
+  "docs/engineering/AUTH-AND-RBAC.md": {
+    "mtime": 1791885471.5818205,
+    "seen": 1791885763.5747442,
+    "ast_hash": "d8510fef09830674ab86744bde4c629d",
+    "semantic_hash": ""
+  },
+  "docs/engineering/CODING-STANDARDS.md": {
+    "mtime": 1791885422.950751,
+    "seen": 1791885763.5747461,
+    "ast_hash": "258da84de3bd47ad2107dac1132e2af8",
+    "semantic_hash": ""
+  },
+  "docs/engineering/COMPONENT-LIBRARY.md": {
+    "mtime": 1791885445.7447877,
+    "seen": 1791885763.5747476,
+    "ast_hash": "adf73e9e8b5418153401c2a93d2c88f7",
+    "semantic_hash": ""
+  },
+  "docs/engineering/DATA-AND-API.md": {
+    "mtime": 1791885494.7548423,
+    "seen": 1791885763.5747492,
+    "ast_hash": "de808c45723aa3649c1ad23ee2af0c00",
+    "semantic_hash": ""
+  },
+  "docs/engineering/TESTING-STRATEGY.md": {
+    "mtime": 1791885521.3998592,
+    "seen": 1791885763.5747507,
+    "ast_hash": "b5d8a36620ecf8cc368991037e30a521",
+    "semantic_hash": ""
+  },
+  "docs/operations/DEPLOYMENT.md": {
+    "mtime": 1791885547.2598674,
+    "seen": 1791885763.574758,
+    "ast_hash": "a126f3ca901accc6d3b52593ae5c912f",
+    "semantic_hash": ""
+  },
+  "docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md": {
+    "mtime": 1791885040.1696737,
+    "seen": 1791885763.574766,
+    "ast_hash": "97be25c322ba1e4bcb1d45b1b900966b",
+    "semantic_hash": ""
+  },
+  "docs/prompts/PROJECT-CONTEXT.md": {
+    "mtime": 1791885297.3474042,
+    "seen": 1791885763.5747674,
+    "ast_hash": "d422bb1f0128e0368232b8d05f87d815",
+    "semantic_hash": ""
+  },
+  "docs/prompts/UNIVERSAL-UI-AND-ENGINEERING-PROTOCOL.md": {
+    "mtime": 1791885043.7527232,
+    "seen": 1791885763.5747688,
+    "ast_hash": "e3ec6686a958f3bf0488a110e0bdd686",
     "semantic_hash": ""
   }
 }
