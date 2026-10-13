@@ -18,10 +18,10 @@ export function CommunicationModeBadge({
   if (isConnected) {
     return (
       <span
-        className={`inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 shadow-sm ${className}`}
+        className={`inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shadow-xs ${className}`}
         title="Connected Hub: Auto-syncs conversations from linked channels into unified inbox"
       >
-        <Zap className="h-3 w-3 text-emerald-400 fill-emerald-400/20" />
+        <Zap className="h-3 w-3 text-emerald-600 dark:text-emerald-400 fill-emerald-600/20 dark:fill-emerald-400/20" />
         <span>Connected</span>
       </span>
     )
@@ -32,12 +32,12 @@ export function CommunicationModeBadge({
       <button
         type="button"
         onClick={onUpgrade}
-        className={`inline-flex items-center gap-1.5 rounded-full border border-slate-700/80 bg-slate-800/80 px-2.5 py-0.5 text-xs font-semibold text-slate-300 hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-300 transition shadow-sm cursor-pointer group ${className}`}
+        className={`inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/80 px-2.5 py-0.5 text-xs font-semibold text-foreground hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-300 transition shadow-xs cursor-pointer group ${className}`}
         title="Manual Mode: Click to upgrade to Connected Hub auto-sync"
       >
-        <Pencil className="h-3 w-3 text-slate-400 group-hover:text-emerald-400 transition" />
+        <Pencil className="h-3 w-3 text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition" />
         <span>Manual</span>
-        <span className="text-[10px] text-emerald-400 font-bold ml-0.5 opacity-80 group-hover:opacity-100 flex items-center gap-0.5">
+        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold ml-0.5 opacity-80 group-hover:opacity-100 flex items-center gap-0.5">
           <Zap className="h-2.5 w-2.5" /> Upgrade
         </span>
       </button>
@@ -46,10 +46,10 @@ export function CommunicationModeBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border border-slate-700/80 bg-slate-800/80 px-2.5 py-0.5 text-xs font-semibold text-slate-300 shadow-sm ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/80 px-2.5 py-0.5 text-xs font-semibold text-foreground shadow-xs ${className}`}
       title="Manual: Team logs conversations manually"
     >
-      <Pencil className="h-3 w-3 text-slate-400" />
+      <Pencil className="h-3 w-3 text-muted-foreground" />
       <span>Manual</span>
     </span>
   )

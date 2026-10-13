@@ -165,26 +165,26 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
     switch (status) {
       case 'active':
         return (
-          <span className="inline-flex items-center rounded-md bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[11px] font-semibold text-emerald-400">
+          <span className="inline-flex items-center rounded-md bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
             Active
           </span>
         )
       case 'paused':
         return (
-          <span className="inline-flex items-center rounded-md bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[11px] font-semibold text-amber-400">
+          <span className="inline-flex items-center rounded-md bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
             Paused
           </span>
         )
       case 'completed':
         return (
-          <span className="inline-flex items-center rounded-md bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 text-[11px] font-semibold text-sky-400">
+          <span className="inline-flex items-center rounded-md bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 text-[11px] font-semibold text-sky-600 dark:text-sky-400">
             Completed
           </span>
         )
       case 'archived':
       default:
         return (
-          <span className="inline-flex items-center rounded-md bg-slate-800 border border-slate-700 px-2 py-0.5 text-[11px] font-semibold text-slate-400">
+          <span className="inline-flex items-center rounded-md bg-muted border border-border px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
             Archived
           </span>
         )
@@ -203,21 +203,21 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
       {/* Header & View Mode Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">Clients Directory</h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <h1 className="text-2xl font-black text-foreground tracking-tight">Clients Directory</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
             Manage your agency clients, communication mode, and platform integrations.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {/* View Toggle */}
-          <div className="flex items-center rounded-xl border border-slate-800 bg-slate-900/80 p-1">
+          <div className="flex items-center rounded-xl border border-border bg-card/80 p-1">
             <button
               onClick={() => setViewMode('table')}
               className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                 viewMode === 'table'
-                  ? 'bg-sky-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-primary text-primary-foreground shadow-xs'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
               title="Table View"
             >
@@ -228,8 +228,8 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
               onClick={() => setViewMode('cards')}
               className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                 viewMode === 'cards'
-                  ? 'bg-sky-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-primary text-primary-foreground shadow-xs'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
               title="Cards Grid View"
             >
@@ -241,16 +241,16 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
           {/* Manage Tags Button */}
           <button
             onClick={() => setIsTagManagerOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold text-foreground hover:bg-muted transition"
           >
-            <TagIcon className="h-3.5 w-3.5 text-sky-400" />
+            <TagIcon className="h-3.5 w-3.5 text-primary" />
             <span>Manage Tags</span>
           </button>
 
           {/* Add Client Button */}
           <Link
             href="/clients/new"
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-sky-600/25 hover:from-sky-400 hover:to-blue-500 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary hover:bg-primary/90 px-4 py-2 text-xs font-bold text-primary-foreground shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <Plus className="h-4 w-4 stroke-[2.5]" />
             <span>New Client</span>
@@ -276,10 +276,10 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
         <>
           {/* View Mode 1: Zebra Striped Responsive Table */}
           {viewMode === 'table' ? (
-            <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 shadow-xl backdrop-blur-md">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card/60 shadow-xl backdrop-blur-md">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <table className="w-full text-left text-xs text-foreground">
+                  <thead className="border-b border-border bg-muted/60 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                     <tr>
                       <th className="px-5 py-3.5">Client & Company</th>
                       <th className="px-4 py-3.5">Tags</th>
@@ -292,12 +292,12 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                       {canManage && <th className="px-4 py-3.5 text-right">Actions</th>}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y divide-border">
                     {filteredClients.map((client, idx) => (
                       <tr
                         key={client.id}
-                        className={`transition hover:bg-sky-500/5 ${
-                          idx % 2 === 0 ? 'bg-slate-900/30' : 'bg-slate-950/40'
+                        className={`transition hover:bg-muted/50 ${
+                          idx % 2 === 0 ? 'bg-card/30' : 'bg-muted/20'
                         }`}
                       >
                         {/* Name & Company */}
@@ -305,14 +305,14 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                           <div className="flex flex-col">
                             <Link
                               href={`/clients/${client.id}`}
-                              className="font-bold text-white text-sm hover:text-sky-400 transition flex items-center gap-1.5"
+                              className="font-bold text-foreground text-sm hover:text-primary transition flex items-center gap-1.5"
                             >
                               <span>{client.name}</span>
-                              <ExternalLink className="h-3 w-3 text-slate-500 hover:text-sky-400 opacity-0 group-hover:opacity-100 transition" />
+                              <ExternalLink className="h-3 w-3 text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition" />
                             </Link>
                             {client.company && (
-                              <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                                <Building2 className="h-3 w-3 text-slate-500" />
+                              <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                                <Building2 className="h-3 w-3 text-muted-foreground" />
                                 {client.company}
                               </span>
                             )}
@@ -328,7 +328,7 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                               ))}
                             </div>
                           ) : (
-                            <span className="text-slate-600 text-[11px]">—</span>
+                            <span className="text-subtle-foreground text-[11px]">—</span>
                           )}
                         </td>
 
@@ -336,26 +336,26 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                         <td className="px-4 py-4">
                           {client.email ? (
                             <span
-                              className="text-slate-300 truncate max-w-[180px] inline-block"
+                              className="text-foreground truncate max-w-[180px] inline-block"
                               title={client.email}
                             >
                               {client.email}
                             </span>
                           ) : (
-                            <span className="text-slate-600">—</span>
+                            <span className="text-subtle-foreground">—</span>
                           )}
                         </td>
 
                         {/* Platform */}
                         <td className="px-4 py-4">
-                          <span className="inline-flex items-center rounded-lg border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] font-medium text-slate-300">
+                          <span className="inline-flex items-center rounded-lg border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground">
                             {client.platform || 'WhatsApp'}
                           </span>
                         </td>
 
                         {/* Country */}
                         <td className="px-4 py-4">
-                          <span className="text-slate-300">
+                          <span className="text-foreground">
                             {client.country || '—'}
                           </span>
                         </td>
@@ -369,7 +369,7 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                         </td>
 
                         {/* Created At */}
-                        <td className="px-4 py-4 text-slate-400 text-[11px]">
+                        <td className="px-4 py-4 text-muted-foreground text-[11px]">
                           {new Date(client.created_at).toLocaleDateString(undefined, {
                             month: 'short',
                             day: 'numeric',
@@ -383,11 +383,11 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                             <button
                               onClick={() => handleDelete(client.id, client.name)}
                               disabled={deletingId === client.id}
-                              className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition"
+                              className="rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition"
                               title="Delete Client"
                             >
                               {deletingId === client.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin text-rose-400" />
+                                <Loader2 className="h-4 w-4 animate-spin text-destructive" />
                               ) : (
                                 <Trash2 className="h-4 w-4" />
                               )}
@@ -406,20 +406,20 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
               {filteredClients.map((client) => (
                 <div
                   key={client.id}
-                  className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg backdrop-blur-md hover:border-slate-700 transition space-y-4"
+                  className="flex flex-col justify-between rounded-2xl border border-border bg-card/60 p-5 shadow-xs backdrop-blur-md hover:border-border/80 transition space-y-4"
                 >
                   {/* Top Card Header */}
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <Link
                         href={`/clients/${client.id}`}
-                        className="font-extrabold text-white text-base leading-tight hover:text-sky-400 transition"
+                        className="font-extrabold text-foreground text-base leading-tight hover:text-primary transition"
                       >
                         {client.name}
                       </Link>
                       {client.company && (
-                        <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                          <Building2 className="h-3.5 w-3.5 text-slate-500" />
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                          <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
                           {client.company}
                         </p>
                       )}
@@ -430,7 +430,7 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                   {/* Badges & Mode Row */}
                   <div className="flex flex-wrap items-center gap-1.5 pt-1">
                     <CommunicationModeBadge mode={client.communication_mode} />
-                    <span className="inline-flex items-center rounded-lg border border-slate-800 bg-slate-950 px-2 py-0.5 text-[11px] font-medium text-slate-300">
+                    <span className="inline-flex items-center rounded-lg border border-border bg-background px-2 py-0.5 text-[11px] font-medium text-foreground">
                       {client.platform || 'WhatsApp'}
                     </span>
                     {client.tags && client.tags.map((t) => (
@@ -439,29 +439,29 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                   </div>
 
                   {/* Contact Info List */}
-                  <div className="space-y-1.5 border-t border-slate-800/80 pt-3 text-xs text-slate-400">
+                  <div className="space-y-1.5 border-t border-border pt-3 text-xs text-muted-foreground">
                     {client.email && (
                       <div className="flex items-center gap-2 truncate">
-                        <Mail className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                        <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         <span className="truncate">{client.email}</span>
                       </div>
                     )}
                     {client.phone && (
                       <div className="flex items-center gap-2">
-                        <Phone className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                        <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         <span>{client.phone}</span>
                       </div>
                     )}
                     {client.country && (
                       <div className="flex items-center gap-2">
-                        <Globe className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                        <Globe className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         <span>{client.country}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Card Footer Actions */}
-                  <div className="flex items-center justify-between border-t border-slate-800/80 pt-3 text-[11px] text-slate-500">
+                  <div className="flex items-center justify-between border-t border-border pt-3 text-[11px] text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
                       {new Date(client.created_at).toLocaleDateString()}
@@ -471,10 +471,10 @@ export function ClientsList({ initialClients, userRole, isSuperAdmin }: ClientsL
                       <button
                         onClick={() => handleDelete(client.id, client.name)}
                         disabled={deletingId === client.id}
-                        className="flex items-center gap-1 text-slate-400 hover:text-rose-400 transition"
+                        className="flex items-center gap-1 text-muted-foreground hover:text-destructive transition"
                       >
                         {deletingId === client.id ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-destructive" />
                         ) : (
                           <Trash2 className="h-3.5 w-3.5" />
                         )}

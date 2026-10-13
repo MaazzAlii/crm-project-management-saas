@@ -28,7 +28,7 @@ export function TagBadge({ name, color = 'sky', onRemove, size = 'sm' }: TagBadg
             e.stopPropagation()
             onRemove()
           }}
-          className="ml-0.5 rounded p-0.5 hover:bg-black/20 text-current transition"
+          className="ml-0.5 rounded p-0.5 hover:bg-foreground/10 text-current transition"
         >
           <X className="h-2.5 w-2.5" />
         </button>
