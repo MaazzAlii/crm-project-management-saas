@@ -66,6 +66,7 @@ export const INVITE_RATE_LIMITS = {
   ACCEPT_DECLINE: { maxRequests: 30, windowMs: 60 * 60 * 1000 }, // 30 per hour per IP
   VERIFY_EMAIL_SEND: { maxRequests: 1, windowMs: 60 * 1000 }, // 1 per 60 seconds per user
   DOMAIN_CODE_SEND: { maxRequests: 3, windowMs: 60 * 60 * 1000 }, // 3 per hour per organization
+  PASSWORD_RESET_SEND: { maxRequests: 3, windowMs: 60 * 60 * 1000 }, // 3 per hour per email & IP (Item 1)
 }
 
 /**
@@ -96,6 +97,19 @@ export function checkLoginRateLimit(email: string, ip: string): RateLimitResult 
   const ipResult = checkRateLimit(ipKey, RATE_LIMIT_TIERS.LOGIN_BY_IP)
   return ipResult
 }
+
+/**
+ * Check password reset rate limits for both email and IP (Item 1: 3 per hour).
+ */
+export function checkPasswordResetRateLimit(email: string, ip: string): RateLimitResult {
+  const emailKey = `rl:pwd_reset:email:${email.toLowerCase().trim()}`
+  const ipKey = `rl:pwd_reset:ip:${ip}`
+  const emailResult = checkRateLimit(emailKey, INVITE_RATE_LIMITS.PASSWORD_RESET_SEND)
+  if (!emailResult.allowed) return emailResult
+  const ipResult = checkRateLimit(ipKey, INVITE_RATE_LIMITS.PASSWORD_RESET_SEND)
+  return ipResult
+}
+
 
 /**
  * Extracts client IP identifier from Next.js request headers or socket.

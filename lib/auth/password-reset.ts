@@ -42,7 +42,7 @@ export async function createPasswordResetToken(email: string): Promise<PasswordR
     [user.id, normalizedEmail, tokenHash, expiresAt]
   );
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const baseUrl = (process.env.APP_PUBLIC_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
   const url = `${baseUrl}/auth/reset-password?token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`;
 
   return {

@@ -318,3 +318,68 @@ Your membership role in ${params.organizationName} has been updated to ${params.
 
   return { subject, html, text };
 }
+
+/**
+ * 6. Password Reset Email (Item 1)
+ */
+export function renderPasswordResetEmail(params: {
+  resetUrl: string;
+  expiresAt?: Date | string;
+}): EmailTemplateResult {
+  const subject = 'Reset your password';
+  const formattedExpiry = params.expiresAt
+    ? new Date(params.expiresAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    : '1 hour';
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${subject}</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; padding: 32px 16px; margin: 0; color: #0f172a;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden;">
+    <tr>
+      <td style="padding: 32px 32px 24px; text-align: left;">
+        <div style="display: inline-block; width: 36px; height: 36px; line-height: 36px; text-align: center; background: linear-gradient(135deg, #0284c7, #2563eb); border-radius: 10px; color: #ffffff; font-weight: 800; font-size: 14px; margin-bottom: 20px;">
+          IX
+        </div>
+        <h1 style="font-size: 20px; font-weight: 700; color: #0f172a; margin: 0 0 12px; letter-spacing: -0.02em;">
+          Reset your Innoventix password
+        </h1>
+        <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 24px;">
+          We received a request to reset the password for your account. Click the button below to choose a new password:
+        </p>
+        <table border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
+          <tr>
+            <td align="center" style="border-radius: 10px; background-color: #0284c7;">
+              <a href="${params.resetUrl}" target="_blank" style="font-size: 14px; font-weight: 600; color: #ffffff; text-decoration: none; padding: 12px 24px; display: inline-block; border-radius: 10px; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.25);">
+                Reset Password
+              </a>
+            </td>
+          </tr>
+        </table>
+        <p style="font-size: 12px; line-height: 1.5; color: #64748b; margin: 0 0 8px;">
+          This link expires in <strong>${formattedExpiry}</strong>. If you did not request a password reset, you can safely ignore this email.
+        </p>
+        <p style="font-size: 11px; line-height: 1.4; color: #94a3b8; margin: 16px 0 0; word-break: break-all;">
+          Button not working? Copy and paste this URL into your browser:<br>
+          <a href="${params.resetUrl}" style="color: #0284c7; text-decoration: underline;">${params.resetUrl}</a>
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  const text = `Reset your Innoventix password
+
+We received a request to reset the password for your account. Open the link below to choose a new password:
+
+${params.resetUrl}
+
+This link expires in 1 hour. If you did not request a password reset, you can safely ignore this email.`;
+
+  return { subject, html, text };
+}
+
