@@ -60,9 +60,9 @@
     "semantic_hash": ""
   },
   "app/(auth)/login/page.tsx": {
-    "mtime": 1791886606.990465,
-    "seen": 1791887938.7323062,
-    "ast_hash": "7f984507dbbf777520c783dcb04cc34f",
+    "mtime": 1791890775.8934724,
+    "seen": 1791891378.1433754,
+    "ast_hash": "22dbf966c0f1915c74297730eea88013",
     "semantic_hash": ""
   },
   "app/(auth)/signup/page.tsx": {
@@ -156,9 +156,9 @@
     "semantic_hash": ""
   },
   "middleware.ts": {
-    "mtime": 1791886554.382065,
-    "seen": 1791887938.7328658,
-    "ast_hash": "73fb728b4a125e5e681d052d2d3af8e3",
+    "mtime": 1791890838.137125,
+    "seen": 1791891378.1441395,
+    "ast_hash": "69de3e649356d95cb98bd9f48feaac71",
     "semantic_hash": ""
   },
   "scripts/infra/backup-postgres.sh": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791887184.7989655,
-    "seen": 1791887938.7331264,
-    "ast_hash": "3faad22263fe92bc04e9cea61af984ea",
+    "mtime": 1791887994.4748557,
+    "seen": 1791891378.1444411,
+    "ast_hash": "e676e4332b28b5c2810f3f2123c1aa2c",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1626,9 +1626,9 @@
     "semantic_hash": ""
   },
   "app/api/auth/login/route.ts": {
-    "mtime": 1791833645.6626384,
-    "seen": 1791835213.5280287,
-    "ast_hash": "9287733e2967bbdb2313d19d1c5ede00",
+    "mtime": 1791891087.253816,
+    "seen": 1791891378.1435966,
+    "ast_hash": "f04cd4d3740e905aa5a4672b53584049",
     "semantic_hash": ""
   },
   "app/api/auth/logout/route.ts": {
@@ -2892,15 +2892,15 @@
     "semantic_hash": ""
   },
   "lib/auth/change-password.ts": {
-    "mtime": 1790579676.4064715,
-    "seen": 1791772540.8373153,
-    "ast_hash": "11d3a1decbd916388a4af8979a7cba04",
+    "mtime": 1791890726.797665,
+    "seen": 1791891378.1440232,
+    "ast_hash": "02940b3ef13643a53e14bed2ea4987de",
     "semantic_hash": ""
   },
   "lib/auth/edge-jwt.ts": {
-    "mtime": 1791633287.6001205,
-    "seen": 1791772540.8373165,
-    "ast_hash": "fc165d45d183498a8c06615234cc9a35",
+    "mtime": 1791890701.499734,
+    "seen": 1791891378.144025,
+    "ast_hash": "49003ccfa3003433fd978bcce1c8d68c",
     "semantic_hash": ""
   },
   "lib/auth/impersonation.ts": {
@@ -2910,9 +2910,9 @@
     "semantic_hash": ""
   },
   "lib/auth/jwt.ts": {
-    "mtime": 1791829767.165028,
-    "seen": 1791831904.3702984,
-    "ast_hash": "43f6f3a91e26fe7358af543e86717a1e",
+    "mtime": 1791890693.6977506,
+    "seen": 1791891378.1440282,
+    "ast_hash": "d11cdc5605d5fce7df4e9630fc331b06",
     "semantic_hash": ""
   },
   "lib/auth/magic-link.ts": {
@@ -2976,9 +2976,9 @@
     "semantic_hash": ""
   },
   "lib/db/embedded-migrations.ts": {
-    "mtime": 1791834930.1598098,
-    "seen": 1791835213.5285056,
-    "ast_hash": "d1aa91b2261cbe6dfb65871a3ba93528",
+    "mtime": 1791890494.353352,
+    "seen": 1791891378.1440487,
+    "ast_hash": "9c6b46c1608e3a3b0a73059b0b76caba",
     "semantic_hash": ""
   },
   "lib/db/index.ts": {
@@ -3036,9 +3036,9 @@
     "semantic_hash": ""
   },
   "lib/db/repositories/invitation-repo.ts": {
-    "mtime": 1791780592.953677,
-    "seen": 1791780986.2203827,
-    "ast_hash": "7e9c161bf049e8cbb73011fcd913725e",
+    "mtime": 1791890573.8487182,
+    "seen": 1791891378.1440635,
+    "ast_hash": "f8f4ac6641671d90d33ba8e1d9e3ba18",
     "semantic_hash": ""
   },
   "lib/db/repositories/message-repo.ts": {
@@ -3066,9 +3066,9 @@
     "semantic_hash": ""
   },
   "lib/db/repositories/user-repo.ts": {
-    "mtime": 1791778086.4085531,
-    "seen": 1791778843.7846296,
-    "ast_hash": "089da80d8f38f71e5e38af4e792014a5",
+    "mtime": 1791891063.2280917,
+    "seen": 1791891378.1440701,
+    "ast_hash": "3e99e33ff163a3bfd68ccd4f8323334a",
     "semantic_hash": ""
   },
   "lib/db/transactions.ts": {
@@ -3282,9 +3282,9 @@
     "semantic_hash": ""
   },
   "lib/types/database.ts": {
-    "mtime": 1791800422.8929412,
-    "seen": 1791801427.6753063,
-    "ast_hash": "9bca7bd685bc4f5b25e2127ef606f29d",
+    "mtime": 1791890559.2986734,
+    "seen": 1791891378.1441257,
+    "ast_hash": "2f2852a2d7b6451208fc1ab40d31d3ed",
     "semantic_hash": ""
   },
   "lib/types/pipeline.ts": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791887167.3583913,
-    "seen": 1791887938.7331326,
-    "ast_hash": "23453bee50198d5958390655bf915316",
+    "mtime": 1791887968.8782501,
+    "seen": 1791891378.1444483,
+    "ast_hash": "95559f6c205c6d85fbc93a671c2a8860",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6342,9 +6342,9 @@
     "semantic_hash": ""
   },
   "app/api/invitations/route.ts": {
-    "mtime": 1791780725.0403504,
-    "seen": 1791780986.2200096,
-    "ast_hash": "8aa74416ce077e07117ef3ffa7738a94",
+    "mtime": 1791890642.8038058,
+    "seen": 1791891378.1437128,
+    "ast_hash": "7ceca92dc20cf21dc94ec9c9121971dc",
     "semantic_hash": ""
   },
   "app/api/organizations/domain/confirm/route.ts": {
@@ -6366,9 +6366,9 @@
     "semantic_hash": ""
   },
   "lib/services/invitation-service.ts": {
-    "mtime": 1791785127.0197632,
-    "seen": 1791785735.673255,
-    "ast_hash": "b331935690a2300d81c161fb1275b45f",
+    "mtime": 1791890622.9028008,
+    "seen": 1791891378.1441164,
+    "ast_hash": "6af2bcfa736aea1e2c72661bc4645bcd",
     "semantic_hash": ""
   },
   "lib/validation/business-email.ts": {
@@ -6576,9 +6576,9 @@
     "semantic_hash": ""
   },
   "components/settings/InviteMemberDialog.tsx": {
-    "mtime": 1791782864.8877628,
-    "seen": 1791785735.6730995,
-    "ast_hash": "c76b9d9a0aaa1e73b628e322adc56045",
+    "mtime": 1791890942.0733216,
+    "seen": 1791891378.143915,
+    "ast_hash": "105b33cf2fd401b3d5f8bbddb1dd4424",
     "semantic_hash": ""
   },
   "components/settings/PendingInvitationsList.tsx": {
@@ -6972,9 +6972,9 @@
     "semantic_hash": ""
   },
   "docs/engineering/AUTH-AND-RBAC.md": {
-    "mtime": 1791885471.5818205,
-    "seen": 1791885763.5747442,
-    "ast_hash": "d8510fef09830674ab86744bde4c629d",
+    "mtime": 1791890525.8175335,
+    "seen": 1791891378.1446588,
+    "ast_hash": "be213cf41de14a34cbe9bfd38504a39a",
     "semantic_hash": ""
   },
   "docs/engineering/CODING-STANDARDS.md": {
@@ -7038,9 +7038,9 @@
     "semantic_hash": ""
   },
   "tests/auth/login-rate-limit.test.ts": {
-    "mtime": 1791886811.1149879,
-    "seen": 1791887938.733041,
-    "ast_hash": "e70895b168240c74d6b690a2a50a1669",
+    "mtime": 1791891229.9389987,
+    "seen": 1791891378.1443326,
+    "ast_hash": "b8be394ab6761823402b04d163bbc6d0",
     "semantic_hash": ""
   },
   "tests/auth/reset-password.test.ts": {
@@ -7059,6 +7059,24 @@
     "mtime": 1791885835.6696162,
     "seen": 1791887938.7333958,
     "ast_hash": "d557c6b74cfb74c0b1c8ffdca279ac1e",
+    "semantic_hash": ""
+  },
+  "app/(auth)/change-password/page.tsx": {
+    "mtime": 1791890817.6852512,
+    "seen": 1791891378.1433697,
+    "ast_hash": "202d278531b2c2ded30d2a3f3671de00",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0045_invitation_temp_password.sql": {
+    "mtime": 1791890481.9342666,
+    "seen": 1791891378.1443093,
+    "ast_hash": "54d3225af32be6ce847df4b5c95f6e0e",
+    "semantic_hash": ""
+  },
+  "tests/auth/invitation-temp-password.test.ts": {
+    "mtime": 1791891023.0705302,
+    "seen": 1791891378.1443307,
+    "ast_hash": "c416440554c1e0866440fc21d333c366",
     "semantic_hash": ""
   }
 }
