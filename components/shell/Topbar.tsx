@@ -6,6 +6,7 @@ import { Menu, ChevronDown, LogOut } from 'lucide-react'
 import { OrgSwitcher } from './OrgSwitcher'
 import { type UserSessionContext, type UserOrganizationItem } from '@/lib/auth/session'
 import { NotificationPanel } from './NotificationPanel'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 interface TopbarProps {
   sessionContext: UserSessionContext
@@ -53,12 +54,12 @@ export function Topbar({ sessionContext, onOpenMobileMenu }: TopbarProps) {
     : user.email.substring(0, 2).toUpperCase()
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-800/80 bg-slate-950/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200/80 bg-white/80 dark:border-slate-800/80 dark:bg-slate-950/90 px-4 backdrop-blur-md sm:px-6 lg:px-8 transition-colors">
       <div className="flex items-center gap-3">
         {/* Mobile Hamburger Button */}
         <button
           onClick={onOpenMobileMenu}
-          className="rounded-lg border border-slate-800 bg-slate-900 p-2 text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden"
+          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white lg:hidden"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -73,7 +74,10 @@ export function Topbar({ sessionContext, onOpenMobileMenu }: TopbarProps) {
       </div>
 
       {/* Right Header Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
+        {/* Universal Theme Toggle */}
+        <ThemeToggle />
+
         {/* In-App Notification Center */}
         <NotificationPanel />
 
@@ -81,16 +85,16 @@ export function Topbar({ sessionContext, onOpenMobileMenu }: TopbarProps) {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-            className="flex items-center gap-2.5 rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-1.5 text-left text-xs font-medium text-white hover:border-slate-700 hover:bg-slate-800 transition focus:outline-none"
+            className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/80 px-3 py-1.5 text-left text-xs font-medium text-slate-800 dark:text-white hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition focus:outline-none shadow-sm"
           >
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 font-bold text-white shadow-sm">
               {userInitials}
             </div>
             <div className="hidden flex-col sm:flex">
-              <span className="font-semibold text-white truncate max-w-[120px]">
+              <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[120px]">
                 {user.full_name || user.email.split('@')[0]}
               </span>
-              <span className="text-[10px] capitalize text-slate-400 font-mono">
+              <span className="text-[10px] capitalize text-slate-500 dark:text-slate-400 font-mono">
                 {role || 'Member'}
               </span>
             </div>
@@ -98,14 +102,14 @@ export function Topbar({ sessionContext, onOpenMobileMenu }: TopbarProps) {
           </button>
 
           {userDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-slate-800 bg-slate-900 p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="px-3 py-2 border-b border-slate-800">
-                <p className="text-xs font-bold text-white truncate">
+            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800">
+                <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
                   {user.full_name || 'Account User'}
                 </p>
-                <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
                 {role && (
-                  <span className="mt-1 inline-block rounded bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold text-sky-400 border border-sky-500/20 capitalize">
+                  <span className="mt-1 inline-block rounded bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold text-sky-600 dark:text-sky-400 border border-sky-500/20 capitalize">
                     Role: {role}
                   </span>
                 )}
@@ -115,7 +119,7 @@ export function Topbar({ sessionContext, onOpenMobileMenu }: TopbarProps) {
                 <button
                   onClick={handleSignOut}
                   disabled={signingOut}
-                  className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition disabled:opacity-50"
+                  className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition disabled:opacity-50"
                 >
                   <LogOut className="h-4 w-4" />
                   {signingOut ? 'Signing out...' : 'Sign Out'}
