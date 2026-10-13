@@ -204,10 +204,10 @@ export default async function DashboardPage() {
       />
 
       {/* Header Banner */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/80 dark:border-slate-800/80 pb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border/80 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
               Workspace Overview
             </h1>
             <span className="inline-flex items-center gap-1 rounded-md bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-600 dark:text-sky-400 border border-sky-500/20">
@@ -215,8 +215,8 @@ export default async function DashboardPage() {
               {org.name}
             </span>
           </div>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Welcome back, <span className="font-semibold text-slate-800 dark:text-slate-200">{sessionContext.user.full_name || sessionContext.user.email}</span>. Here is your team&apos;s real-time operational summary.
+          <p className="mt-1 text-sm text-muted-foreground">
+            Welcome back, <span className="font-semibold text-foreground">{sessionContext.user.full_name || sessionContext.user.email}</span>. Here is your team&apos;s real-time operational summary.
           </p>
         </div>
 
@@ -225,6 +225,7 @@ export default async function DashboardPage() {
             initialFigures={reportData.figures}
             aiEnabled={reportData.aiEnabled}
           />
+          {/* intentional: primary action button uses text-white on branded bg-sky-600 */}
           <Link
             href="/clients?action=new"
             className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-sky-600/20 hover:bg-sky-500 transition"
@@ -244,13 +245,14 @@ export default async function DashboardPage() {
                 <Sparkles className="h-3.5 w-3.5 text-sky-500 dark:text-sky-400" />
                 Workspace Ready
               </div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Let&apos;s set up your agency workspace!</h2>
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Your multi-tenant workspace <span className="font-semibold text-slate-900 dark:text-white">[{org.name}]</span> is initialized. Start by adding your first client or creating an active client project.
+              <h2 className="text-lg font-bold text-foreground">Let&apos;s set up your agency workspace!</h2>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Your multi-tenant workspace <span className="font-semibold text-foreground">[{org.name}]</span> is initialized. Start by adding your first client or creating an active client project.
               </p>
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
+              {/* intentional: primary action button uses text-white on branded bg-sky-500 */}
               <Link
                 href="/clients?action=new"
                 className="inline-flex items-center gap-2 rounded-xl bg-sky-500 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-400 transition"
@@ -322,36 +324,36 @@ export default async function DashboardPage() {
           <QuickActions />
 
           {/* Secondary Overview Card */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-emerald-400" />
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm dark:shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
                 Subscription & Resource Limits
               </h3>
-              <span className="rounded-full bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-300 border border-purple-500/20">
+              <span className="rounded-full bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-600 dark:text-purple-300 border border-purple-500/20">
                 {org.plan_tier.toUpperCase()} TIER
               </span>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="rounded-xl border border-slate-800/80 bg-slate-950/60 p-4">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase">Billing Status</span>
-                <p className="text-sm font-bold text-emerald-400 capitalize mt-1">
+              <div className="rounded-xl border border-border/80 bg-slate-50/80 dark:bg-slate-950/60 p-4">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase">Billing Status</span>
+                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 capitalize mt-1">
                   {org.billing_status}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-800/80 bg-slate-950/60 p-4">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase">Client Count</span>
-                <p className="text-sm font-bold text-white mt-1">
-                  {clientsCount} <span className="text-xs font-normal text-slate-400">clients</span>
+              <div className="rounded-xl border border-border/80 bg-slate-50/80 dark:bg-slate-950/60 p-4">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase">Client Count</span>
+                <p className="text-sm font-bold text-foreground mt-1">
+                  {clientsCount} <span className="text-xs font-normal text-muted-foreground">clients</span>
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-800/80 bg-slate-950/60 p-4">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase">Projects Managed</span>
-                <p className="text-sm font-bold text-white mt-1">
-                  {activeProjectsCount} <span className="text-xs font-normal text-slate-400">active</span>
+              <div className="rounded-xl border border-border/80 bg-slate-50/80 dark:bg-slate-950/60 p-4">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase">Projects Managed</span>
+                <p className="text-sm font-bold text-foreground mt-1">
+                  {activeProjectsCount} <span className="text-xs font-normal text-muted-foreground">active</span>
                 </p>
               </div>
             </div>
