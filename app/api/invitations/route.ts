@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Strict validation: reject any unknown fields
-    const allowedKeys = ['email', 'role'];
+    const allowedKeys = ['email', 'role', 'password'];
     const bodyKeys = Object.keys(body);
     const hasUnknownKeys = bodyKeys.some((key) => !allowedKeys.includes(key));
     if (hasUnknownKeys) {
@@ -105,6 +105,10 @@ export async function POST(request: NextRequest) {
       return apiError("Role must be 'admin', 'member', or 'viewer'", 400, 'INVALID_INPUT');
     }
 
+    if (body.password !== undefined && (typeof body.password !== 'string' || !body.password.trim())) {
+      return apiError('Password must be a non-empty string when provided', 400, 'INVALID_INPUT');
+    }
+
     // Call invitation service
     const result = await createInvitation(
       {
@@ -115,6 +119,7 @@ export async function POST(request: NextRequest) {
       {
         email: body.email,
         role,
+        password: body.password ? body.password.trim() : undefined,
       }
     );
 
@@ -148,8 +153,8 @@ export async function POST(request: NextRequest) {
       return apiError(result.message, 400, 'INVALID_INPUT');
     }
 
-    // Sanitize: never return rawToken or token_hash in response payload
-    const { token_hash, ...safeInvitation } = result.invitation as any;
+    // Sanitize: never return rawToken, token_hash, or temp_password_hash in response payload
+    const { token_hash, temp_password_hash, ...safeInvitation } = result.invitation as any;
 
     const baseUrl = (process.env.APP_PUBLIC_URL || 'http://localhost:3000').replace(/\/$/, '');
     const inviteLink = result.rawToken ? `${baseUrl}/invite/${result.rawToken}` : undefined;
