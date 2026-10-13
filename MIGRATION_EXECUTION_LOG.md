@@ -1784,4 +1784,40 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - Route count: **140 routes** (unchanged)
 - **Status**: ✅ Step 1 complete. Local commit only. Awaiting user review before Step 2.
 
+---
+
+### Step 31: Batch "Type-Fix — Pre-UI-1B Test Type Errors" (Docs + 3 Split Commits)
+- **Timestamp**: 2026-10-13T19:20:00+05:00
+- **Task ID**: `BATCH-TYPE-FIX-PRE-UI-1B`
+- **Rationale**: Eliminate all 93 pre-existing test-file TypeScript compilation errors before continuing Batch UI-1B. Establish honest "0 type errors" baseline across entire codebase. Enforce Rule 18 against output truncation.
+- **Actions Performed**:
+  1. **Docs Commit (`b41e3fa`)**: Added Rule 18 to `docs/prompts/UNIVERSAL-MASTER-PROMPT.md` Section 7 ("Never pipe type-check, lint, or test output through tail, head, or any truncating command...").
+  2. **Commit 1 (`37e7d79`) — Group 1: NODE_ENV assignment (15 errors, 4 files)**:
+     - Replaced direct `process.env.NODE_ENV = '...'` with `vi.stubEnv('NODE_ENV', '...')` and added `vi.unstubAllEnvs()` in `afterEach`.
+     - Files: `tests/production-safety.test.ts`, `tests/console-dev-mode.test.ts`, `tests/email-config.test.ts`, `tests/email-sender.test.ts`.
+     - Error count: 93 → 78.
+  3. **Commit 2 (`0df7ae8`) — Group 2: SessionContext.organization mock missing fields (5 errors, 3 files)**:
+     - Added `slug: 'test-org'` and `plan_tier: 'starter'` to mock organization fixtures.
+     - Files: `tests/pipeline-move-deal.test.ts`, `tests/pipeline-editable-columns.test.ts`, `tests/pipeline-column-order-colors-won-lost.test.ts`.
+     - Error count: 78 → 73.
+  4. **Commit 3 (`f6adc44`) — Group 3: Union narrowing in invitation tests (73 errors, 7 files)**:
+     - Added discriminant guards (`if (!result.success || !result.rawToken) throw new Error(...)` and `if (result.success) throw new Error(...)` for failure cases) and proper route params wrappers (`params: Promise.resolve(...)`).
+     - Files: `tests/cross-tenant-invites.test.ts`, `tests/free-limits.test.ts`, `tests/invitation-checklist-part1.test.ts`, `tests/invitation-service-accept.test.ts`, `tests/invitation-service-create.test.ts`, `tests/invitation-service-resend-revoke.test.ts`, `tests/seat-limit-enforcement.test.ts`.
+     - Error count: 73 → 0.
+- **Files Modified**:
+  - `docs/prompts/UNIVERSAL-MASTER-PROMPT.md`
+  - `tests/production-safety.test.ts`, `tests/console-dev-mode.test.ts`, `tests/email-config.test.ts`, `tests/email-sender.test.ts`
+  - `tests/pipeline-move-deal.test.ts`, `tests/pipeline-editable-columns.test.ts`, `tests/pipeline-column-order-colors-won-lost.test.ts`
+  - `tests/cross-tenant-invites.test.ts`, `tests/free-limits.test.ts`, `tests/invitation-checklist-part1.test.ts`, `tests/invitation-service-accept.test.ts`, `tests/invitation-service-create.test.ts`, `tests/invitation-service-resend-revoke.test.ts`, `tests/seat-limit-enforcement.test.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `tsc --noEmit` exit code: **0** (raw command: `npx tsc --noEmit; echo "EXIT: $?"` → `EXIT: 0`)
+  - Type errors: **0** (decreased 93 → 78 → 73 → 0)
+  - `npm test`: **73/73 test files passed, 497/497 tests passed (100%)**
+  - `npm run lint`: **0 new warnings** (4 existing warnings unchanged)
+  - `npm run build`: **Exit code 0 — 140/140 routes compiled cleanly**
+- **Status**: ✅ All 93 test-file type errors resolved across 3 atomic commits + 1 docs commit. Total type errors = 0. Awaiting review before UI-1B Step 2.
+
+
 
