@@ -1,4 +1,27 @@
 import { test, expect } from '@playwright/test'
+import fs from 'fs'
+import path from 'path'
+
+// Helper to load .env.local for local E2E runs
+const envLocalPath = path.resolve(process.cwd(), '.env.local')
+if (fs.existsSync(envLocalPath)) {
+  const lines = fs.readFileSync(envLocalPath, 'utf8').split('\n')
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const idx = trimmed.indexOf('=')
+    if (idx > 0) {
+      const key = trimmed.slice(0, idx).trim()
+      let val = trimmed.slice(idx + 1).trim()
+      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+        val = val.slice(1, -1)
+      }
+      if (!process.env[key]) {
+        process.env[key] = val
+      }
+    }
+  }
+}
 
 test.describe('Sign-In Flow: Landing Page to Dashboard E2E', () => {
   const email = process.env.E2E_EMAIL || process.env.ADMIN_EMAIL || 'admin@innoventix.io'
