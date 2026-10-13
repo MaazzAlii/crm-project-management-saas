@@ -13,6 +13,8 @@ export class InvitationRepository {
       tokenHash: string;
       invitedBy?: string | null;
       expiresAt: Date | string;
+      tempPasswordHash?: string | null;
+      requirePasswordChange?: boolean;
     }
   ): Promise<Invitation> {
     const normalizedEmail = data.email.toLowerCase().trim();
@@ -27,10 +29,12 @@ export class InvitationRepository {
         status,
         invited_by,
         expires_at,
+        temp_password_hash,
+        require_password_change,
         created_at,
         updated_at
       )
-      VALUES ($1, $2, $3, $4, 'pending', $5, $6, NOW(), NOW())
+      VALUES ($1, $2, $3, $4, 'pending', $5, $6, $7, $8, NOW(), NOW())
       RETURNING *`,
       [
         orgId,
@@ -39,6 +43,8 @@ export class InvitationRepository {
         data.tokenHash,
         data.invitedBy || null,
         expiresAt,
+        data.tempPasswordHash || null,
+        data.requirePasswordChange ?? false,
       ]
     );
 
