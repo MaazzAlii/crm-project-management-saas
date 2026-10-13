@@ -3,7 +3,6 @@ import { ConsoleEmailProvider } from '../lib/email/sender';
 import { validateEmailConfig } from '../lib/email/config';
 
 describe('Prompt 31: Development Mode for Email (Console Provider)', () => {
-  const originalEnv = process.env.NODE_ENV;
   const originalProvider = process.env.EMAIL_PROVIDER;
 
   beforeEach(() => {
@@ -11,13 +10,13 @@ describe('Prompt 31: Development Mode for Email (Console Provider)', () => {
   });
 
   afterEach(() => {
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
     process.env.EMAIL_PROVIDER = originalProvider;
     vi.restoreAllMocks();
   });
 
   it('1. throws an error if console mode is used in production (ConsoleEmailProvider)', async () => {
-    process.env.NODE_ENV = 'production';
+    vi.stubEnv('NODE_ENV', 'production');
     const provider = new ConsoleEmailProvider();
 
     await expect(
@@ -31,14 +30,14 @@ describe('Prompt 31: Development Mode for Email (Console Provider)', () => {
   });
 
   it('2. throws an error if console mode is validated in production (validateEmailConfig)', () => {
-    process.env.NODE_ENV = 'production';
+    vi.stubEnv('NODE_ENV', 'production');
     process.env.EMAIL_PROVIDER = 'console';
 
     expect(() => validateEmailConfig()).toThrow(/not allowed in production/i);
   });
 
   it('3. prints readable block with email content and accept link in development', async () => {
-    process.env.NODE_ENV = 'development';
+    vi.stubEnv('NODE_ENV', 'development');
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const provider = new ConsoleEmailProvider();

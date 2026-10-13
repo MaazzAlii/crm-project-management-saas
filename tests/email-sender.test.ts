@@ -9,14 +9,12 @@ import {
 } from '../lib/email/sender';
 
 describe('Prompt 29: Email Provider Abstraction', () => {
-  const originalEnv = process.env.NODE_ENV;
-
   beforeEach(() => {
     setEmailProvider(null);
   });
 
   afterEach(() => {
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
     setEmailProvider(null);
     vi.restoreAllMocks();
   });
@@ -110,7 +108,7 @@ describe('Prompt 29: Email Provider Abstraction', () => {
   });
 
   it('5. privacy rule: never logs full recipient address in production', () => {
-    process.env.NODE_ENV = 'production';
+    vi.stubEnv('NODE_ENV', 'production');
     const email = 'sensitive.ceo@innoventix.io';
     const sanitized = sanitizeRecipientForLog(email);
 
@@ -123,7 +121,7 @@ describe('Prompt 29: Email Provider Abstraction', () => {
   });
 
   it('6. privacy rule in non-production preserves recipient for debugging', () => {
-    process.env.NODE_ENV = 'development';
+    vi.stubEnv('NODE_ENV', 'development');
     const email = 'developer@innoventix.io';
     const sanitized = sanitizeRecipientForLog(email);
 

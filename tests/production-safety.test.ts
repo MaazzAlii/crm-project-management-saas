@@ -16,11 +16,12 @@ describe('Prompt 06: Production Safety Audit Tests', () => {
 
   afterEach(() => {
     process.env = { ...originalEnv };
+    vi.unstubAllEnvs();
   });
 
   describe('1. Demo routes production guard (app/api/seed-demo-data/route.ts)', () => {
     it('returns 404 on GET and POST when NODE_ENV === "production" before database access', async () => {
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
 
       const getReq = new NextRequest('http://localhost:3000/api/seed-demo-data', { method: 'GET' });
       const getRes = await seedGet(getReq);
@@ -38,7 +39,7 @@ describe('Prompt 06: Production Safety Audit Tests', () => {
 
   describe('2. JWT & Refresh Secret length enforcement in production', () => {
     it('throws in production when JWT_SECRET is missing or shorter than 32 characters', () => {
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
 
       process.env.JWT_SECRET = '';
       expect(() => getJwtSecretNode()).toThrow(/missing or shorter than 32 characters/);
@@ -54,7 +55,7 @@ describe('Prompt 06: Production Safety Audit Tests', () => {
     });
 
     it('throws in production when REFRESH_TOKEN_SECRET is missing or shorter than 32 characters', () => {
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
 
       process.env.REFRESH_TOKEN_SECRET = '';
       process.env.REFRESH_SECRET = '';
