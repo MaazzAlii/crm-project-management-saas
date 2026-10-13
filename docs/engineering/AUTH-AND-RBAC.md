@@ -61,9 +61,23 @@ In addition, **`billing_manager (0)`** operates as a specialized scoped role foc
 
 ---
 
-## 5. Related Files
+## 5. Invitation Direct Temporary Password & First-Login Gate
+
+- **Schema**:
+  - `invitations`: `temp_password_hash TEXT NULL`, `require_password_change BOOLEAN NOT NULL DEFAULT false` (migration `0045_invitation_temp_password.sql`).
+  - `users`: `require_password_change BOOLEAN NOT NULL DEFAULT false`.
+- **Workflow**:
+  - Workspace owners/admins can optionally set a temporary password during member invitation.
+  - The temporary password is never transmitted in email notifications (shared securely out-of-band).
+  - The invited user can log in directly using the temporary password or accept via the invite link.
+  - Upon first login with a temporary password, the account is gated to `/auth/change-password?required=1`, requiring a new password before dashboard access is permitted.
+
+---
+
+## 6. Related Files
 
 - `docs/engineering/DATA-AND-API.md`
 - `docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md`
 - `lib/auth/session.ts`
 - `lib/auth/roles.ts`
+- `supabase/migrations/0045_invitation_temp_password.sql`

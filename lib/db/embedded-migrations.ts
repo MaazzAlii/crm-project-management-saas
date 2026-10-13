@@ -188,6 +188,10 @@ export const EMBEDDED_MIGRATIONS: MigrationDef[] = [
   {
     "name": "0044_plan_override.sql",
     "sql": "ALTER TABLE public.organization_plans ADD COLUMN IF NOT EXISTS plan_override TEXT DEFAULT NULL;"
+  },
+  {
+    "name": "0045_invitation_temp_password.sql",
+    "sql": "ALTER TABLE public.invitations ADD COLUMN IF NOT EXISTS temp_password_hash TEXT NULL;\nALTER TABLE public.invitations ADD COLUMN IF NOT EXISTS require_password_change BOOLEAN NOT NULL DEFAULT false;\nALTER TABLE public.users ADD COLUMN IF NOT EXISTS require_password_change BOOLEAN NOT NULL DEFAULT false;"
   }
 ];
 
