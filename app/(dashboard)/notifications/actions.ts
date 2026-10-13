@@ -76,7 +76,7 @@ export async function markNotificationAsReadAction(notificationId: string) {
   try {
     const session = await getCurrentSessionContext()
 
-    if (!session || !session.organization) return { success: true }
+    if (!session || !session.organization) return { success: false, error: 'Unauthorized' }
 
     await query(
       `UPDATE in_app_notifications
@@ -97,7 +97,7 @@ export async function markAllNotificationsAsReadAction() {
   try {
     const session = await getCurrentSessionContext()
 
-    if (!session || !session.organization) return { success: true }
+    if (!session || !session.organization) return { success: false, error: 'Unauthorized' }
 
     await query(
       `UPDATE in_app_notifications
