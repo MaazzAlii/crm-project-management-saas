@@ -14,7 +14,7 @@ export function DashboardShell({ sessionContext, children }: DashboardShellProps
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors">
+    <div className="flex min-h-screen bg-slate-50 text-foreground dark:bg-slate-950 font-sans transition-colors">
       {/* Persistent Sidebar */}
       <Sidebar
         isSuperAdmin={sessionContext.isSuperAdmin}
