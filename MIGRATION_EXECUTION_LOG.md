@@ -1907,7 +1907,67 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm run lint`: **0 new warnings** (4 pre-existing warnings unchanged)
   - `npm run build`: **Exit code 0 — 140 routes compiled**
   - Browser verification: **PASS (100% verified with Playwright Chromium)**
-- **Status**: ✅ Step 3 complete. Local commits only (`e76ca99`, `6f6855a`). Awaiting review before Step 4 (dashboard components group).
+- **Status**: ✅ Step 3 complete. Local commits only (`e76ca99`, `6f6855a`, `d3355a8`).
+
+---
+
+### Step 34: Batch UI-1B Step 4 — Dashboard Components Group & Theme Consistency Bug Fix
+- **Timestamp**: 2026-10-13T22:15:00+05:00
+- **Task ID**: `BATCH-UI-1B-STEP-4-DASHBOARD-COMPONENTS`
+- **Rationale**: 
+  1. Investigate and resolve Light Mode Theme Consistency Bug where "Team Members" and "Pending Invitations" rendered with dark backgrounds (`bg-slate-900/90`) even in Light mode.
+  2. Root Cause Audit:
+     - **Root Cause Identified (Possibility 1 + Missing Token Registration)**: Hardcoded `bg-slate-900/90` and `border-slate-800` were embedded directly in `DashboardTeamWidgets.tsx` (L66, L160), `RecentActivity.tsx` (L30), and `QuickActions.tsx` (L33) without theme-responsive variants. Furthermore, `--card` and `--card-border` were missing in `globals.css` and `tailwind.config.ts`.
+  3. Solution:
+     - Registered `--card` (`0 0% 100%` in `:root`, `222.2 47.4% 11.2%` in `.dark`) and `--card-border` (`214.3 31.8% 91.4%` in `:root`, `217.2 32.6% 17.5%` in `.dark`) in `app/globals.css` and `tailwind.config.ts`.
+     - Refactored `DashboardTeamWidgets.tsx`, `RecentActivity.tsx`, `QuickActions.tsx`, and `StatCard.tsx` to use `bg-card`, `border-border`, `text-card-foreground`, `text-foreground`, and `text-muted-foreground`.
+- **Actions Performed**:
+  1. **Section 6 Pre-edit Grep**:
+     - Identified 19 hardcoded dark background hits across `components/dashboard/` (`bg-slate-900/90`, `bg-slate-950/60`, `bg-slate-800`).
+     - Hardcoded `text-white`: 13 occurrences across titles, member names, and badges.
+  2. **Token Foundation Commit (`9905593`)**:
+     - Registered `card` and `border` tokens in `app/globals.css` and `tailwind.config.ts`.
+  3. **Components Refactor Commit (`be3d2f9`)**:
+     - `DashboardTeamWidgets.tsx`: Replaced card containers with `bg-card border-border`, replaced inner items with `bg-slate-50/80 dark:bg-slate-950/60`, member text with `text-foreground`, and labels with `text-muted-foreground`.
+     - `RecentActivity.tsx`: Container to `bg-card border-border`, title to `text-foreground`, subtitles to `text-muted-foreground`.
+     - `QuickActions.tsx`: Container to `bg-card border-border`, header to `text-muted-foreground`.
+     - `StatCard.tsx`: Replaced skeleton and card container backgrounds with `bg-card border-border`, titles and values with `text-foreground`.
+  4. **Section 6 Post-edit Grep**:
+     - 0 unjustified hits. Only 3 intentional `text-white` instances remaining on primary action buttons (`bg-sky-600` and quick-action gradients) with inline comments.
+  5. **Browser & Computed Style Verification**:
+     - Light Mode:
+       - `teamCardBg`: `rgb(255, 255, 255)` (Pure white ✅)
+       - `teamCardBorder`: `rgb(226, 232, 240)` (slate-200 ✅)
+       - `teamCardTitleColor`: `rgb(2, 8, 23)` (slate-900 ✅)
+       - `invitesCardBg`: `rgb(255, 255, 255)` (Pure white ✅)
+       - `invitesCardBorder`: `rgb(226, 232, 240)` (slate-200 ✅)
+     - Dark Mode:
+       - `teamCardBg`: `rgb(15, 23, 42)` (slate-900 ✅)
+       - `teamCardBorder`: `rgb(30, 41, 59)` (slate-800 ✅)
+       - `teamCardTitleColor`: `rgb(248, 250, 252)` (slate-50 ✅)
+       - `invitesCardBg`: `rgb(15, 23, 42)` (slate-900 ✅)
+       - `invitesCardBorder`: `rgb(30, 41, 59)` (slate-800 ✅)
+     - Screenshots captured: `dashboard_cards_light.png` and `dashboard_cards_dark.png`.
+     - Multi-route navigation: Confirmed `/dashboard` → `/projects` → `/clients` render seamlessly in both Light and Dark modes.
+- **Files Modified**:
+  - `app/globals.css`
+  - `tailwind.config.ts`
+  - `components/dashboard/DashboardTeamWidgets.tsx`
+  - `components/dashboard/RecentActivity.tsx`
+  - `components/dashboard/QuickActions.tsx`
+  - `components/dashboard/StatCard.tsx`
+  - `scripts/verify-dashboard-cards-e2e.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `tsc --noEmit` exit code: **0**
+  - Type errors: **0**
+  - `npm test`: **497/497 passed (73/73 test files passed)**
+  - `npm run lint`: **0 new warnings** (4 pre-existing warnings unchanged)
+  - `npm run build`: **Exit code 0 — 140 routes compiled**
+  - Browser verification: **PASS (100% verified with Playwright Chromium)**
+- **Status**: ✅ Step 4 complete. Local commits only. Awaiting review before Step 5 (`app/(dashboard)/dashboard/page.tsx`).
+
 
 
 
