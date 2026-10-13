@@ -12,9 +12,9 @@
     "semantic_hash": ""
   },
   "app/page.tsx": {
-    "mtime": 1791895921.8073347,
-    "seen": 1791896347.8292487,
-    "ast_hash": "9a90f07cc2565f0a71bf88488f002d5d",
+    "mtime": 1791897910.5872285,
+    "seen": 1791898644.8712053,
+    "ast_hash": "01b0ba7a3e7cd8a8ed4ef71fb07d23b2",
     "semantic_hash": ""
   },
   "package.json": {
@@ -30,9 +30,9 @@
     "semantic_hash": "8640f9b2e6475cc3f5b1ff4548925765"
   },
   "tailwind.config.ts": {
-    "mtime": 1791892842.496633,
-    "seen": 1791894010.8372855,
-    "ast_hash": "d94aa447c25624e7e15e6ad8d0c32a59",
+    "mtime": 1791897449.4651783,
+    "seen": 1791898644.8716958,
+    "ast_hash": "b349774acd8e1049ef151b3a9df5c97b",
     "semantic_hash": ""
   },
   "tsconfig.json": {
@@ -60,15 +60,15 @@
     "semantic_hash": ""
   },
   "app/(auth)/login/page.tsx": {
-    "mtime": 1791893102.4535406,
-    "seen": 1791894010.8364527,
-    "ast_hash": "9a1d2fd5c916a5e08cdf657b5b11d7bb",
+    "mtime": 1791898053.990808,
+    "seen": 1791898644.8709736,
+    "ast_hash": "c932b9869102e6817c30d7214ed6b346",
     "semantic_hash": ""
   },
   "app/(auth)/signup/page.tsx": {
-    "mtime": 1791893264.6884375,
-    "seen": 1791894010.8364568,
-    "ast_hash": "c7dabfb4b7fe26ac0e5f8863cd114792",
+    "mtime": 1791898131.7705016,
+    "seen": 1791898644.870977,
+    "ast_hash": "01c94a755ab73d246df6143d91380937",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/billing/page.tsx": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791896309.7676861,
-    "seen": 1791896347.8300087,
-    "ast_hash": "9e38ea734058dd0f0dbe65854a400368",
+    "mtime": 1791898611.619506,
+    "seen": 1791898644.8718011,
+    "ast_hash": "b9812f6307643403921aa82ca3673156",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791896276.5122406,
-    "seen": 1791896347.830015,
-    "ast_hash": "3c489a0c47b5ba8b54b8567d70817121",
+    "mtime": 1791898584.7429516,
+    "seen": 1791898644.871808,
+    "ast_hash": "b45377017f3a59d8d58bebc411e60017",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6948,9 +6948,9 @@
     "semantic_hash": ""
   },
   "docs/design/DESIGN-SYSTEM.md": {
-    "mtime": 1791893562.017675,
-    "seen": 1791894010.8376093,
-    "ast_hash": "fd3863090639af73ab7a5b27ee319d1d",
+    "mtime": 1791897485.609542,
+    "seen": 1791898644.872001,
+    "ast_hash": "77d232c0d6e096fcec320a936bcdfb8b",
     "semantic_hash": ""
   },
   "docs/design/MOTION-GUIDELINES.md": {
@@ -6966,9 +6966,9 @@
     "semantic_hash": ""
   },
   "docs/design/THEME-SYSTEM.md": {
-    "mtime": 1791892823.0770042,
-    "seen": 1791894010.8376136,
-    "ast_hash": "c0cf938137658b12ba532ff6a9459d0e",
+    "mtime": 1791897519.3059514,
+    "seen": 1791898644.8720047,
+    "ast_hash": "146bc24169e83569aed9c493de8d236d",
     "semantic_hash": ""
   },
   "docs/engineering/AUTH-AND-RBAC.md": {
@@ -7026,9 +7026,9 @@
     "semantic_hash": ""
   },
   "app/(auth)/reset-password/page.tsx": {
-    "mtime": 1791893309.0727816,
-    "seen": 1791894010.8364549,
-    "ast_hash": "15e1caa2b2df91b4497edb23594ea583",
+    "mtime": 1791898196.5134168,
+    "seen": 1791898644.8709755,
+    "ast_hash": "bcce321df9fb8d7d09eef0cfe1d0d667",
     "semantic_hash": ""
   },
   "tests/auth/forgot-password.test.ts": {
@@ -7062,9 +7062,9 @@
     "semantic_hash": ""
   },
   "app/(auth)/change-password/page.tsx": {
-    "mtime": 1791893362.6471128,
-    "seen": 1791894010.8364487,
-    "ast_hash": "167940a44c42c8afdb5d8eb4f91e0459",
+    "mtime": 1791898268.9342062,
+    "seen": 1791898644.870971,
+    "ast_hash": "20717f145126bde3d78d9db9cbd7f775",
     "semantic_hash": ""
   },
   "supabase/migrations/0045_invitation_temp_password.sql": {
@@ -7110,15 +7110,21 @@
     "semantic_hash": ""
   },
   "scripts/test-real-browser-e2e.ts": {
-    "mtime": 1791895719.6720257,
-    "seen": 1791896347.829812,
-    "ast_hash": "30964571b19fb1b73888ca0a7451d2ba",
+    "mtime": 1791898327.0062373,
+    "seen": 1791898644.8716187,
+    "ast_hash": "87b858b5a7729bbc18725fbca23dccb3",
     "semantic_hash": ""
   },
   "docs/prompts/UNIVERSAL-MASTER-PROMPT.md": {
     "mtime": 1791894258.1091487,
     "seen": 1791896347.830284,
     "ast_hash": "a48746b5e6d9fd6bf33f133e4663972f",
+    "semantic_hash": ""
+  },
+  "docs/prompts/INNOVENTIX-COLOR-TYPOGRAPHY-PROTOCOL.md": {
+    "mtime": 1791897087.492759,
+    "seen": 1791898644.8720784,
+    "ast_hash": "5018b0713a35b8b2697bddbbaeb3554b",
     "semantic_hash": ""
   }
 }
