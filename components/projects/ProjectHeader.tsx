@@ -108,12 +108,12 @@ export function ProjectHeader({ project, membersList, onProjectUpdated }: Projec
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-6">
+    <div className="bg-card border border-border rounded-2xl p-6 shadow-xs space-y-6">
       {/* Top Breadcrumb & Navigation */}
       <div className="flex items-center justify-between">
         <Link
           href="/projects"
-          className="inline-flex items-center gap-2 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition"
+          className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Projects
@@ -121,12 +121,12 @@ export function ProjectHeader({ project, membersList, onProjectUpdated }: Projec
 
         {/* Status Dropdown */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Status:</span>
+          <span className="text-xs text-muted-foreground font-medium">Status:</span>
           <select
             value={status}
             onChange={(e) => handleStatusChange(e.target.value)}
             disabled={isUpdatingStatus}
-            className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-1.5 bg-background border border-border rounded-lg text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
           >
             {STATUS_OPTIONS.map((st) => (
               <option key={st} value={st}>
@@ -141,42 +141,42 @@ export function ProjectHeader({ project, membersList, onProjectUpdated }: Projec
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold text-foreground">
               {project.title}
             </h1>
             <ProjectStatusBadge status={status} />
             <ProjectHealthBadge deadline={project.deadline} status={status} />
           </div>
           {project.description && (
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl">
+            <p className="text-sm text-muted-foreground mt-1 max-w-3xl">
               {project.description}
             </p>
           )}
         </div>
 
         {/* Budget Highlight */}
-        <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-xl text-right shrink-0">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+        <div className="bg-muted/50 border border-border px-4 py-2.5 rounded-xl text-right shrink-0">
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Contract Value
           </div>
-          <div className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">
+          <div className="text-xl font-bold text-foreground mt-0.5">
             {formatCurrency(project.amount, project.currency)}
           </div>
         </div>
       </div>
 
       {/* Key Info Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-border">
         {/* Client */}
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg text-indigo-600 dark:text-indigo-400">
+          <div className="p-2.5 bg-primary/10 rounded-lg text-primary">
             <Building2 className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs text-slate-400 font-medium">Client</div>
+            <div className="text-xs text-muted-foreground font-medium">Client</div>
             <Link
               href={`/clients/${project.client_id}`}
-              className="text-sm font-semibold text-slate-900 dark:text-white hover:underline truncate block"
+              className="text-sm font-semibold text-foreground hover:underline truncate block"
             >
               {project.client_name || 'Client Profile'}
             </Link>
@@ -189,12 +189,12 @@ export function ProjectHeader({ project, membersList, onProjectUpdated }: Projec
             <User className="w-5 h-5" />
           </div>
           <div className="flex-1">
-            <div className="text-xs text-slate-400 font-medium">Assigned Member</div>
+            <div className="text-xs text-muted-foreground font-medium">Assigned Member</div>
             <select
               value={assignedTo}
               onChange={(e) => handleAssigneeChange(e.target.value)}
               disabled={isUpdatingAssignee}
-              className="mt-0.5 w-full bg-transparent text-xs font-semibold text-slate-900 dark:text-white focus:outline-hidden"
+              className="mt-0.5 w-full bg-transparent text-xs font-semibold text-foreground focus:outline-hidden"
             >
               <option value="">Unassigned</option>
               {membersList.map((m) => (
@@ -212,8 +212,8 @@ export function ProjectHeader({ project, membersList, onProjectUpdated }: Projec
             <Calendar className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs text-slate-400 font-medium">Start Date</div>
-            <div className="text-sm font-semibold text-slate-900 dark:text-white">
+            <div className="text-xs text-muted-foreground font-medium">Start Date</div>
+            <div className="text-sm font-semibold text-foreground">
               {project.start_date
                 ? new Date(project.start_date).toLocaleDateString(undefined, {
                     month: 'short',
@@ -231,8 +231,8 @@ export function ProjectHeader({ project, membersList, onProjectUpdated }: Projec
             <Clock className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs text-slate-400 font-medium">Target Deadline</div>
-            <div className="text-sm font-semibold text-slate-900 dark:text-white">
+            <div className="text-xs text-muted-foreground font-medium">Target Deadline</div>
+            <div className="text-sm font-semibold text-foreground">
               {project.deadline
                 ? new Date(project.deadline).toLocaleDateString(undefined, {
                     month: 'short',
