@@ -67,24 +67,24 @@ export function EditProjectModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl p-6 sm:p-8 space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--bg-overlay)] backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl rounded-2xl border border-border bg-card shadow-2xl p-6 sm:p-8 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-600 dark:text-sky-400">
               <Briefcase className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Edit Project Details</h2>
-              <p className="text-xs text-slate-400">
-                Client: <span className="font-semibold text-slate-200">{project.client_name}</span>
+              <h2 className="text-lg font-bold text-foreground">Edit Project Details</h2>
+              <p className="text-xs text-muted-foreground">
+                Client: <span className="font-semibold text-foreground">{project.client_name}</span>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition"
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
           >
             <X className="h-5 w-5" />
           </button>
@@ -99,7 +99,7 @@ export function EditProjectModal({
         <form onSubmit={handleSubmit} className="space-y-4 text-xs max-h-[70vh] overflow-y-auto pr-1">
           {/* Title */}
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">
+            <label className="block text-muted-foreground font-semibold mb-1">
               Project Title <span className="text-rose-400">*</span>
             </label>
             <input
@@ -107,29 +107,29 @@ export function EditProjectModal({
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none"
+              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-foreground placeholder:text-placeholder focus:border-primary focus:outline-none"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Description & Scope</label>
+            <label className="block text-muted-foreground font-semibold mb-1">Description & Scope</label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 text-white focus:border-sky-500 focus:outline-none"
+              className="w-full rounded-xl border border-border bg-background p-3 text-foreground placeholder:text-placeholder focus:border-primary focus:outline-none"
             />
           </div>
 
           {/* Type, Amount & Currency */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Type</label>
+              <label className="block text-muted-foreground font-semibold mb-1">Type</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-foreground focus:border-primary focus:outline-none"
               >
                 <option value="UGC Media">UGC Media</option>
                 <option value="AI Voice Agent">AI Voice Agent</option>
@@ -140,22 +140,22 @@ export function EditProjectModal({
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Budget / Amount</label>
+              <label className="block text-muted-foreground font-semibold mb-1">Budget / Amount</label>
               <input
                 type="number"
                 step="0.01"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-foreground placeholder:text-placeholder focus:border-primary focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Currency</label>
+              <label className="block text-muted-foreground font-semibold mb-1">Currency</label>
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white focus:border-sky-500 focus:outline-none uppercase"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-foreground focus:border-primary focus:outline-none uppercase"
               >
                 <option value="USD">USD ($)</option>
                 <option value="EUR">EUR (€)</option>
@@ -169,11 +169,11 @@ export function EditProjectModal({
           {/* Status, Priority & Member */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Status</label>
+              <label className="block text-muted-foreground font-semibold mb-1">Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-foreground focus:border-primary focus:outline-none"
               >
                 <option value="Planning">Planning</option>
                 <option value="Active">Active</option>
@@ -185,11 +185,11 @@ export function EditProjectModal({
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Priority</label>
+              <label className="block text-muted-foreground font-semibold mb-1">Priority</label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white focus:border-sky-500 focus:outline-none capitalize"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-foreground focus:border-primary focus:outline-none capitalize"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -199,11 +199,11 @@ export function EditProjectModal({
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Assigned Member</label>
+              <label className="block text-muted-foreground font-semibold mb-1">Assigned Member</label>
               <select
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-foreground focus:border-primary focus:outline-none"
               >
                 <option value="">Unassigned</option>
                 {membersList.map((m) => (
@@ -218,39 +218,39 @@ export function EditProjectModal({
           {/* Dates */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Start Date</label>
+              <label className="block text-muted-foreground font-semibold mb-1">Start Date</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-foreground focus:border-primary focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Deadline</label>
+              <label className="block text-muted-foreground font-semibold mb-1">Deadline</label>
               <input
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-foreground focus:border-primary focus:outline-none"
               />
             </div>
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 border-t border-slate-800 pt-4">
+          <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 font-semibold hover:bg-slate-800 hover:text-white transition"
+              className="px-4 py-2 rounded-xl border border-border text-muted-foreground font-semibold hover:bg-muted hover:text-foreground transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !title.trim()}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold shadow-lg shadow-sky-500/20 transition disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg shadow-primary/20 transition disabled:opacity-50"
             >
               {loading ? (
                 <>
