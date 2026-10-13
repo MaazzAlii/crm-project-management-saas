@@ -1697,4 +1697,62 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - Real browser Playwright suite: **Passed with screenshots**
 - **Status**: ✅ All 3 red flags resolved, Master Prompt v1.1 active, ready for Batch UI-2 or Auth Batch B.
 
+---
+
+### Step: Innoventix Color & Typography Protocol Adoption & Full Public Page Refactor
+- **Timestamp**: 2026-10-13T18:35:00+05:00
+- **Task ID**: `INNOVENTIX-COLOR-TYPOGRAPHY-PROTOCOL-ADOPTION`
+- **Actions Performed**:
+  - **1. Protocol Documentation & Startup Enforcement**:
+    - Created and committed `docs/prompts/INNOVENTIX-COLOR-TYPOGRAPHY-PROTOCOL.md` (`5793482`).
+    - Updated `.agent-state.md` to make the Protocol file #2 in the mandatory session startup reading sequence (`8647e2c`).
+  - **2. Semantic Token Foundation Implementation**:
+    - Added semantic tokens to `app/globals.css` under both `:root` and `.dark`:
+      - `--foreground`, `--muted-foreground`, `--subtle-foreground`, `--primary`, `--primary-foreground`, `--destructive`, `--success`, `--warning`, `--card-foreground`, `--popover-foreground`, `--placeholder`, `--disabled`.
+      - Theme-aware brand gradients: `--brand-gradient-from` and `--brand-gradient-to` (indigo-500/blue-500 for light, indigo-400/blue-400 for dark).
+    - Mapped all semantic tokens into `tailwind.config.ts` (`theme.extend.colors`).
+    - Updated `docs/design/DESIGN-SYSTEM.md` and `docs/design/THEME-SYSTEM.md` token reference tables (`5969f7a`).
+  - **3. Landing Page Refactor (`app/page.tsx`)**:
+    - Replaced all raw palette classes and hardcoded colors with semantic tokens.
+    - Updated hero heading to use theme-aware brand gradient stops (`from-brand-gradient-from to-brand-gradient-to`).
+    - Annotated simulated dark mockup container (`/* intentional: simulated dark preview mockup */`).
+    - Verified Section 6 greps: 0 non-intentional hits (`4d0d2ba`).
+  - **4. Auth Pages Semantic Token Refactor**:
+    - Refactored `app/(auth)/login/page.tsx` (`9c9c694`).
+    - Refactored `app/(auth)/signup/page.tsx` (`5ecdf9f`).
+    - Refactored `app/(auth)/reset-password/page.tsx` (`65509d1`).
+    - Refactored `app/(auth)/change-password/page.tsx` (`225a851`).
+    - Section 6 grep checks across all auth pages passed with 0 non-intentional hits.
+  - **5. Extended Real Browser Playwright Test Suite**:
+    - Enhanced `scripts/test-real-browser-e2e.ts` to assert computed colors on `h1`, `h2`, and `body` in both light mode (not `rgb(255,255,255)`) and dark mode (not `rgb(0,0,0)`).
+    - Verified `Geist` font family resolution via `window.getComputedStyle`.
+    - Executed live against local server and captured full screenshot suite:
+      - `e2e_landing_light.png`, `e2e_landing_dark.png`
+      - `e2e_login_light.png`, `e2e_login_dark.png`
+      - `e2e_signup_light.png`, `e2e_signup_dark.png`
+      - `e2e_reset_password_light.png`, `e2e_reset_password_dark.png`
+      - `e2e_dashboard_light.png`, `e2e_dashboard_dark.png`
+    - Verified 5x reload on landing with 100% theme retention.
+    - Verified multi-route navigation across `/projects`, `/clients`, and `/tasks` with 100% theme persistence (`2991b49`).
+- **Files Modified / Created**:
+  - `docs/prompts/INNOVENTIX-COLOR-TYPOGRAPHY-PROTOCOL.md` (committed)
+  - `app/globals.css` (committed)
+  - `tailwind.config.ts` (committed)
+  - `docs/design/DESIGN-SYSTEM.md` (committed)
+  - `docs/design/THEME-SYSTEM.md` (committed)
+  - `app/page.tsx` (committed)
+  - `app/(auth)/login/page.tsx` (committed)
+  - `app/(auth)/signup/page.tsx` (committed)
+  - `app/(auth)/reset-password/page.tsx` (committed)
+  - `app/(auth)/change-password/page.tsx` (committed)
+  - `scripts/test-real-browser-e2e.ts` (committed)
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `npm run build`: **Next.js compiled 140 routes cleanly with 0 errors**.
+  - Section 6 Greps 1, 2, 3, 4: **Passed with 0 non-intentional hits**.
+  - Playwright real browser suite: **100% passed across all 5 surfaces in both themes**.
+- **Status**: ✅ Innoventix Color & Typography Protocol fully implemented, validated, and verified with real screenshots.
+
+
 
