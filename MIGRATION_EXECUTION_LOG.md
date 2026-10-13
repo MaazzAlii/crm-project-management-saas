@@ -1819,5 +1819,48 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm run build`: **Exit code 0 — 140/140 routes compiled cleanly**
 - **Status**: ✅ All 93 test-file type errors resolved across 3 atomic commits + 1 docs commit. Total type errors = 0. Awaiting review before UI-1B Step 2.
 
+---
+
+### Step 32: Batch UI-1B Step 2 — Sidebar.tsx Semantic Token Refactor (Innoventix Color Protocol)
+- **Timestamp**: 2026-10-13T19:43:00+05:00
+- **Task ID**: `BATCH-UI-1B-STEP-2-SIDEBAR`
+- **Rationale**: Apply Innoventix Color & Typography Protocol (Section 3.1) to `components/shell/Sidebar.tsx`. Replace all hardcoded raw palette text colors (`text-slate-*`, `dark:text-white`, `dark:text-slate-*`) with semantic tokens (`text-foreground`, `text-muted-foreground`). Justify logo text-white on fixed dark brand gradient. Zero layout, spacing, or DOM structure changes. Full Chromium browser verification with light and dark screenshots.
+- **Actions Performed**:
+  1. **Section 6 Pre-edit Grep**:
+     - Grep 1 (text-white/black/hex): Lines 60, 64, 74
+     - Grep 4 (text-slate/gray/zinc): Lines 64, 67, 74, 96, 101, 123, 124, 128
+  2. **Replacements Applied**:
+     - L60: Logo initials `text-white` kept with inline justification comment (`// intentional: text-white on fixed dark brand gradient logo...`)
+     - L64: Brand title `text-slate-900 dark:text-white` → `text-foreground`
+     - L67: Subtitle `text-slate-500 dark:text-slate-400` → `text-muted-foreground`
+     - L74: Close button `text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white` → `text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground`
+     - L96: Nav items `text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200` → `text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground`
+     - L101: Nav icons `text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300` → `text-muted-foreground group-hover:text-foreground dark:text-muted-foreground dark:group-hover:text-foreground`
+     - L123: Card body `text-slate-600 dark:text-slate-400` → `text-muted-foreground`
+     - L124: Card title `text-slate-800 dark:text-slate-300` → `text-foreground`
+     - L128: Card description `text-slate-500 dark:text-slate-400` → `text-muted-foreground`
+  3. **Section 6 Post-edit Grep**:
+     - Grep 1: 1 hit (L60, justified with intentional comment)
+     - Greps 2, 3, 4: 0 hits
+  4. **Browser & Computed Style Verification**:
+     - Light Mode: `brandColor`: `rgb(2, 8, 23)`, `subtitleColor`: `rgb(100, 116, 139)`, `activeNavTextColor`: `rgb(2, 132, 199)`, `inactiveNavTextColor`: `rgb(2, 8, 23)`, `fontFamily`: `GeistSans`
+     - Dark Mode: `brandColor`: `rgb(248, 250, 252)`, `subtitleColor`: `rgb(148, 163, 184)`, `activeNavTextColor`: `rgb(56, 189, 248)`, `inactiveNavTextColor`: `rgb(248, 250, 252)`, `fontFamily`: `GeistSans`
+     - Screenshots captured: `sidebar_light.png` and `sidebar_dark.png`
+     - Multi-route navigation: Confirmed sidebar renders properly across `/dashboard`, `/projects`, and `/clients` in both themes.
+- **Files Modified**:
+  - `components/shell/Sidebar.tsx`
+  - `scripts/verify-sidebar-e2e.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `tsc --noEmit` exit code: **0**
+  - Type errors: **0**
+  - `npm test`: **497/497 passed (73/73 test files)**
+  - `npm run lint`: **0 new warnings** (4 existing warnings unchanged)
+  - `npm run build`: **Exit code 0 — 140 routes compiled**
+  - Browser verification: **PASS (100% verified with Playwright Chromium)**
+- **Status**: ✅ Step 2 complete. Local commit only. Awaiting review before Step 3 (DashboardShell.tsx).
+
+
 
 
