@@ -4,6 +4,7 @@ import { useState, Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Lock, Mail, ArrowRight, AlertCircle, CheckCircle2, Loader2, Clock } from 'lucide-react'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 function LoginForm() {
   const [email, setEmail] = useState('')
@@ -55,7 +56,7 @@ function LoginForm() {
         setError(data.error || 'Invalid email or password')
       } else {
         if (data.requirePasswordChange) {
-          window.location.assign(data.redirectTo || '/auth/change-password?required=1')
+          window.location.assign(data.redirectTo || '/change-password?required=1')
           return
         }
         window.location.assign(redirectTo)
@@ -69,21 +70,27 @@ function LoginForm() {
   }
 
   return (
-    <div className="bg-slate-900/80 backdrop-blur-xl py-8 px-4 shadow-2xl border border-slate-800/80 sm:rounded-2xl sm:px-10">
+    <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl py-8 px-4 shadow-xl dark:shadow-2xl border border-slate-200 dark:border-slate-800/80 sm:rounded-2xl sm:px-10 transition-colors">
       {resetSuccess && !error && (
-        <div className="mb-6 border border-emerald-500/20 bg-emerald-500/10 rounded-xl p-4 flex items-center gap-3 text-sm text-emerald-400">
-          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
+        <div className="mb-6 border border-emerald-500/20 bg-emerald-500/10 rounded-xl p-4 flex items-center gap-3 text-sm text-emerald-600 dark:text-emerald-400">
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
           <span>Password reset successful! Please sign in with your new credentials.</span>
         </div>
       )}
 
       {error && (
-        <div className={`mb-6 border rounded-xl p-4 flex items-center gap-3 text-sm ${
-          retryAfter > 0
-            ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-            : 'bg-red-500/10 border-red-500/20 text-red-400'
-        }`}>
-          {retryAfter > 0 ? <Clock className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
+        <div
+          className={`mb-6 border rounded-xl p-4 flex items-center gap-3 text-sm ${
+            retryAfter > 0
+              ? 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
+              : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'
+          }`}
+        >
+          {retryAfter > 0 ? (
+            <Clock className="w-5 h-5 shrink-0" />
+          ) : (
+            <AlertCircle className="w-5 h-5 shrink-0" />
+          )}
           <span>
             {retryAfter > 0
               ? `Too many attempts. Try again in ${retryAfter}s.`
@@ -94,11 +101,11 @@ function LoginForm() {
 
       <form className="space-y-5" onSubmit={handleLogin}>
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
             Email Address
           </label>
           <div className="relative rounded-xl shadow-sm">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
               <Mail className="h-5 w-5" />
             </div>
             <input
@@ -107,17 +114,17 @@ function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@company.com"
-              className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
+              className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
             Password
           </label>
           <div className="relative rounded-xl shadow-sm">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
               <Lock className="h-5 w-5" />
             </div>
             <input
@@ -126,16 +133,19 @@ function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
+              className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
             />
           </div>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="text-sm">
-            <a href="#" className="font-medium text-blue-400 hover:text-blue-300 transition-colors">
+            <Link
+              href="/reset-password"
+              className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
+            >
               Forgot your password?
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -165,9 +175,12 @@ function LoginForm() {
         </div>
       </form>
 
-      <div className="mt-6 text-center text-sm text-slate-400">
+      <div className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
         Don&apos;t have an account?{' '}
-        <Link href="/signup" className="font-semibold text-blue-400 hover:text-blue-300 transition-colors">
+        <Link
+          href="/signup"
+          className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
+        >
           Create organization workspace
         </Link>
       </div>
@@ -177,23 +190,27 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-100 relative overflow-hidden">
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/20 blur-3xl rounded-full pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-600/15 blur-3xl rounded-full pointer-events-none" />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-900 dark:text-slate-100 relative overflow-hidden transition-colors">
+      <div className="fixed top-5 right-5 z-50">
+        <ThemeToggle />
+      </div>
+
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/15 blur-3xl rounded-full pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-600/10 blur-3xl rounded-full pointer-events-none" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div className="flex justify-center items-center gap-2">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/30">
             IX
           </div>
-          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
+          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-slate-200 dark:to-slate-400">
             Innoventix Platform
           </span>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-white">
+        <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
           Sign in to your workspace
         </h2>
-        <p className="mt-2 text-center text-sm text-slate-400">
+        <p className="mt-2 text-center text-sm text-slate-600 dark:text-slate-400">
           Enter your credentials to access your CRM & Project Management hub
         </p>
       </div>
