@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
 import './globals.css'
 import { SupportBannerWrapper } from '@/components/super-admin/support-banner-wrapper'
 import { ThemeProvider } from '@/components/providers/theme-provider'
@@ -17,11 +19,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: antiFlashScript }} />
       </head>
-      <body className="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased min-h-screen transition-colors duration-150">
+      <body className={`${GeistSans.className} font-sans bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased min-h-screen transition-colors duration-150`}>
         <ThemeProvider>
           <SupportBannerWrapper />
           {children}
