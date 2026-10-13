@@ -42,6 +42,23 @@ Innoventix uses a dual-engine design token system combining **CSS custom propert
 | `--border-strong` | `#94a3b8` (slate-400) | `#475569` (slate-600) | Active / hovered borders |
 | `--border-glass` | `rgba(255, 255, 255, 0.2)`| `rgba(255, 255, 255, 0.08)`| Specular rim highlight on glass |
 
+### 2.1.1 Semantic Text Tokens (Innoventix Color Protocol)
+
+| Token | Light Mode (`:root`) | Dark Mode (`.dark`) | Purpose |
+| :--- | :--- | :--- | :--- |
+| `--foreground` | `222.2 84% 4.9%` (slate-900) | `210 40% 98%` (slate-50) | Primary body & heading text (`text-foreground`) |
+| `--muted-foreground` | `215.4 16.3% 46.9%` (slate-500) | `215 20.2% 65.1%` (slate-400) | Secondary text, captions, labels (`text-muted-foreground`) |
+| `--subtle-foreground` | `215 20.2% 65.1%` (slate-400) | `215.4 16.3% 46.9%` (slate-500) | Tertiary text, timestamps, helper text (`text-subtle-foreground`) |
+| `--primary` | `238.7 83.5% 58.6%` (indigo-600) | `234.5 89.5% 73.9%` (indigo-400) | Brand accent text & links (`text-primary`) |
+| `--primary-foreground` | `0 0% 100%` (white) | `0 0% 100%` (white) | Text on primary backgrounds (`text-primary-foreground`) |
+| `--destructive` | `0 72.2% 50.6%` (red-600) | `0 90.6% 70.8%` (red-400) | Error text (`text-destructive`) |
+| `--card-foreground` | `222.2 84% 4.9%` (slate-900) | `210 40% 98%` (slate-50) | Text on card surfaces (`text-card-foreground`) |
+| `--popover-foreground` | `222.2 84% 4.9%` (slate-900) | `210 40% 98%` (slate-50) | Text on popovers/tooltips (`text-popover-foreground`) |
+| `--placeholder` | `215 20.2% 65.1%` (slate-400) | `215.4 16.3% 46.9%` (slate-500) | Input placeholder text (`placeholder:text-placeholder`) |
+| `--disabled` | `214.3 31.8% 91.4%` (slate-300) | `215 27.9% 16.9%` (slate-700) | Disabled control text (`text-disabled`) |
+| `--brand-gradient-from` | `239 84% 67%` (indigo-500) | `239 84% 77%` (indigo-400) | Theme-aware gradient start |
+| `--brand-gradient-to` | `217 91% 60%` (blue-500) | `217 91% 70%` (blue-400) | Theme-aware gradient end |
+
 ### 2.2 Brand & Semantic Accents
 
 | Token | Light Mode | Dark Mode | Semantic Meaning |

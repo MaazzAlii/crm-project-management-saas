@@ -15,7 +15,9 @@ The theme architecture guarantees zero flash of unstyled content (FOUC), instant
 - Dark-mode token overrides are bound to `.dark` and `[data-theme="dark"]`.
 - The following CSS variables are standardized across the application:
   - **Surfaces**: `--bg-base`, `--bg-elevated`, `--bg-sunken`, `--bg-overlay`, `--surface-1`, `--surface-2`, `--surface-3`, `--surface-glass`
-  - **Text**: `--text-primary`, `--text-secondary`, `--text-tertiary`, `--text-muted`, `--text-inverse`
+  - **Text (Core)**: `--text-primary`, `--text-secondary`, `--text-tertiary`, `--text-muted`, `--text-inverse`
+  - **Semantic Text Tokens (`INNOVENTIX-COLOR-TYPOGRAPHY-PROTOCOL.md`)**: `--foreground`, `--muted-foreground`, `--subtle-foreground`, `--primary`, `--primary-foreground`, `--destructive`, `--card-foreground`, `--popover-foreground`, `--placeholder`, `--disabled`
+  - **Brand Gradients**: `--brand-gradient-from`, `--brand-gradient-to`
   - **Borders**: `--border-subtle`, `--border-default`, `--border-strong`, `--border-glass`
   - **Brand & Accents**: `--accent`, `--accent-hover`, `--accent-muted`, `--accent-fg`
   - **Status**: `--success`, `--success-bg`, `--warning`, `--warning-bg`, `--danger`, `--danger-bg`

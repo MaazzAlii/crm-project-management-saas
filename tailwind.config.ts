@@ -15,6 +15,22 @@ const config: Config = {
         mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
       },
       colors: {
+        foreground: 'hsl(var(--foreground))',
+        'muted-foreground': 'hsl(var(--muted-foreground))',
+        'subtle-foreground': 'hsl(var(--subtle-foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        destructive: 'hsl(var(--destructive))',
+        success: 'hsl(var(--success))',
+        warning: 'hsl(var(--warning))',
+        'card-foreground': 'hsl(var(--card-foreground))',
+        'popover-foreground': 'hsl(var(--popover-foreground))',
+        placeholder: 'hsl(var(--placeholder))',
+        disabled: 'hsl(var(--disabled))',
+        'brand-gradient-from': 'hsl(var(--brand-gradient-from))',
+        'brand-gradient-to': 'hsl(var(--brand-gradient-to))',
         brand: {
           50: "#f0f7ff",
           100: "#e0effe",
