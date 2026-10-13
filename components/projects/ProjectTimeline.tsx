@@ -110,22 +110,22 @@ export function ProjectTimeline({
   return (
     <div className="space-y-6">
       {/* Tasks & Milestones Card */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-6">
+      <div className="bg-card border border-border rounded-2xl p-6 shadow-xs space-y-6">
         {/* Task Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <CheckSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <CheckSquare className="w-5 h-5 text-primary" />
               Project Milestones & Task Checklist
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Track project deliverables, execution tasks, and completion rate.
             </p>
           </div>
 
           <button
             onClick={() => setIsAddTaskOpen(!isAddTaskOpen)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium text-xs transition"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium text-xs transition"
           >
             <Plus className="w-4 h-4" />
             Add Task
@@ -133,18 +133,18 @@ export function ProjectTimeline({
         </div>
 
         {/* Progress Bar */}
-        <div className="space-y-2 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800">
+        <div className="space-y-2 p-4 bg-muted/40 rounded-xl border border-border">
           <div className="flex justify-between items-center text-xs font-medium">
-            <span className="text-slate-600 dark:text-slate-400">
+            <span className="text-muted-foreground">
               Task Completion Progress ({completedTasks} of {totalTasks} done)
             </span>
-            <span className="font-bold text-slate-900 dark:text-white">
+            <span className="font-bold text-foreground">
               {completionPercentage}%
             </span>
           </div>
-          <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+          <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
             <div
-              className="bg-indigo-600 dark:bg-indigo-500 h-full rounded-full transition-all duration-500"
+              className="bg-primary h-full rounded-full transition-all duration-500"
               style={{ width: `${completionPercentage}%` }}
             />
           </div>
@@ -152,13 +152,13 @@ export function ProjectTimeline({
 
         {/* Add Task Form */}
         {isAddTaskOpen && (
-          <form onSubmit={handleCreateTask} className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
-            <h3 className="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">
+          <form onSubmit={handleCreateTask} className="p-4 bg-muted/40 rounded-xl border border-border space-y-3">
+            <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">
               Create New Task
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="md:col-span-3">
-                <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1 font-medium">
+                <label className="block text-xs text-muted-foreground mb-1 font-medium">
                   Task Title *
                 </label>
                 <input
@@ -167,18 +167,18 @@ export function ProjectTimeline({
                   placeholder="Task title..."
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
-                  className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1 font-medium">
+                <label className="block text-xs text-muted-foreground mb-1 font-medium">
                   Priority
                 </label>
                 <select
                   value={taskPriority}
                   onChange={(e) => setTaskPriority(e.target.value as any)}
-                  className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -188,25 +188,25 @@ export function ProjectTimeline({
               </div>
 
               <div>
-                <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1 font-medium">
+                <label className="block text-xs text-muted-foreground mb-1 font-medium">
                   Due Date
                 </label>
                 <input
                   type="date"
                   value={taskDueDate}
                   onChange={(e) => setTaskDueDate(e.target.value)}
-                  className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1 font-medium">
+                <label className="block text-xs text-muted-foreground mb-1 font-medium">
                   Assigned Team Member
                 </label>
                 <select
                   value={taskAssignee}
                   onChange={(e) => setTaskAssignee(e.target.value)}
-                  className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                 >
                   <option value="">Unassigned</option>
                   {membersList.map((m) => (
@@ -222,14 +222,14 @@ export function ProjectTimeline({
               <button
                 type="button"
                 onClick={() => setIsAddTaskOpen(false)}
-                className="px-3 py-1.5 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium"
+                className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground font-medium"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-xs font-medium transition disabled:opacity-50"
               >
                 {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Save Task
@@ -240,22 +240,22 @@ export function ProjectTimeline({
 
         {/* Task List */}
         {tasks.length === 0 ? (
-          <div className="text-center py-6 text-xs text-slate-400">
+          <div className="text-center py-6 text-xs text-muted-foreground">
             No tasks created yet for this project.
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+          <div className="divide-y divide-border">
             {tasks.map((t) => {
               const isDone = t.status === 'done'
 
               return (
                 <div
                   key={t.id}
-                  className="py-3 flex items-start gap-3 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 px-2 rounded-lg transition"
+                  className="py-3 flex items-start gap-3 hover:bg-muted/40 px-2 rounded-lg transition"
                 >
                   <button
                     onClick={() => handleTaskToggle(t.id, t.status)}
-                    className="mt-0.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                    className="mt-0.5 text-muted-foreground hover:text-primary transition"
                   >
                     {isDone ? (
                       <CheckSquare className="w-5 h-5 text-emerald-500" />
@@ -269,8 +269,8 @@ export function ProjectTimeline({
                       <span
                         className={`text-sm font-semibold ${
                           isDone
-                            ? 'line-through text-slate-400 dark:text-slate-500'
-                            : 'text-slate-900 dark:text-white'
+                            ? 'line-through text-muted-foreground'
+                            : 'text-foreground'
                         }`}
                       >
                         {t.title}
@@ -287,13 +287,13 @@ export function ProjectTimeline({
                       )}
                     </div>
                     {t.description && (
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                      <p className="text-xs text-muted-foreground">
                         {t.description}
                       </p>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3 text-xs text-slate-400 shrink-0">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
                     {t.assigned_name && (
                       <div className="flex items-center gap-1">
                         <User className="w-3 h-3" />
@@ -315,35 +315,35 @@ export function ProjectTimeline({
       </div>
 
       {/* Activity Log Card */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-        <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <Activity className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+      <div className="bg-card border border-border rounded-2xl p-6 shadow-xs space-y-4">
+        <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+          <Activity className="w-5 h-5 text-primary" />
           Project Activity History & Audit Trail
         </h2>
 
         {activityLogs.length === 0 ? (
-          <div className="text-center py-6 text-xs text-slate-400">
+          <div className="text-center py-6 text-xs text-muted-foreground">
             No activity logged yet.
           </div>
         ) : (
-          <div className="space-y-3 relative before:absolute before:inset-0 before:left-3 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
+          <div className="space-y-3 relative before:absolute before:inset-0 before:left-3 before:w-0.5 before:bg-border">
             {activityLogs.map((log) => (
               <div key={log.id} className="relative pl-8 flex items-start justify-between text-xs">
-                <span className="absolute left-1.5 top-1.5 w-3 h-3 rounded-full bg-indigo-600 ring-4 ring-white dark:ring-slate-900" />
+                <span className="absolute left-1.5 top-1.5 w-3 h-3 rounded-full bg-primary ring-4 ring-card" />
                 <div>
-                  <div className="font-semibold text-slate-900 dark:text-white">
+                  <div className="font-semibold text-foreground">
                     {log.actor_name || 'System User'}{' '}
-                    <span className="font-normal text-slate-500 dark:text-slate-400">
-                      performed action <span className="font-medium text-indigo-600 dark:text-indigo-400">{log.action}</span>
+                    <span className="font-normal text-muted-foreground">
+                      performed action <span className="font-medium text-primary">{log.action}</span>
                     </span>
                   </div>
                   {log.details && (
-                    <div className="text-slate-500 dark:text-slate-400 mt-0.5">
+                    <div className="text-muted-foreground mt-0.5">
                       {JSON.stringify(log.details)}
                     </div>
                   )}
                 </div>
-                <div className="text-slate-400 shrink-0 text-[11px]">
+                <div className="text-muted-foreground shrink-0 text-[11px]">
                   {new Date(log.created_at).toLocaleString(undefined, {
                     month: 'short',
                     day: 'numeric',

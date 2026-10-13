@@ -102,22 +102,22 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-6">
+    <div className="bg-card border border-border rounded-2xl p-6 shadow-xs space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <FolderCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+            <FolderCheck className="w-5 h-5 text-primary" />
             Deliverables & Review
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             Client review links, files, approval status, and feedback log.
           </p>
         </div>
 
         <button
           onClick={() => setIsFormOpen(!isFormOpen)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium text-xs transition"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium text-xs transition"
         >
           <Plus className="w-4 h-4" />
           Add Deliverable
@@ -126,13 +126,13 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
 
       {/* Quick Add Form */}
       {isFormOpen && (
-        <form onSubmit={handleCreate} className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
-          <h3 className="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">
+        <form onSubmit={handleCreate} className="p-4 bg-muted/40 rounded-xl border border-border space-y-3">
+          <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">
             New Deliverable
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1 font-medium">
+              <label className="block text-xs text-muted-foreground mb-1 font-medium">
                 Deliverable Title *
               </label>
               <input
@@ -141,12 +141,12 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
                 placeholder="e.g. Final Video Cut / API Spec Docs"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
               />
             </div>
 
             <div>
-              <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1 font-medium">
+              <label className="block text-xs text-muted-foreground mb-1 font-medium">
                 Drive Link or File URL
               </label>
               <input
@@ -154,7 +154,7 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
                 placeholder="https://drive.google.com/..."
                 value={driveLink}
                 onChange={(e) => setDriveLink(e.target.value)}
-                className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
               />
             </div>
           </div>
@@ -163,14 +163,14 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
             <button
               type="button"
               onClick={() => setIsFormOpen(false)}
-              className="px-3 py-1.5 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium"
+              className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground font-medium"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-xs font-medium transition disabled:opacity-50"
             >
               {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               Save Deliverable
@@ -181,9 +181,9 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
 
       {/* Deliverables List */}
       {deliverables.length === 0 ? (
-        <div className="text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
-          <FileText className="mx-auto h-8 w-8 text-slate-400 dark:text-slate-600" />
-          <p className="mt-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+        <div className="text-center py-8 border-2 border-dashed border-border rounded-xl">
+          <FileText className="mx-auto h-8 w-8 text-muted-foreground" />
+          <p className="mt-2 text-xs font-medium text-muted-foreground">
             No deliverables uploaded yet.
           </p>
         </div>
@@ -196,28 +196,28 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
             return (
               <div
                 key={del.id}
-                className="p-4 bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3"
+                className="p-4 bg-muted/40 border border-border rounded-xl space-y-3"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-semibold text-sm text-slate-900 dark:text-white">
+                      <h4 className="font-semibold text-sm text-foreground">
                         {del.title}
                       </h4>
 
                       {/* Status Badge */}
                       {isApproved && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                           <CheckCircle2 className="w-3 h-3" /> Approved
                         </span>
                       )}
                       {isRevision && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-500/10 text-red-500 border border-red-500/20">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
                           <AlertTriangle className="w-3 h-3" /> Revision Requested
                         </span>
                       )}
                       {del.status === 'pending' && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                           <Clock className="w-3 h-3" /> Pending Review
                         </span>
                       )}
@@ -229,7 +229,7 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
                         href={del.drive_link}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-medium"
+                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium"
                       >
                         <ExternalLink className="w-3 h-3" /> Open Drive Link
                       </a>
@@ -240,7 +240,7 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
                     {/* Status Action Buttons */}
                     <button
                       onClick={() => handleStatusUpdate(del.id, 'approved')}
-                      className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-medium transition"
+                      className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-medium transition" // intentional: status action button requires high-contrast white text
                       title="Approve Deliverable"
                     >
                       Approve
@@ -249,14 +249,14 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
                       onClick={() => {
                         setFeedbackInputId(feedbackInputId === del.id ? null : del.id)
                       }}
-                      className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded text-[11px] font-medium transition"
+                      className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded text-[11px] font-medium transition" // intentional: status action button requires high-contrast white text
                       title="Request Revision"
                     >
                       Request Revision
                     </button>
                     <button
                       onClick={() => handleDelete(del.id)}
-                      className="p-1 text-red-400 hover:text-red-600 transition"
+                      className="p-1 text-muted-foreground hover:text-destructive transition"
                       title="Delete Deliverable"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -277,8 +277,8 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
 
                 {/* Feedback Input Prompt */}
                 {feedbackInputId === del.id && (
-                  <div className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg space-y-2">
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
+                  <div className="p-3 bg-card border border-border rounded-lg space-y-2">
+                    <label className="block text-xs font-medium text-foreground">
                       Specify revision requirements / feedback:
                     </label>
                     <textarea
@@ -286,13 +286,13 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
                       value={feedbackText}
                       onChange={(e) => setFeedbackText(e.target.value)}
                       placeholder="e.g. Please update logo placement and adjust voiceover speed."
-                      className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-1.5 bg-background border border-border rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                     />
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
                         onClick={() => setFeedbackInputId(null)}
-                        className="px-2.5 py-1 text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400"
+                        className="px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground"
                       >
                         Cancel
                       </button>
@@ -301,7 +301,7 @@ export function DeliverablesList({ projectId, deliverables: initialDeliverables 
                         onClick={() =>
                           handleStatusUpdate(del.id, 'revision_required', feedbackText)
                         }
-                        className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-medium"
+                        className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-medium" // intentional: status action button requires high-contrast white text
                       >
                         Submit Feedback
                       </button>
