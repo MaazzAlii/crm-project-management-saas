@@ -1510,10 +1510,33 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
 - **Verification / Test Result**:
   - All mandatory specification files created and verified against templates in Section 12.
   - Zero code regressions introduced.
-- **Status**: ✅ Complete. Ready for Auth Hardening Batch A execution.
+- **Status**: ✅ Complete.
+---
 
-
-
-
-
-
+### Step 27: Auth Hardening — Batch A (Items 1, 2, 4) & Dual-Repository Synchronization
+- **Timestamp**: 2026-10-13T15:26:00+05:00
+- **Task ID**: `AUTH-HARDENING-BATCH-A-PROGRESS`
+- **Actions Performed**:
+  1. **Item 1 (Forgot Password Flow)**: Hardened `/api/auth/forgot-password` with SHA-256 token hashing, single-use invalidation of prior unconsumed tokens, 3/hour rate limiting per email & IP, `PASSWORD_RESET_REQUESTED` audit logging, email dispatch via `renderPasswordResetEmail` and `sendEmail`, generic 200 responses to prevent enumeration attacks.
+  2. **Item 2 (Password Reset Link Handling & Dedicated UI)**: Hardened `/api/auth/reset-password` with atomic `SELECT ... FOR UPDATE` token consumption, full refresh token revocation, standardized user-facing error message `"This reset link is invalid or has expired. Please request a new one."`, `PASSWORD_RESET_COMPLETED` audit logging, `/auth/reset-password` middleware rewrite, and dedicated strength-checking UI page at `app/(auth)/reset-password/page.tsx`.
+  3. **Item 4 (Sign-In Rate Limiting Scoped to API Only)**: Restricted rate limiter strictly to `/api/` and `/client/auth` routes (never HTML navigation routes like `/login` or `/signup`), standardized generic fallback message `"Too many requests. Please try again later."`, configured 10 attempts/15 min per email and 50 attempts/15 min per IP with instant reset on success, and added an inline countdown timer in `app/(auth)/login/page.tsx`.
+  4. **Dual Remote Push**: With explicit user authorization, pushed commits `af29ac4`, `af3fd48`, `c83b911`, and `7b1c67f` to both `origin` (`MaazzAlii/crm-project-management-saas`) and `deploy` (`Urk-Khan/Project-Management-CRM`).
+- **Files Modified/Created**:
+  - `app/api/auth/forgot-password/route.ts`
+  - `app/api/auth/reset-password/route.ts`
+  - `lib/auth/password-reset.ts`
+  - `lib/auth/rate-limiter.ts`
+  - `middleware/rate-limit.ts`
+  - `middleware.ts`
+  - `app/(auth)/reset-password/page.tsx`
+  - `app/(auth)/login/page.tsx`
+  - `tests/auth/forgot-password.test.ts`
+  - `tests/auth/reset-password.test.ts`
+  - `tests/auth/login-rate-limit.test.ts`
+  - `tests/api-email-verification.test.ts`
+  - `tests/auth-system.test.ts`
+- **Verification / Test Result**:
+  - `npm test`: **70/70 test files passed, 462/462 tests passed (100%)**.
+  - `npm run lint`: **0 errors**.
+  - Dual push: Both `origin/main` and `deploy/main` in sync at commit `7b1c67f`.
+- **Status**: ✅ Completed & Pushed. Continuing with Item 7 (Server-Side Auth Checks in Server Actions).
