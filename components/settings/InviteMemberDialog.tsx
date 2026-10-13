@@ -13,6 +13,8 @@ import {
   Shield,
   User,
   Eye,
+  Lock,
+  KeyRound,
 } from 'lucide-react'
 import { classifyEmail } from '@/lib/validation/business-email'
 import { isValidEmail } from '@/lib/validation/email'
@@ -47,6 +49,12 @@ export function InviteMemberDialog({
   const [serverError, setServerError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
+  // Temporary password state
+  const [setTempPassword, setSetTempPassword] = useState(false)
+  const [tempPassword, setTempPasswordValue] = useState('')
+  const [confirmTempPassword, setConfirmTempPassword] = useState('')
+  const [tempPasswordError, setTempPasswordError] = useState<string | null>(null)
+
   // Billing usage state
   const [usage, setUsage] = useState<BillingUsageState | null>(null)
   const [loadingUsage, setLoadingUsage] = useState(false)
@@ -63,6 +71,10 @@ export function InviteMemberDialog({
     setEmailError(null)
     setServerError(null)
     setSubmitting(false)
+    setSetTempPassword(false)
+    setTempPasswordValue('')
+    setConfirmTempPassword('')
+    setTempPasswordError(null)
 
     let mounted = true
     setLoadingUsage(true)
@@ -132,12 +144,36 @@ export function InviteMemberDialog({
     return true
   }
 
+  // Password validation rules
+  const hasMinLength = tempPassword.length >= 8
+  const hasUppercase = /[A-Z]/.test(tempPassword)
+  const hasLowercase = /[a-z]/.test(tempPassword)
+  const hasDigit = /[0-9]/.test(tempPassword)
+  const passwordsMatch = tempPassword.length > 0 && tempPassword === confirmTempPassword
+  const isPasswordValid = hasMinLength && hasUppercase && hasLowercase && hasDigit && passwordsMatch
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setServerError(null)
+    setTempPasswordError(null)
 
     if (!validateEmailInput(email)) {
       return
+    }
+
+    if (setTempPassword) {
+      if (!tempPassword) {
+        setTempPasswordError('Please enter a temporary password')
+        return
+      }
+      if (!isPasswordValid) {
+        if (!passwordsMatch) {
+          setTempPasswordError('Passwords do not match')
+        } else {
+          setTempPasswordError('Password does not meet complexity requirements')
+        }
+        return
+      }
     }
 
     if (isSeatLimitReached) {
@@ -155,6 +191,7 @@ export function InviteMemberDialog({
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
           role,
+          ...(setTempPassword && tempPassword ? { password: tempPassword } : {}),
         }),
       })
 
@@ -316,6 +353,115 @@ export function InviteMemberDialog({
               <option value="member">Member — Standard workspace contributor</option>
               <option value="viewer">Viewer — Read-only access to workspace resources</option>
             </select>
+          </div>
+
+          {/* Temporary Password Toggle */}
+          <div className="space-y-3 pt-1 border-t border-slate-800/60">
+            <label className="flex items-center gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={setTempPassword}
+                onChange={(e) => {
+                  setSetTempPassword(e.target.checked)
+                  if (!e.target.checked) {
+                    setTempPasswordValue('')
+                    setConfirmTempPassword('')
+                    setTempPasswordError(null)
+                  }
+                }}
+                className="h-4 w-4 rounded border-slate-700 bg-slate-950 text-sky-500 focus:ring-sky-500/30"
+              />
+              <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                <KeyRound className="h-3.5 w-3.5 text-sky-400" />
+                Set temporary password (optional)
+              </span>
+            </label>
+
+            {setTempPassword && (
+              <div className="space-y-3.5 rounded-xl border border-slate-800 bg-slate-950/60 p-3.5">
+                {/* Warning note */}
+                <div className="flex items-start gap-2 text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5">
+                  <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="leading-relaxed">
+                    The user will be forced to change this password on first login. Share this temporary password securely with them out-of-band.
+                  </div>
+                </div>
+
+                {/* Password input */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+                    <Lock className="h-3 w-3 text-slate-400" />
+                    Temporary Password
+                  </label>
+                  <input
+                    type="password"
+                    value={tempPassword}
+                    disabled={submitting}
+                    onChange={(e) => {
+                      setTempPasswordValue(e.target.value)
+                      if (tempPasswordError) setTempPasswordError(null)
+                    }}
+                    placeholder="••••••••••••"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none font-mono"
+                  />
+                </div>
+
+                {/* Confirm password input */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+                    <Lock className="h-3 w-3 text-slate-400" />
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmTempPassword}
+                    disabled={submitting}
+                    onChange={(e) => {
+                      setConfirmTempPassword(e.target.value)
+                      if (tempPasswordError) setTempPasswordError(null)
+                    }}
+                    placeholder="••••••••••••"
+                    className={`w-full rounded-xl border bg-slate-900 px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none font-mono ${
+                      confirmTempPassword && !passwordsMatch
+                        ? 'border-rose-500 focus:border-rose-500'
+                        : 'border-slate-800 focus:border-sky-500'
+                    }`}
+                  />
+                </div>
+
+                {/* Strength requirements */}
+                <div className="space-y-1.5 pt-1 text-[10px]">
+                  <span className="text-slate-400 font-medium">Requirements:</span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <span className={hasMinLength ? 'text-emerald-400' : 'text-slate-500'}>
+                      • At least 8 characters
+                    </span>
+                    <span className={hasUppercase ? 'text-emerald-400' : 'text-slate-500'}>
+                      • 1 uppercase letter
+                    </span>
+                    <span className={hasLowercase ? 'text-emerald-400' : 'text-slate-500'}>
+                      • 1 lowercase letter
+                    </span>
+                    <span className={hasDigit ? 'text-emerald-400' : 'text-slate-500'}>
+                      • 1 number (0-9)
+                    </span>
+                  </div>
+                  {confirmTempPassword && (
+                    <div className={`pt-1 font-semibold ${passwordsMatch ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      {passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Inline error */}
+                {tempPasswordError && (
+                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-400 pt-0.5">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    <span>{tempPasswordError}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Modal Actions */}
