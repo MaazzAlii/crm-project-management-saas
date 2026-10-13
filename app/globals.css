@@ -3,28 +3,153 @@
 @tailwind utilities;
 
 :root {
+  /* Color & Surface Tokens (Light Mode Default) */
+  --bg-base: #f8fafc;
+  --bg-elevated: #ffffff;
+  --bg-sunken: #f1f5f9;
+  --bg-overlay: rgba(15, 23, 42, 0.4);
+
+  --surface-1: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #f1f5f9;
+  --surface-glass: rgba(255, 255, 255, 0.75);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-muted: #94a3b8;
+  --text-inverse: #ffffff;
+
+  --border-subtle: rgba(226, 232, 240, 0.8);
+  --border-default: #cbd5e1;
+  --border-strong: #94a3b8;
+  --border-glass: rgba(255, 255, 255, 0.2);
+
+  /* Brand & Semantic Accents */
+  --accent: #0284c7;
+  --accent-hover: #0369a1;
+  --accent-muted: rgba(2, 132, 199, 0.1);
+  --accent-fg: #ffffff;
+
+  --success: #059669;
+  --success-bg: rgba(5, 150, 105, 0.1);
+  --warning: #d97706;
+  --warning-bg: rgba(217, 119, 6, 0.1);
+  --danger: #e11d48;
+  --danger-bg: rgba(225, 29, 72, 0.1);
+
+  /* Spacing Scale (4px Base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Radii Scale */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Shadows & Elevation */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 20px -2px rgba(2, 132, 199, 0.25);
+
+  /* Focus Rings & Accessibility */
+  --focus-ring-color: var(--accent);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+
+  /* Typography Scale Tokens */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.8125rem;  /* 13px */
+  --text-base: 0.875rem; /* 14px — app default */
+  --text-md: 1rem;       /* 16px — marketing default */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+  --text-5xl: 3rem;      /* 48px */
+  --text-6xl: 3.75rem;   /* 60px */
+
+  /* Legacy Fallbacks for existing CSS */
   --foreground-rgb: 15, 23, 42;
   --background-rgb: 248, 250, 252;
 }
 
+.dark, [data-theme="dark"] {
+  /* Color & Surface Tokens (Dark Mode) */
+  --bg-base: #020617;
+  --bg-elevated: #0b1120;
+  --bg-sunken: #01040f;
+  --bg-overlay: rgba(2, 6, 23, 0.8);
+
+  --surface-1: #0f172a;
+  --surface-2: #1e293b;
+  --surface-3: #334155;
+  --surface-glass: rgba(15, 23, 42, 0.75);
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-muted: #475569;
+  --text-inverse: #020617;
+
+  --border-subtle: rgba(30, 41, 59, 0.7);
+  --border-default: #334155;
+  --border-strong: #475569;
+  --border-glass: rgba(255, 255, 255, 0.08);
+
+  /* Brand & Semantic Accents */
+  --accent: #38bdf8;
+  --accent-hover: #0ea5e9;
+  --accent-muted: rgba(56, 189, 248, 0.15);
+  --accent-fg: #020617;
+
+  --success: #34d399;
+  --success-bg: rgba(52, 211, 153, 0.15);
+  --warning: #fbbf24;
+  --warning-bg: rgba(251, 191, 36, 0.15);
+  --danger: #fb7185;
+  --danger-bg: rgba(251, 113, 133, 0.15);
+
+  --shadow-glow: 0 0 20px -2px rgba(56, 189, 248, 0.25);
+
+  /* Legacy Fallbacks */
+  --foreground-rgb: 248, 250, 252;
+  --background-rgb: 2, 6, 23;
+}
+
 body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ─── Client Portal Design Tokens ────────────────────────────────────────── */
 .portal-bg {
-  @apply relative bg-[#09090f];
+  @apply relative bg-slate-100 dark:bg-[#09090f] transition-colors duration-150;
 }
 
 .portal-card {
-  @apply rounded-2xl border border-slate-800/80 bg-slate-900/80 px-8 py-8 shadow-2xl backdrop-blur-xl;
+  @apply rounded-2xl border border-slate-200/80 bg-white/90 dark:border-slate-800/80 dark:bg-slate-900/80 px-8 py-8 shadow-xl dark:shadow-2xl backdrop-blur-xl transition-colors duration-150;
 }
 
 .portal-input {
-  @apply block w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3.5 py-3
-         text-sm text-white placeholder-slate-500
+  @apply block w-full rounded-xl border border-slate-300/80 bg-slate-50/80 dark:border-slate-700/60 dark:bg-slate-800/60 px-3.5 py-3
+         text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500
          transition-colors focus:border-violet-500/60 focus:outline-none focus:ring-2 focus:ring-violet-500/20;
 }
 
@@ -32,18 +157,18 @@ body {
   @apply flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-3 text-sm
          font-semibold text-white shadow-lg shadow-violet-600/20 transition-all
          hover:bg-violet-500 hover:shadow-violet-500/30 focus:outline-none focus:ring-2
-         focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-slate-900
+         focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900
          disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 .portal-badge-status-active {
-  @apply inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-400 ring-1 ring-emerald-500/20;
+  @apply inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20;
 }
 
 .portal-badge-status-pending {
-  @apply inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-400 ring-1 ring-amber-500/20;
+  @apply inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/20;
 }
 
 .portal-badge-status-done {
-  @apply inline-flex items-center gap-1.5 rounded-full bg-slate-500/15 px-2.5 py-1 text-xs font-medium text-slate-400 ring-1 ring-slate-500/20;
+  @apply inline-flex items-center gap-1.5 rounded-full bg-slate-500/15 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 ring-1 ring-slate-500/20;
 }
