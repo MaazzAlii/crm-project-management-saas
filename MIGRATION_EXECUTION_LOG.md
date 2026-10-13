@@ -2143,7 +2143,77 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm run lint`: **0 new warnings** (4 pre-existing warnings unchanged)
   - `npm run build`: **Exit code 0 — 140 routes compiled**
   - Browser verification: **PASS (100% verified with Playwright Chromium)**
-- **Status**: ✅ Sub-Batch 6C complete. Local commits only (`6d2d267`, `a4c6012`). Awaiting review before Sub-Batch 6D1 (`ProjectHeader`, `[id]/page.tsx`).
+- **Status**: ✅ Sub-Batch 6C complete. Pushed to origin/main and deploy/main at `5e36e54`.
+
+---
+
+### Step 30: Batch UI-1B Sub-Batch 6D1 — Project Detail Header Semantic Refactor
+- **Timestamp**: 2026-10-13T23:38:00+05:00
+- **Task ID**: `BATCH-UI-1B-STEP-6D1-PROJECT-HEADER`
+- **Rationale**:
+  - `components/projects/ProjectHeader.tsx`:
+    - Replaced all raw palette colors across top card wrapper (`bg-card border-border`), breadcrumb navigation link (`text-muted-foreground hover:text-foreground`), status label (`text-muted-foreground`), status dropdown select (`bg-background text-foreground border-border focus:ring-primary`), project title H1 (`text-foreground`), description (`text-muted-foreground`), contract value stat block (`bg-muted/50 border-border text-foreground`, label `text-muted-foreground`), key info grid borders (`border-border`), client link (`text-foreground`, label `text-muted-foreground`, brand icon container `bg-primary/10 text-primary`), assigned member select (`text-foreground`, label `text-muted-foreground`), start date (`text-foreground`, label `text-muted-foreground`), and deadline (`text-foreground`, label `text-muted-foreground`).
+  - `app/(dashboard)/projects/[id]/page.tsx`:
+    - Server component wrapper verified: 0 hits before and after. Zero hardcoded colors.
+  - Non-color changes explicitly documented:
+    - Line 158: `bg-slate-50 dark:bg-slate-800/80` → `bg-muted/50`: Light mode changed from solid (100%) to 50% opacity, dark mode changed from 80% to 50% opacity for unified subtle stat block treatment.
+    - Line 172: `bg-indigo-50 dark:bg-indigo-950/40` → `bg-primary/10`: Dark mode opacity changed from 40% to 10% for brand primary token alignment.
+    - Zero shadow, spacing, radius, or layout alterations.
+- **Actions Performed**:
+  1. **Section 6 Pre-edit Grep**:
+     - 17 hits in `components/projects/ProjectHeader.tsx`, 0 hits in `app/(dashboard)/projects/[id]/page.tsx`.
+  2. **Code Edit (`1f8b3b5`)**:
+     - 19 lines inserted, 19 lines deleted (exact 1:1 semantic color swap).
+  3. **Section 6 Post-edit Grep**:
+     - 0 unjustified hits remaining across both files.
+  4. **Test Suite Commit (`c8a60fb`)**:
+     - Added `scripts/verify-project-detail-header-e2e.ts`.
+  5. **Browser & Computed Style Verification**:
+     - Booted Next.js standalone production server on port 3000.
+     - Seeded test organization with a project and deliverable and verified live rendering with Playwright Chromium.
+     - Light Mode:
+       - `backLinkColor`: `rgb(100, 116, 139)` (slate-500 / `text-muted-foreground`)
+       - `h1Color`: `rgb(2, 8, 23)` (slate-900 / `text-foreground`)
+       - `statusSelectColor`: `rgb(2, 8, 23)` (slate-900 / `text-foreground`)
+       - `statusBadgeColor`: `rgb(217, 119, 6)` (`amber-600` / planning)
+       - `contractValueColor`: `rgb(2, 8, 23)` (slate-900 / `text-foreground`)
+       - `contractLabelColor`: `rgb(100, 116, 139)` (slate-500 / `text-muted-foreground`)
+       - `clientLabelColor`: `rgb(100, 116, 139)` (slate-500 / `text-muted-foreground`)
+       - `clientLinkColor`: `rgb(2, 8, 23)` (slate-900 / `text-foreground`)
+       - `memberLabelColor`: `rgb(100, 116, 139)` (slate-500 / `text-muted-foreground`)
+       - `deadlineLabelColor`: `rgb(100, 116, 139)` (slate-500 / `text-muted-foreground`)
+       - `headerCardBg`: `rgb(255, 255, 255)` (`bg-card`)
+       - `fontFamily`: `__GeistSans_8adcd2`
+     - Dark Mode:
+       - `backLinkColor`: `rgb(148, 163, 184)` (slate-400 / `text-muted-foreground`)
+       - `h1Color`: `rgb(248, 250, 252)` (slate-50 / `text-foreground`)
+       - `statusSelectColor`: `rgb(248, 250, 252)` (slate-50 / `text-foreground`)
+       - `statusBadgeColor`: `rgb(251, 191, 36)` (`amber-400` / planning)
+       - `contractValueColor`: `rgb(248, 250, 252)` (slate-50 / `text-foreground`)
+       - `contractLabelColor`: `rgb(148, 163, 184)` (slate-400 / `text-muted-foreground`)
+       - `clientLabelColor`: `rgb(148, 163, 184)` (slate-400 / `text-muted-foreground`)
+       - `clientLinkColor`: `rgb(248, 250, 252)` (slate-50 / `text-foreground`)
+       - `memberLabelColor`: `rgb(148, 163, 184)` (slate-400 / `text-muted-foreground`)
+       - `deadlineLabelColor`: `rgb(148, 163, 184)` (slate-400 / `text-muted-foreground`)
+       - `headerCardBg`: `rgb(15, 23, 42)` (`bg-card`)
+       - `fontFamily`: `__GeistSans_8adcd2`
+     - Screenshots captured: `projects_detail_header_light.png` and `projects_detail_header_dark.png`.
+     - Multi-route navigation: Confirmed `/projects` → `/projects/[id]` → `/projects/kanban` render seamlessly in both Light and Dark modes with persistent theme state.
+- **Files Modified**:
+  - `components/projects/ProjectHeader.tsx`
+  - `app/(dashboard)/projects/[id]/page.tsx`
+  - `scripts/verify-project-detail-header-e2e.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `tsc --noEmit` exit code: **0**
+  - Type errors: **0**
+  - `npm test`: **497/497 passed (73/73 test files passed)**
+  - `npm run lint`: **0 new warnings** (4 pre-existing warnings unchanged)
+  - `npm run build`: **Exit code 0 — 140 routes compiled**
+  - Browser verification: **PASS (100% verified with Playwright Chromium)**
+- **Status**: ✅ Sub-Batch 6D1 complete. Local commits only (`1f8b3b5`, `c8a60fb`). Awaiting review before Sub-Batch 6D2 (`DeliverablesList`, `ProjectTimeline`).
+
 
 
 
