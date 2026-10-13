@@ -70,14 +70,14 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
   });
 
   it('Step 1: returns unauthorized when session is missing or unauthenticated', async () => {
-    // @ts-expect-error test null session
     const res1 = await createInvitation(null, { email: 'test@example.com', role: 'member' });
     expect(res1.success).toBe(false);
+    if (res1.success) throw new Error('Expected failure');
     expect(res1.error).toBe('unauthorized');
 
-    // @ts-expect-error test empty session
     const res2 = await createInvitation({}, { email: 'test@example.com', role: 'member' });
     expect(res2.success).toBe(false);
+    if (res2.success) throw new Error('Expected failure');
     expect(res2.error).toBe('unauthorized');
   });
 
@@ -88,6 +88,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
       role: 'member',
     });
     expect(resMember.success).toBe(false);
+    if (resMember.success) throw new Error('Expected failure');
     expect(resMember.error).toBe('forbidden');
   });
 
@@ -100,6 +101,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
       role: 'admin',
     });
     expect(resAdminInviteAdmin.success).toBe(false);
+    if (resAdminInviteAdmin.success) throw new Error('Expected failure');
     expect(resAdminInviteAdmin.error).toBe('forbidden');
 
     // Owner inviting admin is allowed (Org A has 2 members, so 2+1=3 seats used, within 3 limit)
@@ -110,6 +112,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
       role: 'admin',
     });
     expect(resOwnerInviteAdmin.success).toBe(true);
+    if (!resOwnerInviteAdmin.success) throw new Error('Expected success');
     expect(resOwnerInviteAdmin.invitation).toBeDefined();
   });
 
@@ -120,6 +123,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
     for (const email of invalidEmails) {
       const res = await createInvitation(ownerSession, { email, role: 'member' });
       expect(res.success).toBe(false);
+      if (res.success) throw new Error('Expected failure');
       expect(res.error).toBe('invalid_email');
     }
   });
@@ -136,6 +140,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
       role: 'member',
     });
     expect(res.success).toBe(false);
+    if (res.success) throw new Error('Expected failure');
     expect(res.error).toBe('already_member');
   });
 
@@ -148,6 +153,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
       role: 'admin',
     });
     expect(second.success).toBe(true);
+    if (!second.success) throw new Error('Expected success');
     expect(second.alreadyPending).toBe(true);
     expect(second.invitation?.email).toBe(invitedAdminEmail.toLowerCase());
   });
@@ -161,6 +167,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
     });
 
     expect(res.success).toBe(false);
+    if (res.success) throw new Error('Expected failure');
     expect(res.error).toBe('LIMIT_REACHED');
     expect(res.planName).toBe('Free');
     expect(res.limit).toBe(PLANS.free.maxMembers);
@@ -202,6 +209,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
       role: 'member',
     });
     expect(inv3.success).toBe(false);
+    if (inv3.success) throw new Error('Expected failure');
     expect(inv3.error).toBe('LIMIT_REACHED');
     expect(inv3.limit).toBe(PLANS.free.maxPendingInvites);
 
@@ -230,12 +238,13 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
     const res = await createInvitation(cleanSession, { email, role: 'member' });
 
     expect(res.success).toBe(true);
+    if (!res.success) throw new Error('Expected success');
     expect(res.rawToken).toBeDefined();
     expect(res.invitation).toBeDefined();
-    expect(res.invitation?.email).toBe(email.toLowerCase());
+    expect(res.invitation.email).toBe(email.toLowerCase());
 
     // Check expiration ~7 days
-    const expiresAt = new Date(res.invitation!.expires_at).getTime();
+    const expiresAt = new Date(res.invitation.expires_at).getTime();
     const expectedApprox = Date.now() + 7 * 24 * 60 * 60 * 1000;
     expect(Math.abs(expiresAt - expectedApprox)).toBeLessThan(60 * 1000); // within 1 minute
 
@@ -277,6 +286,7 @@ describe('Prompt 18: Invitation Service - createInvitation', () => {
       { email: sharedEmail, role: 'member' }
     );
     expect(resB.success).toBe(true);
+    if (!resB.success) throw new Error('Expected success');
     expect(resB.alreadyPending).toBeFalsy();
 
     // Verify lookup by token hash only returns this specific record

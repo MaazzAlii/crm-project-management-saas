@@ -78,7 +78,7 @@ describe('Prompt 53: Security — Cross-Organization Invitations Isolation', () 
     vi.spyOn(authMiddleware, 'getAuthFromRequest').mockReturnValue({
       userId: ownerAId,
       orgId: orgAId,
-      role: 'owner',
+      role: 'org_admin',
       email: 'ownerA@example.com',
     });
 
@@ -96,13 +96,14 @@ describe('Prompt 53: Security — Cross-Organization Invitations Isolation', () 
       { email: inviteeEmail, role: 'member' }
     );
     expect(createRes.success).toBe(true);
-    const orgBInviteId = createRes.invitation!.id;
+    if (!createRes.success) throw new Error('Expected createRes success');
+    const orgBInviteId = createRes.invitation.id;
 
     // Simulate Org A owner session
     vi.spyOn(authMiddleware, 'getAuthFromRequest').mockReturnValue({
       userId: ownerAId,
       orgId: orgAId,
-      role: 'owner',
+      role: 'org_admin',
       email: 'ownerA@example.com',
     });
 
@@ -110,14 +111,14 @@ describe('Prompt 53: Security — Cross-Organization Invitations Isolation', () 
     const resendReq = new NextRequest(`http://localhost:3000/api/invitations/${orgBInviteId}/resend`, {
       method: 'POST',
     });
-    const resendRes = await resendRoute.POST(resendReq, { params: { id: orgBInviteId } });
+    const resendRes = await resendRoute.POST(resendReq, { params: Promise.resolve({ id: orgBInviteId }) });
     expect(resendRes.status).toBe(404);
 
     // Try revoke
     const revokeReq = new NextRequest(`http://localhost:3000/api/invitations/${orgBInviteId}/revoke`, {
       method: 'POST',
     });
-    const revokeRes = await revokeRoute.POST(revokeReq, { params: { id: orgBInviteId } });
+    const revokeRes = await revokeRoute.POST(revokeReq, { params: Promise.resolve({ id: orgBInviteId }) });
     expect(revokeRes.status).toBe(404);
   });
 
@@ -125,7 +126,7 @@ describe('Prompt 53: Security — Cross-Organization Invitations Isolation', () 
     vi.spyOn(authMiddleware, 'getAuthFromRequest').mockReturnValue({
       userId: memberAId,
       orgId: orgAId,
-      role: 'member',
+      role: 'user',
       email: 'memberA@example.com',
     });
 
@@ -145,8 +146,9 @@ describe('Prompt 53: Security — Cross-Organization Invitations Isolation', () 
       { email: inviteeEmail, role: 'member' }
     );
     expect(createRes.success).toBe(true);
-    const rawToken = createRes.rawToken!;
-    const inviteId = createRes.invitation!.id;
+    if (!createRes.success || !createRes.rawToken) throw new Error('Expected createRes success and rawToken');
+    const rawToken = createRes.rawToken;
+    const inviteId = createRes.invitation.id;
 
     // Revoke it
     const revokeRes = await revokeInvitation(
@@ -165,6 +167,7 @@ describe('Prompt 53: Security — Cross-Organization Invitations Isolation', () 
     vi.spyOn(authMiddleware, 'getAuthFromRequest').mockReturnValue({
       userId: userInvitee.id,
       email: inviteeEmail,
+      role: 'user',
     });
 
     const acceptReq = new NextRequest('http://localhost:3000/api/invitations/accept', {
@@ -186,7 +189,7 @@ describe('Prompt 53: Security — Cross-Organization Invitations Isolation', () 
     vi.spyOn(authMiddleware, 'getAuthFromRequest').mockReturnValue({
       userId: ownerAId,
       orgId: orgAId,
-      role: 'owner',
+      role: 'org_admin',
       email: 'ownerA@example.com',
     });
 

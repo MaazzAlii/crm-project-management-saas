@@ -73,7 +73,7 @@ describe('Prompt 20: Invitation Service - acceptInvitation', () => {
       { email: inviteeEmail, role: 'member' }
     );
     expect(created.success).toBe(true);
-    if (!created.success) return;
+    if (!created.success || !created.rawToken) throw new Error('Expected created success with rawToken');
 
     // Manually expire the invitation in db
     await query(
@@ -100,7 +100,7 @@ describe('Prompt 20: Invitation Service - acceptInvitation', () => {
       { email: inviteeEmail, role: 'member' }
     );
     expect(created.success).toBe(true);
-    if (!created.success) return;
+    if (!created.success || !created.rawToken) throw new Error('Expected created success with rawToken');
 
     await invitationRepo.updateStatus(testOrgId, created.invitation.id, {
       status: 'revoked',
@@ -126,7 +126,7 @@ describe('Prompt 20: Invitation Service - acceptInvitation', () => {
       { email: inviteeEmail, role: 'member' }
     );
     expect(created.success).toBe(true);
-    if (!created.success) return;
+    if (!created.success || !created.rawToken) throw new Error('Expected created success with rawToken');
 
     const res = await acceptInvitation(created.rawToken, null);
 
@@ -144,7 +144,7 @@ describe('Prompt 20: Invitation Service - acceptInvitation', () => {
       { email: inviteeEmail, role: 'member' }
     );
     expect(created.success).toBe(true);
-    if (!created.success) return;
+    if (!created.success || !created.rawToken) throw new Error('Expected created success with rawToken');
 
     // Logged in as other user instead of invited user
     const res = await acceptInvitation(created.rawToken, {
@@ -168,7 +168,7 @@ describe('Prompt 20: Invitation Service - acceptInvitation', () => {
       { email: inviteeEmail, role: 'viewer' }
     );
     expect(created.success).toBe(true);
-    if (!created.success) return;
+    if (!created.success || !created.rawToken) throw new Error('Expected created success with rawToken');
 
     const res = await acceptInvitation(created.rawToken, {
       userId: inviteeUserId,
@@ -201,7 +201,7 @@ describe('Prompt 20: Invitation Service - acceptInvitation', () => {
       { email: inviteeEmail, role: 'member' }
     );
     expect(created.success).toBe(true);
-    if (!created.success) return;
+    if (!created.success || !created.rawToken) throw new Error('Expected created success with rawToken');
 
     // First accept succeeds
     const firstAccept = await acceptInvitation(created.rawToken, {
@@ -230,7 +230,7 @@ describe('Prompt 20: Invitation Service - acceptInvitation', () => {
       { email: inviteeEmail, role: 'member' }
     );
     expect(created.success).toBe(true);
-    if (!created.success) return;
+    if (!created.success || !created.rawToken) throw new Error('Expected created success with rawToken');
 
     // Simulate user added as member through another flow prior to clicking accept
     await orgRepo.addMember(testOrgId, inviteeUserId, 'member');
@@ -260,7 +260,7 @@ describe('Prompt 20: Invitation Service - acceptInvitation', () => {
       { email: inviteeEmail, role: 'member' }
     );
     expect(created.success).toBe(true);
-    if (!created.success) return;
+    if (!created.success || !created.rawToken) throw new Error('Expected created success with rawToken');
 
     // Fire 2 accept calls simultaneously
     const [res1, res2] = await Promise.all([

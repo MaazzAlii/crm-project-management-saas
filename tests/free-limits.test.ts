@@ -41,7 +41,7 @@ describe('Prompt 51: Free Plan Limits (Seats & Pending Quota)', () => {
     vi.spyOn(authMiddleware, 'getAuthFromRequest').mockReturnValue({
       userId: ownerId,
       orgId,
-      role: 'owner',
+      role: 'org_admin',
       email: `owner_${id}@example.com`,
     });
   });
@@ -122,11 +122,13 @@ describe('Prompt 51: Free Plan Limits (Seats & Pending Quota)', () => {
     const postRes = await invitationsRoute.POST(postReq);
     expect(postRes.status).toBe(402);
 
+    if (!inv1.success) throw new Error('Expected inv1 to succeed');
+
     // Revoke one pending invitation
-    const revokeReq = new NextRequest(`http://localhost:3000/api/invitations/${inv1.invitation!.id}/revoke`, {
+    const revokeReq = new NextRequest(`http://localhost:3000/api/invitations/${inv1.invitation.id}/revoke`, {
       method: 'POST',
     });
-    const revokeRes = await revokeRoute.POST(revokeReq, { params: { id: inv1.invitation!.id } });
+    const revokeRes = await revokeRoute.POST(revokeReq, { params: Promise.resolve({ id: inv1.invitation.id }) });
     expect(revokeRes.status).toBe(200);
 
     // Now invite succeeds again!

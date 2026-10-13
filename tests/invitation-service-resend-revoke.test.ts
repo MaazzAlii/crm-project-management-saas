@@ -100,9 +100,10 @@ describe('Prompt 19: Invitation Service - resendInvitation and revokeInvitation'
     // 1. Create invitation
     const created = await createInvitation(ownerSession, { email, role: 'member' });
     expect(created.success).toBe(true);
-    const oldRawToken = created.rawToken!;
+    if (!created.success || !created.rawToken) throw new Error('Expected created success with rawToken');
+    const oldRawToken = created.rawToken;
     const oldTokenHash = hashToken(oldRawToken);
-    const inviteId = created.invitation!.id;
+    const inviteId = created.invitation.id;
 
     // Verify lookup by old hash finds record
     const foundOld = await invitationRepo.findByTokenHash(oldTokenHash);
@@ -111,9 +112,10 @@ describe('Prompt 19: Invitation Service - resendInvitation and revokeInvitation'
     // 2. Resend invitation
     const resent = await resendInvitation(ownerSession, inviteId);
     expect(resent.success).toBe(true);
+    if (!resent.success || !resent.rawToken) throw new Error('Expected resent success with rawToken');
     expect(resent.rawToken).toBeDefined();
     expect(resent.rawToken).not.toBe(oldRawToken);
-    const newRawToken = resent.rawToken!;
+    const newRawToken = resent.rawToken;
     const newTokenHash = hashToken(newRawToken);
 
     // 3. Old link immediately fails
@@ -141,13 +143,15 @@ describe('Prompt 19: Invitation Service - resendInvitation and revokeInvitation'
     // 1. Create invitation
     const created = await createInvitation(ownerSession, { email, role: 'viewer' });
     expect(created.success).toBe(true);
-    const rawToken = created.rawToken!;
+    if (!created.success || !created.rawToken) throw new Error('Expected created success with rawToken');
+    const rawToken = created.rawToken;
     const tokenHash = hashToken(rawToken);
-    const inviteId = created.invitation!.id;
+    const inviteId = created.invitation.id;
 
     // 2. Revoke invitation
     const revoked = await revokeInvitation(ownerSession, inviteId);
     expect(revoked.success).toBe(true);
+    if (!revoked.success) throw new Error('Expected revoked success');
     expect(revoked.invitation?.status).toBe('revoked');
     expect(revoked.invitation?.revoked_at).not.toBeNull();
 
@@ -172,11 +176,13 @@ describe('Prompt 19: Invitation Service - resendInvitation and revokeInvitation'
       role: 'viewer',
     });
     expect(created.success).toBe(true);
-    const inviteId = created.invitation!.id;
+    if (!created.success) throw new Error('Expected created success');
+    const inviteId = created.invitation.id;
 
     const memberSession = { userId: memberUserAId, orgId: orgAId };
     const res = await revokeInvitation(memberSession, inviteId);
     expect(res.success).toBe(false);
+    if (res.success) throw new Error('Expected res failure');
     expect(res.error).toBe('forbidden');
   });
 
@@ -187,11 +193,13 @@ describe('Prompt 19: Invitation Service - resendInvitation and revokeInvitation'
       role: 'viewer',
     });
     expect(created.success).toBe(true);
-    const inviteId = created.invitation!.id;
+    if (!created.success) throw new Error('Expected created success');
+    const inviteId = created.invitation.id;
 
     const memberSession = { userId: memberUserAId, orgId: orgAId };
     const res = await resendInvitation(memberSession, inviteId);
     expect(res.success).toBe(false);
+    if (res.success) throw new Error('Expected res failure');
     expect(res.error).toBe('forbidden');
   });
 
@@ -203,17 +211,20 @@ describe('Prompt 19: Invitation Service - resendInvitation and revokeInvitation'
       role: 'member',
     });
     expect(createdA.success).toBe(true);
-    const inviteAId = createdA.invitation!.id;
+    if (!createdA.success) throw new Error('Expected createdA success');
+    const inviteAId = createdA.invitation.id;
 
     // Owner of Org B attempts to resend Org A's invite
     const ownerSessionB = { userId: ownerUserBId, orgId: orgBId };
     const resendCross = await resendInvitation(ownerSessionB, inviteAId);
     expect(resendCross.success).toBe(false);
+    if (resendCross.success) throw new Error('Expected resendCross failure');
     expect(resendCross.error).toBe('not_found');
 
     // Owner of Org B attempts to revoke Org A's invite
     const revokeCross = await revokeInvitation(ownerSessionB, inviteAId);
     expect(revokeCross.success).toBe(false);
+    if (revokeCross.success) throw new Error('Expected revokeCross failure');
     expect(revokeCross.error).toBe('not_found');
   });
 });

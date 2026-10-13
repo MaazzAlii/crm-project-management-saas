@@ -91,7 +91,7 @@ describe('Prompt 21: Seat Limit Enforcement Everywhere', () => {
       { email: inviteeEmail, role: 'member' }
     );
     expect(inv.success).toBe(true);
-    if (!inv.success) return;
+    if (!inv.success || !inv.rawToken) throw new Error('Expected rawToken on invitation');
 
     // Now fill the org with 2 more active members (making 3 active members: owner + 2 members = 3/3)
     const extraUser1 = await userRepo.create({

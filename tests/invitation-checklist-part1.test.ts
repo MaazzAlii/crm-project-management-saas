@@ -77,7 +77,7 @@ describe('Prompt 03: Invitation Test Checklist - Part 1: Local Flow Verification
     });
 
     expect(createResult.success).toBe(true);
-    if (!createResult.success) throw new Error('Create invitation failed');
+    if (!createResult.success || !createResult.rawToken) throw new Error('Create invitation failed');
 
     const rawToken1 = createResult.rawToken;
     const inviteId1 = createResult.invitation.id;
@@ -122,6 +122,7 @@ describe('Prompt 03: Invitation Test Checklist - Part 1: Local Flow Verification
     // Step 10: Try the same link again: expect a clear "already used" or "invalid" message, not a crash
     const reusedAcceptInfo = await getInvitationAcceptInfo(rawToken1);
     expect(reusedAcceptInfo.success).toBe(false);
+    if (reusedAcceptInfo.success) throw new Error('Expected reusedAcceptInfo failure');
     expect(reusedAcceptInfo.error).toBe('invalid_or_expired');
     expect(reusedAcceptInfo.status).toBe(400);
 
@@ -139,7 +140,7 @@ describe('Prompt 03: Invitation Test Checklist - Part 1: Local Flow Verification
       role: 'member',
     });
     expect(createResult2.success).toBe(true);
-    if (!createResult2.success) throw new Error('Create invitation 2 failed');
+    if (!createResult2.success || !createResult2.rawToken) throw new Error('Create invitation 2 failed');
 
     const rawToken2 = createResult2.rawToken;
     const inviteId2 = createResult2.invitation.id;
@@ -155,6 +156,7 @@ describe('Prompt 03: Invitation Test Checklist - Part 1: Local Flow Verification
     // Token must stop working immediately
     const postRevokeInfo = await getInvitationAcceptInfo(rawToken2);
     expect(postRevokeInfo.success).toBe(false);
+    if (postRevokeInfo.success) throw new Error('Expected postRevokeInfo failure');
     expect(postRevokeInfo.error).toBe('invalid_or_expired');
 
     const revokedAcceptAttempt = await acceptInvitation(rawToken2, {
@@ -162,6 +164,7 @@ describe('Prompt 03: Invitation Test Checklist - Part 1: Local Flow Verification
       email: inviteeEmail2,
     });
     expect(revokedAcceptAttempt.success).toBe(false);
+    if (revokedAcceptAttempt.success) throw new Error('Expected revokedAcceptAttempt failure');
     expect(revokedAcceptAttempt.error).toBe('revoked');
   });
 });
