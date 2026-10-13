@@ -1585,3 +1585,71 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `npm run lint`: **0 errors**.
 - **Status**: ✅ Batch A 100% Complete. Ready for Push Approval and Batch B.
 
+---
+
+### Step 29: UI Theme & Typography — Batch UI-1 (Theme Toggle & Geist Typography System)
+- **Timestamp**: 2026-10-13T17:18:00+05:00
+- **Task ID**: `BATCH-UI-1-THEME-TOGGLE-TYPOGRAPHY`
+- **Actions Performed**:
+  1. **Design Tokens & Dark Mode Configuration (Item 2.1)**:
+     - Declared complete CSS variables for surfaces, text, borders, accents, and status badges under `:root` and `.dark, [data-theme="dark"]` in `app/globals.css`.
+     - Updated `docs/design/THEME-SYSTEM.md` to document the token contract and resolution order.
+     - Configured `darkMode: "class"` and font family extensions in `tailwind.config.ts`.
+  2. **Theme Provider & Anti-Flash Engine (Item 2.1)**:
+     - Created `components/providers/theme-provider.tsx` with `'light' | 'dark' | 'system'` support, localStorage persistence, system preference media query listeners, and DOM `.dark` synchronization.
+     - Added synchronous pre-paint anti-flash script to `<head>` in `app/layout.tsx` with `suppressHydrationWarning`.
+  3. **Accessible ThemeToggle Primitive (Item 2.1)**:
+     - Built `components/ui/theme-toggle.tsx` supporting segmented 3-state control (`Sun`, `Moon`, `Monitor`) and icon toggle modes with ARIA switch attributes and keyboard handling.
+     - Integrated `<ThemeToggle />` into:
+       - `components/shell/Topbar.tsx` (right action bar)
+       - `app/page.tsx` (landing navigation header)
+       - `app/(auth)/login/page.tsx`
+       - `app/(auth)/signup/page.tsx`
+       - `app/(auth)/reset-password/page.tsx`
+       - `app/(auth)/change-password/page.tsx`
+       - `components/client-portal/PortalNav.tsx`
+       - `components/super-admin/super-admin-nav.tsx`
+  4. **Geist Typography System & Text Primitive (Item 2.2)**:
+     - Installed `geist` package.
+     - Configured `GeistSans` and `GeistMono` in `app/layout.tsx` via `next/font` with CSS variable bindings.
+     - Mapped `font-sans` and `font-mono` in `tailwind.config.ts`.
+     - Created `<Text>` typography primitive in `components/ui/text.tsx` (`h1`, `h2`, `h3`, `h4`, `body`, `body-lg`, `caption`, `label`, `code`).
+     - Updated `docs/design/DESIGN-SYSTEM.md` typography scale documentation.
+     - Adapted Dashboard header and `StatCard.tsx` for light/dark mode and monospace numeric formatting.
+  5. **Automated Testing & Build Verification**:
+     - Created unit test suite `tests/ui-theme-and-typography.test.ts` (8/8 tests passing).
+     - Verified `npm test`: **73/73 test files, 497/497 tests passing (100%)**.
+     - Verified `npm run lint`: **0 errors**.
+     - Verified `npm run build`: **Production build succeeded cleanly with 0 errors**.
+- **Files Modified/Created**:
+  - `app/globals.css`
+  - `docs/design/THEME-SYSTEM.md`
+  - `tailwind.config.ts`
+  - `components/providers/theme-provider.tsx`
+  - `app/layout.tsx`
+  - `components/ui/theme-toggle.tsx`
+  - `components/shell/Topbar.tsx`
+  - `components/shell/DashboardShell.tsx`
+  - `components/shell/Sidebar.tsx`
+  - `app/page.tsx`
+  - `app/(auth)/login/page.tsx`
+  - `app/(auth)/signup/page.tsx`
+  - `app/(auth)/reset-password/page.tsx`
+  - `app/(auth)/change-password/page.tsx`
+  - `app/(client-portal)/layout.tsx`
+  - `components/client-portal/PortalNav.tsx`
+  - `components/super-admin/super-admin-nav.tsx`
+  - `package.json`
+  - `package-lock.json`
+  - `components/ui/text.tsx`
+  - `docs/design/DESIGN-SYSTEM.md`
+  - `components/dashboard/StatCard.tsx`
+  - `app/(dashboard)/dashboard/page.tsx`
+  - `tests/ui-theme-and-typography.test.ts`
+- **Verification / Test Result**:
+  - `npm test`: **73/73 passed (497 tests)**
+  - `npm run lint`: **Passed (0 errors)**
+  - `npm run build`: **Passed (0 errors)**
+- **Status**: ✅ Batch UI-1 100% Complete. Local commits ready for review.
+
+
