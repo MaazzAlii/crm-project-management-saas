@@ -25,6 +25,12 @@ const config: Config = {
         destructive: 'hsl(var(--destructive))',
         success: 'hsl(var(--success))',
         warning: 'hsl(var(--warning))',
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+          border: 'hsl(var(--card-border))',
+        },
+        border: 'hsl(var(--card-border))',
         'card-foreground': 'hsl(var(--card-foreground))',
         'popover-foreground': 'hsl(var(--popover-foreground))',
         placeholder: 'hsl(var(--placeholder))',
