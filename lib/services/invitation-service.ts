@@ -18,6 +18,7 @@ import { logInvitationAudit } from '../audit/invitations';
 import { canResend, canRevoke } from '../invitations/status';
 import { sendEmail } from '../email/sender';
 import { renderInviteEmail } from '../email/templates';
+import { hashPassword, validatePasswordStrength } from '../auth/password';
 import { Invitation, InvitationRole } from '../types/database';
 
 export interface InvitationSessionContext {
@@ -34,6 +35,7 @@ export interface InvitationSessionContext {
 export interface CreateInvitationInput {
   email: string;
   role: InvitationRole;
+  password?: string;
 }
 
 export interface CreateInvitationSuccess {
@@ -47,7 +49,7 @@ export interface CreateInvitationSuccess {
 
 export interface CreateInvitationError {
   success: false;
-  error: 'unauthorized' | 'forbidden' | 'invalid_email' | 'already_member' | 'LIMIT_REACHED';
+  error: 'unauthorized' | 'forbidden' | 'invalid_email' | 'invalid_password' | 'already_member' | 'LIMIT_REACHED';
   message: string;
   status: number;
   planName?: string;
@@ -180,7 +182,24 @@ export async function createInvitation(
     };
   }
 
-  // 9. Generate token, store hash, expires_at now plus 7 days, write audit event
+  // 9. If temporary password provided, validate strength and hash
+  let tempPasswordHash: string | null = null;
+  let requirePasswordChange = false;
+  if (input.password) {
+    const passwordCheck = validatePasswordStrength(input.password);
+    if (!passwordCheck.isValid) {
+      return {
+        success: false,
+        error: 'invalid_password',
+        status: 400,
+        message: passwordCheck.errors.join('. '),
+      };
+    }
+    tempPasswordHash = await hashPassword(input.password);
+    requirePasswordChange = true;
+  }
+
+  // Generate token, store hash, expires_at now plus 7 days, write audit event
   const rawToken = generateToken();
   const tokenHash = hashToken(rawToken);
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
@@ -191,6 +210,8 @@ export async function createInvitation(
     tokenHash,
     invitedBy: actorUserId,
     expiresAt,
+    tempPasswordHash,
+    requirePasswordChange,
   });
 
   // Write immutable audit event
@@ -707,6 +728,14 @@ export async function acceptInvitation(
        ON CONFLICT (organization_id, user_id) DO NOTHING`,
       [locked.organization_id, actorUserId, locked.role, locked.invited_by || null]
     );
+
+    // If invitation required password change, enforce on user account
+    if (locked.require_password_change) {
+      await client.query(
+        `UPDATE users SET require_password_change = true WHERE id = $1`,
+        [actorUserId]
+      );
+    }
 
     // Mark invitation accepted
     const updatedRes = await client.query<Invitation>(
