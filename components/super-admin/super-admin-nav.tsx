@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Building2, ShieldAlert, ArrowLeft, Sliders, ShieldCheck } from 'lucide-react'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 interface SuperAdminNavProps {
   userEmail?: string
@@ -74,7 +75,8 @@ export function SuperAdminNav({ userEmail }: SuperAdminNavProps) {
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
           {userEmail && (
             <span className="hidden sm:inline-block text-xs text-slate-400 font-mono bg-slate-900 px-2.5 py-1 rounded-md border border-slate-800">
               {userEmail}
