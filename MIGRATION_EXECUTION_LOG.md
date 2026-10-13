@@ -1537,6 +1537,51 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - `tests/auth-system.test.ts`
 - **Verification / Test Result**:
   - `npm test`: **70/70 test files passed, 462/462 tests passed (100%)**.
+- **Status**: ✅ Completed & Pushed.
+
+---
+
+### Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)
+- **Timestamp**: 2026-10-13T15:39:00+05:00
+- **Task ID**: `AUTH-HARDENING-ITEM-7-COMPLETE`
+- **Actions Performed**:
+  1. **Comprehensive Server Action Audit**: Audited all 27 `'use server'` files across `app/(dashboard)/**/actions.ts`, `app/actions/**`, `app/super-admin/actions.ts`, and `lib/team/actions.ts`.
+  2. **Role Guards on Privileged Actions**:
+     - Added `owner` and `admin` role guards (`session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin`) to:
+       - `deleteTagAction` in `app/(dashboard)/clients/tags/actions.ts`
+       - `deleteGlobalTaskAction` in `app/(dashboard)/tasks/actions.ts`
+       - `deleteProjectTemplateAction` in `app/(dashboard)/settings/templates/actions.ts`
+       - `saveSlackIntegrationAction`, `disconnectSlackIntegrationAction`, `testSlackConnectionAction` in `app/(dashboard)/settings/integrations/slack/actions.ts`
+       - `saveDiscordIntegrationAction`, `disconnectDiscordIntegrationAction`, `testDiscordConnectionAction` in `app/(dashboard)/settings/integrations/discord/actions.ts`
+       - `saveEmailIntegrationAction`, `disconnectEmailIntegrationAction`, `testEmailConnectionAction` in `app/(dashboard)/settings/integrations/email/actions.ts`
+       - `saveWhatsAppIntegrationAction`, `disconnectWhatsAppIntegrationAction`, `testWhatsAppConnectionAction` in `app/(dashboard)/settings/integrations/whatsapp/actions.ts`
+       - `saveUpworkIntegrationAction`, `disconnectUpworkIntegrationAction`, `testUpworkConnectionAction` in `app/(dashboard)/settings/integrations/upwork/actions.ts`
+       - `completeOnboarding` in `app/actions/onboarding.ts`
+  3. **Strict Tenancy Scoping on Integration Channels**:
+     - Secured `UPDATE communication_channels` in all 5 integration files by adding `AND organization_id = $sessionOrgId` to prevent cross-tenant mutations.
+  4. **Unauthorized Error Propagation**:
+     - Fixed silent success masking in `markMessageReadAction`, `markAllReadAction`, and `assignMessageClientAction` (`app/(dashboard)/inbox/actions.ts`) to return `{ success: false, error: 'Unauthorized' }` when called without a valid session.
+     - Fixed `markNotificationAsReadAction` and `markAllNotificationsAsReadAction` (`app/(dashboard)/notifications/actions.ts`) to return `{ success: false, error: 'Unauthorized' }` when called without a valid session.
+  5. **Regression Unit Test Suite**:
+     - Created `tests/auth/server-actions-auth.test.ts` with 20 dedicated unit tests verifying unauthenticated rejections, non-admin role rejections, and tenant scoping isolation across server actions.
+  6. **Knowledge Graph Synchronization**:
+     - Executed `graphify update .` updating graph to 7,340 nodes, 12,679 edges, and 641 communities.
+- **Files Modified/Created**:
+  - `app/(dashboard)/clients/tags/actions.ts`
+  - `app/(dashboard)/tasks/actions.ts`
+  - `app/(dashboard)/settings/templates/actions.ts`
+  - `app/(dashboard)/inbox/actions.ts`
+  - `app/(dashboard)/notifications/actions.ts`
+  - `app/(dashboard)/settings/integrations/slack/actions.ts`
+  - `app/(dashboard)/settings/integrations/discord/actions.ts`
+  - `app/(dashboard)/settings/integrations/email/actions.ts`
+  - `app/(dashboard)/settings/integrations/whatsapp/actions.ts`
+  - `app/(dashboard)/settings/integrations/upwork/actions.ts`
+  - `app/actions/onboarding.ts`
+  - `tests/auth/server-actions-auth.test.ts`
+  - `graphify-out/*`
+- **Verification / Test Result**:
+  - `npm test`: **71/71 test files passed, 482/482 tests passed (100%)**.
   - `npm run lint`: **0 errors**.
-  - Dual push: Both `origin/main` and `deploy/main` in sync at commit `7b1c67f`.
-- **Status**: ✅ Completed & Pushed. Continuing with Item 7 (Server-Side Auth Checks in Server Actions).
+- **Status**: ✅ Batch A 100% Complete. Ready for Push Approval and Batch B.
+
