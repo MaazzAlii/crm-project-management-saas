@@ -6,7 +6,12 @@ import { NextRequest, NextResponse } from 'next/server'
  * "/team?action=invite either redirects or shows the dialog; it must not show a raw 404 page."
  */
 export async function GET(request: NextRequest) {
-  const url = request.nextUrl.clone()
-  url.pathname = '/settings/team'
-  return NextResponse.redirect(url)
+  const { search } = request.nextUrl
+  return new NextResponse(null, {
+    status: 307,
+    headers: {
+      Location: `/settings/team${search || ''}`,
+    },
+  })
 }
+
