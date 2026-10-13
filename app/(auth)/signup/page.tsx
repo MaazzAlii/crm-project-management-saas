@@ -90,7 +90,7 @@ function SignUpForm() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-900 dark:text-slate-100 relative overflow-hidden transition-colors">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-foreground relative overflow-hidden transition-colors">
       <div className="fixed top-5 right-5 z-50">
         <ThemeToggle />
       </div>
@@ -101,19 +101,19 @@ function SignUpForm() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div className="flex justify-center items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/30">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-primary-foreground shadow-lg shadow-blue-500/30">
             IX
           </div>
-          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-slate-200 dark:to-slate-400">
+          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground/90 to-muted-foreground">
             Innoventix Platform
           </span>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+        <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-foreground">
           {isInvite
             ? `Join ${inviteOrgName || 'your team'}`
             : 'Create organization workspace'}
         </h2>
-        <p className="mt-2 text-center text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-2 text-center text-sm text-muted-foreground">
           {isInvite
             ? 'Complete your profile to join your workspace'
             : 'Get started with your multi-tenant CRM & Project Management platform'}
@@ -123,7 +123,7 @@ function SignUpForm() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl py-8 px-4 shadow-xl dark:shadow-2xl border border-slate-200 dark:border-slate-800/80 sm:rounded-2xl sm:px-10 transition-colors">
           {error && (
-            <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 text-red-400 text-sm">
+            <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 text-destructive text-sm">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -131,17 +131,17 @@ function SignUpForm() {
 
           {loadingInvite ? (
             <div className="flex flex-col items-center justify-center py-8 gap-3">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
-              <p className="text-xs text-slate-400">Verifying invitation...</p>
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <p className="text-xs text-muted-foreground">Verifying invitation...</p>
             </div>
           ) : (
             <form className="space-y-4" onSubmit={handleSignUp}>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Full Name
                 </label>
                 <div className="relative rounded-xl shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-placeholder">
                     <User className="h-4 w-4" />
                   </div>
                   <input
@@ -150,7 +150,7 @@ function SignUpForm() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Jane Doe"
-                    className="block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
+                    className="block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl text-foreground placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm"
                   />
                 </div>
               </div>
@@ -158,11 +158,11 @@ function SignUpForm() {
               {/* Organization name field is hidden when signing up with an invitation (Prompt 38) */}
               {!isInvite && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Company / Organization Name
                   </label>
                   <div className="relative rounded-xl shadow-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-placeholder">
                       <Building className="h-4 w-4" />
                     </div>
                     <input
@@ -171,18 +171,18 @@ function SignUpForm() {
                       value={orgName}
                       onChange={(e) => setOrgName(e.target.value)}
                       placeholder="Acme Agency"
-                      className="block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
+                      className="block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl text-foreground placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Email Address
                 </label>
                 <div className="relative rounded-xl shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-placeholder">
                     <Mail className="h-4 w-4" />
                   </div>
                   <input
@@ -192,26 +192,26 @@ function SignUpForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@company.com"
-                    className={`block w-full pl-10 pr-4 py-2 border rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none text-sm transition-all ${
+                    className={`block w-full pl-10 pr-4 py-2 border rounded-xl text-foreground placeholder:text-placeholder focus:outline-none text-sm transition-all ${
                       isInvite
                         ? 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700/80 cursor-not-allowed opacity-90'
-                        : 'bg-slate-50 dark:bg-slate-950/60 border-slate-300 dark:border-slate-800 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500'
+                        : 'bg-slate-50 dark:bg-slate-950/60 border-slate-300 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500'
                     }`}
                   />
                 </div>
                 {isInvite && (
-                  <p className="text-[11px] text-slate-500 mt-1">
+                  <p className="text-[11px] text-subtle-foreground mt-1">
                     Locked to the invitation recipient address.
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Password
                 </label>
                 <div className="relative rounded-xl shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-placeholder">
                     <Lock className="h-4 w-4" />
                   </div>
                   <input
@@ -221,7 +221,7 @@ function SignUpForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="•••••••• (Min 6 chars)"
-                    className="block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
+                    className="block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl text-foreground placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm"
                   />
                 </div>
               </div>
@@ -230,7 +230,7 @@ function SignUpForm() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg shadow-blue-600/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-primary-foreground bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg shadow-indigo-600/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {loading ? (
                     <>
@@ -248,11 +248,11 @@ function SignUpForm() {
             </form>
           )}
 
-          <div className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+          <div className="mt-6 text-center text-sm text-muted-foreground">
             Already have an account?{' '}
             <Link
               href={isInvite ? `/login?redirectTo=${encodeURIComponent(`/invite/${inviteToken}`)}` : '/login'}
-              className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
+              className="font-semibold text-primary hover:text-primary/80 transition-colors"
             >
               Sign in
             </Link>
