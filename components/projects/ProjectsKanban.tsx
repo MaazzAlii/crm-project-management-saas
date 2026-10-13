@@ -97,9 +97,9 @@ const COLUMNS: ColumnDef[] = [
     id: 'On Hold',
     title: 'On Hold',
     statuses: ['On Hold', 'on_hold', 'Archived', 'archived'],
-    badgeColor: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
-    headerBg: 'border-t-4 border-t-slate-500',
-    dotColor: 'bg-slate-400',
+    badgeColor: 'bg-muted text-muted-foreground border-border',
+    headerBg: 'border-t-4 border-t-muted-foreground',
+    dotColor: 'bg-muted-foreground',
     icon: PauseCircle
   }
 ]
@@ -246,28 +246,28 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
       {/* Top Header & View Switcher */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Kanban className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Kanban className="w-7 h-7 text-primary" />
             Projects Kanban Board
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Visual workflow pipeline. Drag and drop project cards between status columns.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {/* View Toggle Tabs */}
-          <div className="inline-flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+          <div className="inline-flex items-center p-1 bg-muted rounded-lg border border-border">
             <Link
               href="/projects"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-muted-foreground hover:text-foreground transition"
             >
               <List className="w-4 h-4" />
               List View
             </Link>
             <Link
               href="/projects/kanban"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-card text-primary shadow-xs transition"
             >
               <Kanban className="w-4 h-4" />
               Kanban Board
@@ -279,7 +279,7 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
               setNewModalInitialClient('')
               setIsNewModalOpen(true)
             }}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium text-sm transition shadow-sm"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium text-sm transition shadow-sm"
           >
             <Plus className="w-4 h-4" />
             Create Project
@@ -288,17 +288,17 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-card border border-border rounded-xl p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3 flex-1">
           {/* Search */}
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search projects by title or client..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-9 pr-3 py-1.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
             />
           </div>
 
@@ -307,7 +307,7 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
             <select
               value={selectedClient}
               onChange={(e) => setSelectedClient(e.target.value)}
-              className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
             >
               <option value="ALL">All Clients</option>
               {clientsList.map((c) => (
@@ -323,7 +323,7 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
             <select
               value={selectedMember}
               onChange={(e) => setSelectedMember(e.target.value)}
-              className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
             >
               <option value="ALL">All Team Members</option>
               {membersList.map((m) => (
@@ -335,8 +335,8 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
           </div>
         </div>
 
-        <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-          Showing <span className="font-semibold text-slate-900 dark:text-white">{filteredProjects.length}</span> projects ({formatCurrency(totalAmount)})
+        <div className="text-xs text-muted-foreground font-medium">
+          Showing <span className="font-semibold text-foreground">{filteredProjects.length}</span> projects ({formatCurrency(totalAmount)})
         </div>
       </div>
 
@@ -361,16 +361,16 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
                 onDragOver={(e) => handleDragOver(e, col.id)}
                 onDragLeave={() => handleDragLeave(col.id)}
                 onDrop={(e) => handleDrop(e, col.id)}
-                className={`flex-1 min-w-[270px] bg-slate-50/80 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex flex-col transition-all duration-200 ${
+                className={`flex-1 min-w-[270px] bg-muted/30 border border-border rounded-2xl flex flex-col transition-all duration-200 ${
                   col.headerBg
-                } ${isDragTarget ? 'ring-2 ring-indigo-500 bg-indigo-50/20 dark:bg-indigo-950/20' : ''}`}
+                } ${isDragTarget ? 'ring-2 ring-primary bg-primary/10' : ''}`}
               >
                 {/* Column Header */}
-                <div className="p-4 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
+                <div className="p-4 border-b border-border flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className={`w-2.5 h-2.5 rounded-full ${col.dotColor}`} />
-                    <Icon className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    <Icon className="w-4 h-4 text-muted-foreground" />
+                    <h3 className="font-bold text-sm text-foreground">
                       {col.title}
                     </h3>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-semibold border ${col.badgeColor}`}>
@@ -383,7 +383,7 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
                       setNewModalInitialClient('')
                       setIsNewModalOpen(true)
                     }}
-                    className="p-1 hover:bg-slate-200/60 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-md transition"
+                    className="p-1 hover:bg-muted text-muted-foreground rounded-md transition"
                     title={`Add project to ${col.title}`}
                   >
                     <Plus className="w-4 h-4" />
@@ -391,9 +391,9 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
                 </div>
 
                 {/* Column Budget Sub-header */}
-                <div className="px-4 py-2 bg-slate-100/50 dark:bg-slate-800/30 border-b border-slate-200/50 dark:border-slate-800/50 flex justify-between items-center text-[11px] text-slate-500 dark:text-slate-400">
+                <div className="px-4 py-2 bg-muted/40 border-b border-border/50 flex justify-between items-center text-[11px] text-muted-foreground">
                   <span>Column Total:</span>
-                  <span className="font-medium text-slate-700 dark:text-slate-300">
+                  <span className="font-medium text-foreground">
                     {formatCurrency(colTotalAmount) || '$0'}
                   </span>
                 </div>
@@ -401,7 +401,7 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
                 {/* Project Cards List */}
                 <div className="p-3 space-y-3 flex-1 min-h-[350px]">
                   {colProjects.length === 0 ? (
-                    <div className="h-32 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-center text-xs text-slate-400 dark:text-slate-600">
+                    <div className="h-32 border-2 border-dashed border-border rounded-xl flex items-center justify-center text-xs text-muted-foreground">
                       Drag project here
                     </div>
                   ) : (
@@ -413,13 +413,13 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
                           key={project.id}
                           draggable
                           onDragStart={(e) => handleDragStart(e, project.id)}
-                          className={`group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs hover:shadow-md transition-all cursor-grab active:cursor-grabbing relative ${
+                          className={`group bg-card border border-border rounded-xl p-4 shadow-xs hover:shadow-md transition-all cursor-grab active:cursor-grabbing relative ${
                             isDraggingThis ? 'opacity-40 scale-95' : ''
                           }`}
                         >
                           {/* Card Header: Title & Actions */}
                           <div className="flex items-start justify-between gap-2">
-                            <div className="font-semibold text-sm text-slate-900 dark:text-white line-clamp-2">
+                            <div className="font-semibold text-sm text-foreground line-clamp-2">
                               {project.title}
                             </div>
 
@@ -428,24 +428,24 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
                                 onClick={() =>
                                   setActiveMenuId(activeMenuId === project.id ? null : project.id)
                                 }
-                                className="p-1 opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                                className="p-1 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition"
                               >
                                 <MoreVertical className="w-4 h-4" />
                               </button>
 
                               {activeMenuId === project.id && (
-                                <div className="absolute right-0 top-6 z-20 w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg py-1 text-xs">
+                                <div className="absolute right-0 top-6 z-20 w-44 bg-card border border-border rounded-lg shadow-lg py-1 text-xs">
                                   <button
                                     onClick={() => {
                                       setActiveMenuId(null)
                                       setEditingProject(project)
                                     }}
-                                    className="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center gap-2"
+                                    className="w-full text-left px-3 py-1.5 hover:bg-muted text-foreground flex items-center gap-2"
                                   >
                                     <Edit2 className="w-3.5 h-3.5" /> Quick Edit
                                   </button>
-                                  <div className="border-t border-slate-100 dark:border-slate-700 my-1" />
-                                  <div className="px-3 py-1 text-[10px] uppercase font-semibold text-slate-400">
+                                  <div className="border-t border-border my-1" />
+                                  <div className="px-3 py-1 text-[10px] uppercase font-semibold text-muted-foreground">
                                     Move to status
                                   </div>
                                   {COLUMNS.map((c) => (
@@ -455,18 +455,18 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
                                         setActiveMenuId(null)
                                         handleMoveStatus(project.id, c.id)
                                       }}
-                                      className="w-full text-left px-3 py-1 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1.5"
+                                      className="w-full text-left px-3 py-1 text-foreground hover:bg-muted flex items-center gap-1.5"
                                     >
-                                      <MoveRight className="w-3 h-3 text-slate-400" /> {c.title}
+                                      <MoveRight className="w-3 h-3 text-muted-foreground" /> {c.title}
                                     </button>
                                   ))}
-                                  <div className="border-t border-slate-100 dark:border-slate-700 my-1" />
+                                  <div className="border-t border-border my-1" />
                                   <button
                                     onClick={() => {
                                       setActiveMenuId(null)
                                       handleDelete(project.id)
                                     }}
-                                    className="w-full text-left px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-950/30 text-red-600 dark:text-red-400 flex items-center gap-2"
+                                    className="w-full text-left px-3 py-1.5 hover:bg-destructive/10 text-destructive flex items-center gap-2"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" /> Delete
                                   </button>
@@ -477,15 +477,15 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
 
                           {/* Client badge */}
                           {project.client_name && (
-                            <div className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
-                              <Building2 className="w-3 h-3 text-slate-400" />
+                            <div className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-foreground bg-muted px-2 py-0.5 rounded-md">
+                              <Building2 className="w-3 h-3 text-muted-foreground" />
                               <span className="truncate max-w-[180px]">{project.client_name}</span>
                             </div>
                           )}
 
                           {/* Metadata row: Budget & Deadline & Health */}
-                          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                            <div className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300">
+                          <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1 font-medium text-foreground">
                               <DollarSign className="w-3.5 h-3.5 text-amber-500" />
                               <span>{formatCurrency(project.amount, project.currency) || '$0'}</span>
                             </div>
@@ -493,8 +493,8 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
                             <div className="flex items-center gap-2">
                               <ProjectHealthBadge deadline={project.deadline} status={project.status} />
                               {project.deadline && (
-                                <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
-                                  <Calendar className="w-3 h-3 text-slate-400" />
+                                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                                  <Calendar className="w-3 h-3 text-muted-foreground" />
                                   <span>{new Date(project.deadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                                 </div>
                               )}
@@ -503,8 +503,8 @@ export function ProjectsKanban({ initialProjects, clientsList, membersList }: Pr
 
                           {/* Assignee Footer */}
                           {project.assigned_name && (
-                            <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                              <User className="w-3 h-3 text-slate-400" />
+                            <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                              <User className="w-3 h-3 text-muted-foreground" />
                               <span>{project.assigned_name}</span>
                             </div>
                           )}
