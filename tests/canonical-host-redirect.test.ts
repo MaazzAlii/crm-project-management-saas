@@ -29,6 +29,20 @@ describe('Canonical Host 301 Redirect (Prompt 07)', () => {
     expect(res.headers.get('location')).toBe('https://project-manager.calara.agency/login?redirectTo=%2Fdashboard')
   })
 
+  it('redirects when x-forwarded-host has www even if host header is upstream internal', async () => {
+    const req = new NextRequest('https://127.0.0.1:3000/login', {
+      headers: {
+        host: '127.0.0.1:3000',
+        'x-forwarded-host': 'www.project-manager.calara.agency',
+        'x-forwarded-proto': 'https',
+      },
+    })
+
+    const res = await middleware(req)
+    expect(res.status).toBe(301)
+    expect(res.headers.get('location')).toBe('https://project-manager.calara.agency/login')
+  })
+
   it('does not redirect requests on canonical apex host', async () => {
     const req = new NextRequest('https://project-manager.calara.agency/login', {
       headers: {
