@@ -24,7 +24,7 @@ describe('Column Order, Colors, and Won/Lost Flags Tests (Prompt 03)', () => {
   const adminSession: SessionContext = {
     userId: 'usr-admin',
     user: { id: 'usr-admin', email: 'admin@test.com' },
-    organization: { id: 'org-1', name: 'Test Org' },
+    organization: { id: 'org-1', name: 'Test Org', slug: 'test-org', plan_tier: 'starter' },
     orgId: 'org-1',
     userOrganizations: [],
     role: 'owner',
@@ -34,7 +34,7 @@ describe('Column Order, Colors, and Won/Lost Flags Tests (Prompt 03)', () => {
   const memberSession: SessionContext = {
     userId: 'usr-member',
     user: { id: 'usr-member', email: 'member@test.com' },
-    organization: { id: 'org-1', name: 'Test Org' },
+    organization: { id: 'org-1', name: 'Test Org', slug: 'test-org', plan_tier: 'starter' },
     orgId: 'org-1',
     userOrganizations: [],
     role: 'member',

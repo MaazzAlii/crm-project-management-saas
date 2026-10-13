@@ -28,7 +28,7 @@ describe('Pipeline Move Deal & No Duplication Tests (Prompt 01)', () => {
   const mockSession: SessionContext = {
     userId: 'usr-1',
     user: { id: 'usr-1', email: 'admin@test.com' },
-    organization: { id: 'org-1', name: 'Test Org' },
+    organization: { id: 'org-1', name: 'Test Org', slug: 'test-org', plan_tier: 'starter' },
     orgId: 'org-1',
     userOrganizations: [],
     role: 'owner',
