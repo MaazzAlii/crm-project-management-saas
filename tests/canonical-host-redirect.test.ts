@@ -29,10 +29,10 @@ describe('Canonical Host 301 Redirect (Prompt 07)', () => {
     expect(res.headers.get('location')).toBe('https://project-manager.calara.agency/login?redirectTo=%2Fdashboard')
   })
 
-  it('redirects when x-forwarded-host has www even if host header is upstream internal', async () => {
-    const req = new NextRequest('https://127.0.0.1:3000/login', {
+  it('redirects to canonical apex host when X-Forwarded-Host contains allowlisted www domain behind reverse proxy', async () => {
+    const req = new NextRequest('https://project-manager.calara.agency/login', {
       headers: {
-        host: '127.0.0.1:3000',
+        host: 'project-manager.calara.agency',
         'x-forwarded-host': 'www.project-manager.calara.agency',
         'x-forwarded-proto': 'https',
       },
@@ -53,5 +53,33 @@ describe('Canonical Host 301 Redirect (Prompt 07)', () => {
 
     const res = await middleware(req)
     expect(res.status).not.toBe(301)
+  })
+
+  it('does not redirect and returns no Location header when X-Forwarded-Host is not allowlisted (e.g. www.evil.com)', async () => {
+    const req = new NextRequest('https://project-manager.calara.agency/login', {
+      headers: {
+        host: 'project-manager.calara.agency',
+        'x-forwarded-host': 'www.evil.com',
+        'x-forwarded-proto': 'https',
+      },
+    })
+
+    const res = await middleware(req)
+    expect(res.status).not.toBe(301)
+    expect(res.headers.get('location')).toBeNull()
+  })
+
+  it('redirects local upstream request (127.0.0.1:3000) forwarding allowlisted X-Forwarded-Host with port 443 to canonical apex', async () => {
+    const req = new NextRequest('https://127.0.0.1:3000/login', {
+      headers: {
+        host: '127.0.0.1:3000',
+        'x-forwarded-host': 'www.project-manager.calara.agency:443',
+        'x-forwarded-proto': 'https',
+      },
+    })
+
+    const res = await middleware(req)
+    expect(res.status).toBe(301)
+    expect(res.headers.get('location')).toBe('https://project-manager.calara.agency/login')
   })
 })

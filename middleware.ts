@@ -12,18 +12,36 @@ export async function middleware(request: NextRequest) {
     ''
   ).split(',')[0].trim()
 
-  // 0. Canonical Host Enforcement: Redirect www to non-www canonical host (301 Permanent Redirect)
+  // 0. Canonical Host Enforcement: Redirect www to non-www canonical host only for allowed hosts
+  // If host is not allowlisted, ignore www redirect (fall through) to prevent open redirects to untrusted external domains
   if (host.startsWith('www.')) {
-    const canonicalHost = host.replace(/^www\./, '')
-    const url = request.nextUrl.clone()
-    const [hostname, port] = canonicalHost.split(':')
-    url.hostname = hostname
-    url.port = port || ''
-    const forwardedProto = request.headers.get('x-forwarded-proto')
-    if (forwardedProto) {
-      url.protocol = forwardedProto.split(',')[0].trim()
+    const canonicalHost = host.replace(/^www\./, '').toLowerCase()
+    const canonicalHostname = canonicalHost.split(':')[0]
+
+    const defaultHosts = process.env.NODE_ENV === 'production'
+      ? ['project-manager.calara.agency']
+      : ['project-manager.calara.agency', 'localhost', 'localhost:3000', 'localhost:3005', '127.0.0.1', '127.0.0.1:3000']
+
+    const allowedHosts = process.env.ALLOWED_HOSTS
+      ? process.env.ALLOWED_HOSTS.split(',').map((h) => h.trim().toLowerCase())
+      : defaultHosts
+
+    const isAllowedHost = allowedHosts.some(
+      (allowed) => allowed === canonicalHost || allowed === canonicalHostname
+    )
+
+    if (isAllowedHost) {
+      const url = request.nextUrl.clone()
+      const [hostname, port] = canonicalHost.split(':')
+      url.hostname = hostname
+      url.port = port || ''
+      const forwardedProto = request.headers.get('x-forwarded-proto')
+      if (forwardedProto) {
+        url.protocol = forwardedProto.split(',')[0].trim()
+      }
+      return NextResponse.redirect(url, 301)
     }
-    return NextResponse.redirect(url, 301)
+    // If not in allowed hosts, ignore the www redirect to prevent open redirects
   }
 
   const pathname = request.nextUrl.pathname
