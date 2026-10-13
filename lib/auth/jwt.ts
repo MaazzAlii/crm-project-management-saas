@@ -23,6 +23,7 @@ export interface TokenPayload {
   email: string;
   role: 'user' | 'org_admin' | 'super_admin';
   orgId?: string;
+  requirePasswordChange?: boolean;
   iat?: number;
   exp?: number;
 }
@@ -33,6 +34,7 @@ export interface RefreshTokenPayload {
   email?: string;
   role?: 'user' | 'org_admin' | 'super_admin' | string;
   orgId?: string;
+  requirePasswordChange?: boolean;
   iat?: number;
   exp?: number;
 }

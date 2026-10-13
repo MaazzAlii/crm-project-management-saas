@@ -6,6 +6,7 @@ export interface EdgeTokenPayload {
   role?: 'user' | 'org_admin' | 'super_admin' | string
   orgId?: string
   tokenFamily?: string
+  requirePasswordChange?: boolean
   [key: string]: any
 }
 
