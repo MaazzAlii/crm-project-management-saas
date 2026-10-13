@@ -44,6 +44,7 @@ export class UserRepository {
     fullName?: string | null;
     avatarUrl?: string | null;
     role?: UserRole;
+    requirePasswordChange?: boolean;
   }): Promise<User> {
     return await transaction(async (client) => {
       const normalizedEmail = data.email.toLowerCase().trim();
@@ -55,6 +56,7 @@ export class UserRepository {
         role: data.role || 'user',
         is_active: true,
         email_verified: false,
+        require_password_change: data.requirePasswordChange ?? false,
       };
 
       const q = buildInsertQuery('users', insertData);
