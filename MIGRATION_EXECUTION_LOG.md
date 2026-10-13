@@ -2334,6 +2334,67 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - Browser verification: **PASS (100% verified with Playwright Chromium)**
 - **Status**: ✅ Sub-Batch 6E complete. Local commits only (`7404d24`, `60b75d8`). Awaiting review before proceeding to Groups 7–10.
 
+---
+
+### Step: UI-1B Sub-Batch 7A — Clients Directory & List Views Refactor
+- **Timestamp**: 2026-10-14T00:50:00+05:00
+- **Task ID**: `UI-1B-SUB-BATCH-7A-CLIENTS-LIST-VIEW`
+- **Actions Performed**:
+  1. **Scoping & Batch Split Execution**:
+     - Group 7 (`clients/**`) scoped to 20 files and 276 raw color hits, exceeding the <=6 files / <=80 hits limit.
+     - Per batch-splitting rule, divided into 7A (Directory & List Views: 6 files, 73 hits), 7B (Forms & Modals: 6 files, 124 hits), and 7C (Detail & Tabs: 8 files, 79 hits). Sub-Batch 7A executed and halted for review.
+  2. **Section 6 Greps Pre-edit**:
+     - Audited 6 target files: `app/(dashboard)/clients/page.tsx` (1 hit), `components/clients/ClientsList.tsx` (32 hits), `components/clients/ClientFilters.tsx` (20 hits), `components/clients/EmptyState.tsx` (8 hits), `components/clients/CommunicationModeBadge.tsx` (4 hits), `components/clients/TagBadge.tsx` (0 text hits).
+  3. **Semantic Token Refactor (`e49f955`)**:
+     - `app/(dashboard)/clients/page.tsx`: Empty org prompt converted to `border-border bg-card/50 text-muted-foreground`.
+     - `components/clients/ClientsList.tsx`: Title (`text-foreground`), subtitle (`text-muted-foreground`), view toggle (`bg-primary text-primary-foreground shadow-xs` when active, `text-muted-foreground hover:text-foreground` when inactive), Manage Tags button (`border-border bg-card text-foreground hover:bg-muted`), New Client button (`bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm`), table surface (`border-border bg-card/60 shadow-xl`), headers (`border-border bg-muted/60 text-muted-foreground`), table body rows (`divide-border`, zebra striping `bg-card/30` / `bg-muted/20`, hover `hover:bg-muted/50`), client link (`text-foreground hover:text-primary`), company subtitle (`text-muted-foreground`), empty cell dashes (`text-subtle-foreground`), platform badges (`border-border bg-background text-foreground`), status badges (`text-emerald-600 dark:text-emerald-400`, `text-amber-600 dark:text-amber-400`, `text-sky-600 dark:text-sky-400`, `bg-muted border-border text-muted-foreground`), card grid cards (`border-border bg-card/60 p-5 shadow-xs hover:border-border/80`), contact info icons & text (`text-muted-foreground`), delete button (`text-muted-foreground hover:bg-destructive/10 hover:text-destructive`).
+     - `components/clients/ClientFilters.tsx`: Container surface (`border-border bg-card/80 shadow-xs`), search input (`border-border bg-background text-foreground placeholder:text-placeholder focus:border-primary focus:ring-primary`), clear button (`text-muted-foreground hover:text-foreground`), mobile filter toggle (`border-border bg-background text-foreground hover:bg-muted`), filter count badge (`bg-primary text-primary-foreground`), labels (`text-muted-foreground uppercase`), select dropdowns (`border-border bg-background text-foreground focus:border-primary`), reset button (`border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20`), empty indicator (`text-muted-foreground`).
+     - `components/clients/EmptyState.tsx`: Filtered & initial containers (`border-dashed border-border bg-card/40 / bg-card/50`), icons (`text-muted-foreground`, `text-primary bg-primary/10 border-primary/20`), headings (`text-foreground`), subtitles (`text-muted-foreground`), clear button (`border-border bg-muted text-foreground hover:bg-muted/80`), Add First Client button (`bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm`).
+     - `components/clients/CommunicationModeBadge.tsx`: Connected badge (`border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400`), manual upgrade button (`border-border bg-muted/80 text-foreground hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-300`), manual display badge (`border-border bg-muted/80 text-foreground`).
+     - `components/clients/TagBadge.tsx`: Close button hover state converted from `hover:bg-black/20` to `hover:bg-foreground/10`.
+     - Exact 1:1 line ratio maintained: 89 insertions, 89 deletions across all 6 files. Zero layout, spacing, or DOM restructuring.
+  4. **Section 6 Greps Post-edit**:
+     - 0 unjustified hits remaining across all 6 files.
+  5. **Test Suite Commit (`05188ac`)**:
+     - Added `scripts/verify-clients-list-e2e.ts`.
+     - Added `app/(dashboard)/settings/page.tsx` and `app/(dashboard)/settings/profile/page.tsx` to handle `/settings` and `/settings/profile` redirects gracefully for multi-route testing.
+  6. **Browser & Computed Style Verification**:
+     - Real Next.js server on port 3000 verified with Playwright Chromium.
+     - 4 Screenshots captured in artifact directory:
+       * `clients_list_light.png`
+       * `clients_list_dark.png`
+       * `clients_detail_light.png`
+       * `clients_detail_dark.png`
+     - Computed styles measured and verified across both themes:
+       * H1: `rgb(2, 8, 23)` (Light) / `rgb(248, 250, 252)` (Dark), weight 900
+       * Table text: `rgb(2, 8, 23)` (Light) / `rgb(248, 250, 252)` (Dark)
+       * Table headers: `rgb(100, 116, 139)` (Light) / `rgb(148, 163, 184)` (Dark)
+       * Filter form labels: `rgb(100, 116, 139)` (Light) / `rgb(148, 163, 184)` (Dark)
+       * Primary buttons: `rgb(255, 255, 255)` on `rgb(61, 65, 238)` (Light) / `rgb(129, 140, 248)` (Dark)
+       * Connected badge: `rgb(5, 150, 105)` (Light) / `rgb(52, 211, 153)` (Dark)
+     - Multi-route cycle verified across `/clients` (Dark) → `/clients/[id]` (Dark) → `/settings` (Light) → `/settings/profile` (Light) → `/dashboard` (Light), confirming theme persistence across all 5 routes.
+- **Files Modified**:
+  - `app/(dashboard)/clients/page.tsx`
+  - `components/clients/ClientsList.tsx`
+  - `components/clients/ClientFilters.tsx`
+  - `components/clients/EmptyState.tsx`
+  - `components/clients/CommunicationModeBadge.tsx`
+  - `components/clients/TagBadge.tsx`
+  - `app/(dashboard)/settings/page.tsx`
+  - `app/(dashboard)/settings/profile/page.tsx`
+  - `scripts/verify-clients-list-e2e.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `tsc --noEmit` exit code: **0**
+  - Type errors: **0**
+  - `npm test`: **497/497 passed (73/73 test files passed)**
+  - `npm run lint`: **0 new warnings** (4 pre-existing warnings unchanged)
+  - `npm run build`: **Exit code 0 — 140 routes compiled**
+  - Browser verification: **PASS (100% verified with Playwright Chromium)**
+- **Status**: ✅ Sub-Batch 7A complete. Local commits only (`e49f955`, `05188ac`). Awaiting user review before proceeding to Sub-Batch 7B.
+
+
 
 
 
