@@ -5,6 +5,7 @@ import { generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt';
 import { setRefreshTokenCookie, getDefaultSessionConfig, getRefreshSessionConfig } from '@/lib/auth/session';
 import { query } from '@/lib/db';
 import { ensureAutoMigrated } from '@/lib/db/auto-migrate';
+import { userRepo } from '@/lib/db/repositories/user-repo';
 import { checkLoginRateLimit, resetLoginRateLimit, getClientIp } from '@/lib/security/rate-limit';
 
 export async function POST(request: NextRequest) {
@@ -82,13 +83,12 @@ export async function POST(request: NextRequest) {
         }
 
         // Auto-provision user account with temporary password & require_password_change = true
-        const newUserRes = await query(
-          `INSERT INTO users (email, password_hash, role, is_active, email_verified, require_password_change)
-           VALUES ($1, $2, 'user', true, false, true)
-           RETURNING id, email, password_hash, role, require_password_change`,
-          [invite.email.toLowerCase().trim(), invite.temp_password_hash]
-        );
-        user = newUserRes.rows[0];
+        user = await userRepo.create({
+          email: invite.email.toLowerCase().trim(),
+          passwordHash: invite.temp_password_hash,
+          role: 'user',
+          requirePasswordChange: true,
+        });
 
         // Join the invited organization
         await query(
