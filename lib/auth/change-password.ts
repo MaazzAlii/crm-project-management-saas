@@ -31,9 +31,9 @@ export async function changePassword(
   // Hash new password
   const newHash = await hashPassword(newPassword);
 
-  // Update in database
+  // Update in database and clear require_password_change flag
   await queryOne(
-    'UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2',
+    'UPDATE users SET password_hash = $1, require_password_change = false, updated_at = NOW() WHERE id = $2',
     [newHash, userId]
   );
 
