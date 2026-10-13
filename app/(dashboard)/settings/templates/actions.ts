@@ -176,6 +176,11 @@ export async function deleteProjectTemplateAction(templateId: string) {
       return { error: 'Unauthorized.' }
     }
 
+    const canDelete = session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin
+    if (!canDelete) {
+      return { error: 'Forbidden. Only organization owners and admins can delete project templates.' }
+    }
+
     await query(
       `DELETE FROM project_templates WHERE id = $1 AND organization_id = $2`,
       [templateId, session.organization.id]
