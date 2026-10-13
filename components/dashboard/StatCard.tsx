@@ -21,7 +21,7 @@ export function StatCard({
 }: StatCardProps) {
   if (loading) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/80 p-5 shadow-sm dark:shadow-xl animate-pulse">
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm dark:shadow-xl animate-pulse">
         <div className="flex items-center justify-between">
           <div className="h-4 w-24 rounded bg-slate-200 dark:bg-slate-800" />
           <div className="h-9 w-9 rounded-xl bg-slate-200 dark:bg-slate-800" />
@@ -34,14 +34,14 @@ export function StatCard({
 
   const variantStyles = {
     default: {
-      border: 'border-slate-200 dark:border-slate-800/80',
-      iconBg: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800/80 dark:text-slate-300 dark:border-slate-700/50',
-      text: 'text-slate-900 dark:text-white',
+      border: 'border-border',
+      iconBg: 'bg-slate-100 text-foreground border-slate-200 dark:bg-slate-800/80 dark:border-slate-700/50',
+      text: 'text-foreground',
     },
     accent: {
       border: 'border-sky-300 dark:border-sky-500/30',
       iconBg: 'bg-sky-50 text-sky-600 border-sky-200 dark:bg-sky-500/15 dark:text-sky-400 dark:border-sky-500/30',
-      text: 'text-slate-900 dark:text-white',
+      text: 'text-foreground',
     },
     success: {
       border: 'border-emerald-300 dark:border-emerald-500/30',
@@ -64,10 +64,10 @@ export function StatCard({
 
   return (
     <div
-      className={`flex flex-col justify-between rounded-2xl border ${currentVariant.border} bg-white dark:bg-slate-900/90 p-5 shadow-sm dark:shadow-xl transition hover:border-slate-300 dark:hover:border-slate-700`}
+      className={`flex flex-col justify-between rounded-2xl border ${currentVariant.border} bg-card p-5 shadow-sm dark:shadow-xl transition hover:border-slate-300 dark:hover:border-slate-700`}
     >
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {title}
         </span>
         <div className={`flex h-9 w-9 items-center justify-center rounded-xl border ${currentVariant.iconBg}`}>
@@ -80,12 +80,12 @@ export function StatCard({
           {value}
         </div>
         {subtitle && (
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
         )}
       </div>
 
       {trend && (
-        <div className="mt-3 border-t border-slate-100 dark:border-slate-800/80 pt-2 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+        <div className="mt-3 border-t border-border pt-2 text-[11px] font-medium text-muted-foreground">
           {trend}
         </div>
       )}

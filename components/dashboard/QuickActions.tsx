@@ -30,8 +30,8 @@ export function QuickActions() {
   ]
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl">
-      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm dark:shadow-xl">
+      <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">
         Quick Actions
       </h3>
 
@@ -39,6 +39,7 @@ export function QuickActions() {
         {actions.map((action) => {
           const Icon = action.icon
           return (
+            /* intentional: primary quick-action buttons use text-white on branded gradients */
             <Link
               key={action.label}
               href={action.href}

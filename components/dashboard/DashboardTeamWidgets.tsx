@@ -12,7 +12,6 @@ import {
   AlertTriangle,
   Clock,
   AlertCircle,
-  Sparkles,
 } from 'lucide-react'
 
 export interface RecentMember {
@@ -63,17 +62,17 @@ export function DashboardTeamWidgets({
       {/* 1. Team Card (Prompt 44) */}
       <div
         data-testid="dashboard-team-card"
-        className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl flex flex-col justify-between space-y-4"
+        className="rounded-2xl border border-border bg-card p-5 shadow-sm dark:shadow-xl flex flex-col justify-between space-y-4"
       >
         <div className="space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-sky-400" />
-              <h3 className="text-sm font-bold text-white">Team Members</h3>
+              <Users className="h-4 w-4 text-sky-500 dark:text-sky-400" />
+              <h3 className="text-sm font-bold text-foreground">Team Members</h3>
             </div>
             <span
               data-testid="dashboard-seats-capacity"
-              className="font-mono text-xs text-sky-400 font-bold bg-sky-500/10 px-2.5 py-0.5 rounded-full border border-sky-500/20"
+              className="font-mono text-xs text-sky-600 dark:text-sky-400 font-bold bg-sky-500/10 px-2.5 py-0.5 rounded-full border border-sky-500/20"
             >
               {seatsUsed} of {seatsMax} seats used
             </span>
@@ -83,15 +82,15 @@ export function DashboardTeamWidgets({
           {isFreePlan && isSeatLimitReached && (
             <div
               data-testid="seat-limit-warning"
-              className="flex items-center justify-between gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-300"
+              className="flex items-center justify-between gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-600 dark:text-amber-300"
             >
               <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400" />
                 <span>Seat limit reached. Upgrade to add more.</span>
               </div>
               <Link
                 href="/settings/billing"
-                className="font-bold text-amber-200 hover:underline shrink-0"
+                className="font-bold text-amber-700 dark:text-amber-200 hover:underline shrink-0"
               >
                 Upgrade
               </Link>
@@ -100,11 +99,11 @@ export function DashboardTeamWidgets({
 
           {/* 3 Most Recent Members */}
           <div className="space-y-2 pt-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Recent Members
             </span>
             {recentMembers.length === 0 ? (
-              <p className="text-xs text-slate-500 py-2">No team members joined yet.</p>
+              <p className="text-xs text-muted-foreground py-2">No team members joined yet.</p>
             ) : (
               <div className="space-y-2">
                 {recentMembers.map((member) => {
@@ -112,26 +111,27 @@ export function DashboardTeamWidgets({
                   return (
                     <div
                       key={member.id}
-                      className="flex items-center justify-between rounded-xl border border-slate-800/80 bg-slate-950/60 p-2.5 text-xs"
+                      className="flex items-center justify-between rounded-xl border border-border/80 bg-slate-50/80 dark:bg-slate-950/60 p-2.5 text-xs"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-800 font-bold text-white text-[11px] border border-slate-700">
+                        {/* intentional: avatar badge uses text-white on dark bg in dark mode, text-foreground in light mode */}
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 font-bold text-foreground dark:text-slate-100 text-[11px] border border-slate-300 dark:border-slate-700">
                           {member.fullName
                             ? member.fullName.charAt(0).toUpperCase()
                             : member.email.charAt(0).toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-semibold text-white truncate text-xs">
+                          <p className="font-semibold text-foreground truncate text-xs">
                             {member.fullName || member.email}
                           </p>
-                          <p className="font-mono text-[10px] text-slate-400 truncate">
+                          <p className="font-mono text-[10px] text-muted-foreground truncate">
                             {member.email}
                           </p>
                         </div>
                       </div>
 
-                      <span className="inline-flex items-center gap-1 rounded bg-slate-800/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-300 border border-slate-700/80 shrink-0">
-                        <RoleIcon className="h-3 w-3 text-sky-400" />
+                      <span className="inline-flex items-center gap-1 rounded bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-slate-300 border border-slate-200 dark:border-slate-700/80 shrink-0">
+                        <RoleIcon className="h-3 w-3 text-sky-500 dark:text-sky-400" />
                         {member.role}
                       </span>
                     </div>
@@ -143,7 +143,8 @@ export function DashboardTeamWidgets({
         </div>
 
         {/* Invite Teammate button */}
-        <div className="pt-2 border-t border-slate-800">
+        <div className="pt-2 border-t border-border">
+          {/* intentional: primary action button uses text-white on branded bg-sky-600 */}
           <Link
             href="/settings/team?action=invite"
             className="w-full flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-sky-500 transition shadow-md shadow-sky-600/20"
@@ -157,17 +158,17 @@ export function DashboardTeamWidgets({
       {/* 2. Pending Invitations Card (Prompt 44) */}
       <div
         data-testid="dashboard-invitations-card"
-        className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl flex flex-col justify-between space-y-4"
+        className="rounded-2xl border border-border bg-card p-5 shadow-sm dark:shadow-xl flex flex-col justify-between space-y-4"
       >
         <div className="space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-sky-400" />
-              <h3 className="text-sm font-bold text-white">Pending Invitations</h3>
+              <Mail className="h-4 w-4 text-sky-500 dark:text-sky-400" />
+              <h3 className="text-sm font-bold text-foreground">Pending Invitations</h3>
             </div>
             <span
               data-testid="dashboard-pending-count"
-              className="font-mono text-xs text-white font-bold bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-700"
+              className="font-mono text-xs text-foreground font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700"
             >
               {pendingCount} pending
             </span>
@@ -175,13 +176,13 @@ export function DashboardTeamWidgets({
 
           {/* 3 Most Recent Pending Invites */}
           <div className="space-y-2 pt-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Recent Dispatches
             </span>
             {recentInvitations.length === 0 ? (
-              <div className="py-6 text-center text-xs text-slate-400">
-                <p className="font-semibold text-slate-300">No pending invitations.</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">
+              <div className="py-6 text-center text-xs text-muted-foreground">
+                <p className="font-semibold text-foreground">No pending invitations.</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
                   All invited teammates have accepted or joined.
                 </p>
               </div>
@@ -192,28 +193,28 @@ export function DashboardTeamWidgets({
                   return (
                     <div
                       key={inv.id}
-                      className="flex items-center justify-between rounded-xl border border-slate-800/80 bg-slate-950/60 p-2.5 text-xs"
+                      className="flex items-center justify-between rounded-xl border border-border/80 bg-slate-50/80 dark:bg-slate-950/60 p-2.5 text-xs"
                     >
                       <div className="min-w-0 pr-2">
-                        <p className="font-mono font-medium text-white text-xs truncate">
+                        <p className="font-mono font-medium text-foreground text-xs truncate">
                           {inv.email}
                         </p>
-                        <p className="text-[10px] text-slate-400 capitalize">Role: {inv.role}</p>
+                        <p className="text-[10px] text-muted-foreground capitalize">Role: {inv.role}</p>
                       </div>
 
                       <div className="shrink-0">
                         {inv.sendFailed ? (
-                          <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose-400 border border-rose-500/30">
+                          <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose-500 dark:text-rose-400 border border-rose-500/30">
                             <AlertCircle className="h-3 w-3" />
                             Send failed
                           </span>
                         ) : isExpired ? (
-                          <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-400 border border-amber-500/30">
+                          <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-500 dark:text-amber-400 border border-amber-500/30">
                             <Clock className="h-3 w-3" />
                             Expired
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky-400 border border-sky-500/30">
+                          <span className="inline-flex items-center gap-1 rounded bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky-500 dark:text-sky-400 border border-sky-500/30">
                             <Clock className="h-3 w-3" />
                             Pending
                           </span>
@@ -228,10 +229,10 @@ export function DashboardTeamWidgets({
         </div>
 
         {/* Link to Team Settings page */}
-        <div className="pt-2 border-t border-slate-800">
+        <div className="pt-2 border-t border-border">
           <Link
             href="/settings/team"
-            className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-800/80 px-4 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-border bg-slate-100 dark:bg-slate-800/80 px-4 py-2.5 text-xs font-bold text-foreground hover:bg-slate-200 dark:hover:bg-slate-800 transition"
           >
             <span>Manage all in Team Settings</span>
             <ArrowRight className="h-4 w-4" />
