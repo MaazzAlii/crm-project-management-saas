@@ -2394,13 +2394,67 @@ Comprehensive audit log tracking all actions, file changes, reasoning, and valid
   - Browser verification: **PASS (100% verified with Playwright Chromium)**
 - **Status**: ✅ Sub-Batch 7A complete. Local commits only (`e49f955`, `05188ac`). Awaiting user review before proceeding to Sub-Batch 7B.
 
+---
 
-
-
-
-
-
-
-
-
-
+### Step: UI-1B Sub-Batch 9A — Super Admin Platform Shell, Dashboard & Organizations Refactor
+- **Timestamp**: 2026-10-14T11:25:00+05:00
+- **Task ID**: `UI-1B-SUB-BATCH-9A-SUPER-ADMIN-SHELL-DASHBOARD`
+- **Actions Performed**:
+  1. **Scoping & Batch Split Execution**:
+     - Group 9 (`super-admin/**`) scoped to 15 files and 204 raw color hits; Group 10 (`client-portal/**`) scoped to 11 files and 181 hits.
+     - Because both groups exceed the threshold of <=6 files / <=80 hits, the batch-splitting protocol was triggered: split Group 9 into 9A and 9B, execute Sub-Batch 9A (the first half: 7 files, 65 raw hits), and stop to await review.
+  2. **Section 6 Greps Pre-edit**:
+     - `app/super-admin/layout.tsx`: 2 hits (`bg-slate-950 text-slate-100`)
+     - `app/super-admin/dashboard/page.tsx`: 4 hits (`border-slate-800`, `text-white`, `text-purple-300`, `text-slate-400`, `text-slate-500`)
+     - `app/super-admin/organizations/page.tsx`: 4 hits (`border-slate-800`, `text-white`, `text-purple-300`, `text-slate-400`)
+     - `components/super-admin/super-admin-nav.tsx`: 10 hits (`border-purple-900/40 bg-slate-950/95 text-white`, brand gradient, `text-purple-300`, `text-slate-400`, `hover:bg-slate-900`, `text-slate-400 font-mono bg-slate-900 border-slate-800`, `border-slate-800 bg-slate-900/80 text-slate-300`)
+     - `components/super-admin/platform-metrics-cards.tsx`: 10 hits (`border-slate-800 bg-slate-900/90 text-slate-400`, `text-white`, badge colors)
+     - `components/super-admin/org-list-filter.tsx`: 11 hits (`border-slate-800 bg-slate-900/90 text-slate-400`, inputs `border-slate-800 bg-slate-950 text-white placeholder-slate-500`)
+     - `components/super-admin/org-list-table.tsx`: 24 hits (`border-slate-800 bg-slate-900/90`, thead `border-slate-800 bg-slate-950/60 text-slate-400`, tbody `divide-slate-800/60 text-slate-300`, link `text-white`, slug `text-slate-500`, tier badges, action button)
+  3. **Semantic Token Refactor**:
+     - `app/super-admin/layout.tsx`: Converted root wrapper to `min-h-screen bg-background text-foreground font-sans selection:bg-primary/20 selection:text-primary`.
+     - `app/super-admin/dashboard/page.tsx`: Banner border to `border-border`, heading to `text-foreground`, badge to `text-purple-600 dark:text-purple-300 border-purple-500/20`, subtitle & sync info to `text-muted-foreground`.
+     - `app/super-admin/organizations/page.tsx`: Banner border to `border-border`, heading to `text-foreground`, badge to `text-purple-600 dark:text-purple-300 border-purple-500/20`, subtitle to `text-muted-foreground`.
+     - `components/super-admin/super-admin-nav.tsx`: Nav header to `border-border bg-card/95 text-foreground`, brand title to `text-foreground`, badge to `bg-purple-500/10 text-purple-600 dark:text-purple-300 border-purple-500/30`, active tab to `bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30 shadow-xs`, inactive tabs to `text-muted-foreground hover:bg-muted hover:text-foreground`, user email pill to `text-muted-foreground font-mono bg-muted/50 border-border`, exit button to `border-border bg-muted/50 text-foreground hover:bg-muted`. Added intentional comment for brand icon `text-white`.
+     - `components/super-admin/platform-metrics-cards.tsx`: Metric card containers to `border-border bg-card shadow-xs hover:border-border/80`, card titles to `text-muted-foreground`, metric numbers to `text-foreground font-mono`, subtitles to `text-muted-foreground`, badges to theme-aware `text-emerald-600 dark:text-emerald-400`, `text-purple-600 dark:text-purple-400`, `text-blue-600 dark:text-blue-400`, `text-amber-600 dark:text-amber-400`, `text-cyan-600 dark:text-cyan-400`. Added intentional comment for icon `text-white` on brand gradient.
+     - `components/super-admin/org-list-filter.tsx`: Surface to `border-border bg-card shadow-xs`, search input to `border-border bg-background text-foreground placeholder:text-placeholder focus:border-primary`, select dropdowns to `border-border bg-background text-foreground focus:border-primary`, icons & labels to `text-muted-foreground`.
+     - `components/super-admin/org-list-table.tsx`: Surface to `border-border bg-card shadow-xs`, empty text to `text-muted-foreground`, table header to `border-border bg-muted/50 text-muted-foreground`, rows to `divide-border text-foreground hover:bg-muted/50`, org link to `text-foreground hover:text-primary`, org slug to `text-subtle-foreground`, tier badges to `text-purple-600 dark:text-purple-300`, `text-blue-600 dark:text-blue-300`, `text-emerald-600 dark:text-emerald-300`, default to `bg-muted text-muted-foreground border-border`, status badges to theme-aware contrast pairs, member count to `text-foreground font-mono`, created date to `text-muted-foreground`, action button to `border-border bg-background text-foreground hover:bg-muted`.
+     - Exact 1:1 line ratio maintained: 54 insertions, 54 deletions across all 7 files. Zero layout, spacing, or DOM restructuring.
+  4. **Section 6 Greps Post-edit**:
+     - 0 unjustified hits remaining across all 7 files (2 justified hits retained: brand icon white on gradient in `super-admin-nav.tsx` and `platform-metrics-cards.tsx`).
+  5. **Test Suite Implementation**:
+     - Added `scripts/verify-super-admin-e2e.ts`.
+  6. **Browser & Computed Style Verification**:
+     - Next.js standalone server booted on port 3000 with Playwright Chromium.
+     - 4 Screenshots captured in artifact directory:
+       * `super_admin_dashboard_light.png`
+       * `super_admin_dashboard_dark.png`
+       * `super_admin_organizations_light.png`
+       * `super_admin_organizations_dark.png`
+     - Computed styles measured and verified across both themes:
+       * H1: `rgb(2, 8, 23)` (Light) / `rgb(248, 250, 252)` (Dark), weight 800
+       * Table & card text: `rgb(2, 8, 23)` (Light) / `rgb(248, 250, 252)` (Dark)
+       * Table headers & labels: `rgb(100, 116, 139)` (Light) / `rgb(148, 163, 184)` (Dark)
+       * Input backgrounds & borders: `rgb(255, 255, 255)` / `rgb(226, 232, 240)` (Light) vs `rgb(30, 41, 59)` (Dark)
+       * Nav background: `rgba(255, 255, 255, 0.8)` (Light) / `rgba(15, 23, 42, 0.8)` (Dark)
+       * Badges: `rgb(5, 150, 105)` (Light) / `rgb(52, 211, 153)` (Dark)
+     - Multi-route cycle verified across 5 routes: `/super-admin/dashboard` → `/super-admin/organizations` → `/dashboard` → `/settings` → `/super-admin/dashboard` with persistent theme state.
+- **Files Modified**:
+  - `app/super-admin/layout.tsx`
+  - `app/super-admin/dashboard/page.tsx`
+  - `app/super-admin/organizations/page.tsx`
+  - `components/super-admin/super-admin-nav.tsx`
+  - `components/super-admin/platform-metrics-cards.tsx`
+  - `components/super-admin/org-list-filter.tsx`
+  - `components/super-admin/org-list-table.tsx`
+  - `scripts/verify-super-admin-e2e.ts`
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `tsc --noEmit` exit code: **0**
+  - Type errors: **0**
+  - `npm test`: **497/497 passed (73/73 test files passed)**
+  - `npm run lint`: **0 new warnings** (4 pre-existing warnings unchanged)
+  - `npm run build`: **Exit code 0 — 140 routes compiled**
+  - Browser verification: **PASS (100% verified with Playwright Chromium)**
+- **Status**: ✅ Sub-Batch 9A complete. Local commits only. Awaiting user review before proceeding to Sub-Batch 9B.

@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791919427.576637,
-    "seen": 1791919453.3586142,
-    "ast_hash": "148e35681349ac61c9d5cba54427fdf2",
+    "mtime": 1791921048.170903,
+    "seen": 1791921101.8574793,
+    "ast_hash": "124e4ae40d59de73324b0578bf55d56d",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1320,9 +1320,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/clients/page.tsx": {
-    "mtime": 1791642532.7355297,
-    "seen": 1791772540.8368735,
-    "ast_hash": "2cc5eb8548ecbf800cb805d50796bf18",
+    "mtime": 1791920118.8657963,
+    "seen": 1791921101.854382,
+    "ast_hash": "d6597e2a1c486c0babe55db9591881c3",
     "semantic_hash": ""
   },
   "app/(dashboard)/clients/tags/actions.ts": {
@@ -2220,9 +2220,9 @@
     "semantic_hash": ""
   },
   "components/clients/ClientFilters.tsx": {
-    "mtime": 1789721627.6021287,
-    "seen": 1791772540.8371341,
-    "ast_hash": "7711aa2db435bc97efe0e5e09e9ed0de",
+    "mtime": 1791920208.9430292,
+    "seen": 1791921101.8553338,
+    "ast_hash": "a9ade6525df60e2067efbc9abd69723e",
     "semantic_hash": ""
   },
   "components/clients/ClientForm.tsx": {
@@ -2244,15 +2244,15 @@
     "semantic_hash": ""
   },
   "components/clients/ClientsList.tsx": {
-    "mtime": 1789721627.6040738,
-    "seen": 1791772540.8371394,
-    "ast_hash": "81e00d64de942887d6148e656e07d126",
+    "mtime": 1791920289.9434855,
+    "seen": 1791921101.8553534,
+    "ast_hash": "896bcef81d0796b62361b42815408ee8",
     "semantic_hash": ""
   },
   "components/clients/CommunicationModeBadge.tsx": {
-    "mtime": 1789728401.590078,
-    "seen": 1791772540.8371408,
-    "ast_hash": "3f0bace5c9d1c94c6d37f68072a90429",
+    "mtime": 1791920138.1244135,
+    "seen": 1791921101.8553576,
+    "ast_hash": "1b2f10456fb00421990f13b8aa51511a",
     "semantic_hash": ""
   },
   "components/clients/CommunicationModeSwitchModal.tsx": {
@@ -2262,15 +2262,15 @@
     "semantic_hash": ""
   },
   "components/clients/EmptyState.tsx": {
-    "mtime": 1789721627.605074,
-    "seen": 1791772540.8371437,
-    "ast_hash": "2f5ebd745efd2b1c5b8595d0100de4ad",
+    "mtime": 1791920170.1667829,
+    "seen": 1791921101.855367,
+    "ast_hash": "6930eec93bde7ac3d96f1ef4cefcb708",
     "semantic_hash": ""
   },
   "components/clients/TagBadge.tsx": {
-    "mtime": 1790074917.1527567,
-    "seen": 1791772540.8371449,
-    "ast_hash": "0f68a7446b9421a7fcfefc536f96fd98",
+    "mtime": 1791920145.1132753,
+    "seen": 1791921101.8553712,
+    "ast_hash": "23bbeb38110b1b0edd93e1e6a9972c45",
     "semantic_hash": ""
   },
   "components/clients/TagManagerModal.tsx": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791919414.8050387,
-    "seen": 1791919453.3586233,
-    "ast_hash": "42bf64bd87ca73bd62b231f696bcd07b",
+    "mtime": 1791921027.1833253,
+    "seen": 1791921101.8575044,
+    "ast_hash": "939588aa3818eab7611891f2fbd23ca2",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7179,6 +7179,24 @@
     "mtime": 1791902400.9206595,
     "seen": 1791919453.3583567,
     "ast_hash": "b9066a3e552d68a256364e968eca3165",
+    "semantic_hash": ""
+  },
+  "app/(dashboard)/settings/page.tsx": {
+    "mtime": 1791920421.7730484,
+    "seen": 1791921101.8545752,
+    "ast_hash": "d3c166b721f15730bb901133b32f9778",
+    "semantic_hash": ""
+  },
+  "app/(dashboard)/settings/profile/page.tsx": {
+    "mtime": 1791920429.0249166,
+    "seen": 1791921101.8545814,
+    "ast_hash": "15d3b77ad3a9a952f0ca42c240e90419",
+    "semantic_hash": ""
+  },
+  "scripts/verify-clients-list-e2e.ts": {
+    "mtime": 1791920784.9935088,
+    "seen": 1791921101.8567374,
+    "ast_hash": "a032084454f0ead207d615ae1f03b610",
     "semantic_hash": ""
   }
 }

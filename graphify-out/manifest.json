@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791921048.170903,
-    "seen": 1791921101.8574793,
-    "ast_hash": "124e4ae40d59de73324b0578bf55d56d",
+    "mtime": 1791959182.150678,
+    "seen": 1791959202.8521793,
+    "ast_hash": "038686d74efdd32094c37cff4b27c40a",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1134,15 +1134,15 @@
     "semantic_hash": ""
   },
   "app/super-admin/dashboard/page.tsx": {
-    "mtime": 1791353727.8754973,
-    "seen": 1791772540.8370965,
-    "ast_hash": "4599e0679a55cf7f0f5d3eb60e8106a5",
+    "mtime": 1791957904.1206734,
+    "seen": 1791959202.8515687,
+    "ast_hash": "8d842d3329a62283494969215d140f2a",
     "semantic_hash": ""
   },
   "app/super-admin/layout.tsx": {
-    "mtime": 1791353671.8428092,
-    "seen": 1791772540.837098,
-    "ast_hash": "fa09e41cbfa4875d55ac29a670984651",
+    "mtime": 1791957886.8912578,
+    "seen": 1791959202.8515704,
+    "ast_hash": "4c7fcc9ed7938ac6dd78c74ee67fb7cc",
     "semantic_hash": ""
   },
   "app/super-admin/organizations/[id]/page.tsx": {
@@ -1152,21 +1152,21 @@
     "semantic_hash": ""
   },
   "app/super-admin/organizations/page.tsx": {
-    "mtime": 1791353800.8573542,
-    "seen": 1791772540.8371007,
-    "ast_hash": "5a1ed3557d0cc08fe5cfcd04ae9aca42",
+    "mtime": 1791958271.058193,
+    "seen": 1791959202.851573,
+    "ast_hash": "c85f03cc68c2e22c12ba08a71cc8251d",
     "semantic_hash": ""
   },
   "components/super-admin/org-list-filter.tsx": {
-    "mtime": 1789721627.6160743,
-    "seen": 1791772540.8372464,
-    "ast_hash": "327e0e4cf3c5d3e1f03673f5c9bd4546",
+    "mtime": 1791957988.33579,
+    "seen": 1791959202.851708,
+    "ast_hash": "d87686f8e128eda7eaa48f7ecf2d6d78",
     "semantic_hash": ""
   },
   "components/super-admin/org-list-table.tsx": {
-    "mtime": 1789721627.6160743,
-    "seen": 1791772540.8372483,
-    "ast_hash": "10a8a50e85c79cb09cf239b53d802918",
+    "mtime": 1791958021.7481334,
+    "seen": 1791959202.8517091,
+    "ast_hash": "ca3e12076c48f1ba7e44dc7ec6ce650c",
     "semantic_hash": ""
   },
   "components/super-admin/org-management-actions.tsx": {
@@ -1176,9 +1176,9 @@
     "semantic_hash": ""
   },
   "components/super-admin/platform-metrics-cards.tsx": {
-    "mtime": 1789721627.6172993,
-    "seen": 1791772540.8372514,
-    "ast_hash": "0ce01009fcdd21ac5b9a72ee7476d441",
+    "mtime": 1791957964.457895,
+    "seen": 1791959202.8517115,
+    "ast_hash": "0ce54d4165fdb8c9346e439a8b6acfc7",
     "semantic_hash": ""
   },
   "components/super-admin/recent-activity-tables.tsx": {
@@ -1188,9 +1188,9 @@
     "semantic_hash": ""
   },
   "components/super-admin/super-admin-nav.tsx": {
-    "mtime": 1791893449.7994769,
-    "seen": 1791894010.8368778,
-    "ast_hash": "3752ea6d7155750fa8021bdb3c8e6a93",
+    "mtime": 1791957935.5588048,
+    "seen": 1791959202.8517165,
+    "ast_hash": "c391ca5a6ec159c5937e8bccafdb406f",
     "semantic_hash": ""
   },
   "lib/audit/logger.ts": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791921027.1833253,
-    "seen": 1791921101.8575044,
-    "ast_hash": "939588aa3818eab7611891f2fbd23ca2",
+    "mtime": 1791959154.3839045,
+    "seen": 1791959202.8521855,
+    "ast_hash": "3518a6716a26845d23820f9bb1b42d56",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7197,6 +7197,12 @@
     "mtime": 1791920784.9935088,
     "seen": 1791921101.8567374,
     "ast_hash": "a032084454f0ead207d615ae1f03b610",
+    "semantic_hash": ""
+  },
+  "scripts/verify-super-admin-e2e.ts": {
+    "mtime": 1791958928.6090384,
+    "seen": 1791959202.8519986,
+    "ast_hash": "e3c227fcfb444f30a1a850fa700e09f2",
     "semantic_hash": ""
   }
 }
