@@ -21,6 +21,9 @@ export async function GET(request: NextRequest) {
     const result = await getInvitationAcceptInfo(token);
 
     if (!result.success) {
+      if (result.error === 'expired') {
+        return apiError(result.message, 410, 'EXPIRED');
+      }
       return apiError(result.message, 400, 'INVALID_OR_EXPIRED');
     }
 

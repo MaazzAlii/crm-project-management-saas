@@ -60,8 +60,26 @@ export async function POST(
     // Never return token or token_hash in API response
     const { token_hash, ...safeInvitation } = result.invitation as any;
 
+    const url = new URL(request.url);
+    const returnLinkQuery = url.searchParams.get('returnLink') === 'true';
+    let returnLinkBody = false;
+    try {
+      const cloned = request.clone();
+      const body = await cloned.json();
+      if (body?.returnLink) returnLinkBody = true;
+    } catch {
+      // Body may be empty
+    }
+    const wantsLink = returnLinkQuery || returnLinkBody;
+
+    const baseUrl = (process.env.APP_PUBLIC_URL || 'http://localhost:3000').replace(/\/$/, '');
+    const inviteLink = result.rawToken ? `${baseUrl}/invite/${result.rawToken}` : undefined;
+
     return apiSuccess({
       invitation: safeInvitation,
+      sendFailed: result.sendFailed || false,
+      warning: result.warning,
+      ...(wantsLink && inviteLink ? { inviteLink } : {}),
     });
   } catch (error) {
     return handleApiError(error);

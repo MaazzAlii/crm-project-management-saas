@@ -566,7 +566,7 @@ export interface AcceptInvitationWrongAccount {
 
 export interface AcceptInvitationGeneralError {
   success: false;
-  error: 'invalid_or_expired' | 'revoked' | 'already_accepted' | 'seat_limit_reached';
+  error: 'invalid_or_expired' | 'expired' | 'revoked' | 'already_accepted' | 'seat_limit_reached';
   status: number;
   message: string;
 }
@@ -636,9 +636,9 @@ export async function acceptInvitation(
   if (new Date(invite.expires_at) <= now || invite.status === 'expired') {
     return {
       success: false,
-      error: 'invalid_or_expired',
-      status: 400,
-      message: 'This invitation is invalid or has expired',
+      error: 'expired',
+      status: 410,
+      message: 'This invitation has expired. Invitations are valid for 7 days. Please request a new invitation from your workspace administrator.',
     };
   }
 
@@ -818,8 +818,8 @@ export interface InvitationAcceptInfoSuccess {
 
 export interface InvitationAcceptInfoError {
   success: false;
-  error: 'invalid_or_expired';
-  status: 400;
+  error: 'invalid_or_expired' | 'expired';
+  status: number;
   message: string;
 }
 
@@ -856,15 +856,24 @@ export async function getInvitationAcceptInfo(
     };
   }
 
-  // Check if invitation is expired, revoked, or accepted
+  // Check if invitation is expired (7 days)
+  if (invite.status === 'expired' || new Date(invite.expires_at) <= new Date()) {
+    return {
+      success: false,
+      error: 'expired',
+      status: 410,
+      message: 'This invitation has expired. Invitations are valid for 7 days. Please request a new invitation from your workspace administrator.',
+    };
+  }
+
+  // Check if invitation is revoked, accepted, or declined
   if (
     invite.status === 'revoked' ||
     invite.revoked_at ||
     invite.status === 'accepted' ||
     invite.accepted_at ||
     invite.status === 'declined' ||
-    invite.declined_at ||
-    new Date(invite.expires_at) <= new Date()
+    invite.declined_at
   ) {
     return {
       success: false,

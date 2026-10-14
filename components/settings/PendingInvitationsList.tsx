@@ -48,10 +48,21 @@ export function PendingInvitationsList({
   const [invitationToRevoke, setInvitationToRevoke] = useState<PendingInvitation | null>(null)
   const [revoking, setRevoking] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [copyingId, setCopyingId] = useState<string | null>(null)
+  const [copiedLinks, setCopiedLinks] = useState<Record<string, string>>({})
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const canManage =
     currentUserRole === 'owner' || currentUserRole === 'admin' || isSuperAdmin
+
+  useEffect(() => {
+    if (recentInviteLink?.id && recentInviteLink.link) {
+      setCopiedLinks((prev) => ({
+        ...prev,
+        [recentInviteLink.id]: recentInviteLink.link,
+      }))
+    }
+  }, [recentInviteLink])
 
   const fetchInvitations = useCallback(async () => {
     try {
@@ -80,9 +91,20 @@ export function PendingInvitationsList({
       const res = await fetch(`/api/invitations/${inv.id}/resend`, {
         method: 'POST',
       })
-      const data = await res.json()
+      const contentType = res.headers.get('content-type') || ''
+      let data: any = {}
+      if (contentType.includes('application/json')) {
+        try {
+          data = await res.json()
+        } catch {
+          // Fallback if parsing fails
+        }
+      } else {
+        const raw = await res.text()
+        console.error('[RESEND_INVITATION_ERROR] Server returned non-JSON:', raw)
+      }
       if (!res.ok) {
-        throw new Error(data.error || data.message || 'Failed to resend invitation')
+        throw new Error(data.error || data.message || `Failed to resend invitation (status ${res.status})`)
       }
       setFeedback({
         type: 'success',
@@ -90,6 +112,7 @@ export function PendingInvitationsList({
       })
       await fetchInvitations()
     } catch (err: any) {
+      console.error('[RESEND_INVITATION_EXCEPTION]:', err)
       setFeedback({
         type: 'error',
         text: err.message || 'Error resending invitation',
@@ -106,18 +129,30 @@ export function PendingInvitationsList({
       const res = await fetch(`/api/invitations/${invitationToRevoke.id}/revoke`, {
         method: 'POST',
       })
-      const data = await res.json()
+      const contentType = res.headers.get('content-type') || ''
+      let data: any = {}
+      if (contentType.includes('application/json')) {
+        try {
+          data = await res.json()
+        } catch {
+          // Fallback if parsing fails
+        }
+      } else {
+        const raw = await res.text()
+        console.error('[REVOKE_INVITATION_ERROR] Server returned non-JSON:', raw)
+      }
       if (!res.ok) {
-        throw new Error(data.error || data.message || 'Failed to revoke invitation')
+        throw new Error(data.error || data.message || `Failed to revoke invitation (status ${res.status})`)
       }
       setInvitations((prev) => prev.filter((i) => i.id !== invitationToRevoke.id))
       setFeedback({
         type: 'success',
-        text: `Invitation for ${invitationToRevoke.email} revoked.`,
+        text: 'Invitation revoked',
       })
       setInvitationToRevoke(null)
       if (onInviteRevoked) onInviteRevoked()
     } catch (err: any) {
+      console.error('[REVOKE_INVITATION_EXCEPTION]:', err)
       setFeedback({
         type: 'error',
         text: err.message || 'Failed to revoke invitation',
@@ -127,10 +162,68 @@ export function PendingInvitationsList({
     }
   }
 
-  const handleCopyLink = (invId: string, link: string) => {
-    navigator.clipboard.writeText(link)
-    setCopiedId(invId)
-    setTimeout(() => setCopiedId(null), 2500)
+  const handleCopyLink = async (inv: PendingInvitation) => {
+    const cachedLink = copiedLinks[inv.id]
+    if (cachedLink) {
+      await navigator.clipboard.writeText(cachedLink)
+      setCopiedId(inv.id)
+      setFeedback({
+        type: 'success',
+        text: `Invite link copied to clipboard! Share only with ${inv.email}.`,
+      })
+      setTimeout(() => setCopiedId(null), 2500)
+      return
+    }
+
+    // Option B: Regenerate & Copy
+    try {
+      setCopyingId(inv.id)
+      setFeedback(null)
+      const res = await fetch(`/api/invitations/${inv.id}/resend?returnLink=true`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ returnLink: true }),
+      })
+      const contentType = res.headers.get('content-type') || ''
+      let data: any = {}
+      if (contentType.includes('application/json')) {
+        try {
+          data = await res.json()
+        } catch {
+          // Fallback if parsing fails
+        }
+      } else {
+        const raw = await res.text()
+        console.error('[REGENERATE_LINK_ERROR] Server returned non-JSON:', raw)
+      }
+      if (!res.ok) {
+        throw new Error(data.error || data.message || `Failed to regenerate invite link (status ${res.status})`)
+      }
+      const newLink = data.data?.inviteLink || data.inviteLink
+      if (newLink) {
+        await navigator.clipboard.writeText(newLink)
+        setCopiedLinks((prev) => ({ ...prev, [inv.id]: newLink }))
+        setCopiedId(inv.id)
+        setFeedback({
+          type: 'success',
+          text: `Invite link regenerated & copied to clipboard! (Previous links invalidated). Share only with ${inv.email}.`,
+        })
+        setTimeout(() => setCopiedId(null), 3500)
+        await fetchInvitations()
+      } else {
+        throw new Error('Link regenerated, but failed to retrieve invite URL')
+      }
+    } catch (err: any) {
+      console.error('[COPY_LINK_EXCEPTION]:', err)
+      setFeedback({
+        type: 'error',
+        text: err.message || 'Failed to copy invite link',
+      })
+    } finally {
+      setCopyingId(null)
+    }
   }
 
   const getStatusBadge = (inv: PendingInvitation) => {
@@ -256,7 +349,6 @@ export function PendingInvitationsList({
               </thead>
               <tbody className="divide-y divide-border">
                 {invitations.map((inv) => {
-                  const hasLink = recentInviteLink && recentInviteLink.id === inv.id
                   return (
                     <tr
                       key={inv.id}
@@ -278,21 +370,23 @@ export function PendingInvitationsList({
                       {canManage && (
                         <td className="px-5 py-3.5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            {hasLink && (
-                              <button
-                                type="button"
-                                onClick={() => handleCopyLink(inv.id, recentInviteLink.link)}
-                                title="Copy invite link"
-                                className="inline-flex items-center gap-1 rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary hover:bg-primary/20 transition cursor-pointer"
-                              >
-                                {copiedId === inv.id ? (
-                                  <Check className="h-3 w-3 text-emerald-400" />
-                                ) : (
-                                  <Copy className="h-3 w-3" />
-                                )}
-                                {copiedId === inv.id ? 'Copied' : 'Copy'}
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleCopyLink(inv)}
+                              disabled={copyingId === inv.id}
+                              title="Copies link — share only with the intended recipient."
+                              data-testid={`copy-invite-link-${inv.id}`}
+                              className="inline-flex items-center gap-1 rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary hover:bg-primary/20 transition cursor-pointer disabled:opacity-50"
+                            >
+                              {copyingId === inv.id ? (
+                                <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                              ) : copiedId === inv.id ? (
+                                <Check className="h-3 w-3 text-emerald-400" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                              {copyingId === inv.id ? 'Copying...' : copiedId === inv.id ? 'Copied' : 'Copy'}
+                            </button>
 
                             <button
                               type="button"

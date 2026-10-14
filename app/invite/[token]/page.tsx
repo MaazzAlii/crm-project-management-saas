@@ -21,18 +21,29 @@ export default async function InviteAcceptancePage({ params }: PageProps) {
 
   // STATE 1: Invalid, expired, or revoked
   if (!acceptInfoRes.success) {
+    const isExpired = acceptInfoRes.error === 'expired'
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 text-slate-100 relative">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-8 shadow-2xl text-center space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+            <div
+              className={`w-12 h-12 rounded-2xl ${
+                isExpired
+                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                  : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+              } border flex items-center justify-center mx-auto`}
+            >
               <AlertTriangle className="w-6 h-6" />
             </div>
-            <h2 className="text-xl font-bold text-white">Invitation Unavailable</h2>
+            <h2 className="text-xl font-bold text-white">
+              {isExpired ? 'This Invitation Has Expired' : 'Invitation Unavailable'}
+            </h2>
             <p className="text-xs text-slate-400 leading-relaxed">
-              This invitation is invalid or has expired. Please contact your workspace administrator to request a new invitation.
+              {isExpired
+                ? 'This invitation link has expired. Workspace invitations are valid for 7 days. Please contact your workspace administrator to request a new invitation.'
+                : 'This invitation is invalid or has been revoked. Please contact your workspace administrator to request a new invitation.'}
             </p>
-            <div className="pt-4 border-t border-slate-800">
+            <div className="pt-4 border-t border-slate-800 space-y-2">
               <Link
                 href="/login"
                 className="inline-flex items-center justify-center gap-2 w-full rounded-xl bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-700 transition"

@@ -64,6 +64,10 @@ export async function POST(request: NextRequest) {
         return apiError(result.message, 400, 'REVOKED');
       }
 
+      if (result.error === 'expired') {
+        return apiError(result.message, 410, 'EXPIRED');
+      }
+
       return apiError(result.message, 400, 'INVALID_OR_EXPIRED');
     }
 

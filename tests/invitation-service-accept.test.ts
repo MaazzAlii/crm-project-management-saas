@@ -88,9 +88,9 @@ describe('Prompt 20: Invitation Service - acceptInvitation', () => {
 
     expect(res.success).toBe(false);
     if (!res.success) {
-      expect(res.error).toBe('invalid_or_expired');
-      expect(res.status).toBe(400);
-      expect(res.message).toMatch(/invalid or has expired/i);
+      expect(res.error).toBe('expired');
+      expect(res.status).toBe(410);
+      expect(res.message).toMatch(/expired/i);
     }
   });
 
