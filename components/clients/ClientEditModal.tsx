@@ -61,7 +61,7 @@ export function ClientEditModal({ client, isOpen, onClose }: ClientEditModalProp
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-overlay)] p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-6">
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-border pb-4">

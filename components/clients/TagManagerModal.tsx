@@ -67,7 +67,7 @@ export function TagManagerModal({ isOpen, onClose, onTagsUpdated }: TagManagerMo
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--bg-overlay)] backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl p-6 space-y-6">
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-border pb-4">

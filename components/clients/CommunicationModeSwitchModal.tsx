@@ -70,7 +70,7 @@ export function CommunicationModeSwitchModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--bg-overlay)] backdrop-blur-sm animate-in fade-in duration-200">
       <div
         className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl relative space-y-6 animate-in zoom-in-95 duration-150"
         role="dialog"
