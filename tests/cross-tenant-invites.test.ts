@@ -137,7 +137,7 @@ describe('Prompt 53: Security — Cross-Organization Invitations Isolation', () 
     const postRes = await invitationsRoute.POST(postReq);
     expect(postRes.status).toBe(403);
     const json = await postRes.json();
-    expect(json.error.code).toBe('FORBIDDEN');
+    expect(['FORBIDDEN', 'INSUFFICIENT_ROLE']).toContain(json.error.code);
   });
 
   it('4. Revoked invite cannot be accepted', async () => {

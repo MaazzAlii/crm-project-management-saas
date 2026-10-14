@@ -18,6 +18,7 @@ describe('TEAM-2: Seat Limits & Upgrade UX Regression Tests', () => {
   beforeEach(async () => {
     // Mock email provider to immediately succeed without SMTP delay
     setEmailProvider({
+      name: 'mock',
       send: async () => ({ success: true, messageId: 'mock_test_msg' }),
     });
 
