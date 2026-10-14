@@ -54,7 +54,7 @@ export function IntegrationsList({ integrations }: IntegrationsListProps) {
           return (
             <div
               key={item.id}
-              className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 flex flex-col justify-between transition-all hover:border-slate-700 shadow-lg hover:shadow-sky-500/5 relative overflow-hidden"
+              className="rounded-2xl border border-border bg-card p-6 flex flex-col justify-between transition-all hover:border-border/80 shadow-sm relative overflow-hidden"
             >
               {/* Brand Accent Top Glow */}
               <div
@@ -80,15 +80,15 @@ export function IntegrationsList({ integrations }: IntegrationsListProps) {
                     <span
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition ${
                         isConnected
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                          : 'bg-slate-800 text-slate-400 border-slate-700'
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' // intentional: status color for active connection
+                          : 'bg-muted/60 text-muted-foreground border-border'
                       }`}
                     >
                       <span
                         className={`w-1.5 h-1.5 rounded-full ${
                           isConnected
-                            ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse'
-                            : 'bg-slate-500'
+                            ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse' // intentional: status color pulse for active connection
+                            : 'bg-muted-foreground/60'
                         }`}
                       />
                       {isConnected ? 'Connected' : 'Disconnected'}
@@ -97,7 +97,7 @@ export function IntegrationsList({ integrations }: IntegrationsListProps) {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-card-foreground flex items-center gap-2">
                     <span>{item.name}</span>
                     <span
                       className="text-[10px] font-semibold px-2 py-0.5 rounded-full border"
@@ -106,20 +106,20 @@ export function IntegrationsList({ integrations }: IntegrationsListProps) {
                       {meta.name}
                     </span>
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                     {item.description}
                   </p>
                 </div>
               </div>
 
               {/* Action Ribbon & Modal Trigger */}
-              <div className="pt-5 mt-4 border-t border-slate-800/60 flex items-center justify-between gap-2">
+              <div className="pt-5 mt-4 border-t border-border flex items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={() => handleOpenStatus(item)}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-white transition-colors"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Activity className="h-3.5 w-3.5 text-indigo-400" />
+                  <Activity className="h-3.5 w-3.5 text-primary" />
                   Connection Status
                 </button>
 

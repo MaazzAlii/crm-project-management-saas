@@ -70,20 +70,20 @@ export default async function IntegrationsSettingsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
       {/* Overview Header */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-8 shadow-xl flex items-start justify-between gap-6">
+      <div className="rounded-2xl border border-border bg-card p-8 shadow-sm flex items-start justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
               <Puzzle className="h-5 w-5" />
             </div>
-            <h1 className="text-xl font-extrabold text-white">Channel Integrations &amp; Webhooks</h1>
+            <h1 className="text-xl font-extrabold text-card-foreground">Channel Integrations &amp; Webhooks</h1>
           </div>
-          <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
+          <p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
             Manage external communication channels. Inbound webhooks normalize messages into your Unified Inbox, matching client accounts automatically. Click any channel status to inspect last sync times, webhook endpoints, and credential validation.
           </p>
         </div>
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300 border border-slate-700 shrink-0">
-          <Sparkles className="h-3.5 w-3.5 text-sky-400" />
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1.5 text-xs font-semibold text-muted-foreground border border-border shrink-0">
+          <Sparkles className="h-3.5 w-3.5 text-primary" />
           Hub Status Active
         </div>
       </div>
