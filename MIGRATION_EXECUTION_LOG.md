@@ -2931,6 +2931,53 @@ paste at the start of every batch report.
      - `npm run build` → 142 routes compiled cleanly (exit code 0)
 - **Status**: ✅ Sub-Batch 9B1 complete. Style and test commits created locally. Dual remotes untouched per Push Approval Policy. Awaiting user approval before Sub-Batch 9B2.
 
+---
+
+### Step: UI-1B Sub-Batch 9B2 — Super-Admin Platform Settings Form & Recent Activity Tables
+- **Timestamp**: 2026-10-14T19:00:00+05:00
+- **Task ID**: `UI-1B-SUB-BATCH-9B2-SUPER-ADMIN-SETTINGS-AND-ACTIVITY`
+- **Actions Performed**:
+  1. **Scoping & Pre-Refactor Baseline (Rule 19)**:
+     - Target files in Sub-Batch 9B2:
+       * `app/super-admin/settings/page.tsx` (6 hits before: 5 raw colors, 1 text-white -> 2 intentional, 0 text-white)
+       * `components/super-admin/platform-settings-form.tsx` (93 hits before: 72 raw colors, 21 text-white, 10 raw overlays -> 3 intentional, 0 text-white, 0 raw overlays; modified 86 lines 1-to-1, strictly under the 120-line guardrail)
+       * `components/super-admin/recent-activity-tables.tsx` (35 hits before: 31 raw colors, 4 text-white, 2 raw overlays -> 10 intentional, 0 text-white, 0 raw overlays)
+     - Total hits processed: 134 hits across 3 files.
+  2. **Semantic Token Refactoring**:
+     - `app/super-admin/settings/page.tsx`: Refactored header banner border to `border-border`, title to `text-foreground`, description to `text-muted-foreground`, TASK 20 badge to `bg-primary/10 text-primary border-primary/20`, and "Super Admin Privileges Verified" security badge to `bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20` with theme-aware contrast and intentional comment.
+     - `components/super-admin/platform-settings-form.tsx`: Refactored alert banners to semantic status styles (`border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300` and `border-destructive/30 bg-destructive/10 text-destructive`), section headers to `border-border` and `text-foreground`, plan cards to `border-border bg-card p-6 shadow-sm hover:border-border/80`, plan badges to `bg-primary/10 text-primary border-primary/20`, inputs and textareas strictly refactored to `border-input bg-background text-foreground focus:border-ring focus:outline-none`, action buttons to `bg-primary text-primary-foreground shadow-xs`, cancel buttons to `border-border bg-background text-muted-foreground hover:bg-muted shadow-xs`, feature flag cards to `border-border bg-card p-4 shadow-xs`, kill switch toggles to `text-destructive`, standard feature toggles to `text-primary`, onboarding defaults cards to `border-border bg-card p-5 shadow-xs`, and number/select inputs to `border-input bg-background text-foreground`.
+     - `components/super-admin/recent-activity-tables.tsx`: Refactored table container cards to `border-border bg-card p-6 shadow-sm`, headers to `border-border text-card-foreground`, table header cells to `border-border text-muted-foreground`, table row borders and hovers to `divide-border` and `hover:bg-muted/50`, org links to `text-foreground hover:text-primary`, mono slugs and timestamp cells to `text-muted-foreground`, action links to `bg-primary/10 text-primary border-primary/20 hover:bg-primary/20`, and status/tier badges to intentional theme-aware contrast pairs (`text-purple-600 dark:text-purple-300`, `text-blue-600 dark:text-blue-300`, `text-emerald-600 dark:text-emerald-300`, `text-rose-600 dark:text-rose-300`, `text-amber-600 dark:text-amber-300`, `text-orange-600 dark:text-orange-300`) with same-line intentional comments.
+  3. **Non-Color Changes Detail**:
+     - `app/super-admin/settings/page.tsx`: Non-color changes: none.
+     - `components/super-admin/platform-settings-form.tsx`: Normalized card elevations (`shadow-xl` -> `shadow-sm`), buttons elevation normalized to `shadow-xs`, toggle button transition updated to `transition-colors`, JSON preview block normalized from `bg-slate-950` to `bg-muted/50`.
+     - `components/super-admin/recent-activity-tables.tsx`: Normalized card elevation (`shadow-lg` -> `shadow-sm`), table container cards normalized to `p-6 shadow-sm`, row hover normalized to `hover:bg-muted/50`.
+  4. **Section 6 Greps Post-edit**:
+     - Grep 1 (raw palettes): 0 unjustified hits across all 3 files (15 intentional hits justified with `// intentional: <reason>` on the exact same line).
+     - Grep 2 (`text-white`): 0 hits across all 3 files.
+     - Grep 3 (intentional): 15 intentional hits across all 3 files (2 in settings page, 3 in platform settings form, 10 in recent activity tables).
+     - Grep 4 (overlays): 0 raw overlay hits across all 3 files.
+  5. **Browser Verification**:
+     - Created `scripts/verify-super-admin-9b2-e2e.ts`.
+     - Captured 8 screenshots:
+       * `super_admin_settings_light.png` & `super_admin_settings_dark.png`
+       * `super_admin_settings_form_active_light.png` & `super_admin_settings_form_active_dark.png`
+       * `super_admin_dashboard_activity_light.png` & `super_admin_dashboard_activity_dark.png`
+       * `multi_route_super_admin_9b2_light.png` & `multi_route_super_admin_9b2_dark.png`
+     - Computed dark-mode input backgrounds strictly verified:
+       * Monthly Price Input: `rgb(5, 8, 15)` (dark slate-950, strictly not white).
+       * Feature Limits JSON Textarea: `rgb(5, 8, 15)` (strictly not white).
+       * Default Trial Days Input: `rgb(5, 8, 15)` (strictly not white).
+       * Default Tier Select: `rgb(5, 8, 15)` (strictly not white).
+       * Save Changes Button: `rgb(129, 140, 248)` (`bg-primary`).
+     - Multi-route theme persistence verified across `/super-admin/settings` → `/super-admin/dashboard` → `/super-admin/organizations` → back to `/super-admin/settings` in both light and dark themes.
+  6. **Quality Gate Verification**:
+     - `npx tsc --noEmit; echo "EXIT: $?"` → EXIT: 0
+     - `npm test` → 497/497 tests passed across 73 test files
+     - `npm run lint` → 4 warnings, 0 errors
+     - `npm run build` → 142 routes compiled cleanly (exit code 0)
+- **Status**: ✅ Sub-Batch 9B2 complete. Style and test commits created locally. Dual remotes untouched per Push Approval Policy. Awaiting user approval before Sub-Batch 9B3.
+
+
 
 
 
