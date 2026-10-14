@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { handleSignUpAction, handleSignUpWithInviteAction } from '@/app/actions/signup'
 import { User, Building, Mail, Lock, ArrowRight, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { PasswordStrengthMeter } from '@/components/auth/PasswordStrengthMeter'
 
 function SignUpForm() {
   const searchParams = useSearchParams()
@@ -224,6 +225,7 @@ function SignUpForm() {
                     className="block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl text-foreground placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm"
                   />
                 </div>
+                <PasswordStrengthMeter password={password} className="mt-2" />
               </div>
 
               <div className="pt-2">

@@ -5,16 +5,27 @@ import { getClientIp } from '@/lib/security/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, token, newPassword } = await request.json().catch(() => ({}));
+    const body = await request.json().catch(() => ({}));
+    const token = body.token;
+    const password = body.password || body.newPassword;
+    const email = body.email;
+    const confirmPassword = body.confirmPassword;
 
-    if (!email || !token || !newPassword) {
+    if (!token || !password) {
       return NextResponse.json(
         { error: 'Email, reset token, and new password are required' },
         { status: 400 }
       );
     }
 
-    const result = await resetPassword(email, token, newPassword);
+    if (confirmPassword !== undefined && password !== confirmPassword) {
+      return NextResponse.json(
+        { error: 'Passwords do not match' },
+        { status: 400 }
+      );
+    }
+
+    const result = await resetPassword(token, password, email);
 
     if (!result.success) {
       return NextResponse.json(

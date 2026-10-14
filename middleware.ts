@@ -85,12 +85,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.rewrite(url)
   }
 
+  // Rewrite /forgot-password and /auth/forgot-password to /reset-password?mode=forgot
+  if (pathname === '/forgot-password' || pathname === '/auth/forgot-password') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/reset-password'
+    url.searchParams.set('mode', 'forgot')
+    return NextResponse.rewrite(url)
+  }
+
+  // Rewrite /reset-password/:token (path token parameter) to /reset-password?token=:token
+  if (pathname.startsWith('/reset-password/') && pathname.split('/').length === 3) {
+    const rawToken = pathname.split('/')[2]
+    if (rawToken && rawToken.length >= 8) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/reset-password'
+      url.searchParams.set('token', rawToken)
+      return NextResponse.rewrite(url)
+    }
+  }
+
   // Rewrite /auth/change-password to /change-password
   if (pathname === '/auth/change-password') {
     const url = request.nextUrl.clone()
     url.pathname = '/change-password'
     return NextResponse.rewrite(url)
   }
+
 
   // 3. Public API Endpoints (Explicitly bypass auth checks)
   // /api/health and /api/auth/* are public by specification

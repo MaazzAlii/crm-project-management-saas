@@ -43,7 +43,7 @@ export async function createPasswordResetToken(email: string): Promise<PasswordR
   );
 
   const baseUrl = (process.env.APP_PUBLIC_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
-  const url = `${baseUrl}/auth/reset-password?token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`;
+  const url = `${baseUrl}/reset-password?token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`;
 
   return {
     token: rawToken,
@@ -56,20 +56,30 @@ export async function createPasswordResetToken(email: string): Promise<PasswordR
  * Verify a password reset token
  */
 export async function verifyPasswordResetToken(
-  email: string,
-  rawToken: string
+  emailOrToken: string,
+  rawToken?: string
 ): Promise<{ isValid: boolean; userId?: string }> {
-  const normalizedEmail = email.toLowerCase().trim();
-  const tokenHash = hashToken(rawToken);
+  let email: string | undefined;
+  let token: string;
+
+  if (rawToken !== undefined && emailOrToken.includes('@')) {
+    email = emailOrToken.toLowerCase().trim();
+    token = rawToken;
+  } else {
+    token = emailOrToken;
+    email = rawToken ? rawToken.toLowerCase().trim() : undefined;
+  }
+
+  const tokenHash = hashToken(token);
 
   const tokenRecord = await queryOne<{ id: string; user_id: string }>(
     `SELECT id, user_id FROM auth_tokens 
-     WHERE email = $1 
-       AND token_hash = $2 
+     WHERE token_hash = $1 
        AND type = 'password_reset' 
        AND is_used = false 
-       AND expires_at > NOW()`,
-    [normalizedEmail, tokenHash]
+       AND expires_at > NOW()
+       AND ($2::text IS NULL OR LOWER(TRIM(email)) = $2)`,
+    [tokenHash, email || null]
   );
 
   if (!tokenRecord) {
@@ -83,11 +93,26 @@ export async function verifyPasswordResetToken(
  * Reset user password with token verification
  */
 export async function resetPassword(
-  email: string,
-  rawToken: string,
-  newPassword: string
+  emailOrToken: string,
+  rawTokenOrPassword: string,
+  newPasswordOrEmail?: string
 ): Promise<{ success: boolean; error?: string; user?: User }> {
-  const normalizedEmail = email.toLowerCase().trim();
+  let email: string | undefined;
+  let rawToken: string;
+  let newPassword: string;
+
+  // Flexible argument handling:
+  // Signature A: resetPassword(email, rawToken, newPassword)
+  // Signature B: resetPassword(rawToken, newPassword, email?)
+  if (newPasswordOrEmail !== undefined && emailOrToken.includes('@')) {
+    email = emailOrToken.toLowerCase().trim();
+    rawToken = rawTokenOrPassword;
+    newPassword = newPasswordOrEmail;
+  } else {
+    rawToken = emailOrToken;
+    newPassword = rawTokenOrPassword;
+    email = newPasswordOrEmail ? newPasswordOrEmail.toLowerCase().trim() : undefined;
+  }
 
   // Validate password strength
   const strengthCheck = validatePasswordStrength(newPassword);
@@ -105,13 +130,13 @@ export async function resetPassword(
     // Verify token
     const tokenRes = await client.query(
       `SELECT id, user_id FROM auth_tokens 
-       WHERE email = $1 
-         AND token_hash = $2 
+       WHERE token_hash = $1 
          AND type = 'password_reset' 
          AND is_used = false 
          AND expires_at > NOW()
+         AND ($2::text IS NULL OR LOWER(TRIM(email)) = $2)
        FOR UPDATE`,
-      [normalizedEmail, tokenHash]
+      [tokenHash, email || null]
     );
 
     if (tokenRes.rows.length === 0) {
