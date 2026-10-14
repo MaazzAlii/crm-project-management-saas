@@ -2542,3 +2542,44 @@ paste at the start of every batch report.
   - Browser verification: **PASS (100% verified with Playwright Chromium across 10 screenshots)**
 - **Status**: ✅ Sub-Batch 7B complete. Committed locally (style, test, docs, and backdrop fix). Push Approval Policy honored: zero remotes pushed. Awaiting user review before Sub-Batch 7C.
 
+---
+
+### UI Foundational Bug Fix — Registered Background, Accent & Muted Tokens in Tailwind Config & Globals
+- **Timestamp**: 2026-10-14T14:25:00+05:00
+- **Task ID**: `UI-FOUNDATIONAL-FIX-TAILWIND-BACKGROUND-ACCENT-MUTED-TOKENS`
+- **Actions Performed**:
+  1. **Foundational Token Audit & Diagnosis**:
+     - Identified that `tailwind.config.ts` was missing the `background`, `muted`, and `accent` token mappings under `theme.extend.colors`.
+     - In dark mode, without `.bg-background` compiled into the CSS stylesheet, browsers defaulted `<input>`, `<select>`, and `<textarea>` elements to the User-Agent stylesheet rule `background-color: rgb(255, 255, 255)`.
+     - With `text-foreground` resolving to a light color in dark mode, inputs were rendering light text on white backgrounds across all dark-mode forms.
+  2. **Tailwind Config & CSS Variable Implementation**:
+     - `tailwind.config.ts`: Added `background: 'hsl(var(--background))'`, `muted: { DEFAULT: 'hsl(var(--muted))', foreground: 'hsl(var(--muted-foreground))' }`, `accent: { DEFAULT: 'hsl(var(--accent))', foreground: 'hsl(var(--accent-foreground))' }`, and `'accent-foreground': 'hsl(var(--accent-foreground))'`.
+     - `app/globals.css`: Added `--background: 210 40% 98%` (light) and `--background: 222.2 47.4% 4.1%` (dark). Added `--muted: 210 40% 96.1%` (light) and `--muted: 217.2 32.6% 17.5%` (dark). Added `--accent: 210 40% 96.1%` (light) and `--accent: 217.2 32.6% 17.5%` (dark).
+  3. **Rebuild & Route Count Verification**:
+     - Next.js production build succeeded with exit code 0. Route count strictly verified at 142 routes per ADR-002.
+  4. **Full Test Suite & Lint Verification**:
+     - Vitest test suite: 497/497 tests passing (73/73 test files).
+     - ESLint: 4 pre-existing warnings, 0 errors.
+  5. **Real Browser Playwright Chromium Verification**:
+     - Created and executed `scripts/verify-dark-mode-inputs.ts` against the live Next.js standalone server on `http://localhost:3000`.
+     - `/clients/new` dark-mode input[name="name"]: computed `backgroundColor` = `rgb(5, 8, 15)` (dark slate-950, NOT rgb(255, 255, 255)).
+     - `/clients/[id]` edit modal input[name="name"]: computed `backgroundColor` = `rgb(5, 8, 15)`.
+     - `/projects/new (modal)` input: computed `backgroundColor` = `rgb(5, 8, 15)`.
+     - `/settings/team (invite dialog)` input: computed `backgroundColor` = `rgb(2, 6, 23)`.
+     - `/login` email input: computed `backgroundColor` = `rgba(2, 6, 23, 0.6)`.
+     - Captured and verified dark mode screenshots:
+       * `clients_new_dark_fixed.png`
+       * `clients_id_dark_fixed.png`
+- **Files Modified**:
+  - `tailwind.config.ts`
+  - `app/globals.css`
+  - `scripts/verify-dark-mode-inputs.ts` (created)
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Verification / Test Result**:
+  - Route count: **142 routes**
+  - Unit/Integration Tests: **497/497 passing**
+  - Lint: **4 warnings, 0 errors**
+  - Real browser computed input background in dark mode: **Dark color across all routes, zero white inputs**
+- **Status**: ✅ Foundational fix complete and verified. Committed locally. Push Approval Policy honored: zero remotes pushed. Awaiting user review before Sub-Batch 7C.
+
+
