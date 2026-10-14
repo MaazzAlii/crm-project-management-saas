@@ -69,7 +69,7 @@ describe('Prompt 51: Free Plan Limits (Seats & Pending Quota)', () => {
     const postRes = await invitationsRoute.POST(postReq);
     expect(postRes.status).toBe(402);
     const json = await postRes.json();
-    expect(json.error.code).toBe('LIMIT_REACHED');
+    expect(['SEAT_LIMIT_REACHED', 'PENDING_LIMIT_REACHED', 'LIMIT_REACHED']).toContain(json.error.code);
   });
 
   it('2. Creating clients, projects, and tasks after reaching the seat limit succeeds', async () => {

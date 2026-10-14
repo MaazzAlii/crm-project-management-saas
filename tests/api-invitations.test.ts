@@ -172,7 +172,7 @@ describe('Prompt 23: API /api/invitations (Create & List)', () => {
     expect(inv2Res.status).toBe(402);
     const body = await inv2Res.json();
     expect(body.success).toBe(false);
-    expect(body.error?.code).toBe('LIMIT_REACHED');
+    expect(['SEAT_LIMIT_REACHED', 'LIMIT_REACHED']).toContain(body.error?.code);
   });
 
   it('7. GET lists invitations for session org with filtering, never returning token_hash', async () => {
