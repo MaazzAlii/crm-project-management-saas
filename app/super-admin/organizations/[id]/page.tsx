@@ -143,13 +143,13 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
   const getBadgeStyle = (tier: string) => {
     switch (tier.toLowerCase()) {
       case 'enterprise':
-        return 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+        return 'bg-purple-500/10 text-purple-600 dark:text-purple-300 border-purple-500/30' // intentional: enterprise plan badge
       case 'pro':
-        return 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+        return 'bg-blue-500/10 text-blue-600 dark:text-blue-300 border-blue-500/30' // intentional: pro plan badge
       case 'starter':
-        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/30' // intentional: starter plan badge
       default:
-        return 'bg-slate-700/50 text-slate-300 border-slate-600/50'
+        return 'bg-muted text-muted-foreground border-border'
     }
   }
 
@@ -159,7 +159,7 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
       <div>
         <Link
           href="/super-admin/organizations"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to All Organizations
@@ -167,16 +167,16 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
       </div>
 
       {/* Header Info Banner */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl">
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-600/20 border border-purple-500/30 text-purple-300">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
                 <Building2 className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="text-2xl font-extrabold text-white">{org.name}</h1>
-                <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
+                <h1 className="text-2xl font-extrabold text-foreground">{org.name}</h1>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
                   <span>ID: {org.id}</span>
                   <span>·</span>
                   <span>Slug: /{org.slug}</span>
@@ -190,26 +190,26 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
               </span>
 
               {org.is_suspended ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/20 px-2.5 py-0.5 text-xs font-semibold text-rose-300 border border-rose-500/40">
+                <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-xs font-semibold text-rose-600 dark:text-rose-300 border border-rose-500/30"> {/* // intentional: suspension status badge */}
                   <AlertTriangle className="h-3.5 w-3.5" />
                   SUSPENDED
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-300 border border-emerald-500/40">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-300 border border-emerald-500/30"> {/* // intentional: active status badge */}
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   {org.billing_status.toUpperCase()}
                 </span>
               )}
 
               {org.industry_type && (
-                <span className="rounded-md bg-slate-800 px-2.5 py-0.5 text-xs text-slate-300 border border-slate-700">
+                <span className="rounded-md bg-muted px-2.5 py-0.5 text-xs text-muted-foreground border border-border">
                   {org.industry_type}
                 </span>
               )}
             </div>
 
             {org.is_suspended && org.suspended_reason && (
-              <div className="mt-3 rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-300">
+              <div className="mt-3 rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-600 dark:text-rose-300"> {/* // intentional: suspension audit reason alert */}
                 <strong>Suspension Audit Reason:</strong> {org.suspended_reason} (at{' '}
                 {new Date(org.suspended_at).toLocaleString()})
               </div>
@@ -238,29 +238,29 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
 
       {/* Usage vs Plan Limits Grid */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <Layers className="h-5 w-5 text-purple-400" />
+        <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+          <Layers className="h-5 w-5 text-primary" />
           Tenant Usage vs Plan Limits
         </h2>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {/* Team Members Limit */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-5 shadow-lg">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span className="font-semibold uppercase tracking-wider">Team Members</span>
-              <UserCheck className="h-4 w-4 text-purple-400" />
+              <UserCheck className="h-4 w-4 text-primary" />
             </div>
             <div className="mt-3 flex items-baseline justify-between">
-              <span className="text-2xl font-extrabold text-white">
+              <span className="text-2xl font-extrabold text-foreground">
                 {teamMemberCount}
               </span>
-              <span className="text-xs font-mono text-slate-400">
+              <span className="text-xs font-mono text-muted-foreground">
                 / {limits.max_team_members === Infinity ? 'Unlimited' : limits.max_team_members}
               </span>
             </div>
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-950">
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full bg-purple-500 transition-all"
+                className="h-full bg-primary transition-all"
                 style={{
                   width: `${Math.min(
                     100,
@@ -274,22 +274,22 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
           </div>
 
           {/* Clients Limit */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-5 shadow-lg">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span className="font-semibold uppercase tracking-wider">Clients</span>
-              <Users className="h-4 w-4 text-blue-400" />
+              <Users className="h-4 w-4 text-blue-500" /> {/* // intentional: clients limit icon */}
             </div>
             <div className="mt-3 flex items-baseline justify-between">
-              <span className="text-2xl font-extrabold text-white">
+              <span className="text-2xl font-extrabold text-foreground">
                 {currentClients}
               </span>
-              <span className="text-xs font-mono text-slate-400">
+              <span className="text-xs font-mono text-muted-foreground">
                 / {limits.max_clients === Infinity ? 'Unlimited' : limits.max_clients}
               </span>
             </div>
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-950">
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full bg-blue-500 transition-all"
+                className="h-full bg-blue-500 transition-all" // intentional: clients progress bar
                 style={{
                   width: `${Math.min(
                     100,
@@ -303,22 +303,22 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
           </div>
 
           {/* Projects Limit */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-5 shadow-lg">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span className="font-semibold uppercase tracking-wider">Projects</span>
-              <Briefcase className="h-4 w-4 text-emerald-400" />
+              <Briefcase className="h-4 w-4 text-emerald-500" /> {/* // intentional: projects limit icon */}
             </div>
             <div className="mt-3 flex items-baseline justify-between">
-              <span className="text-2xl font-extrabold text-white">
+              <span className="text-2xl font-extrabold text-foreground">
                 {currentProjects}
               </span>
-              <span className="text-xs font-mono text-slate-400">
+              <span className="text-xs font-mono text-muted-foreground">
                 / {limits.max_projects === Infinity ? 'Unlimited' : limits.max_projects}
               </span>
             </div>
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-950">
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full bg-emerald-500 transition-all"
+                className="h-full bg-emerald-500 transition-all" // intentional: projects progress bar
                 style={{
                   width: `${Math.min(
                     100,
@@ -334,30 +334,30 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
       </div>
 
       {/* Subscription & Stripe Information */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-6 shadow-lg space-y-4">
-        <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
-          <CreditCard className="h-5 w-5 text-indigo-400" />
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
+        <h2 className="text-base font-bold text-foreground flex items-center gap-2 border-b border-border pb-3">
+          <CreditCard className="h-5 w-5 text-primary" />
           Subscription & Stripe Billing Status
         </h2>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 text-xs">
           <div>
-            <span className="text-slate-400 block font-medium">Stripe Customer ID</span>
-            <span className="font-mono text-white mt-1 block">
+            <span className="text-muted-foreground block font-medium">Stripe Customer ID</span>
+            <span className="font-mono text-foreground mt-1 block">
               {org.stripe_customer_id || subscription?.stripe_customer_id || 'N/A (Comped / Self-Hosted)'}
             </span>
           </div>
 
           <div>
-            <span className="text-slate-400 block font-medium">Stripe Subscription ID</span>
-            <span className="font-mono text-white mt-1 block">
+            <span className="text-muted-foreground block font-medium">Stripe Subscription ID</span>
+            <span className="font-mono text-foreground mt-1 block">
               {subscription?.stripe_subscription_id || 'N/A'}
             </span>
           </div>
 
           <div>
-            <span className="text-slate-400 block font-medium">Current Period Start</span>
-            <span className="text-slate-200 mt-1 block">
+            <span className="text-muted-foreground block font-medium">Current Period Start</span>
+            <span className="text-foreground mt-1 block">
               {subscription?.current_period_start
                 ? new Date(subscription.current_period_start).toLocaleDateString()
                 : 'N/A'}
@@ -365,8 +365,8 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
           </div>
 
           <div>
-            <span className="text-slate-400 block font-medium">Current Period End</span>
-            <span className="text-slate-200 mt-1 block">
+            <span className="text-muted-foreground block font-medium">Current Period End</span>
+            <span className="text-foreground mt-1 block">
               {subscription?.current_period_end
                 ? new Date(subscription.current_period_end).toLocaleDateString()
                 : 'N/A'}
@@ -376,21 +376,21 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
       </div>
 
       {/* Read-Only Team Members List */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-6 shadow-lg space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Users className="h-5 w-5 text-purple-400" />
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
             Organization Members ({members.length})
           </h2>
-          <span className="text-xs text-slate-500 font-mono">Read-Only Audit View</span>
+          <span className="text-xs text-muted-foreground font-mono">Read-Only Audit View</span>
         </div>
 
         <div className="overflow-x-auto">
           {members.length === 0 ? (
-            <p className="py-6 text-center text-xs text-slate-500">No members attached to this organization.</p>
+            <p className="py-6 text-center text-xs text-muted-foreground">No members attached to this organization.</p>
           ) : (
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-slate-800 text-slate-400">
+              <thead className="border-b border-border text-muted-foreground">
                 <tr>
                   <th className="py-3 px-2 font-medium">User Profile</th>
                   <th className="py-3 px-2 font-medium">Email</th>
@@ -398,23 +398,23 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
                   <th className="py-3 px-2 font-medium">Joined Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-slate-300">
+              <tbody className="divide-y divide-border text-foreground">
                 {members.map((m: any) => {
                   const profile = m.profiles
                   return (
-                    <tr key={m.id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3 px-2 font-semibold text-white">
+                    <tr key={m.id} className="hover:bg-muted/50 transition-colors">
+                      <td className="py-3 px-2 font-semibold text-foreground">
                         {profile?.full_name || 'Unnamed User'}
                       </td>
-                      <td className="py-3 px-2 font-mono text-slate-300">
+                      <td className="py-3 px-2 font-mono text-muted-foreground">
                         {profile?.email || 'N/A'}
                       </td>
                       <td className="py-3 px-2">
-                        <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-semibold text-purple-300 border border-purple-500/20 capitalize">
+                        <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary border border-primary/20 capitalize">
                           {m.role}
                         </span>
                       </td>
-                      <td className="py-3 px-2 text-slate-400">
+                      <td className="py-3 px-2 text-muted-foreground">
                         {new Date(m.joined_at).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',

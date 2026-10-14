@@ -33,10 +33,10 @@ export function SuspendOrgModal({ orgId, orgName, isSuspended }: SuspendOrgModal
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors ${
+        className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-xs transition-colors ${
           isSuspended
-            ? 'bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-600/30'
-            : 'bg-rose-600/20 text-rose-300 border border-rose-500/40 hover:bg-rose-600/30'
+            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20' // intentional: resume organization action button
+            : 'bg-rose-500/10 text-rose-600 dark:text-rose-300 border border-rose-500/30 hover:bg-rose-500/20' // intentional: suspend organization action button
         }`}
       >
         {isSuspended ? (
@@ -53,35 +53,35 @@ export function SuspendOrgModal({ orgId, orgName, isSuspended }: SuspendOrgModal
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-overlay)] p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <div className="flex items-center gap-2">
-                <ShieldAlert className={`h-5 w-5 ${isSuspended ? 'text-emerald-400' : 'text-rose-400'}`} />
-                <h3 className="text-base font-bold text-white">
+                <ShieldAlert className={`h-5 w-5 ${isSuspended ? 'text-emerald-500' : 'text-rose-500'}`} /> {/* // intentional: modal status icon */}
+                <h3 className="text-base font-bold text-card-foreground">
                   {isSuspended ? 'Resume Organization' : 'Suspend Organization'}
                 </h3>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             <div className="mt-4 space-y-4">
-              <p className="text-xs text-slate-300">
-                Target Organization: <strong className="text-white">{orgName}</strong>
+              <p className="text-xs text-muted-foreground">
+                Target Organization: <strong className="text-card-foreground">{orgName}</strong>
               </p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 {isSuspended
                   ? 'Resuming access will immediately restore full access for all members of this organization.'
                   : 'Suspending this organization will block all its members from accessing dashboard features until resumed.'}
               </p>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-card-foreground mb-1">
                   Reason for Audit Trail
                 </label>
                 <textarea
@@ -92,13 +92,13 @@ export function SuspendOrgModal({ orgId, orgName, isSuspended }: SuspendOrgModal
                       ? 'e.g. Payment resolved or support review completed.'
                       : 'e.g. Terms of service review or non-payment.'
                   }
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none"
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
                   rows={3}
                 />
               </div>
 
               {error && (
-                <p className="rounded-md bg-rose-500/10 p-2 text-xs font-medium text-rose-400 border border-rose-500/20">
+                <p className="rounded-md bg-destructive/10 p-2 text-xs font-medium text-destructive border border-destructive/20">
                   {error}
                 </p>
               )}
@@ -106,7 +106,7 @@ export function SuspendOrgModal({ orgId, orgName, isSuspended }: SuspendOrgModal
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="rounded-lg border border-slate-800 bg-slate-950 px-4 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800"
+                  className="rounded-lg border border-border bg-background px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                   disabled={isPending}
                 >
                   Cancel
@@ -114,10 +114,10 @@ export function SuspendOrgModal({ orgId, orgName, isSuspended }: SuspendOrgModal
                 <button
                   onClick={handleAction}
                   disabled={isPending}
-                  className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-md transition-all ${
+                  className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition-all ${
                     isSuspended
-                      ? 'bg-emerald-600 hover:bg-emerald-500'
-                      : 'bg-rose-600 hover:bg-rose-500'
+                      ? 'bg-emerald-600 hover:bg-emerald-500' // intentional: confirm resume action button
+                      : 'bg-destructive hover:bg-destructive/90'
                   }`}
                 >
                   {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
@@ -164,35 +164,35 @@ export function OverridePlanModal({ orgId, orgName, currentPlanTier }: OverrideP
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-600/20 px-3 py-1.5 text-xs font-semibold text-purple-300 hover:bg-purple-600/30 transition-colors"
+        className="flex items-center gap-1.5 rounded-lg border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors shadow-xs"
       >
-        <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+        <Sparkles className="h-3.5 w-3.5 text-primary" />
         Override Plan
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-overlay)] p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-400" />
-                <h3 className="text-base font-bold text-white">Manual Plan Override</h3>
+                <Sparkles className="h-5 w-5 text-primary" />
+                <h3 className="text-base font-bold text-card-foreground">Manual Plan Override</h3>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             <div className="mt-4 space-y-4">
-              <p className="text-xs text-slate-300">
-                Organization: <strong className="text-white">{orgName}</strong>
+              <p className="text-xs text-muted-foreground">
+                Organization: <strong className="text-card-foreground">{orgName}</strong>
               </p>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-card-foreground mb-1.5">
                   Select Target Tier
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -203,8 +203,8 @@ export function OverridePlanModal({ orgId, orgName, currentPlanTier }: OverrideP
                       onClick={() => setSelectedPlan(tier)}
                       className={`rounded-lg border p-2 text-center text-xs font-bold capitalize transition-all ${
                         selectedPlan === tier
-                          ? 'border-purple-500 bg-purple-600/30 text-white shadow-sm'
-                          : 'border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-800'
+                          ? 'border-primary bg-primary text-primary-foreground shadow-xs'
+                          : 'border-border bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
                       }`}
                     >
                       {tier === 'lifetime' ? '⭐ Lifetime VIP' : tier}
@@ -214,20 +214,20 @@ export function OverridePlanModal({ orgId, orgName, currentPlanTier }: OverrideP
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-card-foreground mb-1">
                   Reason for Override (Audit Logged)
                 </label>
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="e.g. Comping internal agency account or granting VIP trial extension."
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none"
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
                   rows={3}
                 />
               </div>
 
               {error && (
-                <p className="rounded-md bg-rose-500/10 p-2 text-xs font-medium text-rose-400 border border-rose-500/20">
+                <p className="rounded-md bg-destructive/10 p-2 text-xs font-medium text-destructive border border-destructive/20">
                   {error}
                 </p>
               )}
@@ -235,7 +235,7 @@ export function OverridePlanModal({ orgId, orgName, currentPlanTier }: OverrideP
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="rounded-lg border border-slate-800 bg-slate-950 px-4 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800"
+                  className="rounded-lg border border-border bg-background px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                   disabled={isPending}
                 >
                   Cancel
@@ -243,7 +243,7 @@ export function OverridePlanModal({ orgId, orgName, currentPlanTier }: OverrideP
                 <button
                   onClick={handleAction}
                   disabled={isPending}
-                  className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-4 py-2 text-xs font-semibold text-white hover:bg-purple-500 shadow-md transition-all"
+                  className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 shadow-sm transition-all"
                 >
                   {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   Apply Plan Override
