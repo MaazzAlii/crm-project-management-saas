@@ -104,24 +104,24 @@ export default async function SuperAdminSettingsPage() {
   return (
     <div className="space-y-8">
       {/* Header Banner */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-800 pb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
               Platform Settings & Global Configuration
             </h1>
-            <span className="inline-flex items-center gap-1 rounded-md bg-purple-500/10 px-2.5 py-1 text-xs font-semibold text-purple-300 border border-purple-500/20">
+            <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary border border-primary/20">
               <Sliders className="h-3.5 w-3.5" />
               TASK 20
             </span>
           </div>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-muted-foreground">
             Centralized platform control. Edit subscription plan limits, toggle feature flags, and configure onboarding defaults without redeploying code.
           </p>
         </div>
 
-        <div className="inline-flex items-center gap-2 rounded-lg bg-emerald-500/10 px-3.5 py-2 text-xs font-medium text-emerald-300 border border-emerald-500/20">
-          <ShieldCheck className="h-4 w-4 text-emerald-400" />
+        <div className="inline-flex items-center gap-2 rounded-lg bg-emerald-500/10 px-3.5 py-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"> {/* // intentional: verified security status badge */}
+          <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> {/* // intentional: verified security status badge */}
           Super Admin Privileges Verified
         </div>
       </div>
