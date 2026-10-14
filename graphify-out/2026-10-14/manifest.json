@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791986552.7209215,
-    "seen": 1791986579.0873983,
-    "ast_hash": "4a9aca85e1b5b959759916bf1eec3f13",
+    "mtime": 1791989698.1914406,
+    "seen": 1791989724.1036897,
+    "ast_hash": "b189fb6314bffdad0383c0ccc39a724c",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -2076,15 +2076,15 @@
     "semantic_hash": ""
   },
   "app/super-admin/audit-log/AuditLogAdminView.tsx": {
-    "mtime": 1789807740.7679904,
-    "seen": 1791772540.8370934,
-    "ast_hash": "db69ee3f1ce68bede763735b7573d72d",
+    "mtime": 1791989222.5319002,
+    "seen": 1791989724.1028,
+    "ast_hash": "ca66f6bf493a761d5489a667b785a34d",
     "semantic_hash": ""
   },
   "app/super-admin/audit-log/page.tsx": {
-    "mtime": 1791353702.9616115,
-    "seen": 1791772540.837095,
-    "ast_hash": "338a7ac6dc20dc9f6251c16767b4735e",
+    "mtime": 1791989105.973859,
+    "seen": 1791989724.1028028,
+    "ast_hash": "8869119873de595580d81f57078b5cf5",
     "semantic_hash": ""
   },
   "app/super-admin/settings/page.tsx": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791986536.51693,
-    "seen": 1791986579.087413,
-    "ast_hash": "74f9cd114075216c8f542fd3367deeca",
+    "mtime": 1791989674.945104,
+    "seen": 1791989724.103699,
+    "ast_hash": "4fc03b1213570762f62a4d70d848a104",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7314,9 +7314,147 @@
     "semantic_hash": ""
   },
   "scripts/verify-super-admin-9b2-e2e.ts": {
-    "mtime": 1791986391.8490074,
-    "seen": 1791986579.0871537,
-    "ast_hash": "4997d2ba50c6a45c82c422cec0c7367f",
+    "mtime": 1791987503.6448984,
+    "seen": 1791989724.1034317,
+    "ast_hash": "842cfc8494ffbe45c872a4d0d46a3083",
+    "semantic_hash": ""
+  },
+  "scripts/verify-super-admin-9b3-e2e.ts": {
+    "mtime": 1791989483.6637015,
+    "seen": 1791989724.1034343,
+    "ast_hash": "740d37b8c3c4a0ba6a23033e02a6a745",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b1/multi_route_super_admin_9b1_dark.png": {
+    "mtime": 1791987253.3012843,
+    "seen": 1791989724.1048455,
+    "ast_hash": "3c87a70e83c56e54d209e7e49d6ad1e1",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b1/multi_route_super_admin_9b1_light.png": {
+    "mtime": 1791987253.3018227,
+    "seen": 1791989724.1048481,
+    "ast_hash": "cb1c3fd037c491fbf5b87abf1a4cdc7d",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b1/super_admin_org_detail_dark.png": {
+    "mtime": 1791987253.3137963,
+    "seen": 1791989724.1048498,
+    "ast_hash": "3844b0acc7e3341ac20e5db4511ccc45",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b1/super_admin_org_detail_light.png": {
+    "mtime": 1791987253.3141558,
+    "seen": 1791989724.1048515,
+    "ast_hash": "479a25d432fd3bcaefa513f53e1e0a0c",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b1/super_admin_org_modal_dark.png": {
+    "mtime": 1791987253.3145654,
+    "seen": 1791989724.104853,
+    "ast_hash": "6c405725e6ffda124d99ddda5a0f9da9",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b1/super_admin_org_modal_light.png": {
+    "mtime": 1791987253.314904,
+    "seen": 1791989724.1048548,
+    "ast_hash": "dfe708794880e4ed14ead98ef8c5346f",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b1/super_admin_organizations_dark.png": {
+    "mtime": 1791987253.307673,
+    "seen": 1791989724.1048563,
+    "ast_hash": "1301f2aeefc72ed8362d9fce1445cdb3",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b1/super_admin_organizations_light.png": {
+    "mtime": 1791987253.308284,
+    "seen": 1791989724.104858,
+    "ast_hash": "cb1c3fd037c491fbf5b87abf1a4cdc7d",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b2/multi_route_super_admin_9b2_dark.png": {
+    "mtime": 1791987253.2753649,
+    "seen": 1791989724.1048596,
+    "ast_hash": "8b6124c22ea3968ccceaa4e7bc9fbd50",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b2/multi_route_super_admin_9b2_light.png": {
+    "mtime": 1791987253.2757993,
+    "seen": 1791989724.104861,
+    "ast_hash": "5146bc2ef7f1938a40e5abfd250dd663",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b2/super_admin_dashboard_activity_dark.png": {
+    "mtime": 1791987253.2929726,
+    "seen": 1791989724.1048625,
+    "ast_hash": "c74744cb80e7319835ef4b777b49f325",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b2/super_admin_dashboard_activity_light.png": {
+    "mtime": 1791987253.293285,
+    "seen": 1791989724.1048636,
+    "ast_hash": "338c18aa14298678e398f86056905fd6",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b2/super_admin_settings_dark.png": {
+    "mtime": 1791987253.282546,
+    "seen": 1791989724.1048656,
+    "ast_hash": "d3c4174e7d050db4da790324a419303c",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b2/super_admin_settings_form_active_dark.png": {
+    "mtime": 1791987253.2829301,
+    "seen": 1791989724.104867,
+    "ast_hash": "abc1be7167503c3bf3acec6bdbdeaa08",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b2/super_admin_settings_form_active_light.png": {
+    "mtime": 1791987253.283313,
+    "seen": 1791989724.104869,
+    "ast_hash": "d9aeee9589a4f5faa4c545a9985faffa",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b2/super_admin_settings_light.png": {
+    "mtime": 1791987253.2866359,
+    "seen": 1791989724.1048703,
+    "ast_hash": "f70cb05e2788411df7cda48a9dc70b25",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b3/multi_route_super_admin_9b3_dark.png": {
+    "mtime": 1791989541.523697,
+    "seen": 1791989724.1048722,
+    "ast_hash": "d2caf9d3a42a30ee9705fc3713360d90",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b3/multi_route_super_admin_9b3_light.png": {
+    "mtime": 1791989564.1780124,
+    "seen": 1791989724.104874,
+    "ast_hash": "b2c82c5f380f2bb2b6a1585195a4236b",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b3/super_admin_audit_log_dark.png": {
+    "mtime": 1791989515.4257524,
+    "seen": 1791989724.1048758,
+    "ast_hash": "6fe66837e5318eecf4961a7eadc58f29",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b3/super_admin_audit_log_light.png": {
+    "mtime": 1791989514.7871969,
+    "seen": 1791989724.1048772,
+    "ast_hash": "277ad04f2e0a8c9a9d4a92476e4803ad",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b3/super_admin_audit_log_modal_dark.png": {
+    "mtime": 1791989516.8870788,
+    "seen": 1791989724.104879,
+    "ast_hash": "ac952bada5aef71e8dec50659ce274a7",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-9b3/super_admin_audit_log_modal_light.png": {
+    "mtime": 1791989518.1711679,
+    "seen": 1791989724.1048806,
+    "ast_hash": "629b231e7db52470febb427c62d6a4ad",
     "semantic_hash": ""
   }
 }

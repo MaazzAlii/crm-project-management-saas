@@ -3021,6 +3021,61 @@ paste at the start of every batch report.
      - `npm run build` → 142 routes compiled cleanly (exit code 0)
 - **Status**: ✅ Sub-Batch 9B3 complete. All Super-Admin surfaces are now 100% migrated to semantic tokens. Committed locally. Dual remotes untouched per Push Approval Policy. Awaiting user approval before Phase 3 (Sub-Batch 10A).
 
+---
+
+### Sub-Batch 10A — Client Portal Shell, Auth, Dashboard & Invoices Refactor to Semantic Tokens
+- **Timestamp**: 2026-10-14T20:30:00+05:00
+- **Task ID**: `UI-1B-SUB-BATCH-10A-CLIENT-PORTAL-SHELL`
+- **Actions Performed**:
+  1. **Section 6 Greps Pre-edit**:
+     - `app/(client-portal)/layout.tsx`: 1 hardcoded palette hit.
+     - `app/(client-portal)/client/login/page.tsx`: 16 hardcoded palette hits.
+     - `app/(client-portal)/client/dashboard/page.tsx`: 18 hardcoded palette hits.
+     - `app/(client-portal)/client/invoices/page.tsx`: 22 hardcoded palette hits.
+     - `components/client-portal/PortalNav.tsx`: 9 hardcoded palette hits.
+     - `components/client-portal/PortalProjectCard.tsx`: 13 hardcoded palette hits.
+     - Total: 79 hits across 6 files.
+  2. **Refactored to Semantic Design Tokens**:
+     - `app/(client-portal)/layout.tsx`: Converted root wrapper to `bg-background text-foreground`.
+     - `app/(client-portal)/client/login/page.tsx`: Converted card to `bg-card border-border`, inputs to `bg-background border-input text-foreground`, primary button to `bg-primary text-primary-foreground hover:bg-primary/90`, and error alert to `border-destructive/20 text-destructive`. Preserved checkmark badge domain colors with same-line comments.
+     - `app/(client-portal)/client/dashboard/page.tsx`: Replaced hardcoded slate cards and text with `bg-card`, `border-border`, `text-foreground`, `text-muted-foreground`. Preserved status/metric badges with same-line comments (`// intentional: ...`).
+     - `app/(client-portal)/client/invoices/page.tsx`: Replaced hardcoded slate tables, cards, headers, and text with `bg-card`, `border-border`, `divide-border`, `text-muted-foreground`, `text-foreground`. Preserved invoice status badge styling with same-line comments (`// intentional: ...`).
+     - `components/client-portal/PortalNav.tsx`: 100% semantic adoption (`border-border`, `bg-background/90`, `text-primary`, `text-muted-foreground`, `bg-muted`). 0 residual hits.
+     - `components/client-portal/PortalProjectCard.tsx`: Converted container to `border-border bg-card hover:border-primary/40 hover:shadow-sm`. Replaced hardcoded SVG stroke with `currentColor`. Preserved project status badges with same-line comments.
+  3. **Non-Color Changes Detail**:
+     - `app/(client-portal)/layout.tsx`: None.
+     - `app/(client-portal)/client/login/page.tsx`: Normalized card elevation (`shadow-2xl` → `shadow-sm`), button elevation to `shadow-xs`, inputs verified with `bg-background border-input`.
+     - `app/(client-portal)/client/dashboard/page.tsx`: Normalized card elevations to `shadow-sm`, verified grid layout and borders (`border-border`).
+     - `app/(client-portal)/client/invoices/page.tsx`: Normalized table elevation (`shadow-sm`), table row hover to `hover:bg-muted/50`, headers and borders normalized to `border-border divide-border`.
+     - `components/client-portal/PortalNav.tsx`: Border normalized to `border-border`, background to `bg-background/90 backdrop-blur-md`.
+     - `components/client-portal/PortalProjectCard.tsx`: Normalized hover elevation to `hover:shadow-sm`, border transitions to `hover:border-primary/40`.
+  4. **Section 6 Greps Post-edit**:
+     - 0 unannotated hits across all 6 files.
+     - 27 intentional domain hits justified with `// intentional: <reason>` or `{/* // intentional: <reason> */}` on the exact same line.
+     - 0 unannotated `text-white` hits.
+  5. **Browser Verification**:
+     - Created `scripts/verify-client-portal-10a-e2e.ts`.
+     - Captured 8 screenshots saved to `assets/screenshots/sub-batch-10a/` and artifact directory:
+       * `client_login_light.png` (83KB) & `client_login_dark.png` (74KB)
+       * `client_dashboard_light.png` (138KB) & `client_dashboard_dark.png` (140KB)
+       * `client_invoices_light.png` (90KB) & `client_invoices_dark.png` (92KB)
+       * `multi_route_client_portal_10a_light.png` (138KB) & `multi_route_client_portal_10a_dark.png` (140KB)
+     - Computed color table verified via Playwright `getComputedStyle`:
+       * Dark Email Input Bg: `rgba(30, 41, 59, 0.6)` (NOT white, ✅ PASS).
+       * Dark Password Input Bg: `rgba(30, 41, 59, 0.6)` (NOT white, ✅ PASS).
+       * Dark Login Submit Button: `rgb(124, 58, 237)` (`bg-primary`, ✅ PASS).
+       * Dark Page Background: `rgb(9, 9, 15)` (`bg-background`, ✅ PASS).
+       * Dark Project Card: `rgba(15, 23, 42, 0.8)` (`bg-card`, ✅ PASS).
+       * Light equivalents and invoice table headers/rows/badges all computed and verified (18/18 PASS).
+     - Multi-route theme persistence verified across `/client/dashboard` → `/client/invoices` → back to `/client/dashboard`.
+  6. **Quality Gate Verification**:
+     - `npx tsc --noEmit; echo "EXIT: $?"` → EXIT: 0
+     - `npm test` → 497/497 tests passed across 73 test files
+     - `npm run lint` → 4 warnings, 0 errors
+     - `npm run build` → 142 routes compiled cleanly (exit code 0)
+- **Status**: ✅ Sub-Batch 10A complete. Shell, login, dashboard, and invoices are 100% migrated to semantic tokens. Committed locally. Dual remotes untouched per Push Approval Policy. Awaiting user approval before Sub-Batch 10B.
+
+
 
 
 
