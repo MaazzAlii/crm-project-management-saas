@@ -57,9 +57,9 @@ export function TagSelect({ selectedTags, onChange }: TagSelectProps) {
   return (
     <div className="space-y-3">
       {/* Selected Tags Pills Display */}
-      <div className="flex flex-wrap items-center gap-1.5 min-h-[38px] p-2 rounded-xl border border-slate-800 bg-slate-950">
+      <div className="flex flex-wrap items-center gap-1.5 min-h-[38px] p-2 rounded-xl border border-border bg-background">
         {selectedTags.length === 0 ? (
-          <span className="text-xs text-slate-500 italic px-1">No tags selected</span>
+          <span className="text-xs text-muted-foreground italic px-1">No tags selected</span>
         ) : (
           selectedTags.map((tagName) => {
             const tagObj = availableTags.find((t) => t.name.toLowerCase() === tagName.toLowerCase())
@@ -78,13 +78,13 @@ export function TagSelect({ selectedTags, onChange }: TagSelectProps) {
 
       {/* Available Tags Toggle List */}
       <div>
-        <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-1.5">
+        <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground mb-1.5">
           <span>Select from available tags:</span>
           {!isCreating && (
             <button
               type="button"
               onClick={() => setIsCreating(true)}
-              className="text-sky-400 hover:text-sky-300 font-bold flex items-center gap-1 transition"
+              className="text-primary hover:text-primary/80 font-bold flex items-center gap-1 transition"
             >
               <Plus className="h-3 w-3" />
               Create Tag
@@ -93,7 +93,7 @@ export function TagSelect({ selectedTags, onChange }: TagSelectProps) {
         </div>
 
         {fetching ? (
-          <div className="flex items-center gap-2 text-xs text-slate-500 py-1">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground py-1">
             <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading tags...
           </div>
         ) : (
@@ -108,13 +108,13 @@ export function TagSelect({ selectedTags, onChange }: TagSelectProps) {
                   onClick={() => handleToggleTag(tag.name)}
                   className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-semibold transition ${
                     isSelected
-                      ? `${colorMeta.bg} ring-1 ring-sky-400`
-                      : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                      ? `${colorMeta.bg} ring-1 ring-primary`
+                      : 'border-border bg-muted/50 text-muted-foreground hover:border-border/80 hover:text-foreground'
                   }`}
                 >
                   <TagIcon className="h-3 w-3 opacity-60" />
                   <span>{tag.name}</span>
-                  {isSelected && <Check className="h-3 w-3 ml-0.5 text-sky-400" />}
+                  {isSelected && <Check className="h-3 w-3 ml-0.5 text-primary" />}
                 </button>
               )
             })}
@@ -124,9 +124,9 @@ export function TagSelect({ selectedTags, onChange }: TagSelectProps) {
 
       {/* On-The-Fly Tag Creator Inline Form */}
       {isCreating && (
-        <div className="p-3 rounded-xl border border-sky-500/30 bg-sky-950/20 space-y-3 animate-in fade-in duration-150">
-          <div className="text-xs font-bold text-white flex items-center gap-1.5">
-            <TagIcon className="h-3.5 w-3.5 text-sky-400" />
+        <div className="p-3 rounded-xl border border-primary/30 bg-primary/5 space-y-3 animate-in fade-in duration-150">
+          <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+            <TagIcon className="h-3.5 w-3.5 text-primary" />
             Create New Client Tag
           </div>
 
@@ -136,13 +136,13 @@ export function TagSelect({ selectedTags, onChange }: TagSelectProps) {
               value={newTagName}
               onChange={(e) => setNewTagName(e.target.value)}
               placeholder="Tag name (e.g., Enterprise, Follow Up)"
-              className="rounded-xl border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none"
+              className="rounded-xl border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-placeholder focus:border-primary focus:outline-none"
             />
 
             <select
               value={newTagColor}
               onChange={(e) => setNewTagColor(e.target.value)}
-              className="rounded-xl border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-white focus:border-sky-500 focus:outline-none"
+              className="rounded-xl border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none"
             >
               {TAG_COLORS.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -156,7 +156,7 @@ export function TagSelect({ selectedTags, onChange }: TagSelectProps) {
             <button
               type="button"
               onClick={() => setIsCreating(false)}
-              className="px-3 py-1 text-xs text-slate-400 hover:text-white transition"
+              className="px-3 py-1 text-xs text-muted-foreground hover:text-foreground transition"
             >
               Cancel
             </button>
@@ -164,7 +164,7 @@ export function TagSelect({ selectedTags, onChange }: TagSelectProps) {
               type="button"
               disabled={loading || !newTagName.trim()}
               onClick={handleCreateNewTag}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold transition disabled:opacity-50"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition disabled:opacity-50"
             >
               {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
               Save Tag
