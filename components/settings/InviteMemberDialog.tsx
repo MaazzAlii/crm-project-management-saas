@@ -219,34 +219,34 @@ export function InviteMemberDialog({
   return (
     <div
       data-testid="invite-dialog"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-overlay)] p-4 backdrop-blur-sm animate-in fade-in"
     >
-      <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-5">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <UserPlus className="h-4 w-4 text-sky-400" />
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+            <UserPlus className="h-4 w-4 text-primary" />
             Invite Team Member
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white transition"
+            className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Seat Usage Indicator */}
-        <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3.5 space-y-2">
+        <div className="rounded-xl border border-border bg-background/60 p-3.5 space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold text-slate-300">Seat Capacity</span>
+            <span className="font-semibold text-foreground">Seat Capacity</span>
             <span
               data-testid="seat-usage-line"
-              className="font-mono font-bold text-sky-400 flex items-center gap-1.5"
+              className="font-mono font-bold text-primary flex items-center gap-1.5"
             >
               {loadingUsage ? (
-                <Loader2 className="h-3 w-3 animate-spin text-slate-400" />
+                <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
               ) : null}
               {seatUsageText}
             </span>
@@ -256,7 +256,7 @@ export function InviteMemberDialog({
           {isSeatLimitReached && (
             <div
               data-testid="seat-limit-warning"
-              className="flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-300 mt-2"
+              className="flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-300 mt-2" // intentional: seat quota alert banner
             >
               <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
               <div className="space-y-1">
@@ -268,7 +268,7 @@ export function InviteMemberDialog({
                 </p>
                 <Link
                   href="/settings/billing"
-                  className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-400 hover:underline pt-0.5"
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline pt-0.5"
                 >
                   View Plans & Upgrade <ArrowUpRight className="h-3 w-3" />
                 </Link>
@@ -281,8 +281,8 @@ export function InviteMemberDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email Field */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-              <Mail className="h-3.5 w-3.5 text-slate-400" />
+            <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+              <Mail className="h-3.5 w-3.5 text-muted-foreground" />
               Email Address
             </label>
             <input
@@ -297,10 +297,10 @@ export function InviteMemberDialog({
               }}
               onBlur={(e) => validateEmailInput(e.target.value)}
               placeholder="colleague@company.com"
-              className={`w-full rounded-xl border bg-slate-950 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none font-mono transition ${
+              className={`w-full rounded-xl border bg-background px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none font-mono transition ${
                 emailError || serverError
-                  ? 'border-rose-500 focus:border-rose-500'
-                  : 'border-slate-800 focus:border-sky-500'
+                  ? 'border-destructive focus:border-destructive'
+                  : 'border-border focus:border-primary'
               }`}
             />
 
@@ -308,7 +308,7 @@ export function InviteMemberDialog({
             {(emailError || serverError) && (
               <div
                 data-testid="email-error-message"
-                className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-400 pt-0.5"
+                className="flex items-center gap-1.5 text-[11px] font-semibold text-destructive pt-0.5"
               >
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 <span>{emailError || serverError}</span>
@@ -319,7 +319,7 @@ export function InviteMemberDialog({
             {showPersonalEmailNotice && !emailError && !serverError && (
               <div
                 data-testid="personal-email-notice"
-                className="flex items-start gap-1.5 text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 mt-1"
+                className="flex items-start gap-1.5 text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 mt-1" // intentional: personal email notice banner
               >
                 <AlertCircle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
                 <span>
@@ -331,10 +331,10 @@ export function InviteMemberDialog({
 
           {/* Role Select */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
+            <label className="text-xs font-semibold text-foreground flex items-center justify-between">
               <span>Assign Role</span>
               {!isOwner && (
-                <span className="text-[10px] text-slate-500 font-normal">
+                <span className="text-[10px] text-muted-foreground font-normal">
                   (Only owner can invite admins)
                 </span>
               )}
@@ -345,7 +345,7 @@ export function InviteMemberDialog({
               value={role}
               disabled={submitting}
               onChange={(e) => setRole(e.target.value as 'admin' | 'member' | 'viewer')}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:border-sky-500 focus:outline-none cursor-pointer"
+              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs text-foreground focus:border-primary focus:outline-none cursor-pointer"
             >
               {isOwner && (
                 <option value="admin">Admin — Full operational & management access</option>
@@ -356,7 +356,7 @@ export function InviteMemberDialog({
           </div>
 
           {/* Temporary Password Toggle */}
-          <div className="space-y-3 pt-1 border-t border-slate-800/60">
+          <div className="space-y-3 pt-1 border-t border-border/60">
             <label className="flex items-center gap-2.5 cursor-pointer select-none">
               <input
                 type="checkbox"
@@ -369,18 +369,18 @@ export function InviteMemberDialog({
                     setTempPasswordError(null)
                   }
                 }}
-                className="h-4 w-4 rounded border-slate-700 bg-slate-950 text-sky-500 focus:ring-sky-500/30"
+                className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary/30"
               />
-              <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                <KeyRound className="h-3.5 w-3.5 text-sky-400" />
+              <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <KeyRound className="h-3.5 w-3.5 text-primary" />
                 Set temporary password (optional)
               </span>
             </label>
 
             {setTempPassword && (
-              <div className="space-y-3.5 rounded-xl border border-slate-800 bg-slate-950/60 p-3.5">
+              <div className="space-y-3.5 rounded-xl border border-border bg-background/60 p-3.5">
                 {/* Warning note */}
-                <div className="flex items-start gap-2 text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5">
+                <div className="flex items-start gap-2 text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5"> {/* intentional: temp password warning banner */}
                   <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                   <div className="leading-relaxed">
                     The user will be forced to change this password on first login. Share this temporary password securely with them out-of-band.
@@ -389,8 +389,8 @@ export function InviteMemberDialog({
 
                 {/* Password input */}
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
-                    <Lock className="h-3 w-3 text-slate-400" />
+                  <label className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
+                    <Lock className="h-3 w-3 text-muted-foreground" />
                     Temporary Password
                   </label>
                   <input
@@ -402,14 +402,14 @@ export function InviteMemberDialog({
                       if (tempPasswordError) setTempPasswordError(null)
                     }}
                     placeholder="••••••••••••"
-                    className="w-full rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none font-mono"
+                    className="w-full rounded-xl border border-border bg-background px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none font-mono"
                   />
                 </div>
 
                 {/* Confirm password input */}
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
-                    <Lock className="h-3 w-3 text-slate-400" />
+                  <label className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
+                    <Lock className="h-3 w-3 text-muted-foreground" />
                     Confirm Password
                   </label>
                   <input
@@ -421,33 +421,33 @@ export function InviteMemberDialog({
                       if (tempPasswordError) setTempPasswordError(null)
                     }}
                     placeholder="••••••••••••"
-                    className={`w-full rounded-xl border bg-slate-900 px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none font-mono ${
+                    className={`w-full rounded-xl border bg-background px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none font-mono ${
                       confirmTempPassword && !passwordsMatch
-                        ? 'border-rose-500 focus:border-rose-500'
-                        : 'border-slate-800 focus:border-sky-500'
+                        ? 'border-destructive focus:border-destructive'
+                        : 'border-border focus:border-primary'
                     }`}
                   />
                 </div>
 
                 {/* Strength requirements */}
                 <div className="space-y-1.5 pt-1 text-[10px]">
-                  <span className="text-slate-400 font-medium">Requirements:</span>
+                  <span className="text-muted-foreground font-medium">Requirements:</span>
                   <div className="grid grid-cols-2 gap-1.5">
-                    <span className={hasMinLength ? 'text-emerald-400' : 'text-slate-500'}>
+                    <span className={hasMinLength ? 'text-emerald-400' : 'text-muted-foreground'}> {/* intentional: requirement check */}
                       • At least 8 characters
                     </span>
-                    <span className={hasUppercase ? 'text-emerald-400' : 'text-slate-500'}>
+                    <span className={hasUppercase ? 'text-emerald-400' : 'text-muted-foreground'}> {/* intentional: requirement check */}
                       • 1 uppercase letter
                     </span>
-                    <span className={hasLowercase ? 'text-emerald-400' : 'text-slate-500'}>
+                    <span className={hasLowercase ? 'text-emerald-400' : 'text-muted-foreground'}> {/* intentional: requirement check */}
                       • 1 lowercase letter
                     </span>
-                    <span className={hasDigit ? 'text-emerald-400' : 'text-slate-500'}>
+                    <span className={hasDigit ? 'text-emerald-400' : 'text-muted-foreground'}> {/* intentional: requirement check */}
                       • 1 number (0-9)
                     </span>
                   </div>
                   {confirmTempPassword && (
-                    <div className={`pt-1 font-semibold ${passwordsMatch ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    <div className={`pt-1 font-semibold ${passwordsMatch ? 'text-emerald-400' : 'text-destructive'}`}> {/* intentional: password match check */}
                       {passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
                     </div>
                   )}
@@ -455,7 +455,7 @@ export function InviteMemberDialog({
 
                 {/* Inline error */}
                 {tempPasswordError && (
-                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-400 pt-0.5">
+                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-destructive pt-0.5">
                     <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                     <span>{tempPasswordError}</span>
                   </div>
@@ -465,19 +465,19 @@ export function InviteMemberDialog({
           </div>
 
           {/* Modal Actions */}
-          <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+          <div className="flex justify-end gap-3 pt-3 border-t border-border">
             <button
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="rounded-xl border border-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition"
+              className="rounded-xl border border-border px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting || !!isSeatLimitReached}
-              className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-xs font-bold text-white hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-sky-600/20"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-primary/20"
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

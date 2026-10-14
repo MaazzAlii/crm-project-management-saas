@@ -44,27 +44,27 @@ interface TeamMemberListProps {
 const ROLE_LABELS: Record<string, { label: string; badge: string; icon: any }> = {
   owner: {
     label: 'Owner',
-    badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20', // intentional: role status badge
     icon: ShieldCheck,
   },
   admin: {
     label: 'Admin',
-    badge: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+    badge: 'bg-sky-500/10 text-sky-400 border-sky-500/20', // intentional: role status badge
     icon: Shield,
   },
   member: {
     label: 'Member',
-    badge: 'bg-slate-800 text-slate-300 border-slate-700',
+    badge: 'bg-muted text-muted-foreground border-border',
     icon: User,
   },
   viewer: {
     label: 'Viewer',
-    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', // intentional: role status badge
     icon: Eye,
   },
   billing_manager: {
     label: 'Billing Manager',
-    badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20', // intentional: role status badge
     icon: CreditCard,
   },
 }
@@ -208,11 +208,11 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
       {/* Header Actions */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
-            <Users className="h-5 w-5 text-sky-400" />
+          <h2 className="text-xl font-extrabold text-foreground flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
             Organization Team Members ({members.length})
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             Manage your team, invite new members, and assign role permissions.
           </p>
         </div>
@@ -220,7 +220,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
         {canManage && (
           <button
             onClick={() => setShowInviteModal(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-sky-600/20 hover:bg-sky-500 transition cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition cursor-pointer"
           >
             <UserPlus className="h-4 w-4" />
             Invite Member
@@ -234,8 +234,8 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
           data-testid="invite-toast"
           className={`flex items-center justify-between gap-3 rounded-xl border p-4 text-xs font-semibold ${
             message.type === 'success'
-              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-              : 'border-rose-500/30 bg-rose-500/10 text-rose-300'
+              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' // intentional: success feedback toast
+              : 'border-rose-500/30 bg-rose-500/10 text-rose-300' // intentional: error feedback toast
           }`}
         >
           <div className="flex items-center gap-2.5">
@@ -255,7 +255,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                 setCopied(true)
                 setTimeout(() => setCopied(false), 2500)
               }}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600/30 border border-emerald-500/40 px-2.5 py-1 text-[11px] font-bold text-emerald-200 hover:bg-emerald-600/50 transition cursor-pointer shrink-0"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600/30 border border-emerald-500/40 px-2.5 py-1 text-[11px] font-bold text-emerald-200 hover:bg-emerald-600/50 transition cursor-pointer shrink-0" // intentional: copy feedback button
             >
               {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
               {copied ? 'Link Copied!' : 'Copy Invite Link'}
@@ -266,21 +266,21 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
 
       {/* Single Member Empty Encouragement */}
       {members.length === 1 && (
-        <div className="rounded-2xl border border-sky-500/20 bg-gradient-to-r from-sky-950/40 via-slate-900 to-indigo-950/30 p-5 space-y-3">
-          <div className="flex items-center gap-2.5 text-sky-400 font-bold text-xs">
+        <div className="rounded-2xl border border-primary/20 bg-card p-5 space-y-3">
+          <div className="flex items-center gap-2.5 text-primary font-bold text-xs">
             <UserPlus className="h-4 w-4" />
             Build your team
           </div>
-          <p className="text-xs text-slate-300">
+          <p className="text-xs text-muted-foreground">
             You are currently the only member in this workspace. Invite collaborators, project managers, or billing contacts to get started.
           </p>
         </div>
       )}
 
       {/* Desktop Table View */}
-      <div className="hidden sm:block overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/90 shadow-xl">
+      <div className="hidden sm:block overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
         <table className="w-full text-left text-xs">
-          <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+          <thead className="border-b border-border bg-muted/40 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             <tr>
               <th className="px-5 py-3.5">Member</th>
               <th className="px-5 py-3.5">Role</th>
@@ -288,7 +288,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
               <th className="px-5 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/80">
+          <tbody className="divide-y divide-border">
             {members.map((member) => {
               const RoleIcon = ROLE_LABELS[member.role]?.icon || User
               const isCurrentUser = member.userId === currentUserId
@@ -296,25 +296,25 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
               const removable = canRemoveMember(member)
 
               return (
-                <tr key={member.id} className="hover:bg-slate-800/40 transition">
+                <tr key={member.id} className="hover:bg-muted/40 transition">
                   {/* Name & Email */}
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 font-bold text-white text-xs border border-slate-700">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted font-bold text-foreground text-xs border border-border">
                         {member.profile.fullName
                           ? member.profile.fullName.charAt(0).toUpperCase()
                           : member.profile.email.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div className="font-semibold text-white flex items-center gap-2">
+                        <div className="font-semibold text-foreground flex items-center gap-2">
                           {member.profile.fullName || 'Team Member'}
                           {isCurrentUser && (
-                            <span className="rounded bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-mono text-sky-400 border border-sky-500/30">
+                            <span className="rounded bg-primary/20 px-1.5 py-0.5 text-[10px] font-mono text-primary border border-primary/30">
                               You
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-slate-400 font-mono">{member.profile.email}</div>
+                        <div className="text-[11px] text-muted-foreground font-mono">{member.profile.email}</div>
                       </div>
                     </div>
                   </td>
@@ -331,7 +331,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                             e.target.value as 'owner' | 'admin' | 'member' | 'viewer' | 'billing_manager'
                           )
                         }
-                        className="rounded-lg border border-slate-800 bg-slate-950 px-2.5 py-1 text-xs font-semibold text-white focus:border-sky-500 focus:outline-none disabled:opacity-50"
+                        className="rounded-lg border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground focus:border-primary focus:outline-none disabled:opacity-50"
                       >
                         {isOwner && <option value="admin">Admin</option>}
                         <option value="member">Member</option>
@@ -351,7 +351,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                   </td>
 
                   {/* Joined Date */}
-                  <td className="px-5 py-4 text-slate-400 font-mono text-[11px]">
+                  <td className="px-5 py-4 text-muted-foreground font-mono text-[11px]">
                     {new Date(member.joinedAt).toLocaleDateString(undefined, {
                       year: 'numeric',
                       month: 'short',
@@ -365,7 +365,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                       <button
                         onClick={() => setMemberToRemove(member)}
                         title="Remove member"
-                        className="rounded-lg p-2 text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition cursor-pointer"
+                        className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition cursor-pointer"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -386,35 +386,35 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
           const removable = canRemoveMember(member)
 
           return (
-            <div key={member.id} className="rounded-xl border border-slate-800 bg-slate-900 p-4 space-y-3">
+            <div key={member.id} className="rounded-xl border border-border bg-card p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 font-bold text-white text-xs">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted font-bold text-foreground text-xs border border-border">
                     {member.profile.fullName
                       ? member.profile.fullName.charAt(0).toUpperCase()
                       : member.profile.email.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <div className="font-semibold text-white text-xs flex items-center gap-1.5">
+                    <div className="font-semibold text-foreground text-xs flex items-center gap-1.5">
                       {member.profile.fullName || 'Team Member'}
-                      {isCurrentUser && <span className="text-[10px] text-sky-400">(You)</span>}
+                      {isCurrentUser && <span className="text-[10px] text-primary">(You)</span>}
                     </div>
-                    <div className="text-[10px] text-slate-400 font-mono">{member.profile.email}</div>
+                    <div className="text-[10px] text-muted-foreground font-mono">{member.profile.email}</div>
                   </div>
                 </div>
 
                 {removable && (
                   <button
                     onClick={() => setMemberToRemove(member)}
-                    className="p-1 text-slate-400 hover:text-rose-400"
+                    className="p-1 text-muted-foreground hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 )}
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-slate-800">
-                <span className="text-[11px] text-slate-400">Role:</span>
+              <div className="flex items-center justify-between pt-2 border-t border-border">
+                <span className="text-[11px] text-muted-foreground">Role:</span>
                 {editable ? (
                   <select
                     value={member.role}
@@ -424,7 +424,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                         e.target.value as 'owner' | 'admin' | 'member' | 'viewer' | 'billing_manager'
                       )
                     }
-                    className="rounded-lg border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-white"
+                    className="rounded-lg border border-border bg-background px-2 py-1 text-xs text-foreground focus:border-primary focus:outline-none"
                   >
                     {isOwner && <option value="admin">Admin</option>}
                     <option value="member">Member</option>
@@ -432,7 +432,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                     {isOwner && <option value="billing_manager">Billing Manager</option>}
                   </select>
                 ) : (
-                  <span className="text-xs font-semibold text-sky-400 uppercase font-mono">
+                  <span className="text-xs font-semibold text-primary uppercase font-mono">
                     {ROLE_LABELS[member.role]?.label || member.role}
                   </span>
                 )}
@@ -473,24 +473,24 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
 
       {/* Remove Member Confirmation Modal (Prompt 36) */}
       {memberToRemove && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-md rounded-2xl border border-rose-500/30 bg-slate-900 p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-3 text-rose-400">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-overlay)] p-4 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-md rounded-2xl border border-destructive/30 bg-card p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-destructive">
               <AlertTriangle className="h-6 w-6 shrink-0" />
-              <h3 className="text-base font-bold text-white">Remove Team Member?</h3>
+              <h3 className="text-base font-bold text-foreground">Remove Team Member?</h3>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Are you sure you want to remove{' '}
-              <span className="font-semibold text-white font-mono">{memberToRemove.profile.email}</span> from
+              <span className="font-semibold text-foreground font-mono">{memberToRemove.profile.email}</span> from
               this workspace? They will lose access to all tenant resources immediately.
             </p>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+            <div className="flex justify-end gap-3 pt-3 border-t border-border">
               <button
                 type="button"
                 onClick={() => setMemberToRemove(null)}
-                className="rounded-xl border border-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800"
+                className="rounded-xl border border-border px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted"
               >
                 Cancel
               </button>
@@ -498,7 +498,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                 type="button"
                 disabled={removing}
                 onClick={handleRemoveConfirm}
-                className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-500 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-destructive px-4 py-2 text-xs font-bold text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
               >
                 {removing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                 Confirm Remove

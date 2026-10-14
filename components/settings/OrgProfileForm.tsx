@@ -74,7 +74,7 @@ export function OrgProfileForm({ org, canEdit }: OrgProfileFormProps) {
     <div className="max-w-4xl space-y-6">
       {/* Non-admin Warning Banner */}
       {!canEdit && (
-        <div className="flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-300">
+        <div className="flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-300"> {/* intentional: warning alert banner */}
           <Lock className="h-5 w-5 text-amber-400 shrink-0" />
           <div>
             <p className="font-bold">Read-Only Mode</p>
@@ -90,8 +90,8 @@ export function OrgProfileForm({ org, canEdit }: OrgProfileFormProps) {
         <div
           className={`flex items-center gap-3 rounded-xl border p-4 text-xs font-semibold ${
             message.type === 'success'
-              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-              : 'border-rose-500/30 bg-rose-500/10 text-rose-300'
+              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' // intentional: success feedback banner
+              : 'border-rose-500/30 bg-rose-500/10 text-rose-300' // intentional: error feedback banner
           }`}
         >
           {message.type === 'success' ? (
@@ -105,13 +105,13 @@ export function OrgProfileForm({ org, canEdit }: OrgProfileFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Workspace Details Card */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl space-y-5">
-          <div className="border-b border-slate-800 pb-4">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-sky-400" />
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-xl space-y-5">
+          <div className="border-b border-border pb-4">
+            <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-primary" />
               General Organization Profile
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Basic metadata and branding identifiers for your organization.
             </p>
           </div>
@@ -119,7 +119,7 @@ export function OrgProfileForm({ org, canEdit }: OrgProfileFormProps) {
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             {/* Organization Name */}
             <div className="space-y-1.5 sm:col-span-2">
-              <label className="text-xs font-semibold text-slate-300">Organization Name</label>
+              <label className="text-xs font-semibold text-foreground">Organization Name</label>
               <input
                 type="text"
                 required
@@ -127,21 +127,21 @@ export function OrgProfileForm({ org, canEdit }: OrgProfileFormProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Acme Creative Agency"
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none disabled:opacity-60"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none disabled:opacity-60"
               />
             </div>
 
             {/* Industry Type */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                <Briefcase className="h-3.5 w-3.5 text-slate-400" />
+              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Briefcase className="h-3.5 w-3.5 text-muted-foreground" />
                 Industry Type
               </label>
               <select
                 disabled={!canEdit}
                 value={industryType}
                 onChange={(e) => setIndustryType(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:border-sky-500 focus:outline-none disabled:opacity-60"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs text-foreground focus:border-primary focus:outline-none disabled:opacity-60"
               >
                 <option value="General Agency">General Agency</option>
                 <option value="Digital Marketing">Digital Marketing</option>
@@ -155,15 +155,15 @@ export function OrgProfileForm({ org, canEdit }: OrgProfileFormProps) {
 
             {/* Default Timezone */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                <Globe className="h-3.5 w-3.5 text-slate-400" />
+              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5 text-muted-foreground" />
                 Default Timezone
               </label>
               <select
                 disabled={!canEdit}
                 value={timezone}
                 onChange={(e) => setTimezone(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:border-sky-500 focus:outline-none disabled:opacity-60"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs text-foreground focus:border-primary focus:outline-none disabled:opacity-60"
               >
                 {COMMON_TIMEZONES.map((tz) => (
                   <option key={tz.value} value={tz.value}>
@@ -175,8 +175,8 @@ export function OrgProfileForm({ org, canEdit }: OrgProfileFormProps) {
 
             {/* Logo URL */}
             <div className="space-y-1.5 sm:col-span-2">
-              <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                <ImageIcon className="h-3.5 w-3.5 text-slate-400" />
+              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
                 Logo Asset URL (Optional)
               </label>
               <input
@@ -185,9 +185,9 @@ export function OrgProfileForm({ org, canEdit }: OrgProfileFormProps) {
                 value={logoUrl}
                 onChange={(e) => setLogoUrl(e.target.value)}
                 placeholder="https://example.com/assets/logo.png"
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none disabled:opacity-60 font-mono"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none disabled:opacity-60 font-mono"
               />
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-muted-foreground">
                 URL to a high-resolution PNG or SVG logo used for client portal branding.
               </p>
             </div>
@@ -195,26 +195,26 @@ export function OrgProfileForm({ org, canEdit }: OrgProfileFormProps) {
         </div>
 
         {/* Read-only System Identifiers */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+        <div className="rounded-2xl border border-border bg-card/60 p-6 space-y-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             System & Billing Metadata
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="rounded-xl border border-slate-800/80 bg-slate-950 p-3">
-              <span className="text-[11px] text-slate-400 font-semibold block mb-0.5">Workspace Slug</span>
-              <span className="text-xs font-mono text-white font-bold">{org.slug}</span>
+            <div className="rounded-xl border border-border/80 bg-background p-3">
+              <span className="text-[11px] text-muted-foreground font-semibold block mb-0.5">Workspace Slug</span>
+              <span className="text-xs font-mono text-foreground font-bold">{org.slug}</span>
             </div>
 
-            <div className="rounded-xl border border-slate-800/80 bg-slate-950 p-3">
-              <span className="text-[11px] text-slate-400 font-semibold block mb-0.5">Subscription Plan</span>
-              <span className="inline-flex items-center gap-1 rounded-md bg-sky-500/10 px-2 py-0.5 text-xs font-bold text-sky-400 border border-sky-500/20 uppercase font-mono">
+            <div className="rounded-xl border border-border/80 bg-background p-3">
+              <span className="text-[11px] text-muted-foreground font-semibold block mb-0.5">Subscription Plan</span>
+              <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary border border-primary/20 uppercase font-mono">
                 {org.plan_tier}
               </span>
             </div>
 
-            <div className="rounded-xl border border-slate-800/80 bg-slate-950 p-3">
-              <span className="text-[11px] text-slate-400 font-semibold block mb-0.5">Billing Status</span>
-              <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-bold text-emerald-400 border border-emerald-500/20 uppercase font-mono">
+            <div className="rounded-xl border border-border/80 bg-background p-3">
+              <span className="text-[11px] text-muted-foreground font-semibold block mb-0.5">Billing Status</span>
+              <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-bold text-emerald-400 border border-emerald-500/20 uppercase font-mono">{/* intentional: active billing status badge */}
                 {org.billing_status}
               </span>
             </div>
@@ -227,11 +227,11 @@ export function OrgProfileForm({ org, canEdit }: OrgProfileFormProps) {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-sky-600/20 hover:bg-sky-500 transition focus:outline-none disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition focus:outline-none disabled:opacity-50"
             >
               {saving ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin text-white" />
+                  <Loader2 className="h-4 w-4 animate-spin text-primary-foreground" />
                   Saving Changes...
                 </>
               ) : (

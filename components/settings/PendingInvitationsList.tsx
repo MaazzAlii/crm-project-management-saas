@@ -139,7 +139,7 @@ export function PendingInvitationsList({
       return (
         <span
           data-testid="status-badge-send-failed"
-          className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose-400 border border-rose-500/30"
+          className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose-400 border border-rose-500/30" // intentional: send-failed status badge
         >
           <AlertCircle className="h-3 w-3" />
           Send failed
@@ -150,7 +150,7 @@ export function PendingInvitationsList({
       return (
         <span
           data-testid="status-badge-expired"
-          className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-400 border border-amber-500/30"
+          className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-400 border border-amber-500/30" // intentional: expired status badge
         >
           <Clock className="h-3 w-3" />
           Expired
@@ -160,7 +160,7 @@ export function PendingInvitationsList({
     return (
       <span
         data-testid="status-badge-pending"
-        className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky-400 border border-sky-500/30"
+        className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary border border-primary/30"
       >
         <Clock className="h-3 w-3" />
         Pending
@@ -182,14 +182,14 @@ export function PendingInvitationsList({
   }
 
   return (
-    <div className="space-y-4 pt-6 border-t border-slate-800" data-testid="pending-invitations-list">
+    <div className="space-y-4 pt-6 border-t border-border" data-testid="pending-invitations-list">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Mail className="h-4 w-4 text-sky-400" />
+          <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+            <Mail className="h-4 w-4 text-primary" />
             Pending Invitations
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-muted-foreground">
             Teammates invited to this workspace who have not yet accepted.
           </p>
         </div>
@@ -198,7 +198,7 @@ export function PendingInvitationsList({
           onClick={fetchInvitations}
           disabled={loading}
           title="Refresh pending invitations"
-          className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition disabled:opacity-50"
+          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition disabled:opacity-50"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
         </button>
@@ -210,8 +210,8 @@ export function PendingInvitationsList({
           data-testid="pending-invite-toast"
           className={`flex items-center gap-2.5 rounded-xl border p-3 text-xs font-semibold ${
             feedback.type === 'success'
-              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-              : 'border-rose-500/30 bg-rose-500/10 text-rose-300'
+              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' // intentional: success feedback toast
+              : 'border-rose-500/30 bg-rose-500/10 text-rose-300' // intentional: error feedback toast
           }`}
         >
           {feedback.type === 'success' ? (
@@ -225,25 +225,25 @@ export function PendingInvitationsList({
 
       {/* Content */}
       {loading && invitations.length === 0 ? (
-        <div className="flex h-32 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/50">
-          <Loader2 className="h-5 w-5 animate-spin text-sky-400" />
+        <div className="flex h-32 items-center justify-center rounded-2xl border border-border bg-card/50">
+          <Loader2 className="h-5 w-5 animate-spin text-primary" />
         </div>
       ) : invitations.length === 0 ? (
         <div
           data-testid="empty-pending-invitations"
-          className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/40 p-8 text-center text-xs text-slate-400"
+          className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/40 p-8 text-center text-xs text-muted-foreground"
         >
-          <Mail className="h-8 w-8 text-slate-600 mb-2" />
-          <p className="font-semibold text-slate-300">No pending invitations.</p>
-          <p className="text-slate-500 text-[11px] mt-0.5">
+          <Mail className="h-8 w-8 text-muted-foreground/60 mb-2" />
+          <p className="font-semibold text-foreground">No pending invitations.</p>
+          <p className="text-muted-foreground text-[11px] mt-0.5">
             When you invite teammates, their invitations will appear here until accepted.
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/90 shadow-xl">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs" data-testid="pending-invitations-table">
-              <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <thead className="border-b border-border bg-muted/40 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 <tr>
                   <th className="px-5 py-3.5">Email</th>
                   <th className="px-5 py-3.5">Role</th>
@@ -254,26 +254,26 @@ export function PendingInvitationsList({
                   {canManage && <th className="px-5 py-3.5 text-right">Actions</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/80">
+              <tbody className="divide-y divide-border">
                 {invitations.map((inv) => {
                   const hasLink = recentInviteLink && recentInviteLink.id === inv.id
                   return (
                     <tr
                       key={inv.id}
                       data-testid={`pending-invite-row-${inv.id}`}
-                      className="hover:bg-slate-800/40 transition"
+                      className="hover:bg-muted/40 transition"
                     >
-                      <td className="px-5 py-3.5 font-mono text-white font-medium">{inv.email}</td>
+                      <td className="px-5 py-3.5 font-mono text-foreground font-medium">{inv.email}</td>
                       <td className="px-5 py-3.5">
-                        <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-300 border border-slate-700">
+                        <span className="rounded bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border border-border">
                           {inv.role}
                         </span>
                       </td>
-                      <td className="px-5 py-3.5 text-slate-400 font-mono text-[11px]">
+                      <td className="px-5 py-3.5 text-muted-foreground font-mono text-[11px]">
                         {inv.invited_by ? inv.invited_by.slice(0, 8) + '...' : 'System'}
                       </td>
-                      <td className="px-5 py-3.5 text-slate-400">{formatDate(inv.created_at)}</td>
-                      <td className="px-5 py-3.5 text-slate-400">{formatDate(inv.token_expires_at)}</td>
+                      <td className="px-5 py-3.5 text-muted-foreground">{formatDate(inv.created_at)}</td>
+                      <td className="px-5 py-3.5 text-muted-foreground">{formatDate(inv.token_expires_at)}</td>
                       <td className="px-5 py-3.5">{getStatusBadge(inv)}</td>
                       {canManage && (
                         <td className="px-5 py-3.5 text-right">
@@ -283,7 +283,7 @@ export function PendingInvitationsList({
                                 type="button"
                                 onClick={() => handleCopyLink(inv.id, recentInviteLink.link)}
                                 title="Copy invite link"
-                                className="inline-flex items-center gap-1 rounded-lg border border-sky-500/30 bg-sky-500/10 px-2 py-1 text-[11px] font-semibold text-sky-300 hover:bg-sky-500/20 transition cursor-pointer"
+                                className="inline-flex items-center gap-1 rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary hover:bg-primary/20 transition cursor-pointer"
                               >
                                 {copiedId === inv.id ? (
                                   <Check className="h-3 w-3 text-emerald-400" />
@@ -299,10 +299,10 @@ export function PendingInvitationsList({
                               onClick={() => handleResend(inv)}
                               disabled={resendingId === inv.id}
                               title="Resend invitation email"
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-800/80 px-2.5 py-1 text-[11px] font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition disabled:opacity-50"
+                              className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted/80 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition disabled:opacity-50"
                             >
                               {resendingId === inv.id ? (
-                                <Loader2 className="h-3 w-3 animate-spin text-sky-400" />
+                                <Loader2 className="h-3 w-3 animate-spin text-primary" />
                               ) : (
                                 <RefreshCw className="h-3 w-3" />
                               )}
@@ -313,7 +313,7 @@ export function PendingInvitationsList({
                               type="button"
                               onClick={() => setInvitationToRevoke(inv)}
                               title="Revoke invitation"
-                              className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition"
+                              className="rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -333,25 +333,25 @@ export function PendingInvitationsList({
       {invitationToRevoke && (
         <div
           data-testid="revoke-invite-modal"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-overlay)] p-4 backdrop-blur-sm animate-in fade-in"
         >
-          <div className="w-full max-w-md rounded-2xl border border-rose-500/30 bg-slate-900 p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-3 text-rose-400">
+          <div className="w-full max-w-md rounded-2xl border border-destructive/30 bg-card p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-destructive">
               <AlertTriangle className="h-6 w-6 shrink-0" />
-              <h3 className="text-base font-bold text-white">Revoke Invitation?</h3>
+              <h3 className="text-base font-bold text-foreground">Revoke Invitation?</h3>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Are you sure you want to revoke the invitation for{' '}
-              <span className="font-semibold text-white font-mono">{invitationToRevoke.email}</span>?
+              <span className="font-semibold text-foreground font-mono">{invitationToRevoke.email}</span>?
               Their invitation link will be immediately invalidated and cannot be accepted.
             </p>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+            <div className="flex justify-end gap-3 pt-3 border-t border-border">
               <button
                 type="button"
                 onClick={() => setInvitationToRevoke(null)}
-                className="rounded-xl border border-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800"
+                className="rounded-xl border border-border px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted"
               >
                 Cancel
               </button>
@@ -359,7 +359,7 @@ export function PendingInvitationsList({
                 type="button"
                 disabled={revoking}
                 onClick={handleRevokeConfirm}
-                className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-500 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-destructive px-4 py-2 text-xs font-bold text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
               >
                 {revoking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                 Confirm Revoke
