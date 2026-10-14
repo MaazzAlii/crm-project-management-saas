@@ -2715,6 +2715,55 @@ paste at the start of every batch report.
      - `npm run build` → 142 routes compiled cleanly (exit code 0)
 - **Status**: ✅ Sub-Batch 8A complete. Three atomic commits created locally. Zero remotes pushed per Push Approval Policy. Awaiting review before Sub-Batch 8B.
 
+---
+
+### Step: UI-1B Sub-Batch 8B — Settings Billing, AI Features, and Org Audit Log (6 Files)
+- **Timestamp**: 2026-10-14T16:15:00+05:00
+- **Task ID**: `UI-1B-SUB-BATCH-8B-SETTINGS-BILLING-AI-AUDIT-LOG`
+- **Actions Performed**:
+  1. **Scoping & File Target Protocol**:
+     - Audited and refactored all 6 files within Sub-Batch 8B scope:
+       * `app/(dashboard)/settings/billing/page.tsx`
+       * `app/(dashboard)/settings/ai/page.tsx`
+       * `app/(dashboard)/settings/audit-log/page.tsx`
+       * `app/(dashboard)/settings/audit-log/AuditLogOrgView.tsx`
+       * `components/settings/BillingSettingsClient.tsx`
+       * `components/settings/AIFeatureSettingsView.tsx`
+  2. **Semantic Token Refactoring**:
+     - `app/(dashboard)/settings/billing/page.tsx`: Replaced `bg-slate-950 text-slate-100` with `bg-background text-foreground`, checkout processing banner refactored to `border-sky-500/30 bg-sky-500/10 text-sky-400` with intentional payment banner annotation, headers converted to `text-foreground` and `text-muted-foreground`.
+     - `app/(dashboard)/settings/ai/page.tsx`: Converted error banner from rose-500 to `border-destructive/30 bg-destructive/10 text-destructive` semantic tokens.
+     - `app/(dashboard)/settings/audit-log/page.tsx`: Converted access restricted banner from red-500/slate-400 to `border-destructive/20 bg-destructive/10 text-destructive`, heading to `text-foreground`, description to `text-muted-foreground`.
+     - `components/settings/BillingSettingsClient.tsx`: Converted error container to `bg-destructive/10 border-destructive/20 text-destructive`, subscription management card to `border-border bg-card`, heading to `text-card-foreground`, icon to `text-primary`, description to `text-muted-foreground`, manage button to `border-border bg-muted/60 text-foreground hover:bg-muted`, upgrade button to `bg-primary text-primary-foreground hover:bg-primary/90`, invoices card to `border-border bg-card`, empty state to `border-border bg-muted/30 text-muted-foreground`, table header to `border-border bg-muted/40 text-muted-foreground`, table body to `divide-border`, row hover to `hover:bg-muted/30`, amount and number to `text-foreground`, paid status badge annotated with inline justification, receipt download link to `text-primary`.
+     - `app/(dashboard)/settings/audit-log/AuditLogOrgView.tsx`: Stat cards converted to `border-border bg-card`, numbers to `text-card-foreground`, icons to `text-primary` with intentional annotations for security indicators, search toolbar to `border-border bg-card`, search `<input>` converted to `border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-ring`, all filter `<select>` elements converted to `border-input bg-background text-foreground focus:border-ring`, export CSV button to `border-border bg-muted/60 text-foreground hover:bg-muted`, table container to `border-border bg-card`, thead to `border-border bg-muted/40 text-muted-foreground`, tbody divide to `divide-border`, row hover to `hover:bg-muted/30`, expanded row to `bg-muted/20`, actor avatar to `bg-muted text-foreground border-border`, actor name to `text-foreground`, entity badge to `bg-muted/80 border-border text-muted-foreground`, modal backdrop strictly refactored to `bg-[var(--bg-overlay)] backdrop-blur-sm`, modal card to `border-border bg-card`, metadata grid to `bg-muted/30 border-border`, terminal pre block to `border-border bg-muted/40 text-emerald-400`, close button to `border-border bg-muted/60 text-foreground hover:bg-muted`. Action badges annotated with inline justifications.
+     - `components/settings/AIFeatureSettingsView.tsx`: Header banner converted to `border-border bg-card`, icon container to `bg-primary/10 border-primary/20 text-primary`, title to `text-card-foreground`, badge to `bg-primary/10 border-primary/20 text-primary`, subtext to `text-muted-foreground`, active counter to `bg-muted/60 border-border text-muted-foreground` with intentional emerald counter icon, error alert to `border-destructive/30 bg-destructive/10 text-destructive`, success alert to `border-emerald-500/30 bg-emerald-500/10 text-emerald-400`, platform kill switch alert to `border-amber-500/40 bg-amber-500/10 text-amber-400`, plan gating banner to `border-sky-500/30 bg-sky-500/10 text-sky-400`, plan upgrade button to `text-primary bg-primary/10 hover:bg-primary/20`, monthly consumption cards to `border-border bg-card` with `text-card-foreground` and `text-primary`, feature toggle items to `border-border bg-card`, disabled state to `border-border/60 bg-muted/20`, feature icons to `border-primary/20 bg-primary/10 text-primary`, switch toggle button to `bg-primary` (active) and `bg-muted` (inactive) with `bg-white shadow-md` thumb, breakdown table to `border-border bg-card` with `bg-muted/40 text-muted-foreground` thead and `divide-border` tbody, help card to `border-border bg-muted/30 text-muted-foreground`.
+  3. **Non-Color Changes Detail**:
+     - `app/(dashboard)/settings/billing/page.tsx`: Non-color changes: Checkout processing banner removed gradient background (`from-sky-950/60 via-slate-900 to-indigo-950/40`) and shadow (`shadow-xl`), replaced with `shadow-sm`.
+     - `app/(dashboard)/settings/ai/page.tsx`: Non-color changes: none.
+     - `app/(dashboard)/settings/audit-log/page.tsx`: Non-color changes: none.
+     - `components/settings/BillingSettingsClient.tsx`: Non-color changes: Subscription management card removed `shadow-xl`, applied `shadow-sm`. Manage subscription button removed `shadow-md`, applied `shadow-sm`. Upgrade button removed gradient (`from-blue-600 to-indigo-600`), shadow (`shadow-blue-600/20`), applied `shadow-sm`. Invoices card removed `shadow-xl`, applied `shadow-sm`. Empty state dashed border converted to `border-border`.
+     - `app/(dashboard)/settings/audit-log/AuditLogOrgView.tsx`: Non-color changes: Modal backdrop converted from `bg-black/70` to `bg-[var(--bg-overlay)]`. Modal close X button hover state changed from `hover:bg-slate-800 hover:text-white` to `hover:bg-muted hover:text-foreground`. Close inspector button hover state changed from `hover:bg-slate-700` to `hover:bg-muted`. Chevron button hover state changed from `hover:text-slate-200` to `hover:text-foreground`.
+     - `components/settings/AIFeatureSettingsView.tsx`: Non-color changes: Header banner removed gradient (`from-purple-950/40 via-slate-900/60 to-slate-900/80`) and shadow (`shadow-xl`), applied `shadow-sm`. Switch control thumb updated from `shadow-lg` to `shadow-md`.
+  4. **Section 6 Greps Post-edit**:
+     - Grep 1 (raw palettes): 0 hits across all 6 files.
+     - Grep 2 (`text-white`): 0 hits across all 6 files.
+     - Grep 3 (accents): All remaining hits justified with `// intentional: <reason>` on the exact same line.
+     - Grep 4 (overlays): 0 hits across all 6 files. Modal backdrop strictly uses `bg-[var(--bg-overlay)]`.
+  5. **Browser Verification**:
+     - Created `scripts/verify-settings-billing-ai-audit-e2e.ts`.
+     - Captured 7 screenshots:
+       * `settings_billing_light.png` & `settings_billing_dark.png`
+       * `settings_ai_light.png` & `settings_ai_dark.png`
+       * `settings_audit_log_light.png` & `settings_audit_log_dark.png`
+       * `multi_route_settings_8b_dark.png`
+     - Computed dark-mode input background measured at `rgb(5, 8, 15)` (zero white input fallback).
+     - Multi-route theme persistence verified across `/settings/billing` → `/settings/ai` → `/settings/audit-log` → `/dashboard` in both themes.
+  6. **Quality Gate Verification**:
+     - `npx tsc --noEmit; echo "EXIT: $?"` → EXIT: 0
+     - `npm test` → 497/497 tests passed across 73 test files
+     - `npm run lint` → 4 warnings, 0 errors
+     - `npm run build` → 142 routes compiled cleanly (exit code 0)
+- **Status**: ✅ Sub-Batch 8B complete. Three atomic commits created locally. Zero remotes pushed per Push Approval Policy. Awaiting review before Sub-Batch 8C.
+
 
 
 

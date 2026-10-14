@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/billing/page.tsx": {
-    "mtime": 1791784785.2268374,
-    "seen": 1791785735.6728108,
-    "ast_hash": "a3ef7c997e759d921d7e77f16d90edff",
+    "mtime": 1791975594.1126328,
+    "seen": 1791976486.5971506,
+    "ast_hash": "24c33a7c51ee4f079d95b9b98c855cfe",
     "semantic_hash": ""
   },
   "app/actions/onboarding.ts": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791974806.8492048,
-    "seen": 1791974850.586573,
-    "ast_hash": "0adfbd91aee34d690f560607923573a1",
+    "mtime": 1791976462.7810645,
+    "seen": 1791976486.5979462,
+    "ast_hash": "346a264b88616f69086649c245c675b1",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1422,21 +1422,21 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/ai/page.tsx": {
-    "mtime": 1789738691.1455085,
-    "seen": 1791772540.8368983,
-    "ast_hash": "cc820b7a4a68fd7538230dcd8f966897",
+    "mtime": 1791975608.4394631,
+    "seen": 1791976486.597146,
+    "ast_hash": "948c5527aed2625321d4506694cfd11a",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/audit-log/AuditLogOrgView.tsx": {
-    "mtime": 1789807707.2705498,
-    "seen": 1791772540.8368998,
-    "ast_hash": "9d4c844a810f56722e7b5e4a6609161b",
+    "mtime": 1791975726.1692824,
+    "seen": 1791976486.597148,
+    "ast_hash": "701a2294a19b67365b6be9902fae336c",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/audit-log/page.tsx": {
-    "mtime": 1789807688.3532948,
-    "seen": 1791772540.836901,
-    "ast_hash": "11a4abdcf4f04e20f2fa84822589cfc1",
+    "mtime": 1791975621.6393125,
+    "seen": 1791976486.597149,
+    "ast_hash": "3e32b7030bb6e3bc86bacd10aec084ed",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/discord/DiscordClientPage.tsx": {
@@ -2568,15 +2568,15 @@
     "semantic_hash": ""
   },
   "components/settings/AIFeatureSettingsView.tsx": {
-    "mtime": 1789738683.7987754,
-    "seen": 1791772540.837226,
-    "ast_hash": "1590a3bf2c8e9c02f8f71c71494126ac",
+    "mtime": 1791975802.7836912,
+    "seen": 1791976486.597458,
+    "ast_hash": "8798b978867aa9b8a2a76df098b7fc61",
     "semantic_hash": ""
   },
   "components/settings/BillingSettingsClient.tsx": {
-    "mtime": 1791784813.254032,
-    "seen": 1791785735.6730974,
-    "ast_hash": "a58cbb5e70add426a20356aabbb12099",
+    "mtime": 1791975648.7610178,
+    "seen": 1791976486.5974588,
+    "ast_hash": "10f10e5f27bfc933b51d27ca12531d7c",
     "semantic_hash": ""
   },
   "components/settings/IntegrationsList.tsx": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791974786.070084,
-    "seen": 1791974850.586579,
-    "ast_hash": "e5d911a88c29b6f9fc53b0a2a577ec4d",
+    "mtime": 1791976434.7910542,
+    "seen": 1791976486.5979524,
+    "ast_hash": "b4caeee5d0e9eb94b8a5edae69fbe17e",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7233,6 +7233,12 @@
     "mtime": 1791974602.6030917,
     "seen": 1791974850.586366,
     "ast_hash": "97733f6d930b5a93c54433ac55e4fbec",
+    "semantic_hash": ""
+  },
+  "scripts/verify-settings-billing-ai-audit-e2e.ts": {
+    "mtime": 1791976172.9172149,
+    "seen": 1791976486.5977666,
+    "ast_hash": "bb41a83bd13e41e53a57090c76e3629e",
     "semantic_hash": ""
   }
 }
