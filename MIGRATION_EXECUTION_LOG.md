@@ -3075,6 +3075,67 @@ paste at the start of every batch report.
      - `npm run build` → 142 routes compiled cleanly (exit code 0)
 - **Status**: ✅ Sub-Batch 10A complete. Shell, login, dashboard, and invoices are 100% migrated to semantic tokens. Committed locally. Dual remotes untouched per Push Approval Policy. Awaiting user approval before Sub-Batch 10B.
 
+---
+
+### Phase: AUTH-1 — Fix Password Recovery Loop (Forgot / Reset / Strength Meter)
+- **Timestamp**: 2026-10-14T21:20:00+05:00
+- **Task ID**: AUTH-1
+- **Action Performed**:
+  1. **Bug #1 (Forgot Password Flow)**:
+     - Root cause: `lib/auth/password-reset.ts` generated reset links pointing to non-existent `/auth/reset-password` path (404), and `app/(auth)/reset-password/page.tsx` displayed a dead-end "Invalid Reset Link" error if no token query parameter was supplied, without providing any email input field to request a reset. Furthermore, navigating directly to `/forgot-password` failed because the route did not exist.
+     - Solution: Added rewrite in `middleware.ts` mapping `/forgot-password` and `/auth/forgot-password` to `/reset-password?mode=forgot` (maintaining the strict 142 route baseline). Updated `lib/auth/password-reset.ts` to generate canonical `/reset-password?token=...` URLs. Updated `app/(auth)/reset-password/page.tsx` to conditionally render `ForgotPasswordView` when no token is present, featuring anti-enumeration generic responses, client-side rate limit countdown, and seamless recovery UX.
+  2. **Bug #2 (Reset Password Link Handling & Token Verification)**:
+     - Root cause: `/api/auth/reset-password/route.ts` strictly required `email` and `newPassword`, rejecting standard recovery payloads `{ token, password }` with HTTP 400. `verifyPasswordResetToken` and `resetPassword` in `lib/auth/password-reset.ts` failed when `email` was omitted or parameter positions varied.
+     - Solution: Refactored `verifyPasswordResetToken` and `resetPassword` to support flexible argument order and token-only database lookup with optional email verification (`($2::text IS NULL OR LOWER(TRIM(email)) = $2)`). Accepted both `password` and `newPassword`, validated optional `confirmPassword`, enforced password complexity, invalidated token atomically upon success, and revoked all active refresh token families for the user.
+  3. **Bug #15 (Password Strength Meter)**:
+     - Root cause: No reusable strength meter component existed anywhere in the repository, leaving users with zero visual feedback during password creation.
+     - Solution: Created `components/auth/PasswordStrengthMeter.tsx` featuring a 4-segment visual progress bar utilizing semantic tokens (`bg-destructive` for weak, `bg-amber-500` for fair, `bg-emerald-500` for strong, `bg-muted dark:bg-slate-800` for empty), live accessible text (`aria-live="polite"`), and criteria checklist. Implemented `calculatePasswordStrength` in `lib/auth/password.ts`. Integrated meter into `app/(auth)/reset-password/page.tsx` and `app/(auth)/signup/page.tsx`.
+  4. **Regression Tests**:
+     - Created `tests/auth/password-recovery.test.ts` covering 10 test cases:
+       1. POST /forgot-password with valid email → 200 + token row created in `auth_tokens` + email send called.
+       2. POST /forgot-password with unknown email → 200 + no token created + anti-enumeration response.
+       3. POST /forgot-password with malformed email → 400.
+       4. POST /reset-password with valid token → 200 + password hash updated + token marked `is_used = true`.
+       5. POST /reset-password with expired token → 400 with specific user error.
+       6. POST /reset-password with already-used token → 400 with specific user error.
+       7. POST /reset-password with mismatched confirm password → 400.
+       8. Login with newly reset password → 200 + valid JWT access token.
+       9. Login with OLD password after reset → 401 Invalid credentials.
+       10. `calculatePasswordStrength` correctly evaluates Weak, Fair, and Strong states.
+  5. **Playwright Browser Verification**:
+     - Created `scripts/verify-auth-1-e2e.ts`.
+     - Captured 6 screenshots in `assets/screenshots/auth-1/` and artifact directory:
+       * `forgot_password_light.png` (27.3 KB)
+       * `forgot_password_dark.png` (27.8 KB)
+       * `forgot_password_sent_light.png` (28.8 KB)
+       * `reset_password_light.png` (38.8 KB)
+       * `reset_password_dark.png` (39.7 KB)
+       * `password_strength_dark.png` (40.2 KB)
+     - Computed color table verified via Playwright:
+       * Weak: Segment 1 `rgb(248, 113, 113)`, Segments 2-4 `rgb(30, 41, 59)`, Text "Weak".
+       * Fair: Segments 1-2 `rgb(245, 158, 11)`, Segments 3-4 `rgb(30, 41, 59)`, Text "Fair".
+       * Strong: Segments 1-4 `rgb(16, 185, 129)`, Text "Strong".
+- **Files Modified / Created**:
+  - `app/api/auth/reset-password/route.ts`
+  - `lib/auth/password-reset.ts`
+  - `lib/auth/password.ts`
+  - `middleware.ts`
+  - `app/(auth)/reset-password/page.tsx`
+  - `app/(auth)/signup/page.tsx`
+  - `components/auth/PasswordStrengthMeter.tsx`
+  - `tests/auth/password-recovery.test.ts`
+  - `scripts/verify-auth-1-e2e.ts`
+  - `assets/screenshots/auth-1/*`
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `npx tsc --noEmit`: EXIT 0
+  - `npm test`: 507/507 tests passed across 74 test files (0 failures, 0 regressions)
+  - `npm run lint`: 4 warnings, 0 errors (0 new warnings)
+  - `npm run build`: 142 routes compiled cleanly (strict baseline preserved)
+- **Status**: ✅ AUTH-1 complete. All 3 bugs fixed and verified. 3 atomic local commits. Awaiting user approval to push or continue to AUTH-2.
+
+
 
 
 

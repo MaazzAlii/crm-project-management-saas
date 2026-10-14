@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791989698.1914406,
-    "seen": 1791989724.1036897,
-    "ast_hash": "b189fb6314bffdad0383c0ccc39a724c",
+    "mtime": 1791992218.2391188,
+    "seen": 1791992245.3666341,
+    "ast_hash": "0c90d39ebd5177280ba044fc934d2ff2",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1218,21 +1218,21 @@
     "semantic_hash": ""
   },
   "app/(client-portal)/client/dashboard/page.tsx": {
-    "mtime": 1791971637.654742,
-    "seen": 1791971986.2138183,
-    "ast_hash": "1146cbc0f1ff98ab61b307d911ba6aad",
+    "mtime": 1791990908.6502151,
+    "seen": 1791992245.364623,
+    "ast_hash": "3805e9a2244f71b4c1a5fcea9da4fd2a",
     "semantic_hash": ""
   },
   "app/(client-portal)/client/invoices/page.tsx": {
-    "mtime": 1791971655.1883209,
-    "seen": 1791971986.2138205,
-    "ast_hash": "16ca3dad809645436c099630d8cb0dc8",
+    "mtime": 1791990972.6435678,
+    "seen": 1791992245.3646257,
+    "ast_hash": "61854bcb2bb7f12469b21309b20f4879",
     "semantic_hash": ""
   },
   "app/(client-portal)/client/login/page.tsx": {
-    "mtime": 1791971619.034113,
-    "seen": 1791971986.2138216,
-    "ast_hash": "7215381167f68f0de42aa1d8a82926ea",
+    "mtime": 1791990868.3682535,
+    "seen": 1791992245.3646276,
+    "ast_hash": "692853dbd86872c300cb929e99a8bdfe",
     "semantic_hash": ""
   },
   "app/(client-portal)/client/projects/[id]/actions.ts": {
@@ -1254,9 +1254,9 @@
     "semantic_hash": ""
   },
   "app/(client-portal)/layout.tsx": {
-    "mtime": 1791893406.19132,
-    "seen": 1791894010.8364751,
-    "ast_hash": "28fa873f693bdcb7b720501effc025c5",
+    "mtime": 1791990800.5360038,
+    "seen": 1791992245.3646364,
+    "ast_hash": "9de4db17a53207310425b3d3c2302088",
     "semantic_hash": ""
   },
   "app/(client-portal)/portal/settings/page.tsx": {
@@ -2178,15 +2178,15 @@
     "semantic_hash": ""
   },
   "components/client-portal/PortalNav.tsx": {
-    "mtime": 1791893419.0773714,
-    "seen": 1791894010.8367507,
-    "ast_hash": "eb693db6b491b04c8ca959a60ad62512",
+    "mtime": 1791991005.3047278,
+    "seen": 1791992245.3651233,
+    "ast_hash": "04d4019a3217bd32d6898a5ca42531a5",
     "semantic_hash": ""
   },
   "components/client-portal/PortalProjectCard.tsx": {
-    "mtime": 1789741758.3910537,
-    "seen": 1791772540.8371263,
-    "ast_hash": "c0fdca3a474893265ae8c35d0b084ebd",
+    "mtime": 1791991054.983451,
+    "seen": 1791992245.3651264,
+    "ast_hash": "d911260687ea7315d753d8613dd5582a",
     "semantic_hash": ""
   },
   "components/client-portal/PortalSettingsClient.tsx": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791989674.945104,
-    "seen": 1791989724.103699,
-    "ast_hash": "4fc03b1213570762f62a4d70d848a104",
+    "mtime": 1791992198.9888558,
+    "seen": 1791992245.366651,
+    "ast_hash": "436487003aa670c194a1f653f5366e15",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7455,6 +7455,60 @@
     "mtime": 1791989518.1711679,
     "seen": 1791989724.1048806,
     "ast_hash": "629b231e7db52470febb427c62d6a4ad",
+    "semantic_hash": ""
+  },
+  "scripts/verify-client-portal-10a-e2e.ts": {
+    "mtime": 1791991884.2868311,
+    "seen": 1791992245.3660696,
+    "ast_hash": "50966f06248544e3b640850b2ca3a279",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-10a/client_dashboard_dark.png": {
+    "mtime": 1791991835.017633,
+    "seen": 1791992245.3676295,
+    "ast_hash": "a06f483f5d889e707f9c6a950599a118",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-10a/client_dashboard_light.png": {
+    "mtime": 1791991834.420175,
+    "seen": 1791992245.367632,
+    "ast_hash": "8de9521d2aaf458c1b6d87994e44f792",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-10a/client_invoices_dark.png": {
+    "mtime": 1791991836.7421908,
+    "seen": 1791992245.3676336,
+    "ast_hash": "4a9b2f46aebc6ca93a6043c225b73770",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-10a/client_invoices_light.png": {
+    "mtime": 1791991836.2189167,
+    "seen": 1791992245.3676355,
+    "ast_hash": "4b459f23c0fa80119522eace280ff92f",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-10a/client_login_dark.png": {
+    "mtime": 1791991822.57212,
+    "seen": 1791992245.367637,
+    "ast_hash": "6b6997db4c4484fcef60fa63a3571552",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-10a/client_login_light.png": {
+    "mtime": 1791991821.9389088,
+    "seen": 1791992245.3676386,
+    "ast_hash": "aa3b5f45a2c23449aad260fcc38caa50",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-10a/multi_route_client_portal_10a_dark.png": {
+    "mtime": 1791991841.454905,
+    "seen": 1791992245.3676403,
+    "ast_hash": "1d036bb94be14febe9c6e8e43f54b15e",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/sub-batch-10a/multi_route_client_portal_10a_light.png": {
+    "mtime": 1791991839.2061365,
+    "seen": 1791992245.3676417,
+    "ast_hash": "eadf67ac09b219a29f7a82dbaf80838f",
     "semantic_hash": ""
   }
 }
