@@ -348,7 +348,7 @@ SESSION STARTUP CHECKLIST
 [LINT_COMMAND]: npm run lint
 [TYPECHECK_COMMAND]: npm run type-check
 [BUILD_COMMAND]: npm run build
-[EXPECTED_ROUTE_COUNT]: 140
+[EXPECTED_ROUTE_COUNT]: 142
 
 PROJECT-SPECIFIC RULES:
 - Multi-tenancy strictly enforced on every query/mutation via organization_id
