@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791997172.3638725,
-    "seen": 1791997192.5272458,
-    "ast_hash": "266252f610686cc9329b827d1945d8a9",
+    "mtime": 1791999282.9448678,
+    "seen": 1791999308.923144,
+    "ast_hash": "40c99d85a08f2e1bcd3d7f34cf953a37",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -2592,9 +2592,9 @@
     "semantic_hash": ""
   },
   "components/settings/TeamMemberList.tsx": {
-    "mtime": 1791974195.3426118,
-    "seen": 1791974850.5859363,
-    "ast_hash": "15dc84071a1e2bd0a988a380def5cbf7",
+    "mtime": 1791998455.0285456,
+    "seen": 1791999308.9226232,
+    "ast_hash": "c5b25bc29036e1b789ad7711df9f7b12",
     "semantic_hash": ""
   },
   "components/shared/ProjectHealthBadge.tsx": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791997146.4067817,
-    "seen": 1791997192.5272524,
-    "ast_hash": "6bb594c41264030d892d89403569eaec",
+    "mtime": 1791999251.0668237,
+    "seen": 1791999308.923151,
+    "ast_hash": "fc883dd5cb1090cc17d877a4d6bc4f06",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6330,9 +6330,9 @@
     "semantic_hash": ""
   },
   "app/api/invitations/accept/route.ts": {
-    "mtime": 1791996429.7316494,
-    "seen": 1791997192.5265496,
-    "ast_hash": "aaf0eb336c25ace44bbb09b8dae4b83c",
+    "mtime": 1791998278.4011753,
+    "seen": 1791999308.9224129,
+    "ast_hash": "8a95b79f37d94e4503e90269d0e150fe",
     "semantic_hash": ""
   },
   "app/api/invitations/decline/route.ts": {
@@ -6342,9 +6342,9 @@
     "semantic_hash": ""
   },
   "app/api/invitations/route.ts": {
-    "mtime": 1791890642.8038058,
-    "seen": 1791891378.1437128,
-    "ast_hash": "7ceca92dc20cf21dc94ec9c9121971dc",
+    "mtime": 1791998264.3611436,
+    "seen": 1791999308.9224167,
+    "ast_hash": "054fc6c5953ec01d8586360549f6980c",
     "semantic_hash": ""
   },
   "app/api/organizations/domain/confirm/route.ts": {
@@ -6366,9 +6366,9 @@
     "semantic_hash": ""
   },
   "lib/services/invitation-service.ts": {
-    "mtime": 1791996418.602505,
-    "seen": 1791997192.5269163,
-    "ast_hash": "fc59e119414c9b550a190eaec1b89d32",
+    "mtime": 1791998690.347973,
+    "seen": 1791999308.9228027,
+    "ast_hash": "de2939b04cb467a1f79f120703e453ef",
     "semantic_hash": ""
   },
   "lib/validation/business-email.ts": {
@@ -6408,9 +6408,9 @@
     "semantic_hash": ""
   },
   "tests/api-invitations.test.ts": {
-    "mtime": 1791776959.9780986,
-    "seen": 1791778843.7854807,
-    "ast_hash": "e83985a49f8520ed669e494741bd9f8e",
+    "mtime": 1791998315.1572568,
+    "seen": 1791999308.9230385,
+    "ast_hash": "d0aa4f2d85b4119b5fbd490e901bf85f",
     "semantic_hash": ""
   },
   "tests/api-resend-revoke.test.ts": {
@@ -6576,9 +6576,9 @@
     "semantic_hash": ""
   },
   "components/settings/InviteMemberDialog.tsx": {
-    "mtime": 1791974344.7510028,
-    "seen": 1791974850.5859282,
-    "ast_hash": "aa13fac0a45deee121237adadc307b71",
+    "mtime": 1791998422.308481,
+    "seen": 1791999308.9226184,
+    "ast_hash": "18f1f102e2c2e48201effcbdf9cf57e3",
     "semantic_hash": ""
   },
   "components/settings/PendingInvitationsList.tsx": {
@@ -6678,9 +6678,9 @@
     "semantic_hash": ""
   },
   "tests/free-limits.test.ts": {
-    "mtime": 1791900902.9793139,
-    "seen": 1791919453.3585277,
-    "ast_hash": "0f668735c54f5d69a5dab910149d6ec7",
+    "mtime": 1791998706.0179994,
+    "seen": 1791999308.923078,
+    "ast_hash": "008d7cbc3b5f2e4b007bd62f9e544c1d",
     "semantic_hash": ""
   },
   "config/invite-email-config.json": {
@@ -7623,6 +7623,60 @@
     "mtime": 1791996896.6636698,
     "seen": 1791997192.5280066,
     "ast_hash": "2e16eec0c932a24cc9afbabe4549be73",
+    "semantic_hash": ""
+  },
+  "lib/services/plan-limits.ts": {
+    "mtime": 1791998188.8899653,
+    "seen": 1791999308.922806,
+    "ast_hash": "cf9495a644fc697e543231002ea5bd26",
+    "semantic_hash": ""
+  },
+  "scripts/verify-team-2-e2e.ts": {
+    "mtime": 1791999031.4805095,
+    "seen": 1791999308.9229577,
+    "ast_hash": "b2eac9129b28ddbb421f8e3fa3ad9e41",
+    "semantic_hash": ""
+  },
+  "tests/team/seat-limits.test.ts": {
+    "mtime": 1791998642.8738916,
+    "seen": 1791999308.9231374,
+    "ast_hash": "e65f7054928687da0c1db92be7baefe1",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-2/bulk_invite_dark.png": {
+    "mtime": 1791998980.8554342,
+    "seen": 1791999308.9239366,
+    "ast_hash": "bd2bdd33249225a43d89742378cae750",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-2/bulk_invite_light.png": {
+    "mtime": 1791998980.1684332,
+    "seen": 1791999308.9239378,
+    "ast_hash": "73f3be8646de60f94092af46663424a7",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-2/invite_ok_dark.png": {
+    "mtime": 1791998979.5414321,
+    "seen": 1791999308.923939,
+    "ast_hash": "c52190ede7a1fd28f3eb2f5081d1c52b",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-2/invite_ok_light.png": {
+    "mtime": 1791998978.8521857,
+    "seen": 1791999308.9239404,
+    "ast_hash": "0a3e845bfc14685c9c2582ec0102bac3",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-2/seat_limit_cta_dark.png": {
+    "mtime": 1791998984.3913417,
+    "seen": 1791999308.9239414,
+    "ast_hash": "7333bb1b3e0808595f9aa7eb4d02538e",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-2/seat_limit_cta_light.png": {
+    "mtime": 1791998983.6614385,
+    "seen": 1791999308.9239423,
+    "ast_hash": "a4cc448c6da7c439382f3fbc0e80a54a",
     "semantic_hash": ""
   }
 }

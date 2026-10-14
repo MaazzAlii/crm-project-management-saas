@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791999282.9448678,
-    "seen": 1791999308.923144,
-    "ast_hash": "40c99d85a08f2e1bcd3d7f34cf953a37",
+    "mtime": 1792001679.687109,
+    "seen": 1792001700.5492897,
+    "ast_hash": "71759ef75c81251a9183b5c5f19afb5a",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1890,9 +1890,9 @@
     "semantic_hash": ""
   },
   "app/api/organizations/[id]/members/route.ts": {
-    "mtime": 1791776478.162885,
-    "seen": 1791778843.7835405,
-    "ast_hash": "8513ccb4e4b237c178f12f104d0d18ab",
+    "mtime": 1792000569.0103734,
+    "seen": 1792001700.5485857,
+    "ast_hash": "e2c6a056ebfc04fd077ce96fa5d1fe14",
     "semantic_hash": ""
   },
   "app/api/organizations/[id]/route.ts": {
@@ -2592,9 +2592,9 @@
     "semantic_hash": ""
   },
   "components/settings/TeamMemberList.tsx": {
-    "mtime": 1791998455.0285456,
-    "seen": 1791999308.9226232,
-    "ast_hash": "c5b25bc29036e1b789ad7711df9f7b12",
+    "mtime": 1792000835.7360954,
+    "seen": 1792001700.548797,
+    "ast_hash": "f2f434cde33df16940019ef1cba7c32e",
     "semantic_hash": ""
   },
   "components/shared/ProjectHealthBadge.tsx": {
@@ -3258,9 +3258,9 @@
     "semantic_hash": ""
   },
   "lib/services/org-service.ts": {
-    "mtime": 1791628665.08739,
-    "seen": 1791772540.837405,
-    "ast_hash": "74e51682bcbb9835f8c2f89f46c428a3",
+    "mtime": 1792001056.6696334,
+    "seen": 1792001700.5489666,
+    "ast_hash": "b077a9cbe9dc73d3e60af064802b8d69",
     "semantic_hash": ""
   },
   "lib/services/project-service.ts": {
@@ -3276,15 +3276,15 @@
     "semantic_hash": ""
   },
   "lib/team/actions.ts": {
-    "mtime": 1791783785.4706323,
-    "seen": 1791785735.6732616,
-    "ast_hash": "026ada33c2a8df7787165489daacb7f1",
+    "mtime": 1792000658.6484282,
+    "seen": 1792001700.548975,
+    "ast_hash": "b4cb622dc3cb41f4bbe3654ae20ac146",
     "semantic_hash": ""
   },
   "lib/types/database.ts": {
-    "mtime": 1791890559.2986734,
-    "seen": 1791891378.1441257,
-    "ast_hash": "2f2852a2d7b6451208fc1ab40d31d3ed",
+    "mtime": 1792000889.817187,
+    "seen": 1792001700.5489762,
+    "ast_hash": "5a0c53cf85bbc4ce07f21554b36d567b",
     "semantic_hash": ""
   },
   "lib/types/pipeline.ts": {
@@ -3300,9 +3300,9 @@
     "semantic_hash": ""
   },
   "lib/utils/response.ts": {
-    "mtime": 1790581773.2769456,
-    "seen": 1791772540.837416,
-    "ast_hash": "35c1d3e2b909b50537ad7eaa5f734767",
+    "mtime": 1792000485.4113834,
+    "seen": 1792001700.5489798,
+    "ast_hash": "b9afcf00fde1af14d5bd7153ac07c14b",
     "semantic_hash": ""
   },
   "lib/validation/action-wrapper.ts": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791999251.0668237,
-    "seen": 1791999308.923151,
-    "ast_hash": "fc883dd5cb1090cc17d877a4d6bc4f06",
+    "mtime": 1792001654.1693797,
+    "seen": 1792001700.549296,
+    "ast_hash": "4ec631391d19bc9a34f583f8acb58eda",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6342,9 +6342,9 @@
     "semantic_hash": ""
   },
   "app/api/invitations/route.ts": {
-    "mtime": 1791998264.3611436,
-    "seen": 1791999308.9224167,
-    "ast_hash": "054fc6c5953ec01d8586360549f6980c",
+    "mtime": 1792000761.286424,
+    "seen": 1792001700.5485823,
+    "ast_hash": "327d95599594317e23300e5ed4ab9638",
     "semantic_hash": ""
   },
   "app/api/organizations/domain/confirm/route.ts": {
@@ -6366,9 +6366,9 @@
     "semantic_hash": ""
   },
   "lib/services/invitation-service.ts": {
-    "mtime": 1791998690.347973,
-    "seen": 1791999308.9228027,
-    "ast_hash": "de2939b04cb467a1f79f120703e453ef",
+    "mtime": 1792000735.147914,
+    "seen": 1792001700.5489657,
+    "ast_hash": "40fc7025f357dce6622eaedc81d7efb7",
     "semantic_hash": ""
   },
   "lib/validation/business-email.ts": {
@@ -6666,9 +6666,9 @@
     "semantic_hash": ""
   },
   "tests/cross-tenant-invites.test.ts": {
-    "mtime": 1791900934.5936923,
-    "seen": 1791919453.3585012,
-    "ast_hash": "d12a911d25cc5b85cbe9a6e2aa7c2f9f",
+    "mtime": 1792001077.5353365,
+    "seen": 1792001700.5492089,
+    "ast_hash": "ecf3ed16d083b6dcdea62c8ce1d7f71a",
     "semantic_hash": ""
   },
   "tests/dashboard-counts.test.ts": {
@@ -6972,9 +6972,9 @@
     "semantic_hash": ""
   },
   "docs/engineering/AUTH-AND-RBAC.md": {
-    "mtime": 1791890525.8175335,
-    "seen": 1791891378.1446588,
-    "ast_hash": "be213cf41de14a34cbe9bfd38504a39a",
+    "mtime": 1792001277.4066916,
+    "seen": 1792001700.5495448,
+    "ast_hash": "b84472c3de49469303501c5c8ef72e2f",
     "semantic_hash": ""
   },
   "docs/engineering/CODING-STANDARDS.md": {
@@ -7638,9 +7638,9 @@
     "semantic_hash": ""
   },
   "tests/team/seat-limits.test.ts": {
-    "mtime": 1791998642.8738916,
-    "seen": 1791999308.9231374,
-    "ast_hash": "e65f7054928687da0c1db92be7baefe1",
+    "mtime": 1792000852.4198103,
+    "seen": 1792001700.5492833,
+    "ast_hash": "763b2a5e0260729d0147e4669d802ba7",
     "semantic_hash": ""
   },
   "assets/screenshots/team-2/bulk_invite_dark.png": {
@@ -7677,6 +7677,72 @@
     "mtime": 1791998983.6614385,
     "seen": 1791999308.9239423,
     "ast_hash": "a4cc448c6da7c439382f3fbc0e80a54a",
+    "semantic_hash": ""
+  },
+  "lib/auth/permissions.ts": {
+    "mtime": 1792001107.4519186,
+    "seen": 1792001700.5488904,
+    "ast_hash": "d8c9f93e0b9b845ae7a9aeea28b98ed8",
+    "semantic_hash": ""
+  },
+  "scripts/verify-team-3-e2e.ts": {
+    "mtime": 1792001478.494307,
+    "seen": 1792001700.5491104,
+    "ast_hash": "3976fdca8bfa29cacbdb2edc4f3fe75e",
+    "semantic_hash": ""
+  },
+  "tests/team/role-enforcement.test.ts": {
+    "mtime": 1792001225.2243512,
+    "seen": 1792001700.549282,
+    "ast_hash": "e9d6406094657a42c9e7bdbcab11d5ce",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-3/last_owner_block_dark.png": {
+    "mtime": 1792001450.241629,
+    "seen": 1792001700.5500383,
+    "ast_hash": "cc0a4a3a79fa2f70302383f7f9ae19d5",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-3/last_owner_block_light.png": {
+    "mtime": 1792001450.8106225,
+    "seen": 1792001700.5500395,
+    "ast_hash": "8aeac63970847222efc8d249a121ce89",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-3/remove_owner_disabled_dark.png": {
+    "mtime": 1792001448.661841,
+    "seen": 1792001700.5500407,
+    "ast_hash": "843052456d94b3b4268714b686f4f9de",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-3/remove_owner_disabled_light.png": {
+    "mtime": 1792001448.1705966,
+    "seen": 1792001700.550042,
+    "ast_hash": "c56daced3216c3228c299ff08b8aaab7",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-3/role_dropdown_admin_dark.png": {
+    "mtime": 1792001453.023597,
+    "seen": 1792001700.5500429,
+    "ast_hash": "3870f7d51563c37ee331be9cd44ef641",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-3/role_dropdown_admin_light.png": {
+    "mtime": 1792001452.4960968,
+    "seen": 1792001700.5500443,
+    "ast_hash": "57c94b36f7e74872db143524b41afa5f",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-3/role_dropdown_owner_dark.png": {
+    "mtime": 1792001449.6866353,
+    "seen": 1792001700.5500455,
+    "ast_hash": "2134ba87e4074770a5548fa2ce4fc342",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/team-3/role_dropdown_owner_light.png": {
+    "mtime": 1792001449.193641,
+    "seen": 1792001700.5500464,
+    "ast_hash": "f569dd58b0f485875a182116cfa5611e",
     "semantic_hash": ""
   }
 }

@@ -3290,6 +3290,84 @@ paste at the start of every batch report.
   - `npm run build`: 142 routes compiled cleanly (strict baseline preserved)
 - **Status**: ✅ TEAM-2 complete. All items addressed and verified. 3 atomic local commits. Zero remotes pushed per Push Approval Policy. Awaiting user review before TEAM-3.
 
+---
+
+### [2026-10-14 23:15:00 UTC] - Batch TEAM-3: Role Enforcement & Security Hardening (Phase B Fixes)
+
+- **Phase**: Functional Bug Workstream — Team & Collaboration Track
+- **Task ID**: `TEAM-3`
+- **Action Performed**:
+  1. **Pure Permissions Abstraction (§3.1)**:
+     - Created `lib/auth/permissions.ts` central utility defining strict, tenant-isolated role capabilities:
+       * `canInviteWithRole(inviterRole, targetRole)`: Owners can invite any role; Admins can invite only Member, Viewer, or Billing Manager; Members/Viewers cannot invite anyone.
+       * `canChangeRole(actorRole, currentRole, newRole, options)`: Owners can change any member's role; Admins can change Members, Viewers, or Billing Managers to other non-Admin/non-Owner roles; self-role changes and sole-owner demotions are rejected.
+       * `canRemoveMember(actorRole, targetRole, options)`: Owners can remove any member (except sole owner); Admins can remove Members, Viewers, or Billing Managers (cannot remove other Admins or Owners); Members/Viewers cannot remove anyone.
+  2. **REST API Endpoint Authorization & Audit (§3.2)**:
+     - Hardened `PATCH /api/organizations/[id]/members`: Resolves caller membership in the target organization, verifies `isSuperAdmin` or checks `canChangeRole`, and returns structured `403 INSUFFICIENT_ROLE` or `400 LAST_OWNER_PROTECTED`.
+     - Hardened `DELETE /api/organizations/[id]/members`: Resolves caller membership, verifies `isSuperAdmin` or checks `canRemoveMember`, and returns structured `403 INSUFFICIENT_ROLE` or `400 LAST_OWNER_PROTECTED`.
+  3. **Atomic Last-Owner Protection with Row Locks (§3.3)**:
+     - Refactored `orgService.updateMemberRole` and `orgService.removeMember` in `lib/services/org-service.ts` to run within `transaction(async (client) => ...)` blocks.
+     - Row-locks current owners using `SELECT id FROM organization_members WHERE organization_id = $1 AND role = 'owner' FOR UPDATE`, preventing Time-of-Check to Time-of-Use (TOCTOU) concurrent demotion/removal race conditions.
+  4. **Legacy Server Actions Lockdown (§3.4)**:
+     - Hardened `inviteTeamMember` in `lib/team/actions.ts` to validate `canInviteWithRole` server-side, preventing direct database insert bypasses by Admins or Members.
+     - Standardized `updateMemberRole` and `removeMember` server actions to delegate directly to the atomic `orgService` methods.
+  5. **Structured Error Contract (§3.5)**:
+     - Updated `lib/utils/response.ts` to spread structured error details (`code`, `requiredRole`, `yourRole`, `limit`, etc.) directly into API response bodies.
+     - Invitations and membership APIs consistently return `403 Forbidden` with `{ error: { code: 'INSUFFICIENT_ROLE', message, requiredRole, yourRole } }`.
+  6. **UI Reflection & Testability (§3.6)**:
+     - Updated `components/settings/TeamMemberList.tsx`:
+       * Attached `data-testid="role-select-<userId>"`, `data-testid="remove-member-<userId>"`, and `data-testid="role-option-admin"`.
+       * Omitted Admin option from role selector when viewed by an Admin.
+       * Rendered disabled remove button on owner rows with tooltip: `"The owner cannot be removed. Transfer ownership first."`.
+       * Included `billing_manager` in admin management checks.
+  7. **Comprehensive Regression Test Suite**:
+     - Created `tests/team/role-enforcement.test.ts` covering 24 comprehensive test cases:
+       * Owner inviting Admin/Member/Viewer/Billing Manager.
+       * Admin inviting Admin (rejected 403), Owner (rejected 403), Member/Viewer/Billing Manager (allowed).
+       * Member and Viewer invite attempts (rejected 403).
+       * Admin promoting Member to Admin (rejected 403), self-promotion (rejected 403).
+       * Admin removing another Admin (rejected 403), Admin removing Owner (rejected 403).
+       * Member attempting to remove Owner (rejected 403).
+       * Sole owner demotion and removal blocked atomically (400 LAST_OWNER_PROTECTED).
+       * Concurrent owner demotion TOCTOU race condition blocked via `FOR UPDATE` locking.
+       * Cross-tenant membership role modification and removal isolation.
+  8. **Playwright E2E Verification & Screenshots**:
+     - Created `scripts/verify-team-3-e2e.ts`.
+     - Captured all 8 required screenshots in `assets/screenshots/team-3/` and artifact directory:
+       * `role_dropdown_owner_light.png` (277.4 KB)
+       * `role_dropdown_owner_dark.png` (269.0 KB)
+       * `role_dropdown_admin_light.png` (277.0 KB)
+       * `role_dropdown_admin_dark.png` (268.7 KB)
+       * `remove_owner_disabled_light.png` (278.1 KB)
+       * `remove_owner_disabled_dark.png` (272.4 KB)
+       * `last_owner_block_light.png` (277.3 KB)
+       * `last_owner_block_dark.png` (269.0 KB)
+- **Files Modified / Created**:
+  - `lib/auth/permissions.ts` (created)
+  - `lib/services/org-service.ts`
+  - `lib/services/invitation-service.ts`
+  - `lib/team/actions.ts`
+  - `app/api/organizations/[id]/members/route.ts`
+  - `app/api/invitations/route.ts`
+  - `lib/utils/response.ts`
+  - `lib/types/database.ts`
+  - `components/settings/TeamMemberList.tsx`
+  - `docs/engineering/AUTH-AND-RBAC.md`
+  - `tests/team/role-enforcement.test.ts` (created)
+  - `tests/team/seat-limits.test.ts`
+  - `tests/cross-tenant-invites.test.ts`
+  - `scripts/verify-team-3-e2e.ts` (created)
+  - `assets/screenshots/team-3/*` (8 screenshots)
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `npx tsc --noEmit`: EXIT 0
+  - `npm test`: 550/550 tests passed across 77 test files (526 baseline + 24 new regression tests, 0 failures)
+  - `npm run lint`: 4 warnings, 0 errors (0 new warnings)
+  - `npm run build`: 142 routes compiled cleanly (strict baseline preserved)
+- **Status**: ✅ TEAM-3 complete. All authorization bypasses closed and regression-tested. 3 atomic local commits. Zero remotes pushed per Push Approval Policy. Ready for review.
+
+
 
 
 
