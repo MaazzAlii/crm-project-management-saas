@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "app/(auth)/signup/page.tsx": {
-    "mtime": 1791898131.7705016,
-    "seen": 1791898644.870977,
-    "ast_hash": "01c94a755ab73d246df6143d91380937",
+    "mtime": 1791993997.0507498,
+    "seen": 1791994955.9968987,
+    "ast_hash": "f2852a228e0105868a4591c5dfe51683",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/billing/page.tsx": {
@@ -156,9 +156,9 @@
     "semantic_hash": ""
   },
   "middleware.ts": {
-    "mtime": 1791890838.137125,
-    "seen": 1791891378.1441395,
-    "ast_hash": "69de3e649356d95cb98bd9f48feaac71",
+    "mtime": 1791993757.0546253,
+    "seen": 1791994955.99785,
+    "ast_hash": "3ff344c40906b541c6e41aaddc865c6e",
     "semantic_hash": ""
   },
   "scripts/infra/backup-postgres.sh": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791992218.2391188,
-    "seen": 1791992245.3666341,
-    "ast_hash": "0c90d39ebd5177280ba044fc934d2ff2",
+    "mtime": 1791994929.2695653,
+    "seen": 1791994955.99829,
+    "ast_hash": "7c1d179ae8103cd545174d9ef87f4868",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1650,9 +1650,9 @@
     "semantic_hash": ""
   },
   "app/api/auth/reset-password/route.ts": {
-    "mtime": 1791886495.215238,
-    "seen": 1791887938.7324255,
-    "ast_hash": "dd0a037e41a48ef344104ff7e7f08239",
+    "mtime": 1791994052.697742,
+    "seen": 1791994955.9970646,
+    "ast_hash": "067eb974948a383e64e92ee72a46228a",
     "semantic_hash": ""
   },
   "app/api/auth/session/route.ts": {
@@ -2928,15 +2928,15 @@
     "semantic_hash": ""
   },
   "lib/auth/password-reset.ts": {
-    "mtime": 1791886480.9550455,
-    "seen": 1791887938.7327678,
-    "ast_hash": "df6d88987712e1cecc4579dada5ec770",
+    "mtime": 1791993711.8912818,
+    "seen": 1791994955.9976826,
+    "ast_hash": "7b3b5cbe3c745bb4c87cdf6560aaec98",
     "semantic_hash": ""
   },
   "lib/auth/password.ts": {
-    "mtime": 1790345745.0748625,
-    "seen": 1791772540.8373253,
-    "ast_hash": "57493dc5cc59916f41189369ef55541a",
+    "mtime": 1791993952.8548884,
+    "seen": 1791994955.9976845,
+    "ast_hash": "91cc2033baf0ae0fb29e50c3ed672a6e",
     "semantic_hash": ""
   },
   "lib/automation/emitter.ts": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791992198.9888558,
-    "seen": 1791992245.366651,
-    "ast_hash": "436487003aa670c194a1f653f5366e15",
+    "mtime": 1791994899.240445,
+    "seen": 1791994955.9982991,
+    "ast_hash": "2c8806556fe73a0893e8abd7f29a819c",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7026,9 +7026,9 @@
     "semantic_hash": ""
   },
   "app/(auth)/reset-password/page.tsx": {
-    "mtime": 1791898196.5134168,
-    "seen": 1791898644.8709755,
-    "ast_hash": "bcce321df9fb8d7d09eef0cfe1d0d667",
+    "mtime": 1791993840.5323153,
+    "seen": 1791994955.9968956,
+    "ast_hash": "8dcdb3ba869ec43d7c733bd339aa285b",
     "semantic_hash": ""
   },
   "tests/auth/forgot-password.test.ts": {
@@ -7509,6 +7509,60 @@
     "mtime": 1791991839.2061365,
     "seen": 1791992245.3676417,
     "ast_hash": "eadf67ac09b219a29f7a82dbaf80838f",
+    "semantic_hash": ""
+  },
+  "components/auth/PasswordStrengthMeter.tsx": {
+    "mtime": 1791993967.7931895,
+    "seen": 1791994955.9972966,
+    "ast_hash": "f1c5094848806f17fd9cd0ea13448ac1",
+    "semantic_hash": ""
+  },
+  "scripts/verify-auth-1-e2e.ts": {
+    "mtime": 1791994720.9676077,
+    "seen": 1791994955.9979763,
+    "ast_hash": "a04ecdd240ffbfda60ddc1fa93808c4d",
+    "semantic_hash": ""
+  },
+  "tests/auth/password-recovery.test.ts": {
+    "mtime": 1791994219.6313004,
+    "seen": 1791994955.9981644,
+    "ast_hash": "7be9eead51fb76cdc9ebfe7dd78f4787",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-1/forgot_password_dark.png": {
+    "mtime": 1791994669.162567,
+    "seen": 1791994955.9993048,
+    "ast_hash": "fd3f8b8063502f6f06aa6634d5329920",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-1/forgot_password_light.png": {
+    "mtime": 1791994668.5275524,
+    "seen": 1791994955.9993067,
+    "ast_hash": "28c349068f4d1ca679e9899984fc32ce",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-1/forgot_password_sent_light.png": {
+    "mtime": 1791994680.3622403,
+    "seen": 1791994955.9993086,
+    "ast_hash": "c76fe16e2991eea6a4247bcc4bdfb1ec",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-1/password_strength_dark.png": {
+    "mtime": 1791994683.7788906,
+    "seen": 1791994955.9993103,
+    "ast_hash": "9fdb0c53a2f54d5c6e46c522cea06dd3",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-1/reset_password_dark.png": {
+    "mtime": 1791994682.4608624,
+    "seen": 1791994955.999312,
+    "ast_hash": "7547be52e86057f6451bd207e12c8a50",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-1/reset_password_light.png": {
+    "mtime": 1791994681.8501594,
+    "seen": 1791994955.9993134,
+    "ast_hash": "2a8c51116840f38ff821964bde509541",
     "semantic_hash": ""
   }
 }
