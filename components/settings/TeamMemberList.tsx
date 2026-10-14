@@ -187,7 +187,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
     if (member.userId === currentUserId) return false
     if (isOwner) return true
     if (isAdmin) {
-      return member.role === 'member' || member.role === 'viewer'
+      return member.role === 'member' || member.role === 'viewer' || member.role === 'billing_manager'
     }
     return false
   }
@@ -198,7 +198,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
     if (member.role === 'owner') return false
     if (isOwner) return true
     if (isAdmin) {
-      return member.role === 'member' || member.role === 'viewer'
+      return member.role === 'member' || member.role === 'viewer' || member.role === 'billing_manager'
     }
     return false
   }
@@ -323,6 +323,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                   <td className="px-5 py-4">
                     {editable ? (
                       <select
+                        data-testid={`role-select-${member.userId}`}
                         disabled={updatingRoleMemberId === member.id}
                         value={member.role}
                         onChange={(e) =>
@@ -333,10 +334,14 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                         }
                         className="rounded-lg border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground focus:border-primary focus:outline-none disabled:opacity-50"
                       >
-                        {isOwner && <option value="admin">Admin</option>}
+                        {isOwner && (
+                          <option value="admin" data-testid="role-option-admin">
+                            Admin
+                          </option>
+                        )}
                         <option value="member">Member</option>
                         <option value="viewer">Viewer</option>
-                        {isOwner && <option value="billing_manager">Billing Manager</option>}
+                        <option value="billing_manager">Billing Manager</option>
                       </select>
                     ) : (
                       <span
@@ -359,17 +364,27 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                     })}
                   </td>
 
-                  {/* Actions (Prompt 36) */}
+                  {/* Actions (Prompt 36 & TEAM-3 Hardening) */}
                   <td className="px-5 py-4 text-right">
-                    {removable && (
+                    {member.role === 'owner' ? (
                       <button
+                        data-testid={`remove-member-${member.userId}`}
+                        disabled
+                        title="The owner cannot be removed. Transfer ownership first."
+                        className="rounded-lg p-2 text-muted-foreground/40 cursor-not-allowed opacity-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    ) : removable ? (
+                      <button
+                        data-testid={`remove-member-${member.userId}`}
                         onClick={() => setMemberToRemove(member)}
                         title="Remove member"
                         className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition cursor-pointer"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
-                    )}
+                    ) : null}
                   </td>
                 </tr>
               )
@@ -403,14 +418,22 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                   </div>
                 </div>
 
-                {removable && (
+                {member.role === 'owner' ? (
                   <button
-                    onClick={() => setMemberToRemove(member)}
-                    className="p-1 text-muted-foreground hover:text-destructive"
+                    disabled
+                    title="The owner cannot be removed. Transfer ownership first."
+                    className="p-1 text-muted-foreground/40 cursor-not-allowed opacity-50"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
-                )}
+                ) : removable ? (
+                  <button
+                    onClick={() => setMemberToRemove(member)}
+                    className="p-1 text-muted-foreground hover:text-destructive cursor-pointer"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                ) : null}
               </div>
 
               <div className="flex items-center justify-between pt-2 border-t border-border">
@@ -429,7 +452,7 @@ export function TeamMemberList({ members, currentUserId, currentUserRole, isSupe
                     {isOwner && <option value="admin">Admin</option>}
                     <option value="member">Member</option>
                     <option value="viewer">Viewer</option>
-                    {isOwner && <option value="billing_manager">Billing Manager</option>}
+                    <option value="billing_manager">Billing Manager</option>
                   </select>
                 ) : (
                   <span className="text-xs font-semibold text-primary uppercase font-mono">

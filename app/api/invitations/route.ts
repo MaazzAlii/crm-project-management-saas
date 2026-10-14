@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     const role = (body.role || 'member') as InvitationRole;
-    if (!['admin', 'member', 'viewer'].includes(role)) {
+    if (!['owner', 'admin', 'member', 'viewer'].includes(role)) {
       return apiError("Role must be 'admin', 'member', or 'viewer'", 400, 'INVALID_INPUT');
     }
 
@@ -115,6 +115,7 @@ export async function POST(request: NextRequest) {
         userId: auth.userId,
         orgId: auth.orgId,
         email: auth.email,
+        isSuperAdmin: auth.role === 'super_admin',
       },
       {
         email: body.email,
@@ -167,7 +168,11 @@ export async function POST(request: NextRequest) {
       }
 
       if (result.error === 'forbidden') {
-        return apiError(result.message, 403, 'FORBIDDEN');
+        const code = (result as any).code || 'INSUFFICIENT_ROLE';
+        return apiError(result.message, 403, code, {
+          requiredRole: (result as any).requiredRole,
+          yourRole: (result as any).yourRole,
+        });
       }
 
       if (result.error === 'unauthorized') {

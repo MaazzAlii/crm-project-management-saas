@@ -91,7 +91,7 @@ export interface Session {
 // Multi-Tenancy: Organizations & Memberships
 // -----------------------------------------------------------------------------
 
-export type MembershipRole = "owner" | "admin" | "member" | "viewer";
+export type MembershipRole = "owner" | "admin" | "member" | "viewer" | "billing_manager";
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled" | "unpaid";
 export type SubscriptionPlan = "free" | "starter" | "pro" | "enterprise";
 

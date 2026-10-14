@@ -68,6 +68,7 @@ export function apiError(
       error: {
         message,
         code,
+        ...(details && typeof details === 'object' && !Array.isArray(details) ? details : {}),
         details,
       },
     },

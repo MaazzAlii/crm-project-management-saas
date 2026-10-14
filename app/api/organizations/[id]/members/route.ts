@@ -52,11 +52,13 @@ export async function PATCH(
       return apiError('userId and role are required', 400, 'VALIDATION_ERROR');
     }
 
+    const isSuperAdmin = auth.role === 'super_admin';
     const updated = await orgService.updateMemberRole(
       id,
       auth.userId,
       body.userId,
-      body.role
+      body.role,
+      isSuperAdmin
     );
 
     return apiSuccess(updated);
@@ -82,7 +84,8 @@ export async function DELETE(
       return apiError('userId parameter is required', 400, 'VALIDATION_ERROR');
     }
 
-    const removed = await orgService.removeMember(id, auth.userId, targetUserId);
+    const isSuperAdmin = auth.role === 'super_admin';
+    const removed = await orgService.removeMember(id, auth.userId, targetUserId, isSuperAdmin);
     return apiSuccess({ removed: true, userId: targetUserId });
   } catch (error) {
     return handleApiError(error);

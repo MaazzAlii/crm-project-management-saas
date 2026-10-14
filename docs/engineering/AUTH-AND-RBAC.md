@@ -25,12 +25,18 @@ In addition, **`billing_manager (0)`** operates as a specialized scoped role foc
 | Delete Clients & Projects | ✅ | ✅ | ❌ | ❌ | ❌ |
 | Move Deals in Kanban Pipeline | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Send / Receive Omni-Inbox Chats | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Invite Members / Revoke Invites | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Change Member Roles / Remove | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Invite Members / Revoke Invites | ✅ (admin, member, viewer, billing) | ⚠️ (member, viewer, billing only) | ❌ | ❌ | ❌ |
+| Change Member Roles | ✅ (full role assignment) | ⚠️ (non-admin roles: member ↔ viewer ↔ billing) | ❌ | ❌ | ❌ |
+| Remove Team Members | ✅ (cannot remove sole owner) | ⚠️ (can remove member/viewer/billing only) | ❌ | ❌ | ❌ |
 | Manage Organization Settings | ✅ | ✅ | ❌ | ❌ | ❌ |
 | View & Manage Stripe Billing | ✅ | ❌ | ❌ | ❌ | ✅ |
 | View Organization Audit Logs | ✅ | ✅ | ❌ | ❌ | ❌ |
 | Delete Entire Organization | ✅ | ❌ | ❌ | ❌ | ❌ |
+
+> **Note on Administrative Delegation (TEAM-3)**:
+> - `admin` users can invite, change roles, and remove standard contributors (`member`, `viewer`, `billing_manager`).
+> - `admin` users CANNOT invite admins or owners, CANNOT promote any user to admin or owner, CANNOT change the role of another admin or owner, and CANNOT remove another admin or owner.
+> - The sole primary `owner` is strictly protected at the database transaction layer (`FOR UPDATE` lock) and cannot be demoted or removed by any role (including themselves).
 
 ---
 

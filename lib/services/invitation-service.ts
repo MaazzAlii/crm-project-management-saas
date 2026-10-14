@@ -20,6 +20,7 @@ import { canResend, canRevoke } from '../invitations/status';
 import { sendEmail } from '../email/sender';
 import { renderInviteEmail } from '../email/templates';
 import { hashPassword, validatePasswordStrength } from '../auth/password';
+import { canInviteWithRole, OrgRole } from '../auth/permissions';
 import { Invitation, InvitationRole } from '../types/database';
 
 export interface InvitationSessionContext {
@@ -31,6 +32,7 @@ export interface InvitationSessionContext {
     email?: string;
   } | null;
   role?: string | null;
+  isSuperAdmin?: boolean;
 }
 
 export interface CreateInvitationInput {
@@ -51,7 +53,7 @@ export interface CreateInvitationSuccess {
 export interface CreateInvitationError {
   success: false;
   error: 'unauthorized' | 'forbidden' | 'invalid_email' | 'invalid_password' | 'already_member' | 'LIMIT_REACHED';
-  code?: 'SEAT_LIMIT_REACHED' | 'PENDING_LIMIT_REACHED';
+  code?: 'SEAT_LIMIT_REACHED' | 'PENDING_LIMIT_REACHED' | 'INSUFFICIENT_ROLE';
   reason?: 'MEMBER_LIMIT' | 'PENDING_LIMIT';
   message: string;
   status: number;
@@ -60,6 +62,8 @@ export interface CreateInvitationError {
   current?: number;
   currentCount?: number;
   upgradeUrl?: string;
+  requiredRole?: string;
+  yourRole?: string;
 }
 
 export type CreateInvitationResult = CreateInvitationSuccess | CreateInvitationError;
@@ -94,24 +98,37 @@ export async function createInvitation(
     };
   }
 
-  // 2. Only owner or admin may invite. Member and viewer get forbidden.
-  const actorRole = await orgRepo.getMemberRole(orgId, actorUserId);
-  if (!actorRole || (actorRole !== 'owner' && actorRole !== 'admin')) {
+  // 2. Centralized RBAC check: Only owner or admin may invite, with role hierarchy
+  const actorRole = (await orgRepo.getMemberRole(orgId, actorUserId)) as OrgRole;
+  if (!actorRole) {
     return {
       success: false,
       error: 'forbidden',
       status: 403,
-      message: 'Forbidden: Only organization owners and admins can send invitations',
+      code: 'INSUFFICIENT_ROLE',
+      message: 'Forbidden: You are not a member of this organization',
     };
   }
 
-  // 3. Admin cannot invite another admin or owner. Only owner can invite admin.
-  if (actorRole === 'admin' && (input.role === 'admin' || (input.role as string) === 'owner')) {
+  const perm = canInviteWithRole(
+    {
+      userId: actorUserId,
+      role: actorRole,
+      orgId,
+      isSuperAdmin: session?.isSuperAdmin,
+    },
+    input.role as OrgRole
+  );
+
+  if (!perm.allowed) {
     return {
       success: false,
       error: 'forbidden',
       status: 403,
-      message: 'Forbidden: Admins cannot invite other admins or owners. Only owners can invite admins.',
+      code: perm.code as any,
+      message: perm.message || 'Forbidden: Insufficient role permissions.',
+      requiredRole: perm.requiredRole,
+      yourRole: perm.yourRole,
     };
   }
 

@@ -9,8 +9,9 @@ import crypto from 'crypto';
 import { orgRepo } from '../db/repositories/org-repo';
 import { userRepo } from '../db/repositories/user-repo';
 import { auditRepo } from '../db/repositories/audit-repo';
-import { query, queryOne } from '../db';
-import { NotFoundError, ForbiddenError, ValidationError, ConflictError } from '../utils/error-handler';
+import { query, queryOne, transaction } from '../db';
+import { NotFoundError, ForbiddenError, ValidationError, ConflictError, AppError } from '../utils/error-handler';
+import { canChangeRole, canRemoveMember, OrgRole } from '../auth/permissions';
 import { Organization, MembershipRole } from '../types/database';
 
 export class OrganizationService {
@@ -233,67 +234,164 @@ export class OrganizationService {
   }
 
   /**
-   * Update a member's role (ensures at least 1 owner remains)
+   * Update a member's role (ensures at least 1 owner remains, enforces RBAC inside transaction)
    */
   async updateMemberRole(
     orgId: string,
     actorUserId: string,
     targetUserId: string,
-    newRole: MembershipRole
+    newRole: MembershipRole,
+    isSuperAdmin: boolean = false
   ) {
-    if (newRole !== 'owner') {
-      const members = await orgRepo.getMembers(orgId);
-      const currentOwners = members.filter((m) => m.role === 'owner');
-      if (currentOwners.length === 1 && currentOwners[0].user_id === targetUserId) {
-        throw new ValidationError('Cannot demote the sole organization owner. Transfer ownership first.');
+    return await transaction(async (client) => {
+      // 1. Fetch actor's role in this organization
+      let actorRole: OrgRole = 'member';
+      if (isSuperAdmin) {
+        actorRole = 'owner';
+      } else {
+        const actorRes = await client.query(
+          'SELECT role FROM organization_members WHERE organization_id = $1 AND user_id = $2',
+          [orgId, actorUserId]
+        );
+        if (actorRes.rows.length === 0) {
+          throw new ForbiddenError('Unauthorized: You are not a member of this organization', {
+            code: 'TENANT_MISMATCH',
+          });
+        }
+        actorRole = actorRes.rows[0].role as OrgRole;
       }
-    }
 
-    const updated = await orgRepo.updateMemberRole(orgId, targetUserId, newRole);
-    if (!updated) {
-      throw new NotFoundError('Member record not found');
-    }
+      // 2. Fetch target member record in this organization
+      const targetRes = await client.query(
+        'SELECT id, role, user_id, organization_id FROM organization_members WHERE organization_id = $1 AND user_id = $2',
+        [orgId, targetUserId]
+      );
+      if (targetRes.rows.length === 0) {
+        throw new NotFoundError('Member record not found in organization');
+      }
+      const targetRole = targetRes.rows[0].role as OrgRole;
 
-    await auditRepo.log({
-      organizationId: orgId,
-      userId: actorUserId,
-      action: 'TEAM_MEMBER_ROLE_UPDATED',
-      resourceType: 'membership',
-      resourceId: targetUserId,
-      metadata: { newRole },
+      // 3. Lock and count owners with FOR UPDATE to prevent TOCTOU race
+      const ownerCountRes = await client.query(
+        "SELECT id FROM organization_members WHERE organization_id = $1 AND role = 'owner' FOR UPDATE",
+        [orgId]
+      );
+      const ownerCount = ownerCountRes.rows.length;
+
+      // 4. Check permissions
+      const perm = canChangeRole(
+        { userId: actorUserId, role: actorRole, orgId, isSuperAdmin },
+        { userId: targetUserId, role: targetRole, orgId },
+        newRole as OrgRole,
+        ownerCount
+      );
+
+      if (!perm.allowed) {
+        throw new AppError(perm.message || 'Permission denied', 403, perm.code, {
+          requiredRole: perm.requiredRole,
+          yourRole: perm.yourRole,
+        });
+      }
+
+      // 5. Update role
+      const updateRes = await client.query(
+        `UPDATE organization_members 
+         SET role = $1, updated_at = NOW() 
+         WHERE organization_id = $2 AND user_id = $3 
+         RETURNING *`,
+        [newRole, orgId, targetUserId]
+      );
+
+      // 6. Audit log
+      await auditRepo.log({
+        organizationId: orgId,
+        userId: actorUserId,
+        action: 'TEAM_MEMBER_ROLE_UPDATED',
+        resourceType: 'membership',
+        resourceId: targetUserId,
+        metadata: { oldRole: targetRole, newRole },
+      });
+
+      return updateRes.rows[0];
     });
-
-    return updated;
   }
 
   /**
-   * Remove a member from the organization
+   * Remove a member from the organization (atomic with FOR UPDATE lock)
    */
-  async removeMember(orgId: string, actorUserId: string, targetUserId: string) {
-    const members = await orgRepo.getMembers(orgId);
-    const target = members.find((m) => m.user_id === targetUserId);
-    if (!target) {
-      throw new NotFoundError('Member not found in organization');
-    }
-
-    if (target.role === 'owner') {
-      const owners = members.filter((m) => m.role === 'owner');
-      if (owners.length <= 1) {
-        throw new ValidationError('Cannot remove the sole organization owner.');
+  async removeMember(
+    orgId: string,
+    actorUserId: string,
+    targetUserId: string,
+    isSuperAdmin: boolean = false
+  ) {
+    return await transaction(async (client) => {
+      // 1. Fetch actor's role in this organization
+      let actorRole: OrgRole = 'member';
+      if (isSuperAdmin) {
+        actorRole = 'owner';
+      } else {
+        const actorRes = await client.query(
+          'SELECT role FROM organization_members WHERE organization_id = $1 AND user_id = $2',
+          [orgId, actorUserId]
+        );
+        if (actorRes.rows.length === 0) {
+          throw new ForbiddenError('Unauthorized: You are not a member of this organization', {
+            code: 'TENANT_MISMATCH',
+          });
+        }
+        actorRole = actorRes.rows[0].role as OrgRole;
       }
-    }
 
-    const removed = await orgRepo.removeMember(orgId, targetUserId);
+      // 2. Fetch target member record in this organization
+      const targetRes = await client.query(
+        'SELECT id, role, user_id, organization_id FROM organization_members WHERE organization_id = $1 AND user_id = $2',
+        [orgId, targetUserId]
+      );
+      if (targetRes.rows.length === 0) {
+        throw new NotFoundError('Member not found in organization');
+      }
+      const targetRole = targetRes.rows[0].role as OrgRole;
 
-    await auditRepo.log({
-      organizationId: orgId,
-      userId: actorUserId,
-      action: 'TEAM_MEMBER_REMOVED',
-      resourceType: 'membership',
-      resourceId: targetUserId,
+      // 3. Lock and count owners with FOR UPDATE to prevent TOCTOU race
+      const ownerCountRes = await client.query(
+        "SELECT id FROM organization_members WHERE organization_id = $1 AND role = 'owner' FOR UPDATE",
+        [orgId]
+      );
+      const ownerCount = ownerCountRes.rows.length;
+
+      // 4. Check permissions
+      const perm = canRemoveMember(
+        { userId: actorUserId, role: actorRole, orgId, isSuperAdmin },
+        { userId: targetUserId, role: targetRole, orgId },
+        ownerCount
+      );
+
+      if (!perm.allowed) {
+        throw new AppError(perm.message || 'Permission denied', 403, perm.code, {
+          requiredRole: perm.requiredRole,
+          yourRole: perm.yourRole,
+        });
+      }
+
+      // 5. Delete member
+      const deleteRes = await client.query(
+        'DELETE FROM organization_members WHERE organization_id = $1 AND user_id = $2',
+        [orgId, targetUserId]
+      );
+
+      // 6. Audit log
+      await auditRepo.log({
+        organizationId: orgId,
+        userId: actorUserId,
+        action: 'TEAM_MEMBER_REMOVED',
+        resourceType: 'membership',
+        resourceId: targetUserId,
+        metadata: { removedRole: targetRole },
+      });
+
+      return (deleteRes.rowCount ?? 0) > 0;
     });
-
-    return removed;
   }
 
   /**

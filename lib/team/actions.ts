@@ -4,6 +4,8 @@ import { query, queryOne } from '@/lib/db'
 import { getCurrentSessionContext } from '@/lib/auth/session'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
+import { canInviteWithRole, OrgRole } from '@/lib/auth/permissions'
+import { orgService } from '@/lib/services/org-service'
 
 import { sendEmail } from '@/lib/email/sender'
 import { renderRoleChangedEmail } from '@/lib/email/templates'
@@ -93,7 +95,7 @@ export async function updateOrganizationProfile(input: UpdateOrgProfileInput) {
 
 /**
  * Server Action: Invite Team Member
- * Restricted to 'owner' or 'admin' roles.
+ * Enforces centralized RBAC permissions.
  */
 export async function inviteTeamMember(input: InviteMemberInput) {
   const session = await getCurrentSessionContext()
@@ -102,9 +104,25 @@ export async function inviteTeamMember(input: InviteMemberInput) {
     return { success: false, error: 'Unauthorized: No active session.' }
   }
 
-  // Server-side Role Check
-  if (session.role !== 'owner' && session.role !== 'admin' && !session.isSuperAdmin) {
-    return { success: false, error: 'Forbidden: Only owners and admins can invite team members.' }
+  // Enforce centralized permission check
+  const perm = canInviteWithRole(
+    {
+      userId: session.user.id,
+      role: session.role as OrgRole,
+      orgId: session.organization.id,
+      isSuperAdmin: session.isSuperAdmin,
+    },
+    input.role
+  )
+
+  if (!perm.allowed) {
+    return {
+      success: false,
+      error: perm.message || 'Forbidden: Insufficient role permissions.',
+      code: perm.code,
+      requiredRole: perm.requiredRole,
+      yourRole: perm.yourRole,
+    }
   }
 
   const cleanEmail = input.email.trim().toLowerCase()
@@ -160,26 +178,14 @@ export async function inviteTeamMember(input: InviteMemberInput) {
 }
 
 /**
- * Server Action: Update Member Role (Prompt 36)
- * Rules:
- * - Owner can change any role except their own.
- * - Admin can change member and viewer roles only, and cannot touch owner or admin.
- * - Admin cannot promote a member to admin or owner.
- * - Demoting the last owner is forbidden.
- * - Sends email notification and records audit event.
+ * Server Action: Update Member Role (Prompt 36 & TEAM-3 Hardening)
+ * Calls orgService.updateMemberRole to ensure atomic transaction and FOR UPDATE concurrency lock.
  */
 export async function updateMemberRole(input: UpdateRoleInput) {
   const session = await getCurrentSessionContext()
 
   if (!session || !session.user || !session.organization) {
     return { success: false, error: 'Unauthorized: No active session.' }
-  }
-
-  const isOwner = session.role === 'owner' || session.isSuperAdmin
-  const isAdmin = session.role === 'admin'
-
-  if (!isOwner && !isAdmin) {
-    return { success: false, error: 'Forbidden: Only owners and admins can update member roles.' }
   }
 
   try {
@@ -193,50 +199,14 @@ export async function updateMemberRole(input: UpdateRoleInput) {
       return { success: false, error: 'Target member record not found.' }
     }
 
-    // Rule: Owner cannot change their own role
-    if (targetMember.user_id === session.user.id) {
-      return { success: false, error: 'Cannot change your own role.' }
-    }
-
-    // Rule: Admin can change member and viewer roles only, and cannot touch owner or admin
-    if (isAdmin) {
-      if (targetMember.role === 'owner' || targetMember.role === 'admin') {
-        return { success: false, error: 'Forbidden: Admins cannot change owner or admin roles.' }
-      }
-      if (input.newRole === 'owner' || input.newRole === 'admin') {
-        return { success: false, error: 'Forbidden: Admins cannot promote members to admin or owner.' }
-      }
-    }
-
-    // Prevent demoting the last owner of the organization
-    if (targetMember.role === 'owner' && input.newRole !== 'owner') {
-      const ownerCountRes = await queryOne<{ count: string }>(
-        "SELECT COUNT(*) as count FROM organization_members WHERE organization_id = $1 AND role = 'owner'",
-        [session.organization.id]
-      )
-      const ownerCount = parseInt(ownerCountRes?.count || '0', 10)
-
-      if (ownerCount <= 1) {
-        return { success: false, error: 'Cannot demote the last owner of an organization.' }
-      }
-    }
-
-    // Update member role
-    await query(
-      `UPDATE organization_members
-       SET role = $1, updated_at = NOW()
-       WHERE id = $2 AND organization_id = $3`,
-      [input.newRole, input.memberId, session.organization.id]
+    // Call atomic transactional orgService
+    await orgService.updateMemberRole(
+      session.organization.id,
+      session.user.id,
+      targetMember.user_id,
+      input.newRole,
+      session.isSuperAdmin
     )
-
-    // Audit log
-    await logAuditEvent({
-      actorId: session.user.id,
-      action: 'TEAM_MEMBER_ROLE_UPDATED',
-      targetType: 'organization_member',
-      targetId: input.memberId,
-      details: { oldRole: targetMember.role, newRole: input.newRole },
-    })
 
     // Transactional email notification to the member (Prompt 30 & 36)
     try {
@@ -266,30 +236,25 @@ export async function updateMemberRole(input: UpdateRoleInput) {
     return { success: true }
   } catch (err: any) {
     console.error('Error updating member role:', err)
-    return { success: false, error: err.message || 'Role update failed' }
+    return {
+      success: false,
+      error: err.message || 'Role update failed',
+      code: err.code,
+      requiredRole: err.details?.requiredRole,
+      yourRole: err.details?.yourRole,
+    }
   }
 }
 
 /**
- * Server Action: Remove Member (Prompt 36)
- * Rules:
- * - Owner and admin can remove members, with confirm.
- * - Cannot remove the owner.
- * - Admin cannot remove owner or admin.
- * - Writes audit events.
+ * Server Action: Remove Member (Prompt 36 & TEAM-3 Hardening)
+ * Calls orgService.removeMember to ensure atomic transaction and FOR UPDATE concurrency lock.
  */
 export async function removeMember(input: RemoveMemberInput) {
   const session = await getCurrentSessionContext()
 
   if (!session || !session.user || !session.organization) {
     return { success: false, error: 'Unauthorized: No active session.' }
-  }
-
-  const isOwner = session.role === 'owner' || session.isSuperAdmin
-  const isAdmin = session.role === 'admin'
-
-  if (!isOwner && !isAdmin) {
-    return { success: false, error: 'Forbidden: Only owners and admins can remove team members.' }
   }
 
   try {
@@ -303,34 +268,24 @@ export async function removeMember(input: RemoveMemberInput) {
       return { success: false, error: 'Target member record not found.' }
     }
 
-    // Rule: Cannot remove the owner
-    if (targetMember.role === 'owner') {
-      return { success: false, error: 'Cannot remove the organization owner.' }
-    }
-
-    // Rule: Admin cannot remove other admins
-    if (isAdmin && targetMember.role === 'admin') {
-      return { success: false, error: 'Forbidden: Admins cannot remove other admins.' }
-    }
-
-    // Delete member record (seat count drops automatically)
-    await query(
-      'DELETE FROM organization_members WHERE id = $1 AND organization_id = $2',
-      [input.memberId, session.organization.id]
+    // Call atomic transactional orgService
+    await orgService.removeMember(
+      session.organization.id,
+      session.user.id,
+      targetMember.user_id,
+      session.isSuperAdmin
     )
-
-    await logAuditEvent({
-      actorId: session.user.id,
-      action: 'TEAM_MEMBER_REMOVED',
-      targetType: 'organization_member',
-      targetId: input.memberId,
-      details: { removedUserId: targetMember.user_id, role: targetMember.role },
-    })
 
     revalidatePath('/settings/team')
     return { success: true }
   } catch (err: any) {
     console.error('Error removing org member:', err)
-    return { success: false, error: err.message || 'Remove member failed' }
+    return {
+      success: false,
+      error: err.message || 'Remove member failed',
+      code: err.code,
+      requiredRole: err.details?.requiredRole,
+      yourRole: err.details?.yourRole,
+    }
   }
 }
