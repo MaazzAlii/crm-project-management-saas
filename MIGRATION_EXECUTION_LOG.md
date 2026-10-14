@@ -3211,6 +3211,86 @@ paste at the start of every batch report.
   - `npm run build`: 142 routes compiled cleanly (strict baseline preserved)
 - **Status**: ✅ TEAM-1 complete. All 5 bugs fixed and verified. 3 atomic local commits. Zero remotes pushed per Push Approval Policy. Awaiting user review before TEAM-2.
 
+---
+
+### [2026-10-14 22:30:00 UTC] - Batch TEAM-2: Seat Limits & Upgrade UX
+
+- **Phase**: Functional Bug Workstream — Team & Collaboration Track
+- **Task ID**: `TEAM-2`
+- **Action Performed**:
+  1. **Comprehensive Touchpoint Audit (§2.1 & §4)**:
+     - Formed the complete enforcement inventory across all invite creation, acceptance, frontend pre-checks, and usage services.
+     - Confirmed plan definitions: Free plan = 3 members, 2 pending; Pro plan = 15 members, 20 pending; Enterprise plan = 500 members.
+  2. **Shared Plan Limits Service Architecture (§3.1)**:
+     - Created `lib/services/plan-limits.ts` providing unified helpers:
+       * `checkMemberLimit(organizationId, options)`: Evaluates seats used (`members + pendingInvites`) for creation, or active members count for transactional acceptance.
+       * `checkPendingInviteLimit(organizationId, options)`: Evaluates active pending invitations against `maxPendingInvites`.
+       * Returns structured `PlanLimitCheck`: `{ allowed, reason, currentCount, limit, planName, upgradeUrl: '/settings/billing', message }`.
+  3. **Strict Server-Side Quota Enforcement Everywhere (Bug #6)**:
+     - `lib/services/invitation-service.ts`:
+       * `createInvitation`: Enforces pending invite limit via `checkPendingInviteLimit` and seat limit via `checkMemberLimit`. Returns `status: 402` with `code: 'PENDING_LIMIT_REACHED' | 'SEAT_LIMIT_REACHED'`, `currentCount`, `limit`, `planName`, `upgradeUrl`.
+       * `acceptInvitation`: Enforces seat limit transactionally via `checkMemberLimit(locked.organization_id, { client })`. Returns structured 402 error payload.
+     - `app/api/invitations/route.ts`:
+       * Returns structured `HTTP 402 Payment Required` on limit reached with `{ code: 'SEAT_LIMIT_REACHED' | 'PENDING_LIMIT_REACHED', currentCount, limit, planName, upgradeUrl: '/settings/billing' }`.
+     - `app/api/invitations/accept/route.ts`:
+       * Standardized from generic 403 to structured `HTTP 402 Payment Required` with `code: 'SEAT_LIMIT_REACHED'`, `currentCount`, `limit`, `planName`, and `upgradeUrl: '/settings/billing'`.
+  4. **Inline Upgrade CTA Card (Bug #7)**:
+     - Updated `components/settings/InviteMemberDialog.tsx`:
+       * Implemented structured inline upgrade card displaying plan limit, seats used, and explicit CTA button linking to `/settings/billing`.
+       * Added `data-testid="upgrade-cta"` and `data-testid="seat-limit-warning"`.
+       * Styled with semantic tokens: `bg-amber-500/10`, `border-amber-500/20`, `text-amber-500 dark:text-amber-300`, `bg-primary text-primary-foreground`.
+       * Triggered both on pre-check when quota is reached and on API 402 response.
+  5. **Bulk Invite Support (Feature #9 — Satisfied Escape Hatch)**:
+     - Updated `components/settings/InviteMemberDialog.tsx`:
+       * Changed email input to accept comma-separated email lists with `data-testid="email-input"`.
+       * Added parser: splits by comma, trims, removes empty values, dedupes.
+       * Validates all entries using `isValidEmail`.
+       * Iteratively calls existing `POST /api/invitations` endpoint (0 new routes, 0 new endpoints).
+       * Aggregates results: `{ created: N, failed: [{ email, reason }] }` and displays summary toast feedback.
+       * Diff under 75 lines (well below the 250-line escape hatch limit).
+  6. **Regression Tests Added**:
+     - Created `tests/team/seat-limits.test.ts` covering all 9 required test cases:
+       1. Free plan, 2 members → 3rd invite allowed.
+       2. Free plan, 3 members → invite rejected with 402 + SEAT_LIMIT_REACHED.
+       3. Free plan, 2 pending → 3rd pending rejected with PENDING_LIMIT_REACHED.
+       4. Free plan, invite created when 2 members, 3rd member added, accept → rejected 402.
+       5. Pro plan, 15 members → limit scales beyond Free tier (allows >3 seats, max 15).
+       6. Error body includes upgradeUrl and planName on quota rejection.
+       7. Pending count excludes revoked/accepted invites (only status = 'pending' counts).
+       8. Member count excludes revoked members (deleted from organization_members).
+       9. Bulk invite with 2 valid + 1 duplicate/existing member → creates valid and reports failure.
+  7. **Playwright Browser Verification**:
+     - Created `scripts/verify-team-2-e2e.ts`.
+     - Captured all 6 required screenshots in `assets/screenshots/team-2/` and artifact directory:
+       * `invite_ok_light.png` (227.4 KB)
+       * `invite_ok_dark.png` (154.3 KB)
+       * `bulk_invite_light.png` (227.3 KB)
+       * `bulk_invite_dark.png` (154.2 KB)
+       * `seat_limit_cta_light.png` (259.1 KB)
+       * `seat_limit_cta_dark.png` (187.6 KB)
+     - Verified clicking `[data-testid="upgrade-cta"]` navigates to `/settings/billing`.
+- **Files Modified / Created**:
+  - `lib/services/plan-limits.ts` (new shared helper)
+  - `lib/services/invitation-service.ts`
+  - `app/api/invitations/route.ts`
+  - `app/api/invitations/accept/route.ts`
+  - `components/settings/InviteMemberDialog.tsx`
+  - `components/settings/TeamMemberList.tsx`
+  - `tests/team/seat-limits.test.ts` (new regression suite)
+  - `tests/api-invitations.test.ts`
+  - `tests/free-limits.test.ts`
+  - `scripts/verify-team-2-e2e.ts`
+  - `assets/screenshots/team-2/*`
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `npx tsc --noEmit`: EXIT 0
+  - `npm test`: 526/526 tests passed across 76 test files (517 baseline + 9 new regression tests, 0 failures)
+  - `npm run lint`: 4 warnings, 0 errors (0 new warnings)
+  - `npm run build`: 142 routes compiled cleanly (strict baseline preserved)
+- **Status**: ✅ TEAM-2 complete. All items addressed and verified. 3 atomic local commits. Zero remotes pushed per Push Approval Policy. Awaiting user review before TEAM-3.
+
+
 
 
 
