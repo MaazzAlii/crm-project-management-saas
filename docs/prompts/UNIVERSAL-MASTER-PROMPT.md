@@ -237,6 +237,7 @@ AWAITING:
 17. **Do not claim browser/device/runtime verification without an actual session.** ⭐ NEW
 18. **Never pipe `type-check`, `lint`, or `test` output through `tail`, `head`, or any truncating command.** ⭐ NEW  
     Always capture full output: `npm run type-check 2>&1 | tee /tmp/tc.log`. A report that claims "pass" must include the exact exit code (`echo "EXIT: $?"`) and the full error count from the raw output file. Truncated output that hides errors is equivalent to fabrication.
+19. **Every batch report MUST include the raw output of** `git log --all --oneline --grep="Sub-Batch"` as a plain paste, unedited. This is the single source of truth for what batches have actually been committed. Summary tallies in reports are not acceptable evidence — only the raw git log is. Additionally, route count claims MUST come from a fresh `npm run build 2>&1 | grep -E "^[├└]" | wc -l` executed in the same session, not copied from earlier logs. ⭐ NEW
 
 ---
 
@@ -327,6 +328,8 @@ SESSION STARTUP CHECKLIST
 [ ] Report git status (clean or dirty)
 [ ] Report current branch and remote sync state
 [ ] Report unpushed commit count ← NEW
+[ ] Paste raw `git log --all --oneline --grep="Sub-Batch"` output
+[ ] Confirm route count from a fresh build in this session
 [ ] State session goal in one sentence
 [ ] State batch(es) to execute
 [ ] State what "done" looks like
