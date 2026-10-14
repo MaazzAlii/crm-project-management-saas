@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth/middleware';
 import { acceptInvitation } from '@/lib/services/invitation-service';
 import { checkRateLimit, createRateLimitExceededResponse, getClientIp, INVITE_RATE_LIMITS } from '@/lib/security/rate-limit';
@@ -53,7 +53,31 @@ export async function POST(request: NextRequest) {
       }
 
       if (result.error === 'seat_limit_reached') {
-        return apiError(result.message, 403, 'SEAT_LIMIT_REACHED');
+        const currentCount = (result as any).currentCount ?? (result as any).maxMembers;
+        const limit = (result as any).limit ?? (result as any).maxMembers;
+        const planName = (result as any).planName || 'Free';
+        const upgradeUrl = (result as any).upgradeUrl || '/settings/billing';
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'SEAT_LIMIT_REACHED',
+              message: result.message,
+              currentCount,
+              limit,
+              planName,
+              upgradeUrl,
+              details: {
+                currentCount,
+                limit,
+                planName,
+                upgradeUrl,
+              },
+            },
+          },
+          { status: 402 }
+        );
       }
 
       if (result.error === 'already_accepted') {

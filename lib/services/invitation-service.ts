@@ -12,6 +12,7 @@ import { invitationRepo } from '../db/repositories/invitation-repo';
 import { orgRepo } from '../db/repositories/org-repo';
 import { userRepo } from '../db/repositories/user-repo';
 import { getCurrentPlan } from '../billing/current-plan';
+import { checkMemberLimit, checkPendingInviteLimit } from './plan-limits';
 import { normalizeEmail, isValidEmail } from '../validation/email';
 import { generateToken, hashToken } from '../security/invite-token';
 import { logInvitationAudit } from '../audit/invitations';
@@ -50,11 +51,15 @@ export interface CreateInvitationSuccess {
 export interface CreateInvitationError {
   success: false;
   error: 'unauthorized' | 'forbidden' | 'invalid_email' | 'invalid_password' | 'already_member' | 'LIMIT_REACHED';
+  code?: 'SEAT_LIMIT_REACHED' | 'PENDING_LIMIT_REACHED';
+  reason?: 'MEMBER_LIMIT' | 'PENDING_LIMIT';
   message: string;
   status: number;
   planName?: string;
   limit?: number;
   current?: number;
+  currentCount?: number;
+  upgradeUrl?: string;
 }
 
 export type CreateInvitationResult = CreateInvitationSuccess | CreateInvitationError;
@@ -150,35 +155,39 @@ export async function createInvitation(
     };
   }
 
-  // Retrieve current subscription plan & seat rules
-  const planInfo = await getCurrentPlan(orgId);
-  const planConfig = planInfo.planConfig;
-
   // 7. Check maxPendingInvites
-  const pendingCount = await invitationRepo.countPending(orgId);
-  if (pendingCount >= planConfig.maxPendingInvites) {
+  const pendingCheck = await checkPendingInviteLimit(orgId);
+  if (!pendingCheck.allowed) {
     return {
       success: false,
       error: 'LIMIT_REACHED',
-      status: 403,
-      message: `Pending invitations limit reached for ${planConfig.name} plan (${planConfig.maxPendingInvites} pending)`,
-      planName: planConfig.name,
-      limit: planConfig.maxPendingInvites,
-      current: pendingCount,
+      code: 'PENDING_LIMIT_REACHED',
+      reason: 'PENDING_LIMIT',
+      status: 402,
+      message: pendingCheck.message || `Pending invitations limit reached for ${pendingCheck.planName} plan (${pendingCheck.limit} pending)`,
+      planName: pendingCheck.planName,
+      limit: pendingCheck.limit,
+      current: pendingCheck.currentCount,
+      currentCount: pendingCheck.currentCount,
+      upgradeUrl: pendingCheck.upgradeUrl,
     };
   }
 
   // 8. Check seats: countSeatsUsed + 1 must not exceed the plan's maxMembers
-  const seatsUsed = await orgRepo.countSeatsUsed(orgId);
-  if (seatsUsed + 1 > planConfig.maxMembers) {
+  const memberCheck = await checkMemberLimit(orgId, { isInviteCreation: true });
+  if (!memberCheck.allowed) {
     return {
       success: false,
       error: 'LIMIT_REACHED',
-      status: 403,
-      message: `Seat limit reached for ${planConfig.name} plan (${planConfig.maxMembers} seats)`,
-      planName: planConfig.name,
-      limit: planConfig.maxMembers,
-      current: seatsUsed,
+      code: 'SEAT_LIMIT_REACHED',
+      reason: 'MEMBER_LIMIT',
+      status: 402,
+      message: memberCheck.message || `Seat limit reached for ${memberCheck.planName} plan (${memberCheck.limit} seats)`,
+      planName: memberCheck.planName,
+      limit: memberCheck.limit,
+      current: memberCheck.currentCount,
+      currentCount: memberCheck.currentCount,
+      upgradeUrl: memberCheck.upgradeUrl,
     };
   }
 
@@ -567,8 +576,13 @@ export interface AcceptInvitationWrongAccount {
 export interface AcceptInvitationGeneralError {
   success: false;
   error: 'invalid_or_expired' | 'expired' | 'revoked' | 'already_accepted' | 'seat_limit_reached';
+  code?: 'SEAT_LIMIT_REACHED';
   status: number;
   message: string;
+  currentCount?: number;
+  limit?: number;
+  planName?: string;
+  upgradeUrl?: string;
 }
 
 export type AcceptInvitationResult =
@@ -704,18 +718,14 @@ export async function acceptInvitation(
 
     // If NOT already a member, check if organization seat limit is reached!
     if (existingMemberRes.rows.length === 0) {
-      const planInfo = await getCurrentPlan(locked.organization_id);
-      const planConfig = planInfo.planConfig;
-      const memberCountRes = await client.query(
-        `SELECT count(*) as count FROM organization_members WHERE organization_id = $1`,
-        [locked.organization_id]
-      );
-      const currentMembers = parseInt(memberCountRes.rows[0].count, 10);
-      if (currentMembers >= planConfig.maxMembers) {
+      const memberLimit = await checkMemberLimit(locked.organization_id, { client });
+      if (!memberLimit.allowed) {
         return {
           error: 'seat_limit_reached' as const,
-          maxMembers: planConfig.maxMembers,
-          planName: planConfig.name,
+          maxMembers: memberLimit.limit,
+          currentCount: memberLimit.currentCount,
+          planName: memberLimit.planName,
+          upgradeUrl: memberLimit.upgradeUrl,
           invitation: locked,
         };
       }
@@ -757,8 +767,13 @@ export async function acceptInvitation(
     return {
       success: false,
       error: 'seat_limit_reached',
+      code: 'SEAT_LIMIT_REACHED',
       status: 403,
-      message: `This organization has reached its maximum seat limit (${txResult.maxMembers} members) for the ${txResult.planName} plan. Please contact an organization administrator or owner to upgrade the plan.`,
+      currentCount: txResult.currentCount,
+      limit: txResult.maxMembers,
+      planName: txResult.planName,
+      upgradeUrl: txResult.upgradeUrl || '/settings/billing',
+      message: `${txResult.planName} plan allows up to ${txResult.maxMembers} team members. Upgrade to invite more.`,
     };
   }
   if (txResult.error === 'already_accepted') {

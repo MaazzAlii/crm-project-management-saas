@@ -23,7 +23,7 @@ export interface InviteMemberDialogProps {
   isOpen: boolean
   onClose: () => void
   currentUserRole: string
-  onSuccess?: (invitation: any, inviteLink?: string) => void
+  onSuccess?: (invitation?: any, inviteLink?: string, summaryMessage?: string) => void
 }
 
 interface BillingUsageState {
@@ -35,6 +35,15 @@ interface BillingUsageState {
   maxPendingInvites: number
   seatLimitReached: boolean
   pendingLimitReached: boolean
+}
+
+interface LimitErrorDetails {
+  code: string
+  message: string
+  currentCount?: number
+  limit?: number
+  planName?: string
+  upgradeUrl?: string
 }
 
 export function InviteMemberDialog({
@@ -55,9 +64,14 @@ export function InviteMemberDialog({
   const [confirmTempPassword, setConfirmTempPassword] = useState('')
   const [tempPasswordError, setTempPasswordError] = useState<string | null>(null)
 
-  // Billing usage state
+  // Billing usage & quota error state
   const [usage, setUsage] = useState<BillingUsageState | null>(null)
   const [loadingUsage, setLoadingUsage] = useState(false)
+  const [limitError, setLimitError] = useState<LimitErrorDetails | null>(null)
+  const [bulkSummary, setBulkSummary] = useState<{
+    created: number
+    failed: { email: string; reason: string }[]
+  } | null>(null)
 
   const isOwner = currentUserRole === 'owner'
 
@@ -70,6 +84,8 @@ export function InviteMemberDialog({
     setRole('member')
     setEmailError(null)
     setServerError(null)
+    setLimitError(null)
+    setBulkSummary(null)
     setSubmitting(false)
     setSetTempPassword(false)
     setTempPasswordValue('')
@@ -110,12 +126,25 @@ export function InviteMemberDialog({
 
   if (!isOpen) return null
 
+  // Parse comma-separated emails
+  const parseEmails = (value: string): string[] => {
+    return Array.from(
+      new Set(
+        value
+          .split(',')
+          .map((e) => e.trim().toLowerCase())
+          .filter((e) => e.length > 0)
+      )
+    )
+  }
+
   // Quota & limit evaluation
-  const isSeatLimitReached =
-    usage &&
-    (usage.seatLimitReached ||
-      usage.pendingLimitReached ||
-      (usage.maxMembers > 0 && usage.seatsUsed >= usage.maxMembers))
+  const isLimitReached =
+    !!limitError ||
+    (usage &&
+      (usage.seatLimitReached ||
+        usage.pendingLimitReached ||
+        (usage.maxMembers > 0 && usage.seatsUsed >= usage.maxMembers)))
 
   // Compute seat usage display line
   const seatUsageText = usage
@@ -126,18 +155,20 @@ export function InviteMemberDialog({
 
   // Prompt 17 Personal email notice evaluation on paid plans
   const isPaidPlan = usage && usage.planTier !== 'free'
-  const emailClassification = email.includes('@') ? classifyEmail(email) : null
+  const emailClassification =
+    email.includes('@') && !email.includes(',') ? classifyEmail(email) : null
   const showPersonalEmailNotice = isPaidPlan && emailClassification?.isPersonal
 
   // Real-time / on-blur validation
   const validateEmailInput = (value: string): boolean => {
-    const clean = value.trim().toLowerCase()
-    if (!clean) {
+    const list = parseEmails(value)
+    if (list.length === 0) {
       setEmailError('Email address is required')
       return false
     }
-    if (!isValidEmail(clean)) {
-      setEmailError('Please enter a valid email address')
+    const invalid = list.filter((e) => !isValidEmail(e))
+    if (invalid.length > 0) {
+      setEmailError(`Invalid email address format: ${invalid.join(', ')}`)
       return false
     }
     setEmailError(null)
@@ -150,14 +181,23 @@ export function InviteMemberDialog({
   const hasLowercase = /[a-z]/.test(tempPassword)
   const hasDigit = /[0-9]/.test(tempPassword)
   const passwordsMatch = tempPassword.length > 0 && tempPassword === confirmTempPassword
-  const isPasswordValid = hasMinLength && hasUppercase && hasLowercase && hasDigit && passwordsMatch
+  const isPasswordValid =
+    hasMinLength && hasUppercase && hasLowercase && hasDigit && passwordsMatch
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setServerError(null)
     setTempPasswordError(null)
+    setLimitError(null)
+    setBulkSummary(null)
 
     if (!validateEmailInput(email)) {
+      return
+    }
+
+    const emailsToInvite = parseEmails(email)
+    if (emailsToInvite.length === 0) {
+      setEmailError('Please enter at least one email address')
       return
     }
 
@@ -176,43 +216,124 @@ export function InviteMemberDialog({
       }
     }
 
-    if (isSeatLimitReached) {
+    if (isLimitReached) {
       return
     }
 
     setSubmitting(true)
 
-    try {
-      const res = await fetch('/api/invitations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          role,
-          ...(setTempPassword && tempPassword ? { password: tempPassword } : {}),
-        }),
-      })
+    // Single email invitation path
+    if (emailsToInvite.length === 1) {
+      const targetEmail = emailsToInvite[0]
+      try {
+        const res = await fetch('/api/invitations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: targetEmail,
+            role,
+            ...(setTempPassword && tempPassword ? { password: tempPassword } : {}),
+          }),
+        })
 
-      const data = await res.json()
+        const data = await res.json()
 
-      if (!res.ok || !data.success) {
-        const errorMsg =
-          data.error?.message || data.message || 'Failed to send invitation. Please try again.'
-        setServerError(errorMsg)
+        if (!res.ok || !data.success) {
+          if (
+            res.status === 402 ||
+            data.error?.code === 'SEAT_LIMIT_REACHED' ||
+            data.error?.code === 'PENDING_LIMIT_REACHED'
+          ) {
+            setLimitError(data.error)
+          }
+          const errorMsg =
+            data.error?.message || data.message || 'Failed to send invitation. Please try again.'
+          setServerError(errorMsg)
+          setSubmitting(false)
+          return
+        }
+
+        // Success: close dialog and notify parent
+        onClose()
+        if (onSuccess) {
+          onSuccess(data.data?.invitation, data.data?.inviteLink)
+        }
+      } catch (err: any) {
+        setServerError(err.message || 'Network error while sending invitation.')
         setSubmitting(false)
-        return
       }
+      return
+    }
 
-      // Success: close dialog and notify parent
+    // Bulk email invitation path (Bug #9)
+    let createdCount = 0
+    const failed: { email: string; reason: string }[] = []
+    let lastInvitation: any = null
+    let lastInviteLink: string | undefined = undefined
+
+    for (const targetEmail of emailsToInvite) {
+      try {
+        const res = await fetch('/api/invitations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: targetEmail,
+            role,
+            ...(setTempPassword && tempPassword ? { password: tempPassword } : {}),
+          }),
+        })
+
+        const data = await res.json()
+        if (res.ok && data.success) {
+          createdCount++
+          lastInvitation = data.data?.invitation
+          lastInviteLink = data.data?.inviteLink
+        } else {
+          if (
+            res.status === 402 ||
+            data.error?.code === 'SEAT_LIMIT_REACHED' ||
+            data.error?.code === 'PENDING_LIMIT_REACHED'
+          ) {
+            setLimitError(data.error)
+          }
+          const reason =
+            data.error?.message || data.error?.code || data.message || 'Failed'
+          failed.push({ email: targetEmail, reason })
+
+          // Halt further loop if quota exhausted
+          if (res.status === 402) {
+            break
+          }
+        }
+      } catch (err: any) {
+        failed.push({ email: targetEmail, reason: err.message || 'Network error' })
+      }
+    }
+
+    setSubmitting(false)
+    setBulkSummary({ created: createdCount, failed })
+
+    const summaryToast = `${createdCount} invite${
+      createdCount === 1 ? '' : 's'
+    } sent${
+      failed.length > 0
+        ? `, ${failed.length} failed (${failed.map((f) => f.reason).join('; ')})`
+        : ''
+    }`
+
+    if (createdCount > 0 && failed.length === 0) {
       onClose()
       if (onSuccess) {
-        onSuccess(data.data?.invitation, data.data?.inviteLink)
+        onSuccess(lastInvitation, lastInviteLink, summaryToast)
       }
-    } catch (err: any) {
-      setServerError(err.message || 'Network error while sending invitation.')
-      setSubmitting(false)
+    } else if (createdCount > 0) {
+      if (onSuccess) {
+        onSuccess(lastInvitation, lastInviteLink, summaryToast)
+      }
     }
   }
 
@@ -252,42 +373,77 @@ export function InviteMemberDialog({
             </span>
           </div>
 
-          {/* Seat Quota Exhausted Warning */}
-          {isSeatLimitReached && (
+          {/* Seat Quota Exhausted Warning / Upgrade CTA Card (Bug #7) */}
+          {isLimitReached && (
             <div
               data-testid="seat-limit-warning"
-              className="flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-300 mt-2" // intentional: seat quota alert banner
+              className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3.5 space-y-3 mt-2"
             >
-              <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="font-semibold">
-                  Seat limit reached for {usage?.planName || 'Free'} plan.
-                </p>
-                <p className="text-[11px] text-amber-200/80 leading-relaxed">
-                  Upgrade your subscription plan to add additional seats and invite more collaborators.
-                </p>
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="h-4 w-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-xs font-bold text-amber-500 dark:text-amber-300">
+                    ⚠ {limitError?.planName || usage?.planName || 'Free'} plan limit reached
+                  </p>
+                  <p className="text-[11px] text-amber-700 dark:text-amber-200/80 leading-relaxed">
+                    {limitError?.message ||
+                      (usage?.pendingLimitReached
+                        ? `You've used ${usage?.pendingInvites} of ${usage?.maxPendingInvites} pending invitations.`
+                        : `You've used ${usage?.seatsUsed} of ${usage?.maxMembers} team member seats.`)}
+                    {' '}Upgrade to invite more.
+                  </p>
+                </div>
+              </div>
+
+              <div>
                 <Link
                   href="/settings/billing"
-                  className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline pt-0.5"
+                  data-testid="upgrade-cta"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm hover:bg-primary/90 transition"
                 >
-                  View Plans & Upgrade <ArrowUpRight className="h-3 w-3" />
+                  Upgrade to Pro →
                 </Link>
               </div>
             </div>
           )}
         </div>
 
+        {/* Bulk Summary Alert (if partial failure occurred) */}
+        {bulkSummary && bulkSummary.failed.length > 0 && (
+          <div
+            data-testid="bulk-invite-summary"
+            className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-300 space-y-1.5"
+          >
+            <div className="font-semibold">
+              {bulkSummary.created} invite{bulkSummary.created === 1 ? '' : 's'} sent, {bulkSummary.failed.length} failed:
+            </div>
+            <ul className="list-disc pl-4 text-[11px] space-y-0.5 text-muted-foreground">
+              {bulkSummary.failed.map((f, idx) => (
+                <li key={idx}>
+                  <span className="font-mono text-foreground">{f.email}</span>: {f.reason}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Invite Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email Field */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-              <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-              Email Address
+            <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                Email Address(es)
+              </span>
+              <span className="text-[10px] text-muted-foreground font-normal">
+                Comma-separated for bulk
+              </span>
             </label>
             <input
-              type="email"
+              type="text"
               name="email"
+              data-testid="email-input"
               value={email}
               disabled={submitting}
               onChange={(e) => {
@@ -296,7 +452,7 @@ export function InviteMemberDialog({
                 if (serverError) setServerError(null)
               }}
               onBlur={(e) => validateEmailInput(e.target.value)}
-              placeholder="colleague@company.com"
+              placeholder="colleague@company.com or alice@x.com, bob@x.com"
               className={`w-full rounded-xl border bg-background px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none font-mono transition ${
                 emailError || serverError
                   ? 'border-destructive focus:border-destructive'
@@ -319,9 +475,9 @@ export function InviteMemberDialog({
             {showPersonalEmailNotice && !emailError && !serverError && (
               <div
                 data-testid="personal-email-notice"
-                className="flex items-start gap-1.5 text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 mt-1" // intentional: personal email notice banner
+                className="flex items-start gap-1.5 text-[11px] text-amber-500 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 mt-1"
               >
-                <AlertCircle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+                <AlertCircle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
                 <span>
                   Notice: This looks like a personal webmail address. For company workspaces, consider inviting with their corporate email.
                 </span>
@@ -344,14 +500,22 @@ export function InviteMemberDialog({
               name="role"
               value={role}
               disabled={submitting}
-              onChange={(e) => setRole(e.target.value as 'admin' | 'member' | 'viewer')}
+              onChange={(e) =>
+                setRole(e.target.value as 'admin' | 'member' | 'viewer')
+              }
               className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs text-foreground focus:border-primary focus:outline-none cursor-pointer"
             >
               {isOwner && (
-                <option value="admin">Admin — Full operational & management access</option>
+                <option value="admin">
+                  Admin — Full operational & management access
+                </option>
               )}
-              <option value="member">Member — Standard workspace contributor</option>
-              <option value="viewer">Viewer — Read-only access to workspace resources</option>
+              <option value="member">
+                Member — Standard workspace contributor
+              </option>
+              <option value="viewer">
+                Viewer — Read-only access to workspace resources
+              </option>
             </select>
           </div>
 
@@ -380,8 +544,8 @@ export function InviteMemberDialog({
             {setTempPassword && (
               <div className="space-y-3.5 rounded-xl border border-border bg-background/60 p-3.5">
                 {/* Warning note */}
-                <div className="flex items-start gap-2 text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5"> {/* intentional: temp password warning banner */}
-                  <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 text-[11px] text-amber-500 dark:text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5">
+                  <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                   <div className="leading-relaxed">
                     The user will be forced to change this password on first login. Share this temporary password securely with them out-of-band.
                   </div>
@@ -433,21 +597,25 @@ export function InviteMemberDialog({
                 <div className="space-y-1.5 pt-1 text-[10px]">
                   <span className="text-muted-foreground font-medium">Requirements:</span>
                   <div className="grid grid-cols-2 gap-1.5">
-                    <span className={hasMinLength ? 'text-emerald-400' : 'text-muted-foreground'}> {/* intentional: requirement check */}
+                    <span className={hasMinLength ? 'text-emerald-400' : 'text-muted-foreground'}>
                       • At least 8 characters
                     </span>
-                    <span className={hasUppercase ? 'text-emerald-400' : 'text-muted-foreground'}> {/* intentional: requirement check */}
+                    <span className={hasUppercase ? 'text-emerald-400' : 'text-muted-foreground'}>
                       • 1 uppercase letter
                     </span>
-                    <span className={hasLowercase ? 'text-emerald-400' : 'text-muted-foreground'}> {/* intentional: requirement check */}
+                    <span className={hasLowercase ? 'text-emerald-400' : 'text-muted-foreground'}>
                       • 1 lowercase letter
                     </span>
-                    <span className={hasDigit ? 'text-emerald-400' : 'text-muted-foreground'}> {/* intentional: requirement check */}
+                    <span className={hasDigit ? 'text-emerald-400' : 'text-muted-foreground'}>
                       • 1 number (0-9)
                     </span>
                   </div>
                   {confirmTempPassword && (
-                    <div className={`pt-1 font-semibold ${passwordsMatch ? 'text-emerald-400' : 'text-destructive'}`}> {/* intentional: password match check */}
+                    <div
+                      className={`pt-1 font-semibold ${
+                        passwordsMatch ? 'text-emerald-400' : 'text-destructive'
+                      }`}
+                    >
                       {passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
                     </div>
                   )}
@@ -470,14 +638,14 @@ export function InviteMemberDialog({
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="rounded-xl border border-border px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition"
+              className="rounded-xl border border-border px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={submitting || !!isSeatLimitReached}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-primary/20"
+              disabled={submitting || !!isLimitReached}
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-primary/20 cursor-pointer"
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

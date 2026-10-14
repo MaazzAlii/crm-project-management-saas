@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth/middleware';
 import { createInvitation } from '@/lib/services/invitation-service';
 import { invitationRepo } from '@/lib/db/repositories/invitation-repo';
@@ -136,10 +136,34 @@ export async function POST(request: NextRequest) {
         errStr === 'seat_limit_reached' ||
         errStr === 'pending_limit_reached'
       ) {
-        return apiError(result.message, 402, 'LIMIT_REACHED', {
-          limit: (result as any).limit,
-          planName: (result as any).planName,
-        });
+        const code =
+          (result as any).code ||
+          (errStr.includes('pending') ? 'PENDING_LIMIT_REACHED' : 'SEAT_LIMIT_REACHED');
+        const limit = (result as any).limit;
+        const currentCount = (result as any).currentCount ?? (result as any).current;
+        const planName = (result as any).planName || 'Free';
+        const upgradeUrl = (result as any).upgradeUrl || '/settings/billing';
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code,
+              message: result.message,
+              currentCount,
+              limit,
+              planName,
+              upgradeUrl,
+              details: {
+                currentCount,
+                limit,
+                planName,
+                upgradeUrl,
+              },
+            },
+          },
+          { status: 402 }
+        );
       }
 
       if (result.error === 'forbidden') {
