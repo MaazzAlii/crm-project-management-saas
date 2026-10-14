@@ -2502,10 +2502,14 @@ paste at the start of every batch report.
      - `app/(dashboard)/clients/new/page.tsx`: Converted empty organization warning and header badges from hardcoded borders to `border-border bg-card/50 text-muted-foreground`, `text-foreground`, and `text-primary`.
      - `components/clients/ClientForm.tsx`: Converted form card, inputs, labels, selects, error notices, cancel and submit buttons from hardcoded slate/sky palette to `border-border bg-card`, inputs `border-border bg-background text-foreground placeholder:text-placeholder focus:border-primary`, errors `text-destructive`, buttons `bg-primary text-primary-foreground`. Retained intentional Connected Mode emerald brand card and amber integration warning banner with theme-aware contrast pairs.
      - `components/clients/TagSelect.tsx`: Converted tag pills container, available tags toggle buttons, and inline tag creation card from hardcoded slate to `border-border bg-background`, inline creator to `border-primary/30 bg-primary/5`, inputs to `border-border bg-background text-foreground placeholder:text-placeholder focus:border-primary`, buttons to `bg-primary text-primary-foreground`.
-     - `components/clients/TagManagerModal.tsx`: Converted modal backdrop to `bg-background/80 backdrop-blur-sm`, modal surface to `border-border bg-card shadow-2xl`, inputs to `border-border bg-background text-foreground`, tag creation form to `bg-muted/30 border-border`, tags list and delete buttons to semantic tokens.
-     - `components/clients/CommunicationModeSwitchModal.tsx`: Converted modal backdrop to `bg-background/80 backdrop-blur-sm`, modal surface to `border-border bg-card shadow-2xl`, close button to `text-muted-foreground hover:bg-accent`, impact breakdown to `border-border bg-muted/30 text-muted-foreground`. Retained intentional emerald Connected Mode button and warning banner with theme-aware contrast.
-     - `components/clients/ClientEditModal.tsx`: Converted modal backdrop to `bg-background/80 backdrop-blur-sm`, modal surface to `border-border bg-card shadow-2xl`, inputs, selects, error banner, labels, and action buttons to semantic tokens.
-     - Zero new files created in application routes. Zero new routes. Zero shadow, border, or font additions.
+     - `components/clients/TagManagerModal.tsx`: Converted modal backdrop to `bg-[var(--bg-overlay)] backdrop-blur-sm`, modal surface to `border-border bg-card shadow-2xl`, inputs to `border-border bg-background text-foreground`, tag creation form to `bg-muted/30 border-border`, tags list and delete buttons to semantic tokens.
+     - `components/clients/CommunicationModeSwitchModal.tsx`: Converted modal backdrop to `bg-[var(--bg-overlay)] backdrop-blur-sm`, modal surface to `border-border bg-card shadow-2xl`, close button to `text-muted-foreground hover:bg-accent`, impact breakdown to `border-border bg-muted/30 text-muted-foreground`. Retained intentional emerald Connected Mode button and warning banner with theme-aware contrast.
+     - `components/clients/ClientEditModal.tsx`: Converted modal backdrop to `bg-[var(--bg-overlay)] backdrop-blur-sm`, modal surface to `border-border bg-card shadow-2xl`, inputs, selects, error banner, labels, and action buttons to semantic tokens.
+     - **Non-Color Changes Detail**:
+       * `ClientForm.tsx`: Removed colored shadow tint on Active card (`shadow-sky-500/5`), removed gradient on submit button (`from-sky-500 to-blue-600`), removed colored shadow tint on submit button (`shadow-sky-600/25`), and removed `text-sky-400` from section headers (Basic Identity, Communication Mode, Platform & Region, Tags & Categorization).
+       * `CommunicationModeSwitchModal.tsx`: Replaced backdrop with `bg-[var(--bg-overlay)]`, close button hover state changed from `hover:bg-slate-800` to `hover:bg-accent`.
+       * `ClientEditModal.tsx`: Replaced backdrop with `bg-[var(--bg-overlay)]`, close button hover state changed from `hover:bg-slate-800` to `hover:bg-accent`.
+       * `TagManagerModal.tsx`: Replaced backdrop with `bg-[var(--bg-overlay)]`, close button hover state changed from `hover:bg-slate-800` to `hover:bg-muted`.
   3. **Section 6 Greps Post-edit**:
      - 0 unjustified hits remaining across all 6 files. All remaining color references strictly represent intentional brand colors (emerald Connected Mode) or warning banners (amber).
   4. **Test Suite & Verification**:
@@ -2536,5 +2540,5 @@ paste at the start of every batch report.
   - `npm run lint`: **0 new warnings** (4 pre-existing warnings unchanged)
   - `npm run build`: **Exit code 0 — 142 routes compiled cleanly**
   - Browser verification: **PASS (100% verified with Playwright Chromium across 10 screenshots)**
-- **Status**: ✅ Sub-Batch 7B complete. Committed locally via 3 separate commits (style, test, docs). Push Approval Policy honored: zero remotes pushed. Awaiting user review before Sub-Batch 7C.
+- **Status**: ✅ Sub-Batch 7B complete. Committed locally (style, test, docs, and backdrop fix). Push Approval Policy honored: zero remotes pushed. Awaiting user review before Sub-Batch 7C.
 
