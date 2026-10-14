@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791981519.0312932,
-    "seen": 1791981576.8457384,
-    "ast_hash": "b3b23116c3aeccc1494c5220b7954fff",
+    "mtime": 1791986552.7209215,
+    "seen": 1791986579.0873983,
+    "ast_hash": "4a9aca85e1b5b959759916bf1eec3f13",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1182,9 +1182,9 @@
     "semantic_hash": ""
   },
   "components/super-admin/recent-activity-tables.tsx": {
-    "mtime": 1789721627.6172993,
-    "seen": 1791772540.8372543,
-    "ast_hash": "b31f50f88cd667557ad5317e529a27a0",
+    "mtime": 1791985935.5042546,
+    "seen": 1791986579.0867584,
+    "ast_hash": "2806572833acd60e99ce560836606f13",
     "semantic_hash": ""
   },
   "components/super-admin/super-admin-nav.tsx": {
@@ -2088,9 +2088,9 @@
     "semantic_hash": ""
   },
   "app/super-admin/settings/page.tsx": {
-    "mtime": 1791353779.882369,
-    "seen": 1791772540.837104,
-    "ast_hash": "c4a7b525f64f13800a3b14f882456500",
+    "mtime": 1791985881.0372846,
+    "seen": 1791986579.0865731,
+    "ast_hash": "d6c21957899ecd8fdd83d15c8227dedd",
     "semantic_hash": ""
   },
   "components/analytics/AnalyticsHeader.tsx": {
@@ -2640,9 +2640,9 @@
     "semantic_hash": ""
   },
   "components/super-admin/platform-settings-form.tsx": {
-    "mtime": 1789721627.6172993,
-    "seen": 1791772540.8372526,
-    "ast_hash": "34fc23d289fe9fc297eb2ba3a752ebb7",
+    "mtime": 1791986072.1201797,
+    "seen": 1791986579.0867565,
+    "ast_hash": "4fd7b3e92d241574a1ad1405551a7918",
     "semantic_hash": ""
   },
   "components/super-admin/start-impersonation-button.tsx": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791981480.010172,
-    "seen": 1791981576.8457477,
-    "ast_hash": "1f10b3f31b6f2c94d68e9dad6d3ce238",
+    "mtime": 1791986536.51693,
+    "seen": 1791986579.087413,
+    "ast_hash": "74f9cd114075216c8f542fd3367deeca",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7311,6 +7311,12 @@
     "mtime": 1791981143.815267,
     "seen": 1791981576.845367,
     "ast_hash": "5f50c5c1c686b1490f0ede6e4a122fd6",
+    "semantic_hash": ""
+  },
+  "scripts/verify-super-admin-9b2-e2e.ts": {
+    "mtime": 1791986391.8490074,
+    "seen": 1791986579.0871537,
+    "ast_hash": "4997d2ba50c6a45c82c422cec0c7367f",
     "semantic_hash": ""
   }
 }

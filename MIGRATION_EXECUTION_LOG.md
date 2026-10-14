@@ -2977,6 +2977,51 @@ paste at the start of every batch report.
      - `npm run build` → 142 routes compiled cleanly (exit code 0)
 - **Status**: ✅ Sub-Batch 9B2 complete. Style and test commits created locally. Dual remotes untouched per Push Approval Policy. Awaiting user approval before Sub-Batch 9B3.
 
+---
+
+### Sub-Batch 9B3 — Super-Admin Audit Log Refactor to Semantic Tokens
+- **Timestamp**: 2026-10-14T19:53:00+05:00
+- **Task ID**: `UI-1B-SUB-BATCH-9B3-SUPER-ADMIN-AUDIT-LOG`
+- **Actions Performed**:
+  1. **Section 6 Greps Pre-edit**:
+     - `app/super-admin/audit-log/page.tsx`: 4 hardcoded palette hits.
+     - `app/super-admin/audit-log/AuditLogAdminView.tsx`: 77 hardcoded palette hits.
+     - Total: 81 hits across 2 files.
+  2. **Refactored to Semantic Design Tokens**:
+     - Converted container cards from `border-purple-900/30 bg-slate-900/60` to `border-border bg-card`.
+     - Replaced text colors `text-white`, `text-purple-300`, `text-slate-400`, `text-slate-500` with `text-foreground`, `text-primary`, `text-muted-foreground`.
+     - Updated filter inputs (search input, org select, action group select, date range select) to `bg-background border-input text-foreground`.
+     - Verified modal backdrop strictly uses `bg-[var(--bg-overlay)]`.
+     - Normalized modal inspector box and JSON metadata `<pre>` block to `bg-background border-border text-foreground`.
+     - Preserved action/status badge domain colors with exact same-line comments (`// intentional: ...`).
+  3. **Non-Color Changes Detail**:
+     - `app/super-admin/audit-log/page.tsx`: Header divider normalized to `border-border`.
+     - `app/super-admin/audit-log/AuditLogAdminView.tsx`: Normalized card elevations to `shadow-sm`, buttons to `shadow-xs`, table hover to `hover:bg-muted/50`.
+  4. **Section 6 Greps Post-edit**:
+     - 0 unjustified hits across both files.
+     - 6 intentional domain hits justified with `// intentional: <reason>` on the exact same line.
+     - 0 `text-white` hits.
+     - Modal backdrop strictly uses `bg-[var(--bg-overlay)]`.
+  5. **Browser Verification**:
+     - Created `scripts/verify-super-admin-9b3-e2e.ts`.
+     - Captured 6 screenshots saved to `assets/screenshots/sub-batch-9b3/` and artifact directory:
+       * `super_admin_audit_log_light.png` & `super_admin_audit_log_dark.png`
+       * `super_admin_audit_log_modal_light.png` & `super_admin_audit_log_modal_dark.png`
+       * `multi_route_super_admin_9b3_light.png` & `multi_route_super_admin_9b3_dark.png`
+     - Computed dark-mode input backgrounds strictly verified:
+       * Search Input Bg: `rgb(5, 8, 15)` (NOT white).
+       * Filter Select Bg: `rgb(5, 8, 15)` (NOT white).
+       * JSON Payload `<pre>` Bg: `rgb(5, 8, 15)` (NOT white).
+       * Modal Backdrop Overlay: `rgba(2, 6, 23, 0.8)` (`--bg-overlay`).
+     - Multi-route theme persistence verified across `/super-admin/audit-log` → `/super-admin/dashboard` → `/super-admin/organizations` → back to `/super-admin/audit-log`.
+  6. **Quality Gate Verification**:
+     - `npx tsc --noEmit; echo "EXIT: $?"` → EXIT: 0
+     - `npm test` → 497/497 tests passed across 73 test files
+     - `npm run lint` → 4 warnings, 0 errors
+     - `npm run build` → 142 routes compiled cleanly (exit code 0)
+- **Status**: ✅ Sub-Batch 9B3 complete. All Super-Admin surfaces are now 100% migrated to semantic tokens. Committed locally. Dual remotes untouched per Push Approval Policy. Awaiting user approval before Phase 3 (Sub-Batch 10A).
+
+
 
 
 
