@@ -47,61 +47,61 @@ export function ClientOverviewTab({ client }: ClientOverviewTabProps) {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Metadata Cards Grid (2 cols) */}
       <div className="lg:col-span-2 space-y-6">
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/50 p-6 space-y-6">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">Client Specifications</h2>
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-6">
+          <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Client Specifications</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
-                <Building2 className="h-4 w-4 text-sky-400" />
+            <div className="rounded-xl border border-border bg-background p-4 space-y-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <Building2 className="h-4 w-4 text-primary" />
                 <span>Company / Org</span>
               </div>
-              <div className="text-sm font-bold text-white">{client.company || 'Not Specified'}</div>
+              <div className="text-sm font-bold text-foreground">{client.company || 'Not Specified'}</div>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
-                <Mail className="h-4 w-4 text-sky-400" />
+            <div className="rounded-xl border border-border bg-background p-4 space-y-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <Mail className="h-4 w-4 text-primary" />
                 <span>Contact Email</span>
               </div>
-              <div className="text-sm font-bold text-white truncate">{client.email || 'Not Specified'}</div>
+              <div className="text-sm font-bold text-foreground truncate">{client.email || 'Not Specified'}</div>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
-                <Phone className="h-4 w-4 text-sky-400" />
+            <div className="rounded-xl border border-border bg-background p-4 space-y-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <Phone className="h-4 w-4 text-primary" />
                 <span>Phone Number</span>
               </div>
-              <div className="text-sm font-bold text-white">{client.phone || 'Not Specified'}</div>
+              <div className="text-sm font-bold text-foreground">{client.phone || 'Not Specified'}</div>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
-                <Globe className="h-4 w-4 text-sky-400" />
+            <div className="rounded-xl border border-border bg-background p-4 space-y-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <Globe className="h-4 w-4 text-primary" />
                 <span>Country / Region</span>
               </div>
-              <div className="text-sm font-bold text-white">{client.country || 'Not Specified'}</div>
+              <div className="text-sm font-bold text-foreground">{client.country || 'Not Specified'}</div>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
-                <DollarSign className="h-4 w-4 text-emerald-400" />
+            <div className="rounded-xl border border-border bg-background p-4 space-y-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <DollarSign className="h-4 w-4 text-emerald-500" />
                 <span>Currency &amp; Payment Schedule</span>
               </div>
-              <div className="text-sm font-bold text-white">
+              <div className="text-sm font-bold text-foreground">
                 {client.currency || 'USD'} — {client.payment_schedule || 'Per Project'}
               </div>
             </div>
 
             {/* Communication Mode Specification Card */}
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-2 flex flex-col justify-between">
+            <div className="rounded-xl border border-border bg-background p-4 space-y-2 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                     {isConnected ? (
-                      <Zap className="h-4 w-4 text-emerald-400" />
+                      <Zap className="h-4 w-4 text-emerald-500" />
                     ) : (
-                      <MessageSquare className="h-4 w-4 text-sky-400" />
+                      <MessageSquare className="h-4 w-4 text-primary" />
                     )}
                     <span>Communication Mode</span>
                   </div>
@@ -109,22 +109,22 @@ export function ClientOverviewTab({ client }: ClientOverviewTabProps) {
                   <span
                     className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
                       isConnected
-                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                        : 'bg-sky-500/10 text-sky-400 border-sky-500/30'
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                        : 'bg-primary/10 text-primary border-primary/30'
                     }`}
                   >
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
-                        isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-sky-400'
+                        isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-primary'
                       }`}
                     />
                     {isConnected ? 'Connected Hub' : 'Manual Mode'}
                   </span>
                 </div>
 
-                <div className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                <div className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
                   {isConnected ? (
-                    <span className="text-slate-300">
+                    <span className="text-foreground/90">
                       Inbound &amp; outbound messages across WhatsApp, Slack, Email, Discord, and Upwork are automatically synced to the Unified Inbox.
                     </span>
                   ) : (
@@ -138,6 +138,7 @@ export function ClientOverviewTab({ client }: ClientOverviewTabProps) {
               {/* Mode Action Button / Status Lock */}
               <div className="pt-2">
                 {!isConnected ? (
+                  /* intentional: high contrast text-white on connected brand button */
                   <button
                     type="button"
                     onClick={() => setIsSwitchModalOpen(true)}
@@ -147,7 +148,7 @@ export function ClientOverviewTab({ client }: ClientOverviewTabProps) {
                     <span>Switch to Connected Mode</span>
                   </button>
                 ) : (
-                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
+                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
                     <Lock className="h-3.5 w-3.5 shrink-0" />
                     <span>Connected Mode Active (Permanent)</span>
                   </div>
@@ -158,14 +159,14 @@ export function ClientOverviewTab({ client }: ClientOverviewTabProps) {
         </div>
 
         {/* Editable Notes Section */}
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/50 p-6 space-y-4">
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-sky-400" />
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">Internal Notes &amp; Context</h2>
+              <FileText className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Internal Notes &amp; Context</h2>
             </div>
             {saveSuccess && (
-              <span className="flex items-center gap-1 text-xs text-emerald-400 font-semibold animate-in fade-in">
+              <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-semibold animate-in fade-in">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 <span>Saved successfully</span>
               </span>
@@ -177,14 +178,14 @@ export function ClientOverviewTab({ client }: ClientOverviewTabProps) {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Add internal client notes, preferences, meeting context, or contract details..."
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 p-4 text-sm text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 leading-relaxed"
+            className="w-full rounded-xl border border-border bg-background p-4 text-sm text-foreground placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary leading-relaxed"
           />
 
           <div className="flex justify-end">
             <button
               onClick={handleSaveNotes}
               disabled={savingNotes}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-sky-500 px-4 py-2 text-xs font-bold text-white hover:bg-sky-400 transition disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90 transition disabled:opacity-50"
             >
               {savingNotes ? (
                 <>
@@ -204,27 +205,27 @@ export function ClientOverviewTab({ client }: ClientOverviewTabProps) {
 
       {/* Side Column Quick Info */}
       <div className="space-y-6">
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/50 p-6 space-y-4">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">Record Summary</h2>
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+          <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Record Summary</h2>
           
-          <div className="space-y-3 text-xs text-slate-400">
-            <div className="flex justify-between py-2 border-b border-slate-800/60">
+          <div className="space-y-3 text-xs text-muted-foreground">
+            <div className="flex justify-between py-2 border-b border-border/60">
               <span>Primary Platform</span>
-              <span className="font-semibold text-white">{client.platform}</span>
+              <span className="font-semibold text-foreground">{client.platform}</span>
             </div>
-            <div className="flex justify-between py-2 border-b border-slate-800/60">
+            <div className="flex justify-between py-2 border-b border-border/60">
               <span>Client Status</span>
-              <span className="font-semibold text-white capitalize">{client.status}</span>
+              <span className="font-semibold text-foreground capitalize">{client.status}</span>
             </div>
-            <div className="flex justify-between py-2 border-b border-slate-800/60">
+            <div className="flex justify-between py-2 border-b border-border/60">
               <span>Created Date</span>
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-foreground">
                 {new Date(client.created_at).toLocaleDateString()}
               </span>
             </div>
             <div className="flex justify-between py-2">
               <span>Last Modified</span>
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-foreground">
                 {new Date(client.updated_at).toLocaleDateString()}
               </span>
             </div>

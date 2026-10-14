@@ -22,7 +22,7 @@ export default async function ClientPipelinePage({ params }: { params: { id: str
 
   if (!session.organization) {
     return (
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8 text-center text-slate-400">
+      <div className="rounded-2xl border border-border bg-card/50 p-8 text-center text-muted-foreground">
         No active organization selected. Please choose or create an organization first.
       </div>
     )
@@ -76,24 +76,24 @@ export default async function ClientPipelinePage({ params }: { params: { id: str
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex flex-col gap-2 border-b border-slate-800 pb-4">
+      <div className="flex flex-col gap-2 border-b border-border pb-4">
         <Link
           href={`/clients/${clientDeal.id}`}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-sky-400 transition"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary transition"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           <span>Back to {clientDeal.name} Profile</span>
         </Link>
 
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
             <Kanban className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-white tracking-tight">
+            <h1 className="text-2xl font-black text-foreground tracking-tight">
               {clientDeal.name} — Deal Pipeline
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-muted-foreground">
               Manage stage progress and deal status for this client.
             </p>
           </div>

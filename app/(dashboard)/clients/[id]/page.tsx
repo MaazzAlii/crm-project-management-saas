@@ -22,7 +22,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
 
   if (!session.organization) {
     return (
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8 text-center text-slate-400">
+      <div className="rounded-2xl border border-border bg-card/50 p-8 text-center text-muted-foreground">
         No active organization selected. Please choose or create an organization first.
       </div>
     )

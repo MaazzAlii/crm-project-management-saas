@@ -47,13 +47,13 @@ export function ClientDetailTabs({
   return (
     <div className="space-y-6">
       {/* Desktop Tabs & Mobile Select */}
-      <div className="border-b border-slate-800">
+      <div className="border-b border-border">
         {/* Mobile Select dropdown */}
         <div className="md:hidden pb-3">
           <select
             value={activeTab}
             onChange={(e) => setActiveTab(e.target.value as TabType)}
-            className="w-full rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-2.5 text-xs font-semibold text-white focus:outline-none"
+            className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs font-semibold text-foreground focus:outline-none focus:border-primary"
           >
             {tabs.map((tab) => (
               <option key={tab.id} value={tab.id}>
@@ -74,8 +74,8 @@ export function ClientDetailTabs({
                 onClick={() => setActiveTab(tab.id as TabType)}
                 className={`flex items-center gap-2 py-3.5 text-xs font-bold transition border-b-2 -mb-px ${
                   isActive
-                    ? 'border-sky-500 text-sky-400'
-                    : 'border-transparent text-slate-400 hover:text-white hover:border-slate-700'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
                 }`}
               >
                 <Icon className="h-4 w-4" />

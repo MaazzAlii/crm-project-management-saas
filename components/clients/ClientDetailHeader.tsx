@@ -58,26 +58,26 @@ export function ClientDetailHeader({ client, userRole, isSuperAdmin }: ClientDet
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
       case 'lead':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+        return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
       case 'churned':
-        return 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+        return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
       case 'archived':
-        return 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+        return 'bg-muted text-muted-foreground border-border'
       default:
-        return 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+        return 'bg-muted text-muted-foreground border-border'
     }
   }
 
   return (
     <>
-      <div className="flex flex-col gap-4 border-b border-slate-800/80 pb-6">
+      <div className="flex flex-col gap-4 border-b border-border pb-6">
         {/* Back Link */}
         <div>
           <Link
             href="/clients"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-sky-400 transition"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary transition"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>Back to Clients Directory</span>
@@ -88,7 +88,7 @@ export function ClientDetailHeader({ client, userRole, isSuperAdmin }: ClientDet
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex items-center flex-wrap gap-2.5">
-              <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
                 {client.name}
               </h1>
               <span
@@ -107,22 +107,22 @@ export function ClientDetailHeader({ client, userRole, isSuperAdmin }: ClientDet
               ))}
             </div>
 
-            <div className="flex items-center flex-wrap gap-4 text-xs text-slate-400">
+            <div className="flex items-center flex-wrap gap-4 text-xs text-muted-foreground">
               {client.company && (
                 <div className="flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5 text-slate-500" />
+                  <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>{client.company}</span>
                 </div>
               )}
               {client.email && (
                 <div className="flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5 text-slate-500" />
+                  <Mail className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>{client.email}</span>
                 </div>
               )}
               {client.phone && (
                 <div className="flex items-center gap-1.5">
-                  <Phone className="h-3.5 w-3.5 text-slate-500" />
+                  <Phone className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>{client.phone}</span>
                 </div>
               )}
@@ -133,9 +133,9 @@ export function ClientDetailHeader({ client, userRole, isSuperAdmin }: ClientDet
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsEditOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-slate-800 hover:border-slate-700 transition"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold text-foreground hover:bg-muted transition"
             >
-              <Edit className="h-3.5 w-3.5 text-sky-400" />
+              <Edit className="h-3.5 w-3.5 text-primary" />
               <span>Edit Profile</span>
             </button>
 
@@ -161,17 +161,17 @@ export function ClientDetailHeader({ client, userRole, isSuperAdmin }: ClientDet
 
       {/* Delete Confirmation Modal */}
       {isDeleteOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-2xl border border-rose-500/30 bg-slate-900 p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-overlay)] p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-2xl border border-rose-500/30 bg-card p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3 text-rose-400">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10 border border-rose-500/20">
                 <AlertTriangle className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-bold text-white">Delete Client Record?</h3>
+              <h3 className="text-lg font-bold text-foreground">Delete Client Record?</h3>
             </div>
 
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Are you sure you want to permanently delete <strong className="text-white">{client.name}</strong>?
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Are you sure you want to permanently delete <strong className="text-foreground">{client.name}</strong>?
               This will remove all client metadata and history for this tenant.
             </p>
 
@@ -181,14 +181,15 @@ export function ClientDetailHeader({ client, userRole, isSuperAdmin }: ClientDet
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-800">
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
               <button
                 type="button"
                 onClick={() => setIsDeleteOpen(false)}
-                className="rounded-xl border border-slate-800 px-4 py-2 text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition"
+                className="rounded-xl border border-border px-4 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition"
               >
                 Cancel
               </button>
+              {/* intentional: high contrast text-white on destructive bg-rose-600 */}
               <button
                 type="button"
                 onClick={handleDelete}
