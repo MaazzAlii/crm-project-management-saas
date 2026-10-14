@@ -72,7 +72,7 @@ export function DealCard({ deal, stageColor = '#6366f1', onClick, isDragging = f
           ? 'bg-emerald-950/20 border-emerald-500/40 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-950/50 hover:-translate-y-0.5'
           : isLost
           ? 'bg-rose-950/20 border-rose-500/40 hover:border-rose-400 hover:shadow-lg hover:shadow-rose-950/50 hover:-translate-y-0.5'
-          : 'bg-slate-900/90 border-slate-800/90 hover:border-slate-700 hover:bg-slate-850 hover:shadow-md hover:shadow-black/40 hover:-translate-y-0.5'
+          : 'bg-slate-900/90 border-slate-800/90 hover:border-slate-700 hover:bg-slate-800 hover:shadow-md hover:shadow-black/40 hover:-translate-y-0.5'
       }`}
     >
       {/* Top row: Labels */}

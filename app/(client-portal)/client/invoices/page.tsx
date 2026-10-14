@@ -103,7 +103,7 @@ export default async function PortalInvoicesPage() {
   return (
     <div className="portal-bg min-h-screen">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-60 left-1/2 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-violet-600/8 blur-3xl" />
+        <div className="absolute -top-60 left-1/2 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-violet-600/[0.08] blur-3xl" />
       </div>
 
       <PortalNav orgName={orgName} orgLogoUrl={orgLogoUrl} />

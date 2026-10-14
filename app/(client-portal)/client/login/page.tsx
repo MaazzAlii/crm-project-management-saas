@@ -134,7 +134,7 @@ export default function ClientLoginPage() {
       {/* Ambient glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-violet-600/10 blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 h-[300px] w-[300px] rounded-full bg-cyan-600/8 blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 h-[300px] w-[300px] rounded-full bg-cyan-600/[0.08] blur-3xl" />
       </div>
 
       <div className="relative z-10 w-full max-w-md">

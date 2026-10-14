@@ -223,7 +223,7 @@ export function RevenueBreakdownTable({
               </tr>
             ) : (
               filteredClients.map((c) => (
-                <tr key={c.clientId} className="hover:bg-slate-850/50 transition-colors">
+                <tr key={c.clientId} className="hover:bg-slate-800/50 transition-colors">
                   <td className="py-3.5 px-4 font-medium text-white">
                     <div className="flex items-center gap-2.5">
                       <div className="w-7 h-7 rounded-lg bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center font-bold text-xs flex-shrink-0">

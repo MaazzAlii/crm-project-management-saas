@@ -104,7 +104,7 @@ export default async function PortalDashboardPage() {
     <div className="portal-bg min-h-screen">
       {/* Ambient glow */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-60 left-1/2 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-violet-600/8 blur-3xl" />
+        <div className="absolute -top-60 left-1/2 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-violet-600/[0.08] blur-3xl" />
         <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-cyan-600/5 blur-3xl" />
       </div>
 
