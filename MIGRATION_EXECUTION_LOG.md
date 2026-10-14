@@ -2582,4 +2582,34 @@ paste at the start of every batch report.
   - Real browser computed input background in dark mode: **Dark color across all routes, zero white inputs**
 - **Status**: ✅ Foundational fix complete and verified. Committed locally. Push Approval Policy honored: zero remotes pushed. Awaiting user review before Sub-Batch 7C.
 
+---
+
+### Pre-Push Deep Class Audit & Legacy Token Clean-up
+- **Timestamp**: 2026-10-14T14:55:00+05:00
+- **Task ID**: `UI-PRE-PUSH-TOKEN-AUDIT-AND-CLEANUP`
+- **Actions Performed**:
+  1. **Comprehensive Utility Audit**:
+     - Audited all 466 distinct `bg-*`, `text-*`, `border-*`, and `ring-*` utility classes across `app/` and `components/` against `tailwind.config.ts` and the compiled CSS bundle.
+     - Confirmed all design system semantic tokens (`background`, `foreground`, `muted`, `muted-foreground`, `accent`, `card`, `border`, `primary`, etc.) are 100% mapped and compile cleanly.
+     - Detected 4 legacy syntax/typo classes in unrefactored pipeline, analytics, and client portal templates:
+       * `components/pipeline/DealCard.tsx`: `hover:bg-slate-850` (corrected to `hover:bg-slate-800`).
+       * `components/analytics/RevenueBreakdownTable.tsx`: `hover:bg-slate-850/50` (corrected to `hover:bg-slate-800/50`).
+       * `app/(client-portal)/client/login/page.tsx`: `bg-cyan-600/8` (corrected to `bg-cyan-600/[0.08]`).
+       * `app/(client-portal)` (dashboard, invoices, projects detail): `bg-violet-600/8` (corrected to `bg-violet-600/[0.08]`).
+  2. **Rebuild & Re-Verification**:
+     - Next.js build: 142 routes compiled cleanly (exit code 0).
+     - Full test suite: 497/497 tests passing across 73 test files.
+     - Lint: 4 pre-existing warnings unchanged, 0 errors.
+     - Final audit status: **0 unmapped classes across the entire codebase**.
+- **Files Modified**:
+  - `components/pipeline/DealCard.tsx`
+  - `components/analytics/RevenueBreakdownTable.tsx`
+  - `app/(client-portal)/client/login/page.tsx`
+  - `app/(client-portal)/client/dashboard/page.tsx`
+  - `app/(client-portal)/client/invoices/page.tsx`
+  - `app/(client-portal)/client/projects/[id]/page.tsx`
+  - `MIGRATION_EXECUTION_LOG.md`
+- **Status**: ✅ Zero unmapped classes verified. Ready for push.
+
+
 
