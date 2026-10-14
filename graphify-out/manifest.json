@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791977718.409432,
-    "seen": 1791977740.2949433,
-    "ast_hash": "cdb00d49ac09f93fd93cf8defba86cb1",
+    "mtime": 1791979591.5531328,
+    "seen": 1791979612.5921805,
+    "ast_hash": "b556e7c1c72e6b69a5c0f02c58050fcd",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1458,9 +1458,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/email/EmailClientPage.tsx": {
-    "mtime": 1789721627.5880733,
-    "seen": 1791772540.8369095,
-    "ast_hash": "9cfcc4765e80fbf0b3892d114383237a",
+    "mtime": 1791978873.8420908,
+    "seen": 1791979612.591383,
+    "ast_hash": "0377feefea5c6e0250457df68aced68e",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/email/actions.ts": {
@@ -1476,9 +1476,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/page.tsx": {
-    "mtime": 1789725763.348101,
-    "seen": 1791772540.8369136,
-    "ast_hash": "c90e28687f4047444bd788bffc287485",
+    "mtime": 1791978582.8681908,
+    "seen": 1791979612.591388,
+    "ast_hash": "e4ff8200100df4a1c58e389ec370f3ca",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/slack/SlackClientPage.tsx": {
@@ -1500,9 +1500,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/upwork/UpworkClientPage.tsx": {
-    "mtime": 1789721627.5902796,
-    "seen": 1791772540.836919,
-    "ast_hash": "4b526b0dabef4c5565302e7dbc743cfa",
+    "mtime": 1791978905.0350924,
+    "seen": 1791979612.5914001,
+    "ast_hash": "ebd9e95632e4a7ff78a0f09e36c5cd02",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/upwork/actions.ts": {
@@ -2340,9 +2340,9 @@
     "semantic_hash": ""
   },
   "components/inbox/ConnectionStatusModal.tsx": {
-    "mtime": 1789724748.0315225,
-    "seen": 1791772540.8371606,
-    "ast_hash": "a533a0b1005274a5d3615ef689241381",
+    "mtime": 1791978938.1880958,
+    "seen": 1791979612.591636,
+    "ast_hash": "03fc227a6677a3bd4536d468b47fbe95",
     "semantic_hash": ""
   },
   "components/inbox/ConversationList.tsx": {
@@ -2580,9 +2580,9 @@
     "semantic_hash": ""
   },
   "components/settings/IntegrationsList.tsx": {
-    "mtime": 1789725720.9181433,
-    "seen": 1791772540.8372307,
-    "ast_hash": "ad81c7e32030c9598e2e3733f7f3ae91",
+    "mtime": 1791978605.4031742,
+    "seen": 1791979612.5916877,
+    "ast_hash": "ad6a97e59b8b95f73032e989a0e907c2",
     "semantic_hash": ""
   },
   "components/settings/OrgProfileForm.tsx": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791977696.7236297,
-    "seen": 1791977740.2949493,
-    "ast_hash": "6058b8c4d8deca08ac4a0691092e984e",
+    "mtime": 1791979571.0568361,
+    "seen": 1791979612.5921884,
+    "ast_hash": "90cebc8894baec7f61847d9f72ca0ca4",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7245,6 +7245,66 @@
     "mtime": 1791977601.7936134,
     "seen": 1791977740.2947588,
     "ast_hash": "1b59e5214525039a70a0d70da903fc19",
+    "semantic_hash": ""
+  },
+  "scripts/verify-settings-integrations-8c2-e2e.ts": {
+    "mtime": 1791979190.0171797,
+    "seen": 1791979612.5919971,
+    "ast_hash": "a27f3ad5868aef947cff8a4fd0365ba0",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/multi_route_integrations_8c2_dark.png": {
+    "mtime": 1791979433.6502347,
+    "seen": 1791979612.5928705,
+    "ast_hash": "4cd8172affcdc639ecc3593ac135ce3a",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/multi_route_integrations_8c2_light.png": {
+    "mtime": 1791979433.6503289,
+    "seen": 1791979612.5928717,
+    "ast_hash": "0da182c6eb64ab8b5fb773697ac136b9",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/settings_integrations_connection_modal_dark.png": {
+    "mtime": 1791979433.6505017,
+    "seen": 1791979612.5928729,
+    "ast_hash": "4661ab28f65b0e9569aabd0032576efd",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/settings_integrations_email_dark.png": {
+    "mtime": 1791979433.6506214,
+    "seen": 1791979612.5928743,
+    "ast_hash": "f3813a9f5dbe630ddc19920c3905045c",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/settings_integrations_email_light.png": {
+    "mtime": 1791979433.6507416,
+    "seen": 1791979612.5928752,
+    "ast_hash": "b6b1134e5e617ba44f1f60e49c9ae2b1",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/settings_integrations_hub_dark.png": {
+    "mtime": 1791979433.650859,
+    "seen": 1791979612.5928764,
+    "ast_hash": "d34096be44f5aa3c1e2f207dbd557c93",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/settings_integrations_hub_light.png": {
+    "mtime": 1791979433.650991,
+    "seen": 1791979612.5928776,
+    "ast_hash": "c2176285ba269d91e9890df99cc5110f",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/settings_integrations_upwork_dark.png": {
+    "mtime": 1791979433.6511154,
+    "seen": 1791979612.5928786,
+    "ast_hash": "eda95f5952ac52bfafcdc80fe5e8c17c",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/settings_integrations_upwork_light.png": {
+    "mtime": 1791979433.651229,
+    "seen": 1791979612.5928795,
+    "ast_hash": "17ecdfcb248dad4da5af2c61991b826b",
     "semantic_hash": ""
   }
 }

@@ -2817,7 +2817,71 @@ paste at the start of every batch report.
      - `npm test` → 497/497 tests passed across 73 test files
      - `npm run lint` → 4 warnings, 0 errors
      - `npm run build` → 142 routes compiled cleanly (exit code 0)
-- **Status**: ✅ Sub-Batch 8C1 complete. Three atomic commits created locally. Zero remotes pushed per Push Approval Policy. Awaiting review before proceeding to Sub-Batch 8C2.
+- **Status**: ✅ Sub-Batch 8C1 complete. Three atomic commits created locally. Dual remotes pushed (`dea723d`) upon written user confirmation. Proceeded to Sub-Batch 8C2.
+
+---
+
+### Step: UI-1B Sub-Batch 8C2 — Settings Integrations Hub, Email, Upwork & Connection Modal (7 Files)
+- **Timestamp**: 2026-10-14T17:05:00+05:00
+- **Task ID**: `UI-1B-SUB-BATCH-8C2-SETTINGS-INTEGRATIONS-HUB-EMAIL-UPWORK`
+- **Actions Performed**:
+  1. **Scoping & Pre-Flight Checks**:
+     - Pre-flight git log against origin and deploy confirmed 0 unpushed commits (`dea723d`).
+     - TypeScript compiler check `npx tsc --noEmit` exited 0.
+     - Production build route count strictly verified at 142 routes.
+     - Rule 19 audit of prior Sub-Batch commits confirmed sequential progression.
+  2. **8C2 Scope (7 Files)**:
+     - `app/(dashboard)/settings/integrations/page.tsx` (5 raw color hits, 1 text-white -> 0 raw, 0 text-white)
+     - `app/(dashboard)/settings/integrations/email/page.tsx` (wrapper, 0 hits)
+     - `app/(dashboard)/settings/integrations/email/EmailClientPage.tsx` (45 raw color hits, 8 text-white -> 6 intentional, 0 text-white)
+     - `app/(dashboard)/settings/integrations/upwork/page.tsx` (wrapper, 0 hits)
+     - `app/(dashboard)/settings/integrations/upwork/UpworkClientPage.tsx` (39 raw color hits, 7 text-white -> 5 intentional, 0 text-white)
+     - `components/settings/IntegrationsList.tsx` (9 raw color hits, 2 text-white -> 2 intentional, 0 text-white)
+     - `components/inbox/ConnectionStatusModal.tsx` (42 raw color hits, 6 text-white, 1 raw overlay -> 7 intentional, 0 text-white, 0 raw overlays, modal overlay refactored to `bg-[var(--bg-overlay)]`)
+  3. **Semantic Token Refactoring**:
+     - `app/(dashboard)/settings/integrations/page.tsx`: Overview header refactored to `border-border bg-card p-8 shadow-sm`, icon container to `bg-primary/10 text-primary border-primary/20`, title to `text-card-foreground`, description to `text-muted-foreground`, hub active badge to `bg-muted/60 text-muted-foreground border-border`, sparkles icon to `text-primary`.
+     - `components/settings/IntegrationsList.tsx`: Integration cards refactored to `border-border bg-card shadow-sm`, hover border to `border-border/80`, connection badge disconnected state to `bg-muted/60 text-muted-foreground border-border`, title to `text-card-foreground`, description to `text-muted-foreground`, ribbon divider to `border-border`, connection status button to `text-muted-foreground hover:text-foreground`, icon to `text-primary`.
+     - `EmailClientPage.tsx`: Back link to `text-muted-foreground hover:text-foreground`, main card to `border-border bg-card shadow-sm`, icon box to `bg-primary/10 border-primary/20 text-primary shadow-xs`, title to `text-card-foreground`, description to `text-muted-foreground`, feedback alert to `bg-destructive/10 border-destructive/20 text-destructive`, inbound parse endpoint boxes to `border-border bg-card shadow-sm`, icons to `text-primary`, inputs to `bg-background border-input text-foreground font-mono`, copy buttons to `bg-muted/60 hover:bg-muted text-foreground border-border`, configuration form to `border-border bg-card shadow-sm`, form divider to `border-border`, labels to `text-foreground`, inputs to `bg-background border-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring font-mono`, save button to `bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm`, test button to `bg-muted/60 hover:bg-muted text-foreground border-border`, disconnect button to `bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/20`.
+     - `UpworkClientPage.tsx`: Back link to `text-muted-foreground hover:text-foreground`, main card to `border-border bg-card shadow-sm`, icon container to `bg-primary/10 border-primary/20 text-primary shadow-xs`, title to `text-card-foreground`, description to `text-muted-foreground`, feedback alert to `bg-destructive/10 border-destructive/20 text-destructive`, webhook box to `border-border bg-card shadow-sm`, webhook input to `bg-background border-input text-foreground font-mono`, copy button to `bg-muted/60 hover:bg-muted text-foreground border-border`, configuration form to `border-border bg-card shadow-sm`, labels to `text-foreground`, inputs to `bg-background border-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring font-mono`, save button to `bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm`, test signal button to `bg-muted/60 hover:bg-muted text-foreground border-border`, disconnect button to `bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/20`.
+     - `ConnectionStatusModal.tsx`: Overlay strictly refactored to `bg-[var(--bg-overlay)] backdrop-blur-xs`, modal container to `bg-card border-border shadow-sm`, header to `border-border bg-muted/30`, title to `text-card-foreground`, subtitle to `text-muted-foreground`, close button to `text-muted-foreground hover:text-foreground hover:bg-muted`, body to `text-muted-foreground`, metadata cards to `bg-muted/40 border-border`, metadata labels and icons to `text-muted-foreground`, values to `text-foreground`, webhook input to `bg-background border-input text-foreground font-mono`, copy button to `bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm`, credential validation box to `border-border divide-border`, rows to `bg-card`, footer to `border-border bg-muted/30`, settings link to `bg-muted/60 hover:bg-muted text-foreground`, done button to `bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm`.
+     - Wrapper pages (`email/page.tsx`, `upwork/page.tsx`): 0 hits, verified clean.
+  4. **Non-Color Changes Detail**:
+     - `app/(dashboard)/settings/integrations/page.tsx`: Overview card shadow reduced (`shadow-xl` -> `shadow-sm`).
+     - `components/settings/IntegrationsList.tsx`: Integration cards shadow normalized (`shadow-lg hover:shadow-sky-500/5` -> `shadow-sm`).
+     - `EmailClientPage.tsx`: Header card and form card shadow reduced (`shadow-xl` -> `shadow-sm`), icon box shadow reduced (`shadow-md` -> `shadow-xs`), save button shadow normalized (`shadow-lg shadow-sky-600/20` -> `shadow-sm`), inbound endpoint cards added `shadow-sm`.
+     - `UpworkClientPage.tsx`: Header card and form card shadow reduced (`shadow-xl` -> `shadow-sm`), icon box shadow reduced (`shadow-md` -> `shadow-xs`), save button shadow normalized (`shadow-lg shadow-emerald-600/20` -> `shadow-sm`), webhook endpoint card added `shadow-sm`.
+     - `ConnectionStatusModal.tsx`: Modal card elevation normalized (`shadow-2xl` -> `shadow-sm`), copy button and done button shadow normalized (`shadow-xs` -> `shadow-sm`).
+     - `email/page.tsx`, `upwork/page.tsx`: Non-color changes: none.
+  5. **Section 6 Greps Post-edit**:
+     - Grep 1 (raw palettes): 0 unjustified hits across all 7 files.
+     - Grep 2 (`text-white`): 0 hits across all 7 files.
+     - Grep 3 (intentional): All remaining hits justified with `// intentional: <reason>` on the exact same line.
+     - Grep 4 (overlays): 0 raw overlay hits across all 7 files (overlay strictly uses `bg-[var(--bg-overlay)]`).
+  6. **Browser Verification**:
+     - Created `scripts/verify-settings-integrations-8c2-e2e.ts`.
+     - Captured 9 screenshots:
+       * `settings_integrations_hub_light.png` & `settings_integrations_hub_dark.png`
+       * `settings_integrations_connection_modal_dark.png`
+       * `settings_integrations_email_light.png` & `settings_integrations_email_dark.png`
+       * `settings_integrations_upwork_light.png` & `settings_integrations_upwork_dark.png`
+       * `multi_route_integrations_8c2_dark.png` & `multi_route_integrations_8c2_light.png`
+     - Computed dark-mode input background strictly verified:
+       * Modal webhook input: `rgb(5, 8, 15)`
+       * Email channel name input: `rgb(5, 8, 15)`
+       * Email webhook endpoint input: `rgb(5, 8, 15)`
+       * Upwork contract ID input: `rgb(5, 8, 15)`
+       * Upwork API key input: `rgb(5, 8, 15)`
+       * Upwork webhook endpoint input: `rgb(5, 8, 15)`
+       * Zero white inputs in dark mode.
+     - Modal overlay computed background: `rgba(2, 6, 23, 0.8)` (`bg-[var(--bg-overlay)]`).
+     - Multi-route theme persistence verified across `/settings/integrations` → `/settings/integrations/email` → `/settings/integrations/upwork` → `/dashboard` in both light and dark themes.
+  7. **Quality Gate Verification**:
+     - `npx tsc --noEmit; echo "EXIT: $?"` → EXIT: 0
+     - `npm test` → 497/497 tests passed across 73 test files
+     - `npm run lint` → 4 warnings, 0 errors
+     - `npm run build` → 142 routes compiled cleanly (exit code 0)
+- **Status**: ✅ Sub-Batch 8C2 complete. All 3 commits created locally. Push Approval Policy honored: zero remotes pushed. Awaiting user review. UI-1B Settings group (8A, 8B, 8C) is now 100% complete.
+
 
 
 

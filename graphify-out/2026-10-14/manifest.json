@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791976462.7810645,
-    "seen": 1791976486.5979462,
-    "ast_hash": "346a264b88616f69086649c245c675b1",
+    "mtime": 1791977718.409432,
+    "seen": 1791977740.2949433,
+    "ast_hash": "cdb00d49ac09f93fd93cf8defba86cb1",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1440,9 +1440,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/discord/DiscordClientPage.tsx": {
-    "mtime": 1789721627.5878308,
-    "seen": 1791772540.836905,
-    "ast_hash": "f5161290c11a61dc79f70e94c70f6d5e",
+    "mtime": 1791977305.9046445,
+    "seen": 1791977740.2941246,
+    "ast_hash": "ab226e1fdd1a63cc836ea74a6a42315f",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/discord/actions.ts": {
@@ -1482,9 +1482,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/slack/SlackClientPage.tsx": {
-    "mtime": 1789721627.5893798,
-    "seen": 1791772540.836915,
-    "ast_hash": "5e85efdcbcf68692ca6bd4bd914efb0a",
+    "mtime": 1791977250.745497,
+    "seen": 1791977740.2941349,
+    "ast_hash": "881cab1c6352d8a7709dc502076818a4",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/slack/actions.ts": {
@@ -1518,9 +1518,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/whatsapp/WhatsAppClientPage.tsx": {
-    "mtime": 1789721627.5908196,
-    "seen": 1791772540.8369234,
-    "ast_hash": "7d66bf81894c742d73c999688d328037",
+    "mtime": 1791977360.688715,
+    "seen": 1791977740.2941425,
+    "ast_hash": "cc2ce9cf03ad571536c797db324e4725",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/integrations/whatsapp/actions.ts": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791976434.7910542,
-    "seen": 1791976486.5979524,
-    "ast_hash": "b4caeee5d0e9eb94b8a5edae69fbe17e",
+    "mtime": 1791977696.7236297,
+    "seen": 1791977740.2949493,
+    "ast_hash": "6058b8c4d8deca08ac4a0691092e984e",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7239,6 +7239,12 @@
     "mtime": 1791976172.9172149,
     "seen": 1791976486.5977666,
     "ast_hash": "bb41a83bd13e41e53a57090c76e3629e",
+    "semantic_hash": ""
+  },
+  "scripts/verify-settings-integrations-8c1-e2e.ts": {
+    "mtime": 1791977601.7936134,
+    "seen": 1791977740.2947588,
+    "ast_hash": "1b59e5214525039a70a0d70da903fc19",
     "semantic_hash": ""
   }
 }
