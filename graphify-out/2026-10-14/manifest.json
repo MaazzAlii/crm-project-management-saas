@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791959182.150678,
-    "seen": 1791959202.8521793,
-    "ast_hash": "038686d74efdd32094c37cff4b27c40a",
+    "mtime": 1791963239.0731134,
+    "seen": 1791963286.3968086,
+    "ast_hash": "5e1f4bbd88d16e11bbe8852fe16f277a",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1314,9 +1314,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/clients/new/page.tsx": {
-    "mtime": 1789728066.7367787,
-    "seen": 1791772540.8368719,
-    "ast_hash": "650f6069d61e9dc922398800818ea620",
+    "mtime": 1791961242.432951,
+    "seen": 1791963286.3960147,
+    "ast_hash": "ed6a1fe7f4fe7894cb6fafb40cbe1825",
     "semantic_hash": ""
   },
   "app/(dashboard)/clients/page.tsx": {
@@ -2214,9 +2214,9 @@
     "semantic_hash": ""
   },
   "components/clients/ClientEditModal.tsx": {
-    "mtime": 1789728568.0394714,
-    "seen": 1791772540.8371327,
-    "ast_hash": "fdcb50736de05798419043c98e9b78de",
+    "mtime": 1791961599.9329202,
+    "seen": 1791963286.396258,
+    "ast_hash": "553c4b110e2b36aa894fc8d69acf71f4",
     "semantic_hash": ""
   },
   "components/clients/ClientFilters.tsx": {
@@ -2226,9 +2226,9 @@
     "semantic_hash": ""
   },
   "components/clients/ClientForm.tsx": {
-    "mtime": 1789728133.4537694,
-    "seen": 1791772540.8371353,
-    "ast_hash": "ba4076bc71b9233bdd7d7a2c4136e740",
+    "mtime": 1791961332.5088072,
+    "seen": 1791963286.3962603,
+    "ast_hash": "6bb21106c095cea6d9445b9b08f87bbf",
     "semantic_hash": ""
   },
   "components/clients/ClientOverviewTab.tsx": {
@@ -2256,9 +2256,9 @@
     "semantic_hash": ""
   },
   "components/clients/CommunicationModeSwitchModal.tsx": {
-    "mtime": 1789728351.3929853,
-    "seen": 1791772540.837142,
-    "ast_hash": "23be956d15b6e005bab52d821c261c19",
+    "mtime": 1791961536.7974102,
+    "seen": 1791963286.3962665,
+    "ast_hash": "2f74ba13acb38cb28e4f97b8ff566de8",
     "semantic_hash": ""
   },
   "components/clients/EmptyState.tsx": {
@@ -2274,15 +2274,15 @@
     "semantic_hash": ""
   },
   "components/clients/TagManagerModal.tsx": {
-    "mtime": 1790074899.8778207,
-    "seen": 1791772540.837146,
-    "ast_hash": "f730bdadc311c4959dafebd40211831a",
+    "mtime": 1791961450.2724028,
+    "seen": 1791963286.3962698,
+    "ast_hash": "745f5e8bf973f9f2166bbe7515237d64",
     "semantic_hash": ""
   },
   "components/clients/TagSelect.tsx": {
-    "mtime": 1790074878.1728945,
-    "seen": 1791772540.8371475,
-    "ast_hash": "3d29f531ac294ca2ef08b97e90253c64",
+    "mtime": 1791961375.0347242,
+    "seen": 1791963286.3962708,
+    "ast_hash": "e5de1c1b747779b64301270384c4e291",
     "semantic_hash": ""
   },
   "components/communications/ClientCommunicationsView.tsx": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791959154.3839045,
-    "seen": 1791959202.8521855,
-    "ast_hash": "3518a6716a26845d23820f9bb1b42d56",
+    "mtime": 1791963263.8579776,
+    "seen": 1791963286.3968148,
+    "ast_hash": "b347156ee0ea652d9650dfec081cac3a",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7116,9 +7116,9 @@
     "semantic_hash": ""
   },
   "docs/prompts/UNIVERSAL-MASTER-PROMPT.md": {
-    "mtime": 1791900463.1059968,
-    "seen": 1791919453.3590796,
-    "ast_hash": "74c55c78eebba89cf97910834f7ac56c",
+    "mtime": 1791960678.7166948,
+    "seen": 1791963286.3970802,
+    "ast_hash": "999eb71fa68860779ad045fea4125ef9",
     "semantic_hash": ""
   },
   "docs/prompts/INNOVENTIX-COLOR-TYPOGRAPHY-PROTOCOL.md": {
@@ -7203,6 +7203,18 @@
     "mtime": 1791958928.6090384,
     "seen": 1791959202.8519986,
     "ast_hash": "e3c227fcfb444f30a1a850fa700e09f2",
+    "semantic_hash": ""
+  },
+  "scripts/verify-clients-modals-e2e.ts": {
+    "mtime": 1791963042.5171463,
+    "seen": 1791963286.396611,
+    "ast_hash": "c905689890ba2b558d990c74c36a303a",
+    "semantic_hash": ""
+  },
+  "docs/adr/002-settings-redirect-stubs.md": {
+    "mtime": 1791960281.5710504,
+    "seen": 1791963286.3970442,
+    "ast_hash": "6b7c87c98b6e0a06c000fa024d307b46",
     "semantic_hash": ""
   }
 }
