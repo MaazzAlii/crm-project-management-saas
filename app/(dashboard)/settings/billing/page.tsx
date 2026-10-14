@@ -59,15 +59,15 @@ export default async function BillingSettingsPage({ searchParams }: PageProps) {
   const isPro = org?.plan_tier === 'pro' || org?.plan_tier === 'enterprise'
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-10 space-y-8">
+    <div className="min-h-screen bg-background text-foreground p-6 md:p-10 space-y-8">
       {/* Checkout Processing Banner (Prompt 46) */}
       {checkoutStatus === 'success' && (
         <div
           data-testid="checkout-processing-banner"
-          className="rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-950/60 via-slate-900 to-indigo-950/40 p-4 shadow-xl text-xs text-sky-200 flex items-center justify-between"
+          className="rounded-2xl border border-sky-500/30 bg-sky-500/10 p-4 shadow-sm text-xs text-sky-400 flex items-center justify-between" // intentional: payment checkout processing banner
         >
           <div className="flex items-center gap-2.5">
-            <span className="flex h-2 w-2 rounded-full bg-sky-400 animate-ping" />
+            <span className="flex h-2 w-2 rounded-full bg-sky-400 animate-ping" /> {/* intentional: active ping indicator */}
             <span>
               <strong>Processing payment:</strong> Your Pro subscription is being finalized. Your limits will refresh automatically.
             </span>
@@ -77,8 +77,8 @@ export default async function BillingSettingsPage({ searchParams }: PageProps) {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-extrabold text-white">Billing & Subscription</h1>
-        <p className="text-sm text-slate-400 mt-1">
+        <h1 className="text-2xl font-extrabold text-foreground">Billing & Subscription</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Manage your organization plan, view live resource quotas, and handle payment methods.
         </p>
       </div>

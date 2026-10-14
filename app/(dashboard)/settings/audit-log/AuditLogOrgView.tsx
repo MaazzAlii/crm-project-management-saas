@@ -135,18 +135,18 @@ export function AuditLogOrgView({
   // Action badge color helper
   const getActionBadge = (action: string) => {
     if (action.includes('CREATED') || action.includes('ADDED') || action.includes('RESUMED')) {
-      return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+      return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' // intentional: audit action status badge (create)
     }
     if (action.includes('DELETED') || action.includes('REMOVED') || action.includes('SUSPENDED') || action.includes('FAILED') || action.includes('REVOKED')) {
-      return 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+      return 'bg-rose-500/10 text-rose-400 border-rose-500/20' // intentional: audit action status badge (delete/fail)
     }
     if (action.includes('ROLE') || action.includes('PERMISSION') || action.includes('SETTINGS') || action.includes('TOGGLED')) {
-      return 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+      return 'bg-amber-500/10 text-amber-400 border-amber-500/20' // intentional: audit action status badge (config/role)
     }
     if (action.includes('SUPER_ADMIN')) {
-      return 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+      return 'bg-purple-500/10 text-purple-400 border-purple-500/20' // intentional: audit action status badge (super-admin)
     }
-    return 'bg-sky-500/10 text-sky-400 border-sky-500/20'
+    return 'bg-sky-500/10 text-sky-400 border-sky-500/20' // intentional: audit action status badge (info/default)
   }
 
   // Export CSV Handler
@@ -175,71 +175,71 @@ export function AuditLogOrgView({
     <div className="space-y-6">
       {/* Overview Stat Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Total Audit Events</span>
-            <div className="rounded-xl bg-sky-500/10 p-2 text-sky-400 border border-sky-500/20">
+            <span className="text-xs font-semibold text-muted-foreground">Total Audit Events</span>
+            <div className="rounded-xl bg-primary/10 p-2 text-primary border border-primary/20">
               <ShieldCheck className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-black tracking-tight text-white">{totalCount}</span>
-            <span className="text-xs text-slate-400">events recorded</span>
+            <span className="text-2xl font-black tracking-tight text-card-foreground">{totalCount}</span>
+            <span className="text-xs text-muted-foreground">events recorded</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Log Immutability</span>
-            <div className="rounded-xl bg-emerald-500/10 p-2 text-emerald-400 border border-emerald-500/20">
+            <span className="text-xs font-semibold text-muted-foreground">Log Immutability</span>
+            <div className="rounded-xl bg-emerald-500/10 p-2 text-emerald-400 border border-emerald-500/20"> {/* intentional: audit security metric icon */}
               <Lock className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-sm font-bold text-emerald-400">Append-Only RLS</span>
-            <span className="text-xs text-slate-500">• Tamper Proof</span>
+            <span className="text-sm font-bold text-emerald-400">Append-Only RLS</span> {/* intentional: append-only status indicator */}
+            <span className="text-xs text-muted-foreground">• Tamper Proof</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Retention Policy</span>
-            <div className="rounded-xl bg-purple-500/10 p-2 text-purple-400 border border-purple-500/20">
+            <span className="text-xs font-semibold text-muted-foreground">Retention Policy</span>
+            <div className="rounded-xl bg-primary/10 p-2 text-primary border border-primary/20">
               <Clock className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-sm font-bold text-purple-300">365-Day Archive</span>
-            <span className="text-xs text-slate-500">• SOC 2 / GDPR</span>
+            <span className="text-sm font-bold text-card-foreground">365-Day Archive</span>
+            <span className="text-xs text-muted-foreground">• SOC 2 / GDPR</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Showing Filtered</span>
-            <div className="rounded-xl bg-amber-500/10 p-2 text-amber-400 border border-amber-500/20">
+            <span className="text-xs font-semibold text-muted-foreground">Showing Filtered</span>
+            <div className="rounded-xl bg-amber-500/10 p-2 text-amber-400 border border-amber-500/20"> {/* intentional: filter count metric icon */}
               <Layers className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-black tracking-tight text-white">{filteredLogs.length}</span>
-            <span className="text-xs text-slate-400">of {logs.length} loaded</span>
+            <span className="text-2xl font-black tracking-tight text-card-foreground">{filteredLogs.length}</span>
+            <span className="text-xs text-muted-foreground">of {logs.length} loaded</span>
           </div>
         </div>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 space-y-4 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-4 space-y-4 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           {/* Search Input */}
           <div className="relative flex-1 min-w-[240px]">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search actions, actors, entity IDs, metadata..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950/70 py-2 pl-10 pr-4 text-xs text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              className="w-full rounded-xl border border-input bg-background py-2 pl-10 pr-4 text-xs text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
 
@@ -249,7 +249,7 @@ export function AuditLogOrgView({
               <select
                 value={selectedActionGroup}
                 onChange={(e) => setSelectedActionGroup(e.target.value)}
-                className="appearance-none rounded-xl border border-slate-800 bg-slate-950/70 py-2 pl-3 pr-8 text-xs font-medium text-slate-300 focus:border-sky-500 focus:outline-none"
+                className="appearance-none rounded-xl border border-input bg-background py-2 pl-3 pr-8 text-xs font-medium text-foreground focus:border-ring focus:outline-none"
               >
                 {actionGroups.map((g) => (
                   <option key={g.value} value={g.value}>
@@ -257,7 +257,7 @@ export function AuditLogOrgView({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 pointer-events-none" />
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
             </div>
 
             {/* Entity Filter */}
@@ -266,7 +266,7 @@ export function AuditLogOrgView({
                 <select
                   value={selectedEntity}
                   onChange={(e) => setSelectedEntity(e.target.value)}
-                  className="appearance-none rounded-xl border border-slate-800 bg-slate-950/70 py-2 pl-3 pr-8 text-xs font-medium text-slate-300 focus:border-sky-500 focus:outline-none"
+                  className="appearance-none rounded-xl border border-input bg-background py-2 pl-3 pr-8 text-xs font-medium text-foreground focus:border-ring focus:outline-none"
                 >
                   <option value="all">All Entities</option>
                   {entityOptions.map((e) => (
@@ -275,7 +275,7 @@ export function AuditLogOrgView({
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 pointer-events-none" />
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
               </div>
             )}
 
@@ -284,20 +284,20 @@ export function AuditLogOrgView({
               <select
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value)}
-                className="appearance-none rounded-xl border border-slate-800 bg-slate-950/70 py-2 pl-3 pr-8 text-xs font-medium text-slate-300 focus:border-sky-500 focus:outline-none"
+                className="appearance-none rounded-xl border border-input bg-background py-2 pl-3 pr-8 text-xs font-medium text-foreground focus:border-ring focus:outline-none"
               >
                 <option value="all">All Time</option>
                 <option value="24h">Last 24 Hours</option>
                 <option value="7d">Last 7 Days</option>
                 <option value="30d">Last 30 Days</option>
               </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 pointer-events-none" />
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
             </div>
 
             {/* Export CSV Button */}
             <button
               onClick={handleExportCsv}
-              className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 rounded-xl border border-border bg-muted/60 px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors"
             >
               <Download className="h-3.5 w-3.5" />
               <span>Export CSV</span>
@@ -307,14 +307,14 @@ export function AuditLogOrgView({
       </div>
 
       {/* Logs Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         {filteredLogs.length === 0 ? (
           <div className="p-12 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-800/60 text-slate-500">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
               <ShieldCheck className="h-6 w-6" />
             </div>
-            <h3 className="mt-4 text-sm font-bold text-white">No audit events found</h3>
-            <p className="mt-1 text-xs text-slate-400">
+            <h3 className="mt-4 text-sm font-bold text-card-foreground">No audit events found</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
               Try adjusting your search query or action category filters.
             </p>
           </div>
@@ -322,7 +322,7 @@ export function AuditLogOrgView({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950/40 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <tr className="border-b border-border bg-muted/40 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                   <th className="py-3 px-4 w-8"></th>
                   <th className="py-3 px-4">Timestamp</th>
                   <th className="py-3 px-4">Action</th>
@@ -331,7 +331,7 @@ export function AuditLogOrgView({
                   <th className="py-3 px-4">Details Summary</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-xs text-slate-300">
+              <tbody className="divide-y divide-border text-xs text-foreground">
                 {filteredLogs.map((log) => {
                   const isExpanded = expandedLogId === log.id
                   const detailsObj = log.metadata || log.details || {}
@@ -343,14 +343,14 @@ export function AuditLogOrgView({
                   return (
                     <tr
                       key={log.id}
-                      className={`group transition-colors hover:bg-slate-800/30 ${
-                        isExpanded ? 'bg-slate-800/20' : ''
+                      className={`group transition-colors hover:bg-muted/30 ${
+                        isExpanded ? 'bg-muted/20' : ''
                       }`}
                     >
                       <td className="py-3 px-4">
                         <button
                           onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
-                          className="text-slate-500 hover:text-slate-200 transition-colors"
+                          className="text-muted-foreground hover:text-foreground transition-colors"
                         >
                           {isExpanded ? (
                             <ChevronDown className="h-4 w-4" />
@@ -359,9 +359,9 @@ export function AuditLogOrgView({
                           )}
                         </button>
                       </td>
-                      <td className="py-3 px-4 whitespace-nowrap text-slate-400 font-mono text-[11px]">
+                      <td className="py-3 px-4 whitespace-nowrap text-muted-foreground font-mono text-[11px]">
                         <div>{new Date(log.created_at).toLocaleDateString()}</div>
-                        <div className="text-[10px] text-slate-500">
+                        <div className="text-[10px] text-muted-foreground/80">
                           {new Date(log.created_at).toLocaleTimeString()}
                         </div>
                       </td>
@@ -376,40 +376,40 @@ export function AuditLogOrgView({
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-700">
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-foreground border border-border">
                             {log.actor_name?.[0] || log.actor_email?.[0] || 'U'}
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-200">
+                            <div className="font-semibold text-foreground">
                               {log.actor_name || log.actor_email?.split('@')[0] || 'System Operator'}
                             </div>
                             {log.actor_email && (
-                              <div className="text-[10px] text-slate-500 font-mono">
+                              <div className="text-[10px] text-muted-foreground font-mono">
                                 {log.actor_email}
                               </div>
                             )}
                           </div>
                           {log.actor_is_super_admin && (
-                            <span className="rounded bg-purple-950/80 px-1.5 py-0.5 text-[9px] font-bold text-purple-300 border border-purple-800/60">
+                            <span className="rounded bg-purple-950/80 px-1.5 py-0.5 text-[9px] font-bold text-purple-300 border border-purple-800/60"> {/* intentional: super admin role badge */}
                               SUPER ADMIN
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px] text-slate-400">
+                      <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px] text-muted-foreground">
                         {log.entity_type || log.target_type ? (
-                          <span className="rounded bg-slate-800/80 px-2 py-0.5 border border-slate-700/60">
+                          <span className="rounded bg-muted/80 px-2 py-0.5 border border-border">
                             {log.entity_type || log.target_type}
                             {log.entity_id || log.target_id
                               ? `:${String(log.entity_id || log.target_id).slice(0, 8)}...`
                               : ''}
                           </span>
                         ) : (
-                          <span className="text-slate-600">—</span>
+                          <span className="text-muted-foreground/40">—</span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-slate-400 truncate max-w-xs text-[11px]">
-                        {detailsSummary || <span className="text-slate-600 italic">No extra metadata</span>}
+                      <td className="py-3 px-4 text-muted-foreground truncate max-w-xs text-[11px]">
+                        {detailsSummary || <span className="text-muted-foreground/60 italic">No extra metadata</span>}
                       </td>
                     </tr>
                   )
@@ -422,15 +422,15 @@ export function AuditLogOrgView({
 
       {/* Expanded Log Drawer Modal / View */}
       {expandedLogId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-overlay)] backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="relative w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4">
             {(() => {
               const log = logs.find((l) => l.id === expandedLogId)
               if (!log) return null
 
               return (
                 <>
-                  <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+                  <div className="flex items-start justify-between border-b border-border pb-4">
                     <div>
                       <div className="flex items-center gap-2">
                         <span
@@ -441,50 +441,50 @@ export function AuditLogOrgView({
                           {log.action}
                         </span>
                         {log.actor_is_super_admin && (
-                          <span className="rounded bg-purple-950/80 px-2 py-0.5 text-xs font-bold text-purple-300 border border-purple-800/60">
+                          <span className="rounded bg-purple-950/80 px-2 py-0.5 text-xs font-bold text-purple-300 border border-purple-800/60"> {/* intentional: super admin role badge */}
                             SUPER ADMIN ACTION
                           </span>
                         )}
                       </div>
-                      <p className="mt-1 text-xs text-slate-400 font-mono">
+                      <p className="mt-1 text-xs text-muted-foreground font-mono">
                         Event ID: {log.id} • {new Date(log.created_at).toISOString()}
                       </p>
                     </div>
                     <button
                       onClick={() => setExpandedLogId(null)}
-                      className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                      className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                     >
                       ✕
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 text-xs bg-slate-950/50 p-3 rounded-xl border border-slate-800/60">
+                  <div className="grid grid-cols-2 gap-3 text-xs bg-muted/30 p-3 rounded-xl border border-border">
                     <div>
-                      <span className="text-slate-500 font-medium">Actor:</span>
-                      <p className="text-white font-semibold">
+                      <span className="text-muted-foreground font-medium">Actor:</span>
+                      <p className="text-foreground font-semibold">
                         {log.actor_name || 'System Operator'} ({log.actor_email || 'N/A'})
                       </p>
                     </div>
                     <div>
-                      <span className="text-slate-500 font-medium">Target Entity:</span>
-                      <p className="text-white font-mono">
+                      <span className="text-muted-foreground font-medium">Target Entity:</span>
+                      <p className="text-foreground font-mono">
                         {log.entity_type || log.target_type || 'N/A'}:{' '}
                         {log.entity_id || log.target_id || 'N/A'}
                       </p>
                     </div>
                     <div>
-                      <span className="text-slate-500 font-medium">IP Address:</span>
-                      <p className="text-white font-mono">{log.ip_address || '127.0.0.1 (Local)'}</p>
+                      <span className="text-muted-foreground font-medium">IP Address:</span>
+                      <p className="text-foreground font-mono">{log.ip_address || '127.0.0.1 (Local)'}</p>
                     </div>
                     <div>
-                      <span className="text-slate-500 font-medium">Immutability:</span>
-                      <p className="text-emerald-400 font-medium">Protected (Append-only)</p>
+                      <span className="text-muted-foreground font-medium">Immutability:</span>
+                      <p className="text-emerald-400 font-medium">Protected (Append-only)</p> {/* intentional: audit immutability security status */}
                     </div>
                   </div>
 
                   <div>
-                    <span className="text-xs font-bold text-slate-300">Payload Metadata (JSON)</span>
-                    <pre className="mt-2 max-h-60 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950 p-4 text-[11px] font-mono text-emerald-400">
+                    <span className="text-xs font-bold text-foreground">Payload Metadata (JSON)</span>
+                    <pre className="mt-2 max-h-60 overflow-y-auto rounded-xl border border-border bg-muted/40 p-4 text-[11px] font-mono text-emerald-400"> {/* intentional: terminal code syntax highlighting */}
                       {JSON.stringify(log.metadata || log.details || {}, null, 2)}
                     </pre>
                   </div>
@@ -492,7 +492,7 @@ export function AuditLogOrgView({
                   <div className="flex justify-end pt-2">
                     <button
                       onClick={() => setExpandedLogId(null)}
-                      className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700"
+                      className="rounded-xl border border-border bg-muted/60 px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors"
                     >
                       Close Inspector
                     </button>

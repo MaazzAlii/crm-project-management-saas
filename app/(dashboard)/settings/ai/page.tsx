@@ -24,9 +24,9 @@ export default async function AISettingsPage() {
 
   if (!result.success || !result.data) {
     return (
-      <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-6 text-center text-rose-300">
+      <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-6 text-center text-destructive">
         <p className="font-semibold">Unable to load AI settings</p>
-        <p className="text-xs text-rose-400/80 mt-1">{result.error || 'Unknown error occurred'}</p>
+        <p className="text-xs text-destructive/80 mt-1">{result.error || 'Unknown error occurred'}</p>
       </div>
     )
   }
