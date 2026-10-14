@@ -104,8 +104,8 @@ export default async function PortalDashboardPage() {
     <div className="portal-bg min-h-screen">
       {/* Ambient glow */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-60 left-1/2 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-violet-600/[0.08] blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-cyan-600/5 blur-3xl" />
+        <div className="absolute -top-60 left-1/2 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-primary/[0.08] blur-3xl" /> {/* // intentional: ambient glow centering */}
+        <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-primary/5 blur-3xl" />
       </div>
 
       <PortalNav orgName={orgName} orgLogoUrl={orgLogoUrl} />
@@ -113,10 +113,10 @@ export default async function PortalDashboardPage() {
       <main className="relative z-10 mx-auto max-w-5xl px-6 py-10">
         {/* Welcome header */}
         <div className="mb-10">
-          <h1 className="text-2xl font-bold text-white">
-            Welcome back, <span className="text-violet-400">{displayName}</span>
+          <h1 className="text-2xl font-bold text-foreground">
+            Welcome back, <span className="text-primary">{displayName}</span>
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-muted-foreground">
             Here&apos;s an overview of your work and activity.
           </p>
         </div>
@@ -128,29 +128,29 @@ export default async function PortalDashboardPage() {
               icon: FolderOpen,
               value: activeProjectCount,
               label: 'Active Projects',
-              color: 'text-violet-400',
-              bg: 'bg-violet-500/15 ring-violet-500/20',
+              color: 'text-primary',
+              bg: 'bg-primary/10 ring-primary/20',
             },
             {
               icon: FileClock,
               value: pendingReviewCount,
               label: 'Awaiting Review',
-              color: 'text-amber-400',
-              bg: 'bg-amber-500/15 ring-amber-500/20',
+              color: 'text-amber-500 dark:text-amber-300', // intentional: review status accent
+              bg: 'bg-amber-500/15 ring-amber-500/20', // intentional: review status badge
             },
             {
               icon: FileText,
               value: `$${totalInvoiced.toLocaleString()}`,
               label: 'Total Invoiced',
-              color: 'text-cyan-400',
-              bg: 'bg-cyan-500/15 ring-cyan-500/20',
+              color: 'text-cyan-500 dark:text-cyan-300', // intentional: invoiced financial metric
+              bg: 'bg-cyan-500/15 ring-cyan-500/20', // intentional: invoiced financial metric badge
             },
             {
               icon: TrendingUp,
               value: `$${paidTotal.toLocaleString()}`,
               label: 'Paid to Date',
-              color: 'text-emerald-400',
-              bg: 'bg-emerald-500/15 ring-emerald-500/20',
+              color: 'text-emerald-500 dark:text-emerald-300', // intentional: paid financial metric
+              bg: 'bg-emerald-500/15 ring-emerald-500/20', // intentional: paid financial metric badge
             },
           ].map(({ icon: Icon, value, label, color, bg }) => (
             <div key={label} className="portal-card flex items-center gap-4 py-5">
@@ -158,8 +158,8 @@ export default async function PortalDashboardPage() {
                 <Icon className={`h-5 w-5 ${color}`} />
               </div>
               <div>
-                <p className="text-xl font-bold text-white">{value}</p>
-                <p className="text-xs text-slate-400 mt-0.5">{label}</p>
+                <p className="text-xl font-bold text-foreground">{value}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
               </div>
             </div>
           ))}
@@ -169,11 +169,11 @@ export default async function PortalDashboardPage() {
         {pendingReviewCount > 0 && (
           <section className="mb-10">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-white flex items-center gap-2">
-                <FileClock className="h-4 w-4 text-amber-400" />
+              <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                <FileClock className="h-4 w-4 text-amber-500 dark:text-amber-300" /> {/* // intentional: review pending status icon */}
                 Awaiting Your Review
               </h2>
-              <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-400 ring-1 ring-amber-500/20">
+              <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-600 dark:text-amber-300 ring-1 ring-amber-500/20"> {/* // intentional: review pending status badge */}
                 {pendingReviewCount} pending
               </span>
             </div>
@@ -198,19 +198,19 @@ export default async function PortalDashboardPage() {
         {/* Active Projects */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-white flex items-center gap-2">
-              <FolderOpen className="h-4 w-4 text-violet-400" />
+            <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+              <FolderOpen className="h-4 w-4 text-primary" />
               Your Projects
             </h2>
           </div>
 
           {activeProjectCount === 0 ? (
             <div className="portal-card text-center py-16">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600/15 ring-1 ring-violet-500/20">
-                <FolderOpen className="h-7 w-7 text-violet-400" />
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+                <FolderOpen className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="text-base font-semibold text-white mb-1">No active projects yet</h3>
-              <p className="text-sm text-slate-400">
+              <h3 className="text-base font-semibold text-foreground mb-1">No active projects yet</h3>
+              <p className="text-sm text-muted-foreground">
                 Projects assigned to you will appear here once your account manager creates them.
               </p>
             </div>

@@ -24,22 +24,22 @@ const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle; c
   paid: {
     label: 'Paid',
     icon: CheckCircle,
-    className: 'inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-400 ring-1 ring-emerald-500/20',
+    className: 'inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-300 ring-1 ring-emerald-500/20', // intentional: paid invoice badge
   },
   invoiced: {
     label: 'Invoice Sent',
     icon: Clock,
-    className: 'inline-flex items-center gap-1.5 rounded-full bg-cyan-500/15 px-2.5 py-1 text-xs font-medium text-cyan-400 ring-1 ring-cyan-500/20',
+    className: 'inline-flex items-center gap-1.5 rounded-full bg-cyan-500/15 px-2.5 py-1 text-xs font-medium text-cyan-600 dark:text-cyan-300 ring-1 ring-cyan-500/20', // intentional: invoice sent badge
   },
   overdue: {
     label: 'Overdue',
     icon: AlertTriangle,
-    className: 'inline-flex items-center gap-1.5 rounded-full bg-red-500/15 px-2.5 py-1 text-xs font-medium text-red-400 ring-1 ring-red-500/20',
+    className: 'inline-flex items-center gap-1.5 rounded-full bg-red-500/15 px-2.5 py-1 text-xs font-medium text-red-600 dark:text-red-300 ring-1 ring-red-500/20', // intentional: overdue invoice badge
   },
   delivered: {
     label: 'Delivered (Invoice Pending)',
     icon: Clock,
-    className: 'inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-400 ring-1 ring-amber-500/20',
+    className: 'inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-600 dark:text-amber-300 ring-1 ring-amber-500/20', // intentional: delivered pending invoice badge
   },
 }
 
@@ -103,18 +103,18 @@ export default async function PortalInvoicesPage() {
   return (
     <div className="portal-bg min-h-screen">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-60 left-1/2 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-violet-600/[0.08] blur-3xl" />
+        <div className="absolute -top-60 left-1/2 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-primary/[0.08] blur-3xl" /> {/* // intentional: ambient glow centering */}
       </div>
 
       <PortalNav orgName={orgName} orgLogoUrl={orgLogoUrl} />
 
       <main className="relative z-10 mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <FileText className="h-6 w-6 text-violet-400" />
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
+            <FileText className="h-6 w-6 text-primary" />
             Invoices & Payments
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-muted-foreground">
             Your billing history and payment status.
           </p>
         </div>
@@ -126,22 +126,22 @@ export default async function PortalInvoicesPage() {
               icon: DollarSign,
               value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalInvoiced),
               label: 'Total Invoiced',
-              color: 'text-cyan-400',
-              bg: 'bg-cyan-500/15 ring-cyan-500/20',
+              color: 'text-cyan-500 dark:text-cyan-300', // intentional: invoiced metric accent
+              bg: 'bg-cyan-500/15 ring-cyan-500/20', // intentional: invoiced metric badge
             },
             {
               icon: CheckCircle,
               value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalPaid),
               label: 'Total Paid',
-              color: 'text-emerald-400',
-              bg: 'bg-emerald-500/15 ring-emerald-500/20',
+              color: 'text-emerald-500 dark:text-emerald-300', // intentional: paid metric accent
+              bg: 'bg-emerald-500/15 ring-emerald-500/20', // intentional: paid metric badge
             },
             {
               icon: TrendingUp,
               value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalOutstanding),
               label: `Outstanding${overdueCount > 0 ? ` (${overdueCount} overdue)` : ''}`,
-              color: overdueCount > 0 ? 'text-red-400' : 'text-amber-400',
-              bg: overdueCount > 0 ? 'bg-red-500/15 ring-red-500/20' : 'bg-amber-500/15 ring-amber-500/20',
+              color: overdueCount > 0 ? 'text-red-500 dark:text-red-300' : 'text-amber-500 dark:text-amber-300', // intentional: outstanding balance status accent
+              bg: overdueCount > 0 ? 'bg-red-500/15 ring-red-500/20' : 'bg-amber-500/15 ring-amber-500/20', // intentional: outstanding balance status badge
             },
           ].map(({ icon: Icon, value, label, color, bg }) => (
             <div key={label} className="portal-card flex items-center gap-4 py-5">
@@ -149,8 +149,8 @@ export default async function PortalInvoicesPage() {
                 <Icon className={`h-5 w-5 ${color}`} />
               </div>
               <div>
-                <p className="text-lg font-bold text-white leading-tight">{value}</p>
-                <p className="text-xs text-slate-400 mt-0.5">{label}</p>
+                <p className="text-lg font-bold text-foreground leading-tight">{value}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
               </div>
             </div>
           ))}
@@ -159,11 +159,11 @@ export default async function PortalInvoicesPage() {
         {/* Invoice list */}
         {invoices.length === 0 ? (
           <div className="portal-card text-center py-16">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600/15 ring-1 ring-violet-500/20">
-              <FileText className="h-7 w-7 text-violet-400" />
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+              <FileText className="h-7 w-7 text-primary" />
             </div>
-            <h2 className="text-base font-semibold text-white mb-1">No invoices yet</h2>
-            <p className="text-sm text-slate-400 max-w-sm mx-auto">
+            <h2 className="text-base font-semibold text-foreground mb-1">No invoices yet</h2>
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
               Invoices will appear here once your projects are delivered and invoiced by the team.
             </p>
           </div>
@@ -171,14 +171,14 @@ export default async function PortalInvoicesPage() {
           <div className="portal-card p-0 overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-800/60">
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Project</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 hidden sm:table-cell">Date</th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Amount</th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                <tr className="border-b border-border">
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Project</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground hidden sm:table-cell">Date</th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount</th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/40">
+              <tbody className="divide-y divide-border">
                 {invoices.map((inv) => {
                   const cfg = STATUS_CONFIG[inv.status] ?? STATUS_CONFIG.invoiced
                   const CfgIcon = cfg.icon
@@ -187,12 +187,12 @@ export default async function PortalInvoicesPage() {
                     : '—'
 
                   return (
-                    <tr key={inv.id} className="hover:bg-slate-800/20 transition-colors">
+                    <tr key={inv.id} className="hover:bg-muted/50 transition-colors">
                       <td className="px-6 py-4">
-                        <p className="font-medium text-white">{inv.title}</p>
+                        <p className="font-medium text-foreground">{inv.title}</p>
                       </td>
-                      <td className="px-6 py-4 text-slate-400 hidden sm:table-cell">{date}</td>
-                      <td className="px-6 py-4 text-right font-semibold text-white">
+                      <td className="px-6 py-4 text-muted-foreground hidden sm:table-cell">{date}</td>
+                      <td className="px-6 py-4 text-right font-semibold text-foreground">
                         {new Intl.NumberFormat('en-US', { style: 'currency', currency: inv.currency }).format(inv.amount)}
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -209,7 +209,7 @@ export default async function PortalInvoicesPage() {
           </div>
         )}
 
-        <p className="mt-4 text-xs text-center text-slate-600">
+        <p className="mt-4 text-xs text-center text-muted-foreground">
           For billing questions, contact your account manager.
         </p>
       </main>

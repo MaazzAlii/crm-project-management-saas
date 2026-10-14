@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function ClientPortalLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-[#09090f] text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-screen bg-background text-foreground transition-colors">
       {children}
     </div>
   )
