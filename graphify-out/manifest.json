@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791979591.5531328,
-    "seen": 1791979612.5921805,
-    "ast_hash": "b556e7c1c72e6b69a5c0f02c58050fcd",
+    "mtime": 1791981519.0312932,
+    "seen": 1791981576.8457384,
+    "ast_hash": "b3b23116c3aeccc1494c5220b7954fff",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1146,15 +1146,15 @@
     "semantic_hash": ""
   },
   "app/super-admin/organizations/[id]/page.tsx": {
-    "mtime": 1791353758.057406,
-    "seen": 1791772540.8370993,
-    "ast_hash": "5b6d2727dd32737ff14dd23378bcb215",
+    "mtime": 1791980457.8973475,
+    "seen": 1791981576.8441448,
+    "ast_hash": "670335e08b31151d0eb75c29be44f38b",
     "semantic_hash": ""
   },
   "app/super-admin/organizations/page.tsx": {
-    "mtime": 1791958271.058193,
-    "seen": 1791959202.851573,
-    "ast_hash": "c85f03cc68c2e22c12ba08a71cc8251d",
+    "mtime": 1791980352.826805,
+    "seen": 1791981576.8441498,
+    "ast_hash": "96dadc1af515078d02497d939ac2867f",
     "semantic_hash": ""
   },
   "components/super-admin/org-list-filter.tsx": {
@@ -1170,9 +1170,9 @@
     "semantic_hash": ""
   },
   "components/super-admin/org-management-actions.tsx": {
-    "mtime": 1791471383.8340936,
-    "seen": 1791772540.8372498,
-    "ast_hash": "3e90c0d89d8f351f6e1392b95cabd901",
+    "mtime": 1791980517.419634,
+    "seen": 1791981576.8445313,
+    "ast_hash": "79a9e539e0e1368fef910c2db1ca1bf9",
     "semantic_hash": ""
   },
   "components/super-admin/platform-metrics-cards.tsx": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791979571.0568361,
-    "seen": 1791979612.5921884,
-    "ast_hash": "90cebc8894baec7f61847d9f72ca0ca4",
+    "mtime": 1791981480.010172,
+    "seen": 1791981576.8457477,
+    "ast_hash": "1f10b3f31b6f2c94d68e9dad6d3ce238",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7305,6 +7305,12 @@
     "mtime": 1791979433.651229,
     "seen": 1791979612.5928795,
     "ast_hash": "17ecdfcb248dad4da5af2c61991b826b",
+    "semantic_hash": ""
+  },
+  "scripts/verify-super-admin-9b1-e2e.ts": {
+    "mtime": 1791981143.815267,
+    "seen": 1791981576.845367,
+    "ast_hash": "5f50c5c1c686b1490f0ede6e4a122fd6",
     "semantic_hash": ""
   }
 }

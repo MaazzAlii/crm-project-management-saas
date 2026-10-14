@@ -2882,6 +2882,55 @@ paste at the start of every batch report.
      - `npm run build` → 142 routes compiled cleanly (exit code 0)
 - **Status**: ✅ Sub-Batch 8C2 complete. All 3 commits created locally. Push Approval Policy honored: zero remotes pushed. Awaiting user review. UI-1B Settings group (8A, 8B, 8C) is now 100% complete.
 
+---
+
+### Step: UI-1B Sub-Batch 9B1 — Super-Admin Organizations, Detail & Management Action Modals (3 Files)
+- **Timestamp**: 2026-10-14T17:35:00+05:00
+- **Task ID**: `UI-1B-SUB-BATCH-9B1-SUPER-ADMIN-ORGANIZATIONS-ACTIONS`
+- **Actions Performed**:
+  1. **Scoping & Pre-Flight Checks**:
+     - Pre-flight push confirmation for Sub-Batch 8C2 executed (`e1482a2`).
+     - Both remotes `origin/main` and `deploy/main` strictly in sync and confirmed empty difference with HEAD.
+     - TypeScript compiler check `npx tsc --noEmit` exited 0.
+     - Production build route count strictly verified at 142 routes.
+     - Pre-edit grep threshold evaluated: 320 hits across original 8 files prompted user decision for Option 2 (3 micro-batches). Sub-Batch 9B1 scoped to 3 files (105 hits).
+  2. **9B1 Scope (3 Files)**:
+     - `app/super-admin/organizations/page.tsx` (1 raw color hit, 0 text-white -> 0 raw, 0 text-white)
+     - `app/super-admin/organizations/[id]/page.tsx` (51 raw color hits, 11 text-white -> 10 intentional, 0 text-white)
+     - `components/super-admin/org-management-actions.tsx` (31 raw color hits, 11 text-white, 2 raw overlays -> 4 intentional, 0 text-white, 0 raw overlays, modal overlays refactored to `bg-[var(--bg-overlay)]`)
+  3. **Semantic Token Refactoring**:
+     - `app/super-admin/organizations/page.tsx`: Tenants count badge refactored from `bg-purple-500/10 text-purple-600 dark:text-purple-300 border-purple-500/20` to `bg-primary/10 text-primary border-primary/20`.
+     - `app/super-admin/organizations/[id]/page.tsx`: Back link refactored to `text-muted-foreground hover:text-foreground`, overview header card to `border-border bg-card p-6 shadow-sm`, icon container to `bg-primary/10 border-primary/20 text-primary`, org name to `text-foreground`, metadata to `text-muted-foreground font-mono`, industry badge to `bg-muted text-muted-foreground border-border`, suspension audit reason alert to `bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-300` (intentional), plan tier badges and status badges justified with intentional tags, usage card boxes to `border-border bg-card shadow-sm`, usage headers to `text-foreground`, limit values to `text-foreground`, progress track to `bg-muted`, progress bars refactored (`bg-primary` for team members, intentional blue/emerald for clients/projects), Stripe billing info card to `border-border bg-card shadow-sm`, labels to `text-muted-foreground`, values to `text-foreground`, team member audit table to `border-border bg-card shadow-sm`, header to `border-border text-muted-foreground`, row hover to `hover:bg-muted/50`, cell text to `text-foreground`, role badge to `bg-primary/10 text-primary border-primary/20`.
+     - `components/super-admin/org-management-actions.tsx`: Trigger buttons refactored to `shadow-xs`, resume/suspend buttons justified with intentional tags, Override Plan button to `border-primary/20 bg-primary/10 text-primary hover:bg-primary/20 shadow-xs`, modal backdrops strictly refactored to `bg-[var(--bg-overlay)] backdrop-blur-xs`, dialog cards to `border-border bg-card p-6 shadow-sm`, dialog headers to `border-border text-card-foreground`, close button to `text-muted-foreground hover:text-foreground`, body text to `text-muted-foreground`, audit reason textarea inputs strictly refactored to `border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none`, error alerts to `bg-destructive/10 border-destructive/20 text-destructive`, tier selector buttons to `border-primary bg-primary text-primary-foreground shadow-xs` (selected) and `border-border bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground` (unselected), action buttons to `bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm` and `bg-destructive hover:bg-destructive/90 text-primary-foreground shadow-sm`, cancel buttons to `border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground`.
+  4. **Non-Color Changes Detail**:
+     - `app/super-admin/organizations/page.tsx`: Non-color changes: none.
+     - `app/super-admin/organizations/[id]/page.tsx`: Overview header card shadow reduced (`shadow-xl` -> `shadow-sm`), usage limit cards shadow normalized (`shadow-lg` -> `shadow-sm`), billing status card shadow normalized (`shadow-lg` -> `shadow-sm`), team member table card shadow normalized (`shadow-lg` -> `shadow-sm`), progress bar track rounded container normalized (`bg-slate-950` -> `bg-muted`).
+     - `components/super-admin/org-management-actions.tsx`: Trigger buttons elevation normalized (`shadow-sm` -> `shadow-xs`), modal dialog elevation normalized (`shadow-2xl` -> `shadow-sm`), plan override submit button and cancel button elevation normalized (`shadow-md` -> `shadow-sm`).
+  5. **Section 6 Greps Post-edit**:
+     - Grep 1 (raw palettes): 0 unjustified hits across all 3 files (14 intentional hits justified with `// intentional: <reason>` on the exact same line).
+     - Grep 2 (`text-white`): 0 hits across all 3 files.
+     - Grep 3 (intentional): 14 intentional hits across all 3 files.
+     - Grep 4 (overlays): 0 raw overlay hits across all 3 files (all modals strictly use `bg-[var(--bg-overlay)]`).
+  6. **Browser Verification**:
+     - Created `scripts/verify-super-admin-9b1-e2e.ts`.
+     - Captured 8 screenshots:
+       * `super_admin_organizations_light.png` & `super_admin_organizations_dark.png`
+       * `super_admin_org_detail_light.png` & `super_admin_org_detail_dark.png`
+       * `super_admin_org_modal_light.png` & `super_admin_org_modal_dark.png`
+       * `multi_route_super_admin_9b1_dark.png` & `multi_route_super_admin_9b1_light.png`
+     - Computed dark-mode input background strictly verified:
+       * Modal audit reason textarea input: `rgb(5, 8, 15)` (dark slate-950, strictly not white).
+       * Light-mode textarea input: `rgb(248, 250, 252)`.
+       * Modal overlay backdrop: `rgba(2, 6, 23, 0.8)` (dark) and `rgba(15, 23, 42, 0.4)` (light).
+       * Dialog box background: `rgb(15, 23, 42)` (dark) and `rgb(255, 255, 255)` (light).
+     - Multi-route theme persistence verified across `/super-admin/dashboard` → `/super-admin/organizations` → `/super-admin/organizations/[id]` → back to `/super-admin/organizations` in both light and dark themes.
+  7. **Quality Gate Verification**:
+     - `npx tsc --noEmit; echo "EXIT: $?"` → EXIT: 0
+     - `npm test` → 497/497 tests passed across 73 test files
+     - `npm run lint` → 4 warnings, 0 errors
+     - `npm run build` → 142 routes compiled cleanly (exit code 0)
+- **Status**: ✅ Sub-Batch 9B1 complete. Style and test commits created locally. Dual remotes untouched per Push Approval Policy. Awaiting user approval before Sub-Batch 9B2.
+
 
 
 
