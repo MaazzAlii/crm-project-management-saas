@@ -15,8 +15,18 @@ const config: Config = {
         mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
       },
       colors: {
+        background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
         'muted-foreground': 'hsl(var(--muted-foreground))',
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        'accent-foreground': 'hsl(var(--accent-foreground))',
         'subtle-foreground': 'hsl(var(--subtle-foreground))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
