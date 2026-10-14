@@ -47,13 +47,13 @@ export function OrgListTable({ organizations }: OrgListTableProps) {
   const getBadgeStyle = (tier: string) => {
     switch (tier.toLowerCase()) {
       case 'enterprise':
-        return 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+        return 'bg-purple-500/10 text-purple-600 dark:text-purple-300 border-purple-500/30'
       case 'pro':
-        return 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+        return 'bg-blue-500/10 text-blue-600 dark:text-blue-300 border-blue-500/30'
       case 'starter':
-        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/30'
       default:
-        return 'bg-slate-700/50 text-slate-300 border-slate-600/50'
+        return 'bg-muted text-muted-foreground border-border'
     }
   }
 
@@ -68,15 +68,15 @@ export function OrgListTable({ organizations }: OrgListTableProps) {
         setSelectedStatus={setSelectedStatus}
       />
 
-      <div className="rounded-xl border border-slate-800 bg-slate-900/90 shadow-lg overflow-hidden">
+      <div className="rounded-xl border border-border bg-card shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           {filteredOrgs.length === 0 ? (
-            <div className="py-12 text-center text-xs text-slate-500">
+            <div className="py-12 text-center text-xs text-muted-foreground">
               No organizations match the selected filters.
             </div>
           ) : (
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-slate-800 bg-slate-950/60 text-slate-400">
+              <thead className="border-b border-border bg-muted/50 text-muted-foreground">
                 <tr>
                   <th className="py-3.5 px-4 font-semibold">Organization</th>
                   <th className="py-3.5 px-4 font-semibold">Plan Tier</th>
@@ -86,18 +86,18 @@ export function OrgListTable({ organizations }: OrgListTableProps) {
                   <th className="py-3.5 px-4 font-semibold text-right">Quick Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-slate-300">
+              <tbody className="divide-y divide-border text-foreground">
                 {filteredOrgs.map((org) => (
-                  <tr key={org.id} className="hover:bg-slate-800/40 transition-colors">
+                  <tr key={org.id} className="hover:bg-muted/50 transition-colors">
                     <td className="py-3.5 px-4">
                       <Link
                         href={`/super-admin/organizations/${org.id}`}
-                        className="font-bold text-white hover:text-purple-300 transition-colors flex items-center gap-1.5"
+                        className="font-bold text-foreground hover:text-primary transition-colors flex items-center gap-1.5"
                       >
-                        <Building2 className="h-4 w-4 text-purple-400" />
+                        <Building2 className="h-4 w-4 text-primary" />
                         {org.name}
                       </Link>
-                      <div className="text-[11px] text-slate-500 font-mono ml-5">
+                      <div className="text-[11px] text-subtle-foreground font-mono ml-5">
                         /{org.slug}
                       </div>
                     </td>
@@ -108,25 +108,25 @@ export function OrgListTable({ organizations }: OrgListTableProps) {
                     </td>
                     <td className="py-3.5 px-4">
                       {org.is_suspended ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/20 px-2.5 py-0.5 text-xs font-semibold text-rose-300 border border-rose-500/40">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-xs font-semibold text-rose-600 dark:text-rose-300 border border-rose-500/30">
                           <AlertTriangle className="h-3 w-3" />
                           Suspended
                         </span>
                       ) : org.billing_status === 'active' ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-300 border border-emerald-500/40">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
                           <CheckCircle2 className="h-3 w-3" />
                           Active
                         </span>
                       ) : (
-                        <span className="inline-flex items-center rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-semibold text-amber-300 border border-amber-500/40 capitalize">
+                        <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-300 border border-amber-500/30 capitalize">
                           {org.billing_status}
                         </span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-slate-300">
+                    <td className="py-3.5 px-4 font-mono text-foreground">
                       {org.memberCount} members
                     </td>
-                    <td className="py-3.5 px-4 text-slate-400">
+                    <td className="py-3.5 px-4 text-muted-foreground">
                       {new Date(org.created_at).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -147,7 +147,7 @@ export function OrgListTable({ organizations }: OrgListTableProps) {
                         />
                         <Link
                           href={`/super-admin/organizations/${org.id}`}
-                          className="flex items-center gap-0.5 rounded-lg border border-slate-800 bg-slate-950 px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                          className="flex items-center gap-0.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
                         >
                           Details
                           <ChevronRight className="h-3.5 w-3.5" />
