@@ -1,17 +1,17 @@
 # Graph Report - 91-crm-project-management-saas  (2026-10-14)
 
 ## Corpus Check
-- 1059 files · ~1,613,878 words
+- 1060 files · ~1,616,264 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 17 file(s) not represented in the graph (top: .conf 7, (none) 4, .example 4)
 
 ## Summary
-- 7509 nodes · 13160 edges · 648 communities (401 shown, 247 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 287 edges (avg confidence: 0.93)
+- 7515 nodes · 13180 edges · 647 communities (402 shown, 245 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 289 edges (avg confidence: 0.93)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2b23f002`
+- Built from commit: `7442eb08`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -19,20 +19,20 @@
 - package.json
 - compilerOptions
 - next
-- playwright
+- getCurrentSessionContext
 - devDependencies
 - dependencies
 - UNIVERSAL MASTER PROMPT v1.1
 - Prompts To Build System/ORCHESTRATOR-FULL-RULES.md
 - V2 Prompt to build system/ORCHESTRATOR-FULL-RULES.md
 - extends
-- Invitation
+- invitation-service.ts
 - getPipelineSession
 - Assignment — SMB Project Management Tool
 - Assignment — SMB Project Management Tool
-- (client-portal)/layout.tsx
+- query
 - log.ts
-- deal-service.ts
+- session.ts
 - ref_crypto
 - OrganizationRepository
 - sender.ts
@@ -63,7 +63,7 @@
 - TASK 25 — Status Tag System — Shared Component Library
 - TASK 26 — Communication Hub — Architecture & Unified Inbox Data Layer
 - TASK 27 — Communication Hub — Slack Integration
-- auditService
+- communicationService
 - database.ts
 - TASK 28 — Communication Hub — WhatsApp Integration
 - TASK 31 — Communication Hub — Unified Inbox UI
@@ -166,18 +166,18 @@
 - Agent State
 - generate-production-secrets.ts
 - 7. Step-by-Step Manual Test Procedures
-- PipelinePageClient.tsx
+- MessageThread.tsx
 - decryptSecret
 - TASK 30 — Communication Hub — Discord & Upwork Channel Stubs
-- run-load-test.ts
-- getCurrentSessionContext
-- buildInsertQuery
-- plan-limits.ts
+- emitter.ts
+- ProjectsList.tsx
+- revenue/page.tsx
+- ai/actions.ts
 - Innoventix Platform v2 — Multi-Tenant CRM, Project Management & AI SaaS
-- Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)
-- project-repo.ts
-- email/route.ts
+- templates/actions.ts
 - projectService
+- features/lead-scoring.ts
+- features/task-extraction.ts
 - README.md
 - DNS Record Setup & Let's Encrypt SSL Automated Renewal
 - Contabo VPS Server Inventory & Infrastructure Setup
@@ -193,12 +193,12 @@
 - current-plan.ts
 - ingest.ts
 - pipeline.ts
-- security/rate-limit.ts
+- User
 - whatsapp/actions.ts
 - ThemeToggle
 - ClientCommunicationsView.tsx
-- lucide-react
-- capture_screens.js
+- inbox/actions.ts
+- platform-settings.ts
 - theme-provider.tsx
 - ITEM 4 — Fix Sign-In Rate Limiting (No 429 on HTML Pages)
 - leads/actions.ts
@@ -213,7 +213,7 @@
 - Theme System
 - queryCache
 - 08-signin-e2e-tests.md
-- ITEM 5 — Direct Password Creation During Invite
+- server-actions-auth.test.ts
 - 09-deploy-gate.md
 - signin-fix/README.md
 - (dashboard)/dashboard/page.tsx
@@ -221,14 +221,14 @@
 - generate_jwt.js
 - AUTH-HARDENING-MASTER-PROMPT.md
 - Tokens
-- templates.ts
+- isAIAccessible
 - ITEM 8 — Role-Based Access Consistency
 - scripts
-- upwork/actions.ts
-- createClientAction
+- Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)
+- tags/actions.ts
 - team/page.tsx
 - ITEM 15 — Password Strength Meter (Signup + Reset + Invite)
-- app/layout.tsx
+- impersonate/route.ts
 - BATCH E — Foundations & Polish
 - Migration Runner Partial-Failure Risk Analysis
 - Critical Decisions & Context
@@ -248,25 +248,26 @@
 - ITEM 14 — OAuth Foundation (Google + GitHub)
 - ITEM 3 — Signup Page Server-Side Validation
 - ADR NNN: [Title]
-- billing/page.tsx
+- logAuditEvent
 - ADR 001: Migration to Self-Hosted PostgreSQL and Custom JWT Auth
 - Motion Guidelines
 - Data & API Architecture
 - Auth & Role-Based Access Control (RBAC)
-- activity/route.ts
-- Diagnosis: Sign-In HTTP 429 Error
+- discord/actions.ts
+- slack/actions.ts
 - Deployment & Operations
-- text.tsx
+- react
 - Testing Strategy
+- [token]/page.tsx
 - Coding Standards
 - Data & API
 - Deployment
 - Project Context
-- ITEM 9 — Super Admin Impersonation (Read + Write with Audit)
+- super-admin/dashboard/page.tsx
 - Surface Hierarchy
-- Coding Standards
+- Audit: Current Team Invite Flow and Dashboard Architecture
 - ITEM 11 — Logout Hardening
-- status.ts
+- organization/page.tsx
 - INNOVENTIX-COLOR-TYPOGRAPHY-PROTOCOL.md
 - UNIVERSAL-UI-AND-ENGINEERING-PROTOCOL.md
 - Theme System
@@ -274,22 +275,26 @@
 - Component Library
 - Testing Strategy
 - Motion Guidelines
-- OrganizationService
-- Step 20: Innoventix Invite System & Seat Limits — Prompts 16 to 26
+- automationService
+- ITEM 10 — Session Timeout & Refresh Token Rotation
 - ADR-002: Redirect stubs for /settings and /settings/profile
 - Project Context
+- ITEM 13 — MFA / TOTP Foundation (Optional but Recommended)
 - TASK XX — [NAME]
 - TASK XX — [NAME]
-- 4. TESTING REQUIREMENTS (ALL BATCHES)
+- capture_client_detail_flow.js
+- capture_clients_flow.js
 - 7. EACH MD FILE MUST BE SELF-CONTAINED
 - 7. EACH MD FILE MUST BE SELF-CONTAINED
-- onboarding/page.tsx
+- lucide-react
 - InviteMemberDialog.tsx
+- capture_kanban_pipeline_flow.js
 - 51. FINAL COMPLETION REPORT
 - 51. FINAL COMPLETION REPORT
 - test-validation.ts
 - Agent State
 - Agent State
+- playwright_capture.js
 - ADR 001: Multi-Tenant Architecture, Data Isolation & Super Admin Platform Tier
 - Comprehensive Page & Route Error Audit (Prompt 54)
 - 00-MASTER-PROMPT-v2-self-hosted.md
@@ -298,10 +303,10 @@
 - 50. FINAL PROJECT AUDIT
 - 50. FINAL PROJECT AUDIT
 - schemas.ts
-- client-repo.ts
+- project-repo.ts
 - Subscription Plans & Feature Gating Specification
 - Agent State — Project Build Continuity Log
-- query
+- auth.ts
 - 39. IF REQUIREMENTS ARE AMBIGUOUS
 - 39. IF REQUIREMENTS ARE AMBIGUOUS
 - UNIVERSAL AI PROJECT BUILD ORCHESTRATOR
@@ -313,25 +318,25 @@
 - V2 Prompt to build system/README.md
 - 📝 Execution History
 - ai/client.ts
-- emitter.ts
-- database-layer.test.ts
-- ref_path
+- weekly-summary/route.ts
+- getPool
+- ref_fs
 - Supabase → PostgreSQL Migration Guide
-- session.ts
+- Topbar.tsx
 - requireSuperAdmin
 - combined_migrations.sql
 - Feature Comparison: Supabase vs Direct PostgreSQL
 - Migration Strategy: Step-by-Step Execution Plan
 - 1. Hardcoded Sample Values Search Results
 - ADR: Supabase → Direct PostgreSQL Migration
-- react
+- tasks/actions.ts
 - n8n Workflow Activation & Deployment Guide — Contabo VPS
 - 0034_sales_pipeline_tables.sql
 - Innoventix Plan & Tier Rules
 - 0001_init_auth_system.sql
 - Deployment Steps
-- NotFoundError
-- test_full_signup.js
+- queryOne
+- run-load-test.ts
 - TeamMemberList.tsx
 - 05: Fixes for Antigravity (run before any other email or invite work)
 - Supabase → PostgreSQL Migration Guide
@@ -339,7 +344,7 @@
 - 4. Tracked Action Taxonomy
 - N8N Automation Architecture & Webhook Contracts
 - Core Modules
-- run-e2e-full-system.ts
+- generate_dump.js
 - Innoventix Platform v2 — Production Deployment & Operations Runbook
 - Team Invitation Email Rules & Architecture
 - 📸 Visual Showcase & Platform Tour
@@ -363,10 +368,9 @@
 - dump_project.js
 - Deployment Day
 - ADR 002: Communication Hub Architecture & Unified Inbox Data Layer
-- generate_dump.js
 - Transactional Email Setup & Configuration (Mailcow SMTP)
 - Innoventix Sales Pipeline — Architectural Plan & Audit
-- invitation-service.ts
+- db/index.ts
 - rls-isolation.test.ts
 - 📜 Agent Operating Rules
 - MANDATORY RULE — Individual Commits + Push After Every Change
@@ -607,7 +611,7 @@
 - email-test-pack/README.md
 
 ## God Nodes (most connected - your core abstractions)
-1. `query()` - 294 edges
+1. `query()` - 296 edges
 2. `next` - 243 edges
 3. `getCurrentSessionContext()` - 189 edges
 4. `lucide-react` - 146 edges
@@ -621,35 +625,35 @@
 ## Surprising Connections (you probably didn't know these)
 - `3. Client Card "Connected" Badge Breakdown` --references--> `createClientAction()`  [INFERRED]
   docs/audit-tenancy-and-mock-data.md → app/(dashboard)/clients/actions.ts
+- `4. Dashboard Data Sources & Metric Fidelity` --references--> `fetchWeeklyReportMetricsAction()`  [INFERRED]
+  docs/audit-invites-dashboard.md → app/(dashboard)/reports/actions.ts
 - `Implementation Steps` --references--> `handleSignUpWithInviteAction()`  [INFERRED]
   docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md → app/actions/signup.ts
+- `Step 10: Sales Pipeline Fixes — Prompt 01 (Fix Duplicate Deal on Move)` --references--> `PipelinePageClient()`  [INFERRED]
+  MIGRATION_EXECUTION_LOG.md → components/pipeline/PipelinePageClient.tsx
 - `What happens:` --references--> `generateWeeklyReportNarrative()`  [INFERRED]
   documentation/infra/n8n-deployment.md → lib/ai/features/report-narrative.ts
-- `1. GLOBAL RULES (APPLY TO EVERY BATCH)` --references--> `logAuditEvent()`  [INFERRED]
-  docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md → lib/audit/log.ts
-- `Backend Requirements` --references--> `logAuditEvent()`  [INFERRED]
-  Prompts To Build System/46-audit-logging.md → lib/audit/log.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (648 total, 247 thin omitted)
+## Communities (647 total, 245 thin omitted)
 
 ### Community 0 - "package.json"
 Cohesion: 0.08
-Nodes (23): name, private, version, autoprefixer, clsx, @dnd-kit/utilities, eslint, eslint-config-next (+15 more)
+Nodes (24): name, private, version, autoprefixer, clsx, @dnd-kit/utilities, eslint, eslint-config-next (+16 more)
 
 ### Community 1 - "compilerOptions"
 Cohesion: 0.11
 Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+10 more)
 
 ### Community 2 - "next"
-Cohesion: 0.10
-Nodes (79): GET(), POST(), GET(), GET(), POST(), GET(), GET(), POST() (+71 more)
+Cohesion: 0.06
+Nodes (107): POST(), POST(), GET(), POST(), GET(), GET(), POST(), GET() (+99 more)
 
-### Community 3 - "playwright"
-Cohesion: 0.18
-Nodes (9): bcryptjs, playwright, ComputedStylesReport, ComputedColorReport, ComputedColorReport, ComputedStylesReport, ComputedColorEntry, ComputedColorEntry (+1 more)
+### Community 3 - "getCurrentSessionContext"
+Cohesion: 0.16
+Nodes (28): createDeliverableAction(), createProjectTaskAction(), deleteDeliverableAction(), DeliverableRecord, fetchProjectActivityLogAction(), fetchProjectDeliverablesAction(), fetchProjectDetailAction(), fetchProjectsAction() (+20 more)
 
 ### Community 4 - "devDependencies"
 Cohesion: 0.11
@@ -671,13 +675,13 @@ Nodes (49): 10. DEPENDENCY ORDER, 11. STRICT SEQUENTIAL EXECUTION, 12. READ MD F
 Cohesion: 0.04
 Nodes (49): 10. DEPENDENCY ORDER, 11. STRICT SEQUENTIAL EXECUTION, 12. READ MD FILES IN SEQUENCE, 13. GIT DISCIPLINE, 14. GITHUB REPOSITORY REQUIREMENTS, 15. GITHUB DESCRIPTION, 16. PUBLIC REPOSITORY HYGIENE, 17. INTERNAL AGENT FILES MUST REMAIN PRIVATE (+41 more)
 
-### Community 10 - "Invitation"
-Cohesion: 0.15
-Nodes (9): InvitationRepository, AcceptInvitationSuccess, CreateInvitationSuccess, DeclineInvitationSuccess, ResendInvitationSuccess, RevokeInvitationSuccess, Invitation, InvitationStatus (+1 more)
+### Community 10 - "invitation-service.ts"
+Cohesion: 0.06
+Nodes (39): INVITATION_AUDIT_EVENTS, InvitationAuditEventType, logInvitationAudit(), LogInvitationAuditParams, InvitationRepository, canAccept(), canResend(), canRevoke() (+31 more)
 
 ### Community 12 - "getPipelineSession"
-Cohesion: 0.11
-Nodes (52): POST(), RouteContext, DELETE(), PATCH(), RouteContext, POST(), RouteContext, GET() (+44 more)
+Cohesion: 0.08
+Nodes (70): GET(), RouteContext, POST(), RouteContext, DELETE(), PATCH(), RouteContext, POST() (+62 more)
 
 ### Community 13 - "Assignment — SMB Project Management Tool"
 Cohesion: 0.07
@@ -687,25 +691,29 @@ Nodes (29): Assignment — SMB Project Management Tool, Big Picture — Where Th
 Cohesion: 0.07
 Nodes (29): Assignment — SMB Project Management Tool, Big Picture — Where This Fits, clients table, deliverables table, How the System Will Work (Full Vision), Important Notes, N8N Flow 1 — Project Delivered → Invoice Trigger:, N8N Flow 2 — Task Deadline Alert: (+21 more)
 
-### Community 16 - "log.ts"
-Cohesion: 0.12
-Nodes (21): AuditLogOrgView(), AuditLogOrgViewProps, dynamic, OrgAuditLogPage(), AuditLogAdminView(), AuditLogAdminViewProps, dynamic, SuperAdminAuditLogPage() (+13 more)
+### Community 15 - "query"
+Cohesion: 0.10
+Nodes (11): PortalProjectDetailPage(), fetchRevenueReport(), query(), crmService, Step 9: Coolify Deployment Fix — Complete Supabase Elimination & Edge JWT Auth, main(), main(), main() (+3 more)
 
-### Community 17 - "deal-service.ts"
-Cohesion: 0.20
-Nodes (15): GET(), POST(), getJwtSecret(), verifyAccessToken(), SessionContext, dealRepo, pipelineRepo, canUserManage() (+7 more)
+### Community 16 - "log.ts"
+Cohesion: 0.15
+Nodes (18): AuditLogOrgView(), AuditLogOrgViewProps, dynamic, OrgAuditLogPage(), AuditLogAdminView(), AuditLogAdminViewProps, dynamic, SuperAdminAuditLogPage() (+10 more)
+
+### Community 17 - "session.ts"
+Cohesion: 0.13
+Nodes (20): setActiveOrgAction(), GET(), POST(), GET(), POST(), OrgSwitcherProps, getJwtSecret(), getRefreshSecret() (+12 more)
 
 ### Community 18 - "ref_crypto"
 Cohesion: 0.09
-Nodes (47): handleSignUpAction(), handleSignUpWithInviteAction(), SignUpInput, SignUpWithInviteInput, POST(), POST(), POST(), POST() (+39 more)
+Nodes (48): handleSignUpAction(), handleSignUpWithInviteAction(), SignUpInput, SignUpWithInviteInput, POST(), POST(), POST(), POST() (+40 more)
 
 ### Community 19 - "OrganizationRepository"
-Cohesion: 0.11
-Nodes (22): OrganizationRepository, UserRepository, Organization, assertColorAndTypography(), runRealBrowserVerification(), setTheme(), verifyClientsList(), verifyClientsModals() (+14 more)
+Cohesion: 0.10
+Nodes (32): OrganizationRepository, UserRepository, bcryptjs, playwright, assertColorAndTypography(), runRealBrowserVerification(), setTheme(), ComputedStylesReport (+24 more)
 
 ### Community 20 - "sender.ts"
-Cohesion: 0.13
-Nodes (21): EmailConfig, EmailProviderType, formatSenderAddress(), getEmailConfig(), printEmailConfigStatus(), validateEmailConfig(), ConsoleEmailProvider, EmailProvider (+13 more)
+Cohesion: 0.06
+Nodes (47): POST(), RFC-5321, createPasswordResetToken(), EmailVerificationRepository, EmailConfig, EmailProviderType, formatSenderAddress(), getEmailConfig() (+39 more)
 
 ### Community 21 - "TASK 01 — Repository & Monorepo Foundation"
 Cohesion: 0.10
@@ -815,13 +823,13 @@ Nodes (19): Acceptance Criteria, API Requirements, Backend Requirements, Current
 Cohesion: 0.11
 Nodes (18): Acceptance Criteria, API Requirements, Backend Requirements, Current State, Database Requirements, Dependencies, Files To Create, Files To Inspect (+10 more)
 
-### Community 48 - "auditService"
-Cohesion: 0.19
-Nodes (4): AuditRepository, auditService, AuditLog, InAppNotification
+### Community 48 - "communicationService"
+Cohesion: 0.10
+Nodes (8): AuditRepository, auditService, communicationService, AuditAction, AuditLog, ChannelType, InAppNotification, PaginationOptions
 
 ### Community 49 - "database.ts"
-Cohesion: 0.06
-Nodes (29): AiFeatureSettings, AiUsageLog, ClientPortalSettings, ClientPortalUser, ClientStatus, ClientTag, ClientTagAssignment, CommunicationLog (+21 more)
+Cohesion: 0.05
+Nodes (34): AiFeatureSettings, AiUsageLog, ClientPortalSettings, ClientPortalUser, ClientStatus, ClientTag, ClientTagAssignment, CommunicationLog (+26 more)
 
 ### Community 50 - "TASK 28 — Communication Hub — WhatsApp Integration"
 Cohesion: 0.11
@@ -1227,49 +1235,53 @@ Nodes (4): base64url(), generateAlphanumeric(), generateProductionSecrets(), sig
 Cohesion: 0.14
 Nodes (14): 7. Step-by-Step Manual Test Procedures, Direct n8n Test:, Manual Trigger via Curl:, Option A: Via App Cron Endpoint, Option A: Via App Cron Endpoint, Option A: Via Next.js UI, Option B: Via Direct Signed `curl`, Option B: Via Direct Signed `curl` to n8n (+6 more)
 
-### Community 151 - "PipelinePageClient.tsx"
-Cohesion: 0.14
-Nodes (20): LeadsPage(), metadata, CreateDealModal(), DealDetailModal(), ForecastView(), ManagePipelinesModal(), ManagePipelinesModalProps, PipelineFilterBar() (+12 more)
+### Community 151 - "MessageThread.tsx"
+Cohesion: 0.21
+Nodes (19): ClientSelectItem, IntegrationsSettingsPage(), metadata, ChannelStatusBadge(), ChannelStatusBadgeProps, ChannelStatusInfo, ConnectionStatusModal(), ConnectionStatusModalProps (+11 more)
 
 ### Community 152 - "decryptSecret"
-Cohesion: 0.24
-Nodes (15): dynamic, POST(), getSlackUserInfo(), normalizeSlackEventToIngestPayload(), SlackOutboundResponse, SlackUserInfo, verifySlackSignature(), decryptSecret() (+7 more)
+Cohesion: 0.27
+Nodes (13): dynamic, POST(), DiscordOutboundResponse, normalizeDiscordEventToIngestPayload(), verifyDiscordSignature(), decryptSecret(), encryptSecret(), getDerivedKey() (+5 more)
 
 ### Community 153 - "TASK 30 — Communication Hub — Discord & Upwork Channel Stubs"
 Cohesion: 0.11
 Nodes (18): Acceptance Criteria, API Requirements, Backend Requirements, Current State, Database Requirements, Dependencies, Files To Create, Files To Inspect (+10 more)
 
-### Community 154 - "run-load-test.ts"
-Cohesion: 0.26
-Nodes (12): ALL_ORGS, benchmarkDeadlineCronQuery(), benchmarkMultiTenantReads(), benchmarkMultiUserWrites(), benchmarkRateLimiter(), BenchmarkResult, calculatePercentiles(), getPostgresMetrics() (+4 more)
+### Community 154 - "emitter.ts"
+Cohesion: 0.14
+Nodes (17): dynamic, POST(), dynamic, POST(), EVENT_WEBHOOK_PATHS, signPayload(), verifyAutomationSignature(), AutomationEmitOptions (+9 more)
 
-### Community 155 - "getCurrentSessionContext"
-Cohesion: 0.07
-Nodes (61): createDeliverableAction(), createProjectAction(), createProjectTaskAction(), deleteDeliverableAction(), deleteProjectAction(), DeliverableRecord, fetchProjectActivityLogAction(), fetchProjectDeliverablesAction() (+53 more)
+### Community 155 - "ProjectsList.tsx"
+Cohesion: 0.11
+Nodes (33): deleteProjectAction(), ProjectRecord, updateProjectAction(), updateProjectStatusAction(), updateProjectTeamAssigneeAction(), DeliverProjectConfirmModal(), DeliverProjectConfirmModalProps, EditProjectModal() (+25 more)
 
-### Community 156 - "buildInsertQuery"
-Cohesion: 0.27
-Nodes (6): buildInsertQuery(), MessageRepository, ChannelType, CommunicationChannel, CommunicationMessage, MessageDirection
+### Community 156 - "revenue/page.tsx"
+Cohesion: 0.13
+Nodes (13): metadata, RevenueAnalyticsPage(), MonthlyTrendsChart(), MonthlyTrendsChartProps, RevenueBreakdownTable(), RevenueBreakdownTableProps, SortField, SortOrder (+5 more)
 
-### Community 157 - "plan-limits.ts"
-Cohesion: 0.12
-Nodes (23): AIFeatureSettingsData, DEFAULT_SETTINGS, FEATURE_METADATA, FeatureUsageStats, fetchAIFeatureSettingsAction(), updateAIFeatureToggleAction(), AISettingsPage(), dynamic (+15 more)
+### Community 157 - "ai/actions.ts"
+Cohesion: 0.23
+Nodes (13): AIFeatureSettingsData, DEFAULT_SETTINGS, FEATURE_METADATA, FeatureUsageStats, fetchAIFeatureSettingsAction(), updateAIFeatureToggleAction(), AISettingsPage(), dynamic (+5 more)
 
 ### Community 158 - "Innoventix Platform v2 — Multi-Tenant CRM, Project Management & AI SaaS"
 Cohesion: 0.20
 Nodes (10): 1. Clone & Setup Environment, 2. Launch Local Backend Services, 3. Install Dependencies & Start Dev Server, 📢 Automated Slack & Weekly Performance Reporting, 📚 Documentation & Infrastructure Guides, Innoventix Platform v2 — Multi-Tenant CRM, Project Management & AI SaaS, 🚀 Quick Start (Local Development), Sub-Menu Screenshot Directory (+2 more)
 
-### Community 159 - "Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)"
-Cohesion: 0.07
-Nodes (47): disconnectDiscordIntegrationAction(), DiscordChannelConfig, getDiscordIntegrationStatusAction(), saveDiscordIntegrationAction(), testDiscordConnectionAction(), DiscordClientPage(), Props, DiscordIntegrationPage() (+39 more)
-
-### Community 160 - "project-repo.ts"
-Cohesion: 0.13
-Nodes (10): buildUpdateQuery(), ProjectRepository, Deliverable, DeliverableStatus, Project, ProjectStatus, Task, TaskPriority (+2 more)
-
-### Community 161 - "email/route.ts"
+### Community 159 - "templates/actions.ts"
 Cohesion: 0.21
-Nodes (10): dynamic, POST(), RFC-822, EmailOutboundResponse, normalizeEmailEventToIngestPayload(), parseEmailAddressHeader(), checkContentLength(), DEFAULT_MAX_API_PAYLOAD_BYTES (+2 more)
+Nodes (12): createProjectTemplateAction(), deleteProjectTemplateAction(), ProjectTemplateRecord, saveProjectAsTemplateAction(), TemplateTaskRecord, dynamic, SettingsTemplatesPage(), NewTemplateModal() (+4 more)
+
+### Community 160 - "projectService"
+Cohesion: 0.10
+Nodes (7): ProjectRepository, projectService, Deliverable, Project, Task, TaskPriority, TaskStatus
+
+### Community 161 - "features/lead-scoring.ts"
+Cohesion: 0.15
+Nodes (14): LeadScoreFactor, parseLeadScoreResponse(), scoreLead(), ScoreLeadParams, ScoreLeadResult, getReplySuggestions(), GetReplySuggestionsParams, GetReplySuggestionsResult (+6 more)
+
+### Community 162 - "features/task-extraction.ts"
+Cohesion: 0.22
+Nodes (15): createExtractedTaskAction(), ExtractTasksActionResult, TaskCandidateAssignee, TaskCandidateProject, SuggestedTaskCard(), SuggestedTaskCardProps, TaskExtractionModal(), TaskExtractionModalProps (+7 more)
 
 ### Community 163 - "README.md"
 Cohesion: 0.25
@@ -1284,8 +1296,8 @@ Cohesion: 0.29
 Nodes (6): 1. Service Topology & Port Allocation, 2. Server Access & User Policy, 3. Pre-Installed Runtimes & Dependencies, 4. Maintenance & Health Verification Commands, Contabo VPS Server Inventory & Infrastructure Setup, Overview
 
 ### Community 166 - "reports/actions.ts"
-Cohesion: 0.12
-Nodes (22): completeOnboarding(), CompleteOnboardingInput, fetchWeeklyReportMetricsAction(), generateWeeklyReportAction(), sendWeeklyReportAction(), WeeklyReportData, dynamic, metadata (+14 more)
+Cohesion: 0.17
+Nodes (18): fetchWeeklyReportMetricsAction(), generateWeeklyReportAction(), sendWeeklyReportAction(), WeeklyReportData, dynamic, metadata, ReportsPage(), WeeklyReportButton() (+10 more)
 
 ### Community 167 - "Local Development Environment Setup Guide"
 Cohesion: 0.33
@@ -1300,92 +1312,92 @@ Cohesion: 0.14
 Nodes (13): 1. Executive Summary, 2.1.1 Semantic Text Tokens (Innoventix Color Protocol), 2.1 Colors & Surfaces, 2.2 Brand & Semantic Accents, 2.3 Typography Scale, 2.4 Spacing Scale (4px Base), 2.5 Radii Scale, 2.6 Shadows & Elevation (+5 more)
 
 ### Community 170 - "Component Library"
-Cohesion: 0.20
-Nodes (8): EmptyState(), EmptyStateProps, 1. Overview, 2. UI Primitives, 3. Composite Components, 4. Implementation Rules, 5. Related Files, Component Library
+Cohesion: 0.29
+Nodes (6): 1. Overview, 2. UI Primitives, 3. Composite Components, 4. Implementation Rules, 5. Related Files, Component Library
 
 ### Community 176 - "migrations.ts"
 Cohesion: 0.50
 Nodes (6): closePool(), getMigrationStatus(), initializeMigrationTable(), MigrationRecord, runMigrations(), main()
 
 ### Community 177 - "data.ts"
-Cohesion: 0.05
-Nodes (45): generateAnalyticsNarrativeAction(), AnalyticsPage(), metadata, metadata, PlanUsageAnalyticsPage(), metadata, AnalyticsHeader(), AnalyticsHeaderProps (+37 more)
+Cohesion: 0.09
+Nodes (25): AnalyticsPage(), metadata, metadata, PlanUsageAnalyticsPage(), AnalyticsNav(), DeadlinesAndOverdueCard(), DeadlinesAndOverdueCardProps, MonthlyCompletionRateCard() (+17 more)
 
 ### Community 178 - "TASK 29 — Communication Hub — Email Integration"
 Cohesion: 0.11
 Nodes (18): Acceptance Criteria, API Requirements, Backend Requirements, Current State, Database Requirements, Dependencies, Files To Create, Files To Inspect (+10 more)
 
 ### Community 179 - "BATCH A — Auth Core Hardening"
-Cohesion: 0.18
-Nodes (11): Acceptance Criteria, Acceptance Criteria, BATCH A — Auth Core Hardening, Files to Inspect, Files to Inspect, Implementation Steps, Implementation Steps, ITEM 1 — Fix Forgot Password Flow (+3 more)
+Cohesion: 0.14
+Nodes (14): Acceptance Criteria, Acceptance Criteria, Acceptance Criteria, BATCH A — Auth Core Hardening, Files to Inspect, Files to Inspect, Implementation Steps, Implementation Steps (+6 more)
 
 ### Community 180 - "current-plan.ts"
-Cohesion: 0.20
-Nodes (12): PlanConfig, PlanId, PLANS, CacheEntry, CurrentPlanResult, invalidatePlanCache(), planCache, setOrganizationPlan() (+4 more)
+Cohesion: 0.15
+Nodes (15): PlanConfig, PlanId, PLANS, { loadEnvConfig }, CacheEntry, CurrentPlanResult, getCurrentPlan(), invalidatePlanCache() (+7 more)
 
 ### Community 181 - "ingest.ts"
-Cohesion: 0.10
-Nodes (28): dynamic, POST(), dynamic, POST(), dynamic, POST(), dynamic, POST() (+20 more)
+Cohesion: 0.09
+Nodes (29): dynamic, POST(), dynamic, POST(), dynamic, POST(), RFC-822, InboundMessagePayload (+21 more)
 
 ### Community 182 - "pipeline.ts"
-Cohesion: 0.10
-Nodes (34): Board(), BoardProps, Column(), ColumnProps, SortableCard(), STAGE_PALETTE, CreateDealModalProps, DealCard() (+26 more)
+Cohesion: 0.07
+Nodes (52): LeadsPage(), metadata, Board(), BoardProps, Column(), ColumnProps, SortableCard(), STAGE_PALETTE (+44 more)
 
-### Community 183 - "security/rate-limit.ts"
-Cohesion: 0.14
-Nodes (26): POST(), POST(), POST(), POST(), POST(), POST(), POST(), createPasswordResetToken() (+18 more)
+### Community 183 - "User"
+Cohesion: 0.17
+Nodes (3): userService, User, UserRole
 
 ### Community 184 - "whatsapp/actions.ts"
-Cohesion: 0.33
-Nodes (10): disconnectWhatsAppIntegrationAction(), getWhatsAppIntegrationStatusAction(), saveWhatsAppIntegrationAction(), testWhatsAppConnectionAction(), WhatsAppChannelConfig, metadata, WhatsAppIntegrationPage(), Props (+2 more)
+Cohesion: 0.20
+Nodes (16): dynamic, POST(), disconnectWhatsAppIntegrationAction(), getWhatsAppIntegrationStatusAction(), saveWhatsAppIntegrationAction(), testWhatsAppConnectionAction(), WhatsAppChannelConfig, metadata (+8 more)
 
 ### Community 185 - "ThemeToggle"
 Cohesion: 0.18
 Nodes (13): ChangePasswordForm(), ChangePasswordPage(), LoginForm(), LoginPage(), ResetPasswordForm(), ResetPasswordPage(), HomePage(), SuperAdminLayout() (+5 more)
 
 ### Community 186 - "ClientCommunicationsView.tsx"
-Cohesion: 0.25
-Nodes (12): CommunicationItem, fetchClientCommunicationsAction(), logCommunicationAction(), ClientCommunicationsPage(), extractTasksFromThreadAction(), ClientCommunicationsView(), ClientCommunicationsViewProps, CommunicationThread() (+4 more)
+Cohesion: 0.13
+Nodes (22): CommunicationItem, fetchClientCommunicationsAction(), logCommunicationAction(), ClientCommunicationsPage(), ClientDetailPage(), extractTasksFromThreadAction(), AuditItem, ClientActivityLogTab() (+14 more)
 
-### Community 187 - "lucide-react"
-Cohesion: 0.08
-Nodes (56): assignMessageClientAction(), ChannelInfo, ClientSelectItem, createExtractedTaskAction(), CreateExtractedTaskParams, ExtractTasksActionParams, ExtractTasksActionResult, fetchInboxDataAction() (+48 more)
+### Community 187 - "inbox/actions.ts"
+Cohesion: 0.11
+Nodes (31): assignMessageClientAction(), ChannelInfo, CreateExtractedTaskParams, ExtractTasksActionParams, fetchInboxDataAction(), FetchInboxDataResult, generateReplySuggestionsAction(), GenerateReplySuggestionsParams (+23 more)
 
-### Community 188 - "capture_screens.js"
-Cohesion: 0.33
-Nodes (5): fetchPage(), fs, http, path, run()
+### Community 188 - "platform-settings.ts"
+Cohesion: 0.29
+Nodes (11): FeatureFlagsInput, OnboardingDefaultsInput, PlanUpdateInput, updateGlobalFeatureFlagsAction(), updateGlobalOnboardingDefaultsAction(), updatePlanLimitsAction(), dynamic, SuperAdminSettingsPage() (+3 more)
 
 ### Community 189 - "theme-provider.tsx"
-Cohesion: 0.32
-Nodes (7): applyThemeToDOM(), getSystemTheme(), ResolvedTheme, ThemeContext, ThemeContextValue, ThemeMode, ThemeProvider()
+Cohesion: 0.20
+Nodes (11): metadata, RootLayout(), applyThemeToDOM(), getSystemTheme(), ResolvedTheme, ThemeContext, ThemeContextValue, ThemeProvider() (+3 more)
 
 ### Community 190 - "ITEM 4 — Fix Sign-In Rate Limiting (No 429 on HTML Pages)"
 Cohesion: 0.33
 Nodes (6): Acceptance Criteria, Files to Inspect, Implementation Steps, ITEM 4 — Fix Sign-In Rate Limiting (No 429 on HTML Pages), Objective, Root Cause Analysis (confirm before fixing)
 
 ### Community 191 - "leads/actions.ts"
-Cohesion: 0.11
-Nodes (29): checkAIAccessAction(), ClientPipelinePage(), batchScoreLeadsAction(), createLeadAction(), PipelineStage, scoreLeadAction(), updateLeadStageAction(), VALID_PIPELINE_STAGES (+21 more)
+Cohesion: 0.08
+Nodes (39): batchScoreLeadsAction(), createLeadAction(), PipelineStage, scoreLeadAction(), updateLeadStageAction(), VALID_PIPELINE_STAGES, PlanUsageCardProps, DealCard() (+31 more)
 
 ### Community 200 - "Theme System"
-Cohesion: 0.20
-Nodes (9): 1.1 Token Layer (`app/globals.css`), 1.2 Anti-Flash Pre-Paint Script (SSR), 1.3 State Management & Hook (`components/providers/theme-provider.tsx`), 1. Architecture, 2. Resolution Order, 3. UI Controls & Topbar Toggle, 4. Email & External Surface Rules, 5. Related Files (+1 more)
+Cohesion: 0.22
+Nodes (8): 1.1 Token Layer (`app/globals.css`), 1.2 Anti-Flash Pre-Paint Script (SSR), 1. Architecture, 2. Resolution Order, 3. UI Controls & Topbar Toggle, 4. Email & External Surface Rules, 5. Related Files, Theme System
 
 ### Community 201 - "queryCache"
-Cohesion: 0.18
-Nodes (4): CacheEntry, CacheStats, queryCache, Step 6: Phase 4 — Database Access Layer Implementation
+Cohesion: 0.20
+Nodes (3): CacheEntry, CacheStats, queryCache
 
-### Community 203 - "ITEM 5 — Direct Password Creation During Invite"
-Cohesion: 0.40
-Nodes (5): Acceptance Criteria, Files to Inspect, Implementation Steps, ITEM 5 — Direct Password Creation During Invite, Objective
+### Community 203 - "server-actions-auth.test.ts"
+Cohesion: 0.32
+Nodes (10): disconnectEmailIntegrationAction(), EmailChannelConfig, getEmailIntegrationStatusAction(), saveEmailIntegrationAction(), testEmailConnectionAction(), EmailClientPage(), Props, EmailIntegrationPage() (+2 more)
 
 ### Community 206 - "(dashboard)/dashboard/page.tsx"
 Cohesion: 0.18
 Nodes (14): DashboardPage(), dynamic, DashboardTeamWidgets(), DashboardTeamWidgetsProps, RecentInvitation, RecentMember, ROLE_ICONS, QuickActions() (+6 more)
 
 ### Community 208 - "clients/actions.ts"
-Cohesion: 0.07
-Nodes (51): deleteClientAction(), switchClientToConnectedModeAction(), updateClientAction(), updateClientNotesAction(), ClientDetailPage(), ClientsPage(), metadata, createTagAction() (+43 more)
+Cohesion: 0.10
+Nodes (31): deleteClientAction(), switchClientToConnectedModeAction(), updateClientAction(), updateClientNotesAction(), ClientsPage(), metadata, ClientDetailHeader(), handleDelete() (+23 more)
 
 ### Community 209 - "generate_jwt.js"
 Cohesion: 0.29
@@ -1399,9 +1411,9 @@ Nodes (11): 0. ROLE & OBJECTIVE, 1. GLOBAL RULES (APPLY TO EVERY BATCH), 2. PROJ
 Cohesion: 0.18
 Nodes (11): Colors, Components, Design System, Glass, Motion, Radii, Related Files, Shadows (+3 more)
 
-### Community 213 - "templates.ts"
-Cohesion: 0.47
-Nodes (10): buildInviteEmail(), EmailTemplateResult, escapeHtml(), getBaseUrl(), renderDomainCodeEmail(), renderInviteAcceptedEmail(), renderInviteEmail(), renderRoleChangedEmail() (+2 more)
+### Community 213 - "isAIAccessible"
+Cohesion: 0.26
+Nodes (9): checkAIAccessAction(), generateAnalyticsNarrativeAction(), ClientPipelinePage(), AnalyticsHeader(), AnalyticsHeaderProps, isAIAccessible(), generateWeeklyReportNarrative(), AnalyticsDateRange (+1 more)
 
 ### Community 214 - "ITEM 8 — Role-Based Access Consistency"
 Cohesion: 0.40
@@ -1411,29 +1423,29 @@ Nodes (5): Acceptance Criteria, Files to Inspect, Implementation Steps, ITEM 8 �
 Cohesion: 0.20
 Nodes (10): scripts, build, dev, lint, start, test, test:e2e, test:e2e:full (+2 more)
 
-### Community 217 - "upwork/actions.ts"
-Cohesion: 0.33
-Nodes (10): disconnectUpworkIntegrationAction(), getUpworkIntegrationStatusAction(), saveUpworkIntegrationAction(), testUpworkConnectionAction(), UpworkChannelConfig, metadata, UpworkIntegrationPage(), Props (+2 more)
+### Community 217 - "Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)"
+Cohesion: 0.32
+Nodes (11): disconnectUpworkIntegrationAction(), getUpworkIntegrationStatusAction(), saveUpworkIntegrationAction(), testUpworkConnectionAction(), UpworkChannelConfig, metadata, UpworkIntegrationPage(), Props (+3 more)
 
-### Community 218 - "createClientAction"
-Cohesion: 0.15
-Nodes (13): createClientAction(), metadata, NewClientPage(), ClientForm(), ClientFormProps, ClientFormValues, 02: Tenant isolation & mock data cleanup, CommunicationMode (+5 more)
+### Community 218 - "tags/actions.ts"
+Cohesion: 0.12
+Nodes (23): metadata, NewClientPage(), createTagAction(), deleteTagAction(), fetchTagsAction(), updateClientTagsAction(), TAG_COLORS, TagRecord (+15 more)
 
 ### Community 219 - "team/page.tsx"
-Cohesion: 0.25
-Nodes (7): dynamic, TeamSettingsPage(), EmailVerificationBanner(), EmailVerificationBannerProps, PlanUsageCard(), PlanUsageCardProps, PlanUsageData
+Cohesion: 0.23
+Nodes (8): dynamic, TeamSettingsPage(), EmailVerificationBanner(), EmailVerificationBannerProps, PlanUsageCard(), PlanUsageCardProps, PlanUsageData, MemberItem
 
 ### Community 220 - "ITEM 15 — Password Strength Meter (Signup + Reset + Invite)"
 Cohesion: 0.40
 Nodes (5): Acceptance Criteria, Files to Create, Implementation Steps, ITEM 15 — Password Strength Meter (Signup + Reset + Invite), Objective
 
-### Community 221 - "app/layout.tsx"
-Cohesion: 0.27
-Nodes (7): metadata, RootLayout(), ImpersonationBanner(), ImpersonationBannerProps, SupportBannerWrapper(), getImpersonationContext(), geist
+### Community 221 - "impersonate/route.ts"
+Cohesion: 0.23
+Nodes (11): DELETE(), POST(), ImpersonationBanner(), ImpersonationBannerProps, SupportBannerWrapper(), assertNotImpersonating(), clearImpersonationCookie(), getImpersonationContext() (+3 more)
 
 ### Community 222 - "BATCH E — Foundations & Polish"
 Cohesion: 0.20
-Nodes (10): 5. FINAL ACCEPTANCE CHECKLIST, 6. BATCH EXECUTION SCRIPT (FOR THE USER), 7. REPORTING FORMAT (END OF EACH BATCH), 8. FINAL NOTES, Acceptance Criteria, BATCH E — Foundations & Polish, Files to Create, Implementation Steps (+2 more)
+Nodes (10): 4. TESTING REQUIREMENTS (ALL BATCHES), 5. FINAL ACCEPTANCE CHECKLIST, 6. BATCH EXECUTION SCRIPT (FOR THE USER), 7. REPORTING FORMAT (END OF EACH BATCH), 8. FINAL NOTES, BATCH E — Foundations & Polish, E2E Tests (`e2e/auth/*.spec.ts`), Integration Tests (`tests/integration/*.test.ts`) (+2 more)
 
 ### Community 223 - "Migration Runner Partial-Failure Risk Analysis"
 Cohesion: 0.40
@@ -1444,8 +1456,8 @@ Cohesion: 0.26
 Nodes (10): Critical Decisions & Context, validateAndSanitize(), ValidationResult, DANGEROUS_PROTOCOLS, escapeHtml(), HTML_ESCAPE_MAP, sanitizeObject(), sanitizeString() (+2 more)
 
 ### Community 237 - "2026-10-14 — Correction Entry"
-Cohesion: 0.22
-Nodes (8): 2026-10-14 — Correction Entry, Migration Execution & Audit Log, 📌 Migration Roadmap Summary, Pre-Push Deep Class Audit & Legacy Token Clean-up, Step: UI-1B Sub-Batch 7B — Client Creation Form, Tag Manager, and Modals (Bundled 6 Files), Step: UI-1B Sub-Batch 7C — Client Detail & Tab Components (8 Files), Step: UI-1B Sub-Batch 8B — Settings Billing, AI Features, and Org Audit Log (6 Files), UI Foundational Bug Fix — Registered Background, Accent & Muted Tokens in Tailwind Config & Globals
+Cohesion: 0.20
+Nodes (9): 2026-10-14 — Correction Entry, Migration Execution & Audit Log, 📌 Migration Roadmap Summary, Pre-Push Deep Class Audit & Legacy Token Clean-up, Step: UI-1B Sub-Batch 7B — Client Creation Form, Tag Manager, and Modals (Bundled 6 Files), Step: UI-1B Sub-Batch 7C — Client Detail & Tab Components (8 Files), Step: UI-1B Sub-Batch 8B — Settings Billing, AI Features, and Org Audit Log (6 Files), Step: UI-1B Sub-Batch 8C1 — Settings Integrations: Slack, Discord, and WhatsApp Client Views (6 Files) (+1 more)
 
 ### Community 238 - "ITEM 14 — OAuth Foundation (Google + GitHub)"
 Cohesion: 0.40
@@ -1453,15 +1465,15 @@ Nodes (5): Acceptance Criteria, Files to Create, Implementation Steps, ITEM 14 �
 
 ### Community 239 - "ITEM 3 — Signup Page Server-Side Validation"
 Cohesion: 0.20
-Nodes (10): Acceptance Criteria, Acceptance Criteria, BATCH B — Invitations & Signup, Files to Inspect, Implementation Steps, Implementation Steps, ITEM 3 — Signup Page Server-Side Validation, ITEM 6 — Invite Acceptance Flow (+2 more)
+Nodes (10): Acceptance Criteria, Acceptance Criteria, BATCH B — Invitations & Signup, Files to Inspect, Files to Inspect, Implementation Steps, ITEM 3 — Signup Page Server-Side Validation, ITEM 5 — Direct Password Creation During Invite (+2 more)
 
 ### Community 240 - "ADR NNN: [Title]"
 Cohesion: 0.20
 Nodes (10): ADR NNN: [Title], Alternatives Considered, Consequences, Context, Decision, 📌 How to Use This Protocol, Step 1 — Save the file, Step 2 — Bootstrap the MD files (+2 more)
 
-### Community 241 - "billing/page.tsx"
-Cohesion: 0.16
-Nodes (13): createCheckoutSession(), createCustomerPortalSession(), BillingSettingsPage(), dynamic, metadata, PageProps, BillingSettingsClient(), BillingSettingsClientProps (+5 more)
+### Community 241 - "logAuditEvent"
+Cohesion: 0.11
+Nodes (21): createCheckoutSession(), createCustomerPortalSession(), dynamic, POST(), createClientAction(), createProjectAction(), BillingSettingsPage(), dynamic (+13 more)
 
 ### Community 242 - "ADR 001: Migration to Self-Hosted PostgreSQL and Custom JWT Auth"
 Cohesion: 0.25
@@ -1479,25 +1491,29 @@ Nodes (7): 1. Relational Database Schema Overview, 2. Multi-Tenancy Architecture
 Cohesion: 0.25
 Nodes (7): 1. Role Hierarchy, 2. Capability Matrix, 3. Session Lifecycle & Token Architecture, 4. Super Admin Impersonation, 5. Invitation Direct Temporary Password & First-Login Gate, 6. Related Files, Auth & Role-Based Access Control (RBAC)
 
-### Community 246 - "activity/route.ts"
-Cohesion: 0.31
-Nodes (6): GET(), RouteContext, calculateDealDiff(), listActivity(), recordActivity(), DealActivityType
+### Community 246 - "discord/actions.ts"
+Cohesion: 0.33
+Nodes (10): disconnectDiscordIntegrationAction(), DiscordChannelConfig, getDiscordIntegrationStatusAction(), saveDiscordIntegrationAction(), testDiscordConnectionAction(), DiscordClientPage(), Props, DiscordIntegrationPage() (+2 more)
 
-### Community 247 - "Diagnosis: Sign-In HTTP 429 Error"
-Cohesion: 0.50
-Nodes (3): Detailed Findings, Diagnosis: Sign-In HTTP 429 Error, Summary Table
+### Community 247 - "slack/actions.ts"
+Cohesion: 0.33
+Nodes (10): disconnectSlackIntegrationAction(), getSlackIntegrationStatusAction(), saveSlackIntegrationAction(), SlackChannelConfig, testSlackConnectionAction(), metadata, SlackIntegrationPage(), Props (+2 more)
 
 ### Community 248 - "Deployment & Operations"
 Cohesion: 0.29
 Nodes (6): 1. Environments & Endpoints, 2. Environment Variables Specification, 3. Dual-Repository & Rollout Workflow, 4. Rollback Runbook, 5. Related Files, Deployment & Operations
 
-### Community 249 - "text.tsx"
-Cohesion: 0.33
-Nodes (5): defaultElementMap, Text, TextProps, TextVariant, variantStyles
+### Community 249 - "react"
+Cohesion: 0.13
+Nodes (12): ClientLoginForm(), ClientLoginPage(), AcceptInviteButtonProps, PRESET_REASONS, WonLostDialogProps, StartImpersonationButtonProps, defaultElementMap, Text (+4 more)
 
 ### Community 250 - "Testing Strategy"
 Cohesion: 0.33
 Nodes (5): 1. Testing Pyramid, 2. Coverage & Quality Targets, 3. Mandatory Testing Rules, 4. Related Files, Testing Strategy
+
+### Community 251 - "[token]/page.tsx"
+Cohesion: 0.22
+Nodes (10): AcceptInviteButton(), InviteAcceptancePage(), PageProps, Acceptance Criteria, Files to Inspect, Implementation Steps, ITEM 6 — Invite Acceptance Flow, Objective (+2 more)
 
 ### Community 252 - "Coding Standards"
 Cohesion: 0.33
@@ -1515,25 +1531,25 @@ Nodes (6): CI/CD, Deployment, Env Vars, Environments, Related Files, Rollback
 Cohesion: 0.33
 Nodes (6): Constraints, Key Decisions, Project Context, Purpose, Related Files, Tech Stack
 
-### Community 256 - "ITEM 9 — Super Admin Impersonation (Read + Write with Audit)"
-Cohesion: 0.40
-Nodes (5): Acceptance Criteria, Files to Inspect, Implementation Steps, ITEM 9 — Super Admin Impersonation (Read + Write with Audit), Objective
+### Community 256 - "super-admin/dashboard/page.tsx"
+Cohesion: 0.27
+Nodes (8): dynamic, SuperAdminDashboardPage(), PlatformMetrics, PlatformMetricsCards(), PlatformMetricsCardsProps, RecentActivityTables(), RecentActivityTablesProps, RecentOrganization
 
 ### Community 257 - "Surface Hierarchy"
 Cohesion: 0.40
 Nodes (4): 1. Elevation & Material Scale, 2. Non-Negotiable Surface Rules, 3. Related Files, Surface Hierarchy
 
-### Community 259 - "Coding Standards"
-Cohesion: 0.29
-Nodes (5): 1. Naming Conventions, 2. Directory & Architecture Structure, 4. Forbidden Anti-Patterns, 5. Related Files, Coding Standards
+### Community 259 - "Audit: Current Team Invite Flow and Dashboard Architecture"
+Cohesion: 0.22
+Nodes (9): 1. Invite Entry Points in UI, 2. Existing Invitation API Routes & Server Actions, 3. Email Infrastructure & Providers, 4. Dashboard Data Sources & Metric Fidelity, 5. Sidebar Navigation & Target Route Audit, 6. Role & Permission Checks on Team Screens, 7. Master Deficiency & Action Matrix, Audit: Current Team Invite Flow and Dashboard Architecture (+1 more)
 
 ### Community 260 - "ITEM 11 — Logout Hardening"
 Cohesion: 0.18
 Nodes (11): Acceptance Criteria, Acceptance Criteria, BATCH D — Logout & Verification, Files to Inspect, Files to Inspect, Implementation Steps, Implementation Steps, ITEM 11 — Logout Hardening (+3 more)
 
-### Community 261 - "status.ts"
-Cohesion: 0.47
-Nodes (7): canAccept(), canResend(), canRevoke(), computeStatus(), DEFAULT_INVITATION_EXPIRY_DAYS, getInvitationExpiry(), StatusEvaluationInvite
+### Community 261 - "organization/page.tsx"
+Cohesion: 0.31
+Nodes (7): dynamic, OrganizationSettingsPage(), COMMON_TIMEZONES, OrgData, OrgProfileForm(), OrgProfileFormProps, updateOrganizationProfile()
 
 ### Community 262 - "INNOVENTIX-COLOR-TYPOGRAPHY-PROTOCOL.md"
 Cohesion: 0.40
@@ -1563,21 +1579,21 @@ Nodes (5): Coverage Targets, Pyramid, Related Files, Rules, Testing Strategy
 Cohesion: 0.40
 Nodes (5): Durations, Easings, Motion Guidelines, Related Files, Rules
 
-### Community 269 - "OrganizationService"
-Cohesion: 0.17
-Nodes (3): OrganizationService, MembershipRole, OrganizationMember
-
-### Community 271 - "Step 20: Innoventix Invite System & Seat Limits — Prompts 16 to 26"
-Cohesion: 0.19
-Nodes (5): DomainVerificationRepository, EmailVerificationRepository, DomainVerification, EmailVerification, Step 20: Innoventix Invite System & Seat Limits — Prompts 16 to 26
+### Community 271 - "ITEM 10 — Session Timeout & Refresh Token Rotation"
+Cohesion: 0.40
+Nodes (5): Acceptance Criteria, Files to Inspect, Implementation Steps, ITEM 10 — Session Timeout & Refresh Token Rotation, Objective
 
 ### Community 272 - "ADR-002: Redirect stubs for /settings and /settings/profile"
 Cohesion: 0.33
 Nodes (5): ADR-002: Redirect stubs for /settings and /settings/profile, Consequences, Context, Decision, Status
 
 ### Community 273 - "Project Context"
-Cohesion: 0.33
-Nodes (5): 1. Purpose, 2. Tech Stack, 4. Key Architectural Decisions, 5. Related Files, Project Context
+Cohesion: 0.29
+Nodes (6): 1. Purpose, 2. Tech Stack, 3. Core Architectural Constraints, 4. Key Architectural Decisions, 5. Related Files, Project Context
+
+### Community 274 - "ITEM 13 — MFA / TOTP Foundation (Optional but Recommended)"
+Cohesion: 0.40
+Nodes (5): Acceptance Criteria, Files to Create, Implementation Steps, ITEM 13 — MFA / TOTP Foundation (Optional but Recommended), Objective
 
 ### Community 275 - "TASK XX — [NAME]"
 Cohesion: 0.11
@@ -1587,10 +1603,6 @@ Nodes (19): Acceptance Criteria, API Requirements, Backend Requirements, Current
 Cohesion: 0.11
 Nodes (19): Acceptance Criteria, API Requirements, Backend Requirements, Current State, Database Requirements, Dependencies, Files To Create, Files To Inspect (+11 more)
 
-### Community 277 - "4. TESTING REQUIREMENTS (ALL BATCHES)"
-Cohesion: 0.40
-Nodes (5): 4. TESTING REQUIREMENTS (ALL BATCHES), E2E Tests (`e2e/auth/*.spec.ts`), Integration Tests (`tests/integration/*.test.ts`), Performance & Security Tests, Unit Tests (`tests/auth/*.test.ts`)
-
 ### Community 279 - "7. EACH MD FILE MUST BE SELF-CONTAINED"
 Cohesion: 0.11
 Nodes (18): 7. EACH MD FILE MUST BE SELF-CONTAINED, Acceptance criteria, API requirements, Backend requirements, Context, Database requirements, Dependencies, Files to create (+10 more)
@@ -1599,9 +1611,9 @@ Nodes (18): 7. EACH MD FILE MUST BE SELF-CONTAINED, Acceptance criteria, API req
 Cohesion: 0.11
 Nodes (18): 7. EACH MD FILE MUST BE SELF-CONTAINED, Acceptance criteria, API requirements, Backend requirements, Context, Database requirements, Dependencies, Files to create (+10 more)
 
-### Community 281 - "onboarding/page.tsx"
-Cohesion: 0.19
-Nodes (11): OnboardingPage(), ChoosePlanStep(), ChoosePlanStepProps, PLANS, InviteTeamStep(), InviteTeamStepProps, OnboardingCompleteStep(), OnboardingCompleteStepProps (+3 more)
+### Community 281 - "lucide-react"
+Cohesion: 0.12
+Nodes (15): completeOnboarding(), CompleteOnboardingInput, settingsTabs, OnboardingPage(), ChoosePlanStep(), ChoosePlanStepProps, PLANS, InviteTeamStep() (+7 more)
 
 ### Community 282 - "InviteMemberDialog.tsx"
 Cohesion: 0.31
@@ -1655,9 +1667,9 @@ Nodes (8): 50. FINAL PROJECT AUDIT, Agent Continuity, Code, Deployment, Document
 Cohesion: 0.08
 Nodes (23): ALLOWED_MIME_TYPES, CreateDeliverableSchema, CreateProjectSchema, CreateTaskSchema, CurrencySchema, DeliverableApprovalSchema, DeliverableRevisionSchema, EmailSchema (+15 more)
 
-### Community 304 - "client-repo.ts"
-Cohesion: 0.12
-Nodes (10): buildDeleteQuery(), buildSelectQuery(), PaginationOptions, QueryResultWithCount, WhereCondition, ClientRepository, Client, Lead (+2 more)
+### Community 304 - "project-repo.ts"
+Cohesion: 0.10
+Nodes (20): buildDeleteQuery(), buildInsertQuery(), buildSelectQuery(), buildUpdateQuery(), PaginationOptions, QueryResultWithCount, WhereCondition, clientRepo (+12 more)
 
 ### Community 307 - "Subscription Plans & Feature Gating Specification"
 Cohesion: 0.33
@@ -1667,9 +1679,9 @@ Nodes (5): 1. Plan Tiers & Feature Matrix, 2. Feature Limits JSON Schema (`subsc
 Cohesion: 0.18
 Nodes (10): 🎯 Active Phase: Universal Master Prompt v1.1 & Innoventix Color Protocol Active, Agent State — Project Build Continuity Log, Completed, Completed, Completed Prompts (ALL 56 PROMPTS COMPLETE):, Corrected Progress Tally (verified against git log), Deferred / Stubbed Items, Live Production & End-to-End Testing Matrix (100% Complete) (+2 more)
 
-### Community 318 - "query"
-Cohesion: 0.04
-Nodes (82): UpdateBillingInput, UpdateNotificationsInput, updatePortalBillingAction(), updatePortalNotificationsAction(), updatePortalProfileAction(), UpdateProfileInput, dynamic, POST() (+74 more)
+### Community 318 - "auth.ts"
+Cohesion: 0.07
+Nodes (45): UpdateBillingInput, UpdateNotificationsInput, updatePortalBillingAction(), updatePortalNotificationsAction(), updatePortalProfileAction(), UpdateProfileInput, metadata, PortalDashboardPage() (+37 more)
 
 ### Community 319 - "39. IF REQUIREMENTS ARE AMBIGUOUS"
 Cohesion: 0.50
@@ -1681,35 +1693,35 @@ Nodes (4): 39. IF REQUIREMENTS ARE AMBIGUOUS, Confirmed, Needs clarification, Re
 
 ### Community 334 - "📝 Execution History"
 Cohesion: 0.04
-Nodes (49): [2026-10-12 21:58] Security Audit Review: Auth & Billing Hardening, [2026-10-12 22:05] Security Audit Review: Strict Isolation & Lifetime Decoupling, [2026-10-12 22:15] Security Audit Review: Refresh Fallback Removal, Script Decoupling & DB Integration Tests, [2026-10-13 01:00] Dashboard Crash Fix: Register Embedded Migrations 0035-0044 & Defensive Query Boundaries, [2026-10-13 01:10] Sign-In Fix Pack Prompts 06–09: Honest Landing Page, 301 Canonical Host, E2E Browser Testing & Deploy Gate, [2026-10-13 01:25] Sign-In Fix Pack Refinement: Canonical Redirect Reverse Proxy Port Stripping & E2E Env Loading, 📝 Execution History, Phase 6: Deployment & Operations — Complete (+41 more)
+Nodes (54): register(), [2026-10-12 21:58] Security Audit Review: Auth & Billing Hardening, [2026-10-12 22:05] Security Audit Review: Strict Isolation & Lifetime Decoupling, [2026-10-12 22:15] Security Audit Review: Refresh Fallback Removal, Script Decoupling & DB Integration Tests, [2026-10-12 23:36] Security Audit Review: 30-Minute JWT Expiry, Cookie Decoupling & Test Production Guards, [2026-10-13 01:00] Dashboard Crash Fix: Register Embedded Migrations 0035-0044 & Defensive Query Boundaries, [2026-10-13 01:10] Sign-In Fix Pack Prompts 06–09: Honest Landing Page, 301 Canonical Host, E2E Browser Testing & Deploy Gate, [2026-10-13 01:25] Sign-In Fix Pack Refinement: Canonical Redirect Reverse Proxy Port Stripping & E2E Env Loading (+46 more)
 
 ### Community 336 - "ai/client.ts"
-Cohesion: 0.07
-Nodes (49): getAIUsageAction(), testAICompletionAction(), generateAICompletion(), getAIProviderConfig(), resolveAIProvider(), LeadScoreFactor, parseLeadScoreResponse(), ScoreLeadParams (+41 more)
+Cohesion: 0.18
+Nodes (21): getAIUsageAction(), testAICompletionAction(), generateAICompletion(), getAIProviderConfig(), resolveAIProvider(), buildTestPrompt(), executeAnthropicCompletion(), executeGeminiCompletion() (+13 more)
 
-### Community 337 - "emitter.ts"
-Cohesion: 0.11
-Nodes (24): AlertSummary, dynamic, GET(), POST(), processDeadlineChecks(), timingSafeCheck(), dynamic, GET() (+16 more)
+### Community 337 - "weekly-summary/route.ts"
+Cohesion: 0.21
+Nodes (13): AlertSummary, dynamic, GET(), POST(), processDeadlineChecks(), timingSafeCheck(), dynamic, GET() (+5 more)
 
-### Community 338 - "database-layer.test.ts"
-Cohesion: 0.16
-Nodes (11): getPool(), DatabaseHealth, DatabaseMonitor, dbMonitor, PoolStats, QueryMetrics, executeTransaction(), IsolationLevel (+3 more)
+### Community 338 - "getPool"
+Cohesion: 0.14
+Nodes (12): getPool(), initializePool(), DatabaseHealth, DatabaseMonitor, dbMonitor, PoolStats, QueryMetrics, executeTransaction() (+4 more)
 
-### Community 339 - "ref_path"
-Cohesion: 0.04
-Nodes (36): envLocalPath, register(), initializePool(), [2026-10-13 12:00] Release Gate Fix Pack: Relative /team Redirect, Allowed Hosts Guard, Boot-time Instrumentation Check & Real-DB Verification, { chromium }, path, { chromium }, path (+28 more)
+### Community 339 - "ref_fs"
+Cohesion: 0.05
+Nodes (20): fetchPage(), fs, http, path, run(), runLiveCapture(), SCREENSHOT_DIR, snap() (+12 more)
 
 ### Community 340 - "Supabase → PostgreSQL Migration Guide"
 Cohesion: 0.07
 Nodes (28): 📚 Additional Resources, Complete 60-File Documentation Package, ⚠️ Critical Success Factors, 📊 Expected Outcomes, File Breakdown, 💾 File Contents Preview, 🚀 How to Use This Guide, 🔄 Implementation with Antigravity/DeepSeek (+20 more)
 
-### Community 343 - "session.ts"
-Cohesion: 0.06
-Nodes (47): setActiveOrgAction(), POST(), POST(), GET(), DELETE(), POST(), GET(), POST() (+39 more)
+### Community 343 - "Topbar.tsx"
+Cohesion: 0.09
+Nodes (23): DashboardLayout(), dynamic, createInAppNotificationAction(), fetchInAppNotificationsAction(), InAppNotificationRecord, markAllNotificationsAsReadAction(), markNotificationAsReadAction(), ProjectHealthStatus (+15 more)
 
 ### Community 344 - "requireSuperAdmin"
-Cohesion: 0.08
-Nodes (39): FeatureFlagsInput, OnboardingDefaultsInput, PlanUpdateInput, updateGlobalFeatureFlagsAction(), updateGlobalOnboardingDefaultsAction(), updatePlanLimitsAction(), overrideOrganizationPlan(), toggleSuspendOrganization() (+31 more)
+Cohesion: 0.16
+Nodes (19): overrideOrganizationPlan(), toggleSuspendOrganization(), dynamic, OrgDetailPageProps, SuperAdminOrgDetailPage(), dynamic, SuperAdminOrganizationsPage(), OrgListFilter() (+11 more)
 
 ### Community 345 - "combined_migrations.sql"
 Cohesion: 0.10
@@ -1725,15 +1737,15 @@ Nodes (23): Day 13: Unit Tests, Day 14: Integration Tests, Day 15: Load Testing,
 
 ### Community 354 - "1. Hardcoded Sample Values Search Results"
 Cohesion: 0.09
-Nodes (21): 1. Hardcoded Sample Values Search Results, 1. "Invite Member" Route Analysis, 1. Route Handlers (`app/api`), 2. Analytics Quotas: Computed vs Hardcoded Breakdown, 2. Git Commit Hash Comparison, 3. Client Card "Connected" Badge Breakdown, 3. Server Components & Pages Querying Database Directly, `Connected` (+13 more)
+Nodes (22): 1. Hardcoded Sample Values Search Results, 1. "Invite Member" Route Analysis, 1. Route Handlers (`app/api`), 2. Analytics Quotas: Computed vs Hardcoded Breakdown, 2. Git Commit Hash Comparison, 3. Client Card "Connected" Badge Breakdown, 3. Server Components & Pages Querying Database Directly, `Connected` (+14 more)
 
 ### Community 356 - "ADR: Supabase → Direct PostgreSQL Migration"
 Cohesion: 0.09
 Nodes (22): ADR: Supabase → Direct PostgreSQL Migration, ✅ Advantages, Alternative Approaches Considered, Approval & Signoff, Decision, Implementation Roadmap, Implications, Layer 1: Authentication System (Days 1-2) (+14 more)
 
-### Community 360 - "react"
-Cohesion: 0.14
-Nodes (23): ClientLoginForm(), ClientLoginPage(), createGlobalTaskAction(), deleteGlobalTaskAction(), fetchAllTasksAction(), fetchTeamWorkloadAction(), GlobalTaskRecord, TeamWorkloadRecord (+15 more)
+### Community 360 - "tasks/actions.ts"
+Cohesion: 0.19
+Nodes (18): createGlobalTaskAction(), deleteGlobalTaskAction(), fetchAllTasksAction(), fetchTeamWorkloadAction(), GlobalTaskRecord, TeamWorkloadRecord, toggleGlobalTaskStatusAction(), updateGlobalTaskAction() (+10 more)
 
 ### Community 361 - "n8n Workflow Activation & Deployment Guide — Contabo VPS"
 Cohesion: 0.10
@@ -1755,17 +1767,17 @@ Nodes (15): idx_refresh_tokens_expires_at, idx_refresh_tokens_token_hash, idx_re
 Cohesion: 0.11
 Nodes (18): 1. Prepare Environment on Server, 2. Build and Deploy, 3. Setup Backups, 4. Setup Monitoring, 5. Verify Deployment, Access Monitoring, Application won't start, Database connection issues (+10 more)
 
-### Community 370 - "NotFoundError"
-Cohesion: 0.05
-Nodes (24): 3. Approved Engineering Patterns, auditRepo, messageRepo, AutomationEventPayload, automationService, billingService, PLAN_LIMITS_MAP, PlanLimits (+16 more)
+### Community 370 - "queryOne"
+Cohesion: 0.09
+Nodes (17): 3. Approved Engineering Patterns, queryOne(), auditRepo, AutomationEventPayload, billingService, PLAN_LIMITS_MAP, PlanLimits, OrganizationService (+9 more)
 
-### Community 371 - "test_full_signup.js"
-Cohesion: 0.08
-Nodes (21): adminClient, { createClient }, env, envFile, fs, path, adminClient, anonClient (+13 more)
+### Community 371 - "run-load-test.ts"
+Cohesion: 0.06
+Nodes (33): adminClient, { createClient }, env, envFile, fs, path, adminClient, anonClient (+25 more)
 
 ### Community 373 - "TeamMemberList.tsx"
 Cohesion: 0.26
-Nodes (10): InviteMemberDialog(), PendingInvitation, PendingInvitationsList(), PendingInvitationsListProps, MemberItem, ROLE_LABELS, TeamMemberList(), TeamMemberListProps (+2 more)
+Nodes (11): InviteMemberDialog(), PendingInvitation, PendingInvitationsList(), PendingInvitationsListProps, ROLE_LABELS, TeamMemberList(), TeamMemberListProps, 1. Route Audit Matrix (+3 more)
 
 ### Community 375 - "05: Fixes for Antigravity (run before any other email or invite work)"
 Cohesion: 0.20
@@ -1791,9 +1803,9 @@ Nodes (16): 1. Overview & Architecture, 2. HTTP Request Specification, 3. The 4 
 Cohesion: 0.12
 Nodes (16): 19: Auth System Overview, 20: JWT Implementation, 21: Password Hashing, 22: Session Management, 23: Auth Guards/Middleware, 24: Superadmin Impersonation, 25: Magic Link Authentication, 26: Multi-Tenancy Security (+8 more)
 
-### Community 386 - "run-e2e-full-system.ts"
-Cohesion: 0.25
-Nodes (12): dynamic, POST(), buildSlackSystemTestBlocks(), dispatchSystemReport(), E2ESystemReport, sendSlackWebhook(), SlackBlock, SlackMessagePayload (+4 more)
+### Community 386 - "generate_dump.js"
+Cohesion: 0.08
+Nodes (30): dynamic, POST(), buildSlackSystemTestBlocks(), dispatchSystemReport(), E2ESystemReport, sendSlackWebhook(), SlackBlock, SlackMessagePayload (+22 more)
 
 ### Community 389 - "Innoventix Platform v2 — Production Deployment & Operations Runbook"
 Cohesion: 0.12
@@ -1879,10 +1891,6 @@ Nodes (9): 1. Final Verification (1 hour before), 2. Deployment (Production Cuto
 Cohesion: 0.20
 Nodes (9): ADR 002: Communication Hub Architecture & Unified Inbox Data Layer, Architecture & Data Flow, Consequences, Context, Decision Drivers, Negative, Positive, Schema Contract (`communication_messages`) (+1 more)
 
-### Community 432 - "generate_dump.js"
-Cohesion: 0.27
-Nodes (9): fs, generateDump(), getAllFiles(), getLevel(), IGNORED_PATHS, isIgnored(), outputFile, path (+1 more)
-
 ### Community 433 - "Transactional Email Setup & Configuration (Mailcow SMTP)"
 Cohesion: 0.22
 Nodes (8): 1. Environment Variables Reference, 1. SPF (Sender Policy Framework), 2. DKIM (DomainKeys Identified Mail), 2. Environment Behavior & Safety Rules, 3. DMARC, 3. Sender Name & From Address Rule, 4. DNS Configuration: SPF, DKIM, and DMARC, Transactional Email Setup & Configuration (Mailcow SMTP)
@@ -1891,9 +1899,9 @@ Nodes (8): 1. Environment Variables Reference, 1. SPF (Sender Policy Framework),
 Cohesion: 0.22
 Nodes (8): 1. Current Architecture Overview, 2. Target Trello-Style Pipeline Architecture, 3. Files to Create / Modify, 4. Conflict & Risk Mitigation, A. Data Layer (`lib/types/pipeline.ts`, `lib/db/repositories/`), B. Business Services & API Routes (`lib/services/`, `app/api/pipeline/`), C. UI & Drag-and-Drop Layer (`components/pipeline/`, `app/leads/`, `app/pipelines/`), Innoventix Sales Pipeline — Architectural Plan & Audit
 
-### Community 437 - "invitation-service.ts"
-Cohesion: 0.08
-Nodes (51): POST(), GET(), AcceptInviteButton(), AcceptInviteButtonProps, InviteAcceptancePage(), PageProps, RFC-5321, Files to Inspect (+43 more)
+### Community 437 - "db/index.ts"
+Cohesion: 0.19
+Nodes (16): PlanUsageResult, transaction(), emailVerificationRepo, invitationRepo, memberRepo, orgRepo, userRepo, generateToken() (+8 more)
 
 ### Community 438 - "rls-isolation.test.ts"
 Cohesion: 0.25
@@ -1912,8 +1920,8 @@ Cohesion: 0.25
 Nodes (7): 1. Required, Set in Coolify Application Settings, 2. Required, Generated Per Environment (Secrets), 3. Optional Services (Set when enabling third-party integrations), 4. Do NOT Set in Production (Script / Dev-Only), 📋 Comprehensive Variable Audit, 🚀 Coolify Configuration Matrix, Coolify Environment Variable Reference
 
 ### Community 442 - "@playwright/test"
-Cohesion: 0.17
-Nodes (3): { loadEnvConfig }, { loadEnvConfig }, @playwright/test
+Cohesion: 0.12
+Nodes (5): { loadEnvConfig }, { loadEnvConfig }, envLocalPath, @playwright/test, projectDir
 
 ### Community 444 - "01: Test invitation emails now, using Resend SMTP (temporary)"
 Cohesion: 0.22
@@ -2241,22 +2249,22 @@ Nodes (3): 1. Prerequisites Checklist, 2. Verification Steps, Stripe Test Paymen
 
 ## Knowledge Gaps
 - **20 isolated node(s):** `next/core-web-vitals`, `RFC-822`, `RFC-5321`, `@stripe/stripe-js`, `clsx` (+15 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 5007 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **247 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 5011 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **245 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `next` connect `next` to `package.json`, `run-e2e-full-system.ts`, `getPipelineSession`, `(client-portal)/layout.tsx`, `log.ts`, `deal-service.ts`, `ref_crypto`, `PipelinePageClient.tsx`, `decryptSecret`, `onboarding/page.tsx`, `InviteMemberDialog.tsx`, `getCurrentSessionContext`, `middleware.ts`, `plan-limits.ts`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `email/route.ts`, `reports/actions.ts`, `portal/settings/page.tsx`, `profile/page.tsx`, `Component Library`, `data.ts`, `app/pipeline/page.tsx`, `super-admin/page.tsx`, `invitation-service.ts`, `ingest.ts`, `security/rate-limit.ts`, `whatsapp/actions.ts`, `ThemeToggle`, `ClientCommunicationsView.tsx`, `lucide-react`, `query`, `leads/actions.ts`, `(dashboard)/dashboard/page.tsx`, `clients/actions.ts`, `emitter.ts`, `session.ts`, `requireSuperAdmin`, `upwork/actions.ts`, `createClientAction`, `team/page.tsx`, `app/layout.tsx`, `react`, `billing/page.tsx`, `TeamMemberList.tsx`, `activity/route.ts`, `(dashboard)/settings/page.tsx`?**
-  _High betweenness centrality (0.054) - this node is a cross-community bridge._
+- **Why does `next` connect `next` to `super-admin/dashboard/page.tsx`, `package.json`, `generate_dump.js`, `getCurrentSessionContext`, `organization/page.tsx`, `getPipelineSession`, `log.ts`, `session.ts`, `ref_crypto`, `sender.ts`, `MessageThread.tsx`, `decryptSecret`, `lucide-react`, `emitter.ts`, `ProjectsList.tsx`, `revenue/page.tsx`, `ai/actions.ts`, `InviteMemberDialog.tsx`, `templates/actions.ts`, `middleware.ts`, `features/task-extraction.ts`, `reports/actions.ts`, `data.ts`, `current-plan.ts`, `db/index.ts`, `ingest.ts`, `pipeline.ts`, `whatsapp/actions.ts`, `ThemeToggle`, `ClientCommunicationsView.tsx`, `inbox/actions.ts`, `platform-settings.ts`, `theme-provider.tsx`, `auth.ts`, `leads/actions.ts`, `server-actions-auth.test.ts`, `(dashboard)/dashboard/page.tsx`, `clients/actions.ts`, `weekly-summary/route.ts`, `isAIAccessible`, `Topbar.tsx`, `requireSuperAdmin`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `tags/actions.ts`, `team/page.tsx`, `impersonate/route.ts`, `tasks/actions.ts`, `logAuditEvent`, `TeamMemberList.tsx`, `discord/actions.ts`, `slack/actions.ts`, `react`, `[token]/page.tsx`?**
+  _High betweenness centrality (0.055) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `query()` (e.g. with `Step 9: Coolify Deployment Fix — Complete Supabase Elimination & Edge JWT Auth` and `communication-mode.test.ts`) actually correct?**
   _`query()` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `next/core-web-vitals`, `RFC-822`, `RFC-5321` to the rest of the system?**
   _20 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `package.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
-- **Why does `query()` connect `query` to `next`, `playwright`, `Invitation`, `getPipelineSession`, `OrganizationService`, `Step 20: Innoventix Invite System & Seat Limits — Prompts 16 to 26`, `log.ts`, `deal-service.ts`, `ref_crypto`, `OrganizationRepository`, `sender.ts`, `decryptSecret`, `getCurrentSessionContext`, `buildInsertQuery`, `plan-limits.ts`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `project-repo.ts`, `email/route.ts`, `projectService`, `reports/actions.ts`, `migrations.ts`, `data.ts`, `auditService`, `client-repo.ts`, `current-plan.ts`, `ingest.ts`, `pipeline.ts`, `security/rate-limit.ts`, `whatsapp/actions.ts`, `invitation-service.ts`, `ClientCommunicationsView.tsx`, `lucide-react`, `leads/actions.ts`, `(dashboard)/dashboard/page.tsx`, `clients/actions.ts`, `emitter.ts`, `ai/client.ts`, `database-layer.test.ts`, `session.ts`, `requireSuperAdmin`, `upwork/actions.ts`, `team/page.tsx`, `react`, `NotFoundError`, `activity/route.ts`?**
-  _High betweenness centrality (0.024) - this node is a cross-community bridge._
+  _Cohesion score 0.07692307692307693 - nodes in this community are weakly interconnected._
+- **Why does `query()` connect `query` to `super-admin/dashboard/page.tsx`, `next`, `getCurrentSessionContext`, `Audit: Current Team Invite Flow and Dashboard Architecture`, `organization/page.tsx`, `invitation-service.ts`, `getPipelineSession`, `automationService`, `log.ts`, `session.ts`, `ref_crypto`, `OrganizationRepository`, `sender.ts`, `decryptSecret`, `lucide-react`, `emitter.ts`, `ProjectsList.tsx`, `ai/actions.ts`, `templates/actions.ts`, `projectService`, `features/lead-scoring.ts`, `reports/actions.ts`, `migrations.ts`, `data.ts`, `communicationService`, `project-repo.ts`, `current-plan.ts`, `ingest.ts`, `db/index.ts`, `pipeline.ts`, `whatsapp/actions.ts`, `database.ts`, `ClientCommunicationsView.tsx`, `inbox/actions.ts`, `platform-settings.ts`, `User`, `auth.ts`, `leads/actions.ts`, `server-actions-auth.test.ts`, `(dashboard)/dashboard/page.tsx`, `clients/actions.ts`, `weekly-summary/route.ts`, `ai/client.ts`, `getPool`, `isAIAccessible`, `Topbar.tsx`, `requireSuperAdmin`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `tags/actions.ts`, `team/page.tsx`, `tasks/actions.ts`, `logAuditEvent`, `queryOne`, `TeamMemberList.tsx`, `discord/actions.ts`, `slack/actions.ts`?**
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
 - **Are the 7 inferred relationships involving `getCurrentSessionContext()` (e.g. with `3. Session Lifecycle & Token Architecture` and `1. Current Architecture Overview`) actually correct?**
   _`getCurrentSessionContext()` has 7 INFERRED edges - model-reasoned connections that need verification._
 - **Should `compilerOptions` be split into smaller, more focused modules?**

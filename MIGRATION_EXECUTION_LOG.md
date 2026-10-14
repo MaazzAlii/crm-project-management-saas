@@ -2762,7 +2762,63 @@ paste at the start of every batch report.
      - `npm test` → 497/497 tests passed across 73 test files
      - `npm run lint` → 4 warnings, 0 errors
      - `npm run build` → 142 routes compiled cleanly (exit code 0)
-- **Status**: ✅ Sub-Batch 8B complete. Three atomic commits created locally. Zero remotes pushed per Push Approval Policy. Awaiting review before Sub-Batch 8C.
+- **Status**: ✅ Sub-Batch 8B complete. Three atomic commits created locally. Dual remotes pushed (`8c18016`) upon written user confirmation. Awaiting review before Sub-Batch 8C.
+
+---
+
+### Step: UI-1B Sub-Batch 8C1 — Settings Integrations: Slack, Discord, and WhatsApp Client Views (6 Files)
+- **Timestamp**: 2026-10-14T16:35:00+05:00
+- **Task ID**: `UI-1B-SUB-BATCH-8C1-SETTINGS-SLACK-DISCORD-WHATSAPP`
+- **Actions Performed**:
+  1. **Scoping & Hit-Threshold Protocol**:
+     - Audited total color hits across the 5 Integration ClientPages:
+       * `SlackClientPage.tsx`: 35 hits
+       * `DiscordClientPage.tsx`: 36 hits
+       * `WhatsAppClientPage.tsx`: 39 hits
+       * `EmailClientPage.tsx`: 35 hits
+       * `UpworkClientPage.tsx`: 36 hits
+       * Total ClientPage Grep 1 hits = 181 hits (> 150 hit threshold).
+     - Per explicit user protocol, split Sub-Batch 8C into two sub-batches:
+       * **8C1**: Slack + Discord + WhatsApp ClientPages and corresponding wrapper pages.
+       * **8C2**: Email + Upwork ClientPages + IntegrationsList + integrations/page.tsx.
+  2. **8C1 Scope (6 Files)**:
+     - `app/(dashboard)/settings/integrations/slack/page.tsx` (0 hits)
+     - `app/(dashboard)/settings/integrations/slack/SlackClientPage.tsx` (35 hits)
+     - `app/(dashboard)/settings/integrations/discord/page.tsx` (0 hits)
+     - `app/(dashboard)/settings/integrations/discord/DiscordClientPage.tsx` (36 hits)
+     - `app/(dashboard)/settings/integrations/whatsapp/page.tsx` (0 hits)
+     - `app/(dashboard)/settings/integrations/whatsapp/WhatsAppClientPage.tsx` (39 hits)
+  3. **Semantic Token Refactoring**:
+     - `SlackClientPage.tsx`: Converted back navigation to `text-muted-foreground hover:text-foreground`, main title header to `border-border bg-card shadow-sm`, icon container to `bg-primary/10 border-primary/20 text-primary`, title to `text-card-foreground`, description to `text-muted-foreground`, webhook endpoint card to `border-border bg-card shadow-sm` with `bg-background border-input text-foreground font-mono` input and `border-border bg-muted/60 hover:bg-muted text-foreground` copy button, configuration form to `border-border bg-card shadow-sm`, form divider to `border-border`, labels to `text-foreground`, all form inputs strictly refactored to `bg-background border-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring`, save button to `bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm`, test button to `border-border bg-muted/60 hover:bg-muted text-foreground`, disconnect button to `bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/20`. Annotated status badges with inline justifications.
+     - `DiscordClientPage.tsx`: Converted back navigation to `text-muted-foreground hover:text-foreground`, main title header to `border-border bg-card shadow-sm`, icon container to `bg-primary/10 border-primary/20 text-primary`, title to `text-card-foreground`, description to `text-muted-foreground`, webhook card to `border-border bg-card shadow-sm`, webhook input to `bg-background border-input text-foreground font-mono`, copy button to `border-border bg-muted/60 hover:bg-muted text-foreground`, configuration form to `border-border bg-card shadow-sm`, labels to `text-foreground`, inputs to `bg-background border-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring`, save button to `bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm`, test button to `border-border bg-muted/60 hover:bg-muted text-foreground`, disconnect button to `bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/20`. Annotated status badges with inline justifications.
+     - `WhatsAppClientPage.tsx`: Converted back navigation to `text-muted-foreground hover:text-foreground`, main title header to `border-border bg-card shadow-sm`, icon container to `bg-primary/10 border-primary/20 text-primary`, title to `text-card-foreground`, description to `text-muted-foreground`, webhook card to `border-border bg-card shadow-sm`, webhook input to `bg-background border-input text-foreground font-mono`, copy button to `border-border bg-muted/60 hover:bg-muted text-foreground`, configuration form to `border-border bg-card shadow-sm`, labels to `text-foreground`, inputs and test phone input to `bg-background border-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring font-mono`, save button to `bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm`, test button to `border-border bg-muted/60 hover:bg-muted text-foreground`, disconnect button to `bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/20`. Annotated status badges with inline justifications.
+     - 3 wrapper pages (`slack/page.tsx`, `discord/page.tsx`, `whatsapp/page.tsx`): 0 hits, verified clean.
+  4. **Non-Color Changes Detail**:
+     - `SlackClientPage.tsx`: Removed heavy elevation on main card (`shadow-xl` -> `shadow-sm`) and form card (`shadow-xl` -> `shadow-sm`). Save button removed heavy elevation and colored shadow tint (`shadow-lg shadow-sky-600/20` -> `shadow-sm`).
+     - `DiscordClientPage.tsx`: Removed heavy elevation on main card (`shadow-xl` -> `shadow-sm`) and form card (`shadow-xl` -> `shadow-sm`). Save button removed heavy elevation and colored shadow tint (`shadow-lg shadow-indigo-600/20` -> `shadow-sm`).
+     - `WhatsAppClientPage.tsx`: Removed heavy elevation on main card (`shadow-xl` -> `shadow-sm`) and form card (`shadow-xl` -> `shadow-sm`). Save button removed heavy elevation and colored shadow tint (`shadow-lg shadow-emerald-600/20` -> `shadow-sm`).
+     - `slack/page.tsx`, `discord/page.tsx`, `whatsapp/page.tsx`: Non-color changes: none.
+  5. **Section 6 Greps Post-edit**:
+     - Grep 1 (raw palettes): 0 unjustified hits across all 6 files.
+     - Grep 2 (`text-white`): 0 hits across all 6 files.
+     - Grep 3 (accents): All remaining hits justified with `// intentional: <reason>` on the exact same line.
+     - Grep 4 (overlays): 0 hits across all 6 files.
+  6. **Browser Verification**:
+     - Created `scripts/verify-settings-integrations-8c1-e2e.ts`.
+     - Captured 7 screenshots:
+       * `settings_integrations_slack_light.png` & `settings_integrations_slack_dark.png`
+       * `settings_integrations_discord_light.png` & `settings_integrations_discord_dark.png`
+       * `settings_integrations_whatsapp_light.png` & `settings_integrations_whatsapp_dark.png`
+       * `multi_route_integrations_8c1_dark.png`
+     - Computed dark-mode input background measured at `rgb(5, 8, 15)` (zero white input fallback).
+     - Multi-route theme persistence verified across `/settings/integrations/slack` → `/settings/integrations/discord` → `/settings/integrations/whatsapp` → `/dashboard` in both light and dark themes.
+  7. **Quality Gate Verification**:
+     - `npx tsc --noEmit; echo "EXIT: $?"` → EXIT: 0
+     - `npm test` → 497/497 tests passed across 73 test files
+     - `npm run lint` → 4 warnings, 0 errors
+     - `npm run build` → 142 routes compiled cleanly (exit code 0)
+- **Status**: ✅ Sub-Batch 8C1 complete. Three atomic commits created locally. Zero remotes pushed per Push Approval Policy. Awaiting review before proceeding to Sub-Batch 8C2.
+
 
 
 
