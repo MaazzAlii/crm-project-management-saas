@@ -2611,5 +2611,55 @@ paste at the start of every batch report.
   - `MIGRATION_EXECUTION_LOG.md`
 - **Status**: ✅ Zero unmapped classes verified. Ready for push.
 
+---
+
+### Step: UI-1B Sub-Batch 7C — Client Detail & Tab Components (8 Files)
+- **Timestamp**: 2026-10-14T15:15:00+05:00
+- **Task ID**: `UI-1B-SUB-BATCH-7C-CLIENT-DETAIL-AND-TABS`
+- **Actions Performed**:
+  1. **Scoping & File Target Protocol**:
+     - Bundled all 8 client detail and tab components into Sub-Batch 7C:
+       * `app/(dashboard)/clients/[id]/page.tsx`
+       * `app/(dashboard)/clients/[id]/communications/page.tsx`
+       * `app/(dashboard)/clients/[id]/pipeline/page.tsx`
+       * `components/clients/ClientDetailHeader.tsx`
+       * `components/clients/ClientDetailTabs.tsx`
+       * `components/clients/ClientOverviewTab.tsx`
+       * `components/clients/ClientActivityLogTab.tsx`
+       * `components/clients/ClientProjectsTab.tsx`
+  2. **Semantic Token Refactoring**:
+     - `app/(dashboard)/clients/[id]/page.tsx`: Converted empty organization warning from `border-slate-800 bg-slate-900/50 text-slate-400` to `border-border bg-card/50 text-muted-foreground`.
+     - `app/(dashboard)/clients/[id]/communications/page.tsx`: Converted empty organization warning from `border-slate-800 bg-slate-900/50 text-slate-400` to `border-border bg-card/50 text-muted-foreground`.
+     - `app/(dashboard)/clients/[id]/pipeline/page.tsx`: Converted empty organization banner to `border-border bg-card/50 text-muted-foreground`, header container border to `border-border`, back link to `text-muted-foreground hover:text-primary`, icon wrapper to `bg-primary/10 border-primary/20 text-primary`, page title to `text-foreground`, and subtitle to `text-muted-foreground`.
+     - `components/clients/ClientDetailHeader.tsx`: Converted status badges (`archived` and default to `bg-muted text-muted-foreground border-border`; `active`, `lead`, `churned` to theme-aware contrast pairs), header border to `border-border`, back link to `text-muted-foreground hover:text-primary`, client name title to `text-foreground`, meta info icons/text to `text-muted-foreground`, quick edit button to `border-border bg-card text-foreground hover:bg-muted` with `text-primary` icon. Modal overlay strictly refactored to `bg-[var(--bg-overlay)] backdrop-blur-sm`, modal surface to `border-rose-500/30 bg-card shadow-2xl`, headings to `text-foreground`, text to `text-muted-foreground`, modal divider to `border-border`, cancel button to `border-border text-muted-foreground hover:bg-muted hover:text-foreground`. Added intentional comment for high-contrast `text-white` on destructive `bg-rose-600`.
+     - `components/clients/ClientDetailTabs.tsx`: Converted tab container border to `border-border`, mobile `<select>` to `border-border bg-background text-foreground focus:border-primary`, desktop tab buttons to `border-primary text-primary` (active) and `border-transparent text-muted-foreground hover:text-foreground hover:border-border` (inactive).
+     - `components/clients/ClientOverviewTab.tsx`: Converted specifications container to `border-border bg-card`, heading to `text-foreground`, all 6 spec cards to `border-border bg-background`, spec labels to `text-muted-foreground`, spec icons to `text-primary` and `text-emerald-500`, spec values to `text-foreground`. In communication mode card, converted status badge to `text-emerald-600 dark:text-emerald-400` and `text-primary`, description text to `text-muted-foreground` and `text-foreground/90`. Converted internal notes card to `border-border bg-card`, notes `<textarea>` to `border-border bg-background text-foreground placeholder:text-placeholder focus:border-primary focus:ring-primary`, save notes button to `bg-primary text-primary-foreground hover:bg-primary/90`. Converted record summary card to `border-border bg-card`, rows to `border-border/60`, labels to `text-muted-foreground`, values to `text-foreground`.
+     - `components/clients/ClientActivityLogTab.tsx`: Converted empty state to `border-border bg-card`, icon container to `bg-muted text-muted-foreground`, heading to `text-foreground`, text to `text-muted-foreground`. Converted activity log container to `border-border bg-card`, heading to `text-foreground`, vertical timeline to `before:bg-border`, shield icon node to `bg-card border-border text-primary`, action title to `text-foreground`, timestamp to `text-muted-foreground`, details preview box to `text-muted-foreground bg-muted/30 border-border font-mono`.
+     - `components/clients/ClientProjectsTab.tsx`: Converted empty state to `border-border bg-card`, icon container to `bg-primary/10 border-primary/20 text-primary`, heading to `text-foreground`, text to `text-muted-foreground`. Converted projects list heading to `text-foreground`, project cards to `border-border bg-card hover:border-border/80`, project name to `text-foreground`, status badge to `bg-primary/10 text-primary border-primary/20`, budget text to `text-muted-foreground` and `text-foreground font-semibold`, timestamp to `text-muted-foreground`.
+  3. **Non-Color Changes Detail**:
+     - `ClientDetailHeader.tsx`: Replaced hardcoded delete modal backdrop with `bg-[var(--bg-overlay)]`. Quick edit button hover state changed from `hover:bg-slate-800 hover:border-slate-700` to `hover:bg-muted`. Delete modal cancel button hover state changed from `hover:bg-slate-800 hover:text-white` to `hover:bg-muted hover:text-foreground`.
+     - `ClientDetailTabs.tsx`: Mobile `<select>` received `focus:border-primary`. Inactive tab hover state changed from `hover:border-slate-700` to `hover:border-border`.
+     - `ClientOverviewTab.tsx`: Replaced `<textarea>` focus state from `focus:border-sky-500 focus:ring-sky-500` to `focus:border-primary focus:ring-primary`. Save notes button changed from `bg-sky-500 hover:bg-sky-400` to `bg-primary text-primary-foreground hover:bg-primary/90`.
+     - `ClientActivityLogTab.tsx`: Timeline line rule changed from `before:bg-slate-800` to `before:bg-border`.
+     - `ClientProjectsTab.tsx`: Project card hover state changed from `hover:border-slate-700` to `hover:border-border/80`.
+  4. **Section 6 Greps Post-edit**:
+     - 0 unjustified hits remaining across all 8 files. Only 2 justified hits retained with inline comments: `text-white` on destructive `bg-rose-600` button in `ClientDetailHeader.tsx` and `text-white` on brand connected action `bg-emerald-600` button in `ClientOverviewTab.tsx`.
+  5. **Modal Overlay & Input Background Discipline**:
+     - Modal backdrop confirmed to strictly use `bg-[var(--bg-overlay)]`.
+     - Computed textarea background in dark mode measured: `rgb(5, 8, 15)` (zero UA white input fallback).
+  6. **Automated Playwright E2E Suite**:
+     - Created `scripts/verify-clients-tabs-e2e.ts`.
+     - Captured 8 screenshots:
+       * `clients_id_overview_light.png` & `clients_id_overview_dark.png`
+       * `clients_id_communications_light.png` & `clients_id_communications_dark.png`
+       * `clients_id_pipeline_light.png` & `clients_id_pipeline_dark.png`
+       * `multi_route_clients_directory.png` & `multi_route_dashboard.png`
+  7. **Quality Gate Verification**:
+     - `npx tsc --noEmit; echo "EXIT: $?"` → EXIT: 0
+     - `npm test` → 497/497 tests passed across 73 test files
+     - `npm run lint` → 4 warnings, 0 errors
+     - `npm run build` → 142 routes compiled cleanly (exit code 0)
+- **Status**: ✅ Sub-Batch 7C complete. Three atomic commits created locally. Zero remotes pushed per Push Approval Policy. Awaiting review before Sub-Batch 8A.
+
 
 
