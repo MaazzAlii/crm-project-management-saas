@@ -2661,5 +2661,60 @@ paste at the start of every batch report.
      - `npm run build` → 142 routes compiled cleanly (exit code 0)
 - **Status**: ✅ Sub-Batch 7C complete. Three atomic commits created locally. Zero remotes pushed per Push Approval Policy. Awaiting review before Sub-Batch 8A.
 
+---
+
+### Step: UI-1B Sub-Batch 8A — Settings Organization, Team Members, and Invite Dialog (7 Files)
+- **Timestamp**: 2026-10-14T15:45:00+05:00
+- **Task ID**: `UI-1B-SUB-BATCH-8A-SETTINGS-ORG-TEAM-AND-INVITES`
+- **Actions Performed**:
+  1. **Scoping & File Target Protocol**:
+     - Audited and refactored all 7 files within Sub-Batch 8A scope:
+       * `app/(dashboard)/settings/layout.tsx`
+       * `app/(dashboard)/settings/organization/page.tsx`
+       * `app/(dashboard)/settings/team/page.tsx`
+       * `components/settings/OrgProfileForm.tsx`
+       * `components/settings/TeamMemberList.tsx`
+       * `components/settings/PendingInvitationsList.tsx`
+       * `components/settings/InviteMemberDialog.tsx`
+  2. **Semantic Token Refactoring**:
+     - `app/(dashboard)/settings/layout.tsx`: Refactored header border to `border-border`, icon container to `bg-primary/10 text-primary border border-primary/20`, heading to `text-foreground`, description to `text-muted-foreground`, tab bar divider to `border-border`, tab buttons to `border-primary bg-primary/10 text-primary` (active) and `border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/60` (inactive).
+     - `app/(dashboard)/settings/organization/page.tsx`: Delegator page; verified zero hardcoded palette classes.
+     - `app/(dashboard)/settings/team/page.tsx`: Delegator page; verified zero hardcoded palette classes.
+     - `components/settings/OrgProfileForm.tsx`: Converted form card to `border-border bg-card`, header divider to `border-border`, title to `text-foreground`, icon to `text-primary`, description to `text-muted-foreground`, all form labels to `text-foreground`, all `<input>` and `<select>` elements strictly refactored to `border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary`, read-only metadata cards to `border-border bg-card/60`, slug and status boxes to `border-border/80 bg-background`, plan badge to `bg-primary/10 text-primary border border-primary/20`, submit button to `bg-primary text-primary-foreground hover:bg-primary/90`. Annotated remaining status banners with inline justifications.
+     - `components/settings/TeamMemberList.tsx`: Converted member role badge to `bg-muted text-muted-foreground border-border`, title to `text-foreground`, icon to `text-primary`, description to `text-muted-foreground`, "Invite Member" button to `bg-primary text-primary-foreground hover:bg-primary/90`. Single-member encouragement card refactored from hardcoded gradient to `border-primary/20 bg-card text-foreground`. Desktop table container converted to `border-border bg-card`, thead to `border-border bg-muted/40 text-muted-foreground`, tbody divide to `divide-border`, hover state to `hover:bg-muted/40`, avatar circles to `bg-muted font-bold text-foreground border border-border`, current user badge to `bg-primary/20 text-primary border border-primary/30`, role `<select>` dropdowns to `border-border bg-background text-foreground focus:border-primary`. Remove member confirmation modal backdrop strictly refactored to `bg-[var(--bg-overlay)] backdrop-blur-sm`, modal body to `border-destructive/30 bg-card`, headings to `text-foreground`, text to `text-muted-foreground`, cancel button to `border-border text-foreground hover:bg-muted`, confirm remove button to `bg-destructive text-destructive-foreground hover:bg-destructive/90`.
+     - `components/settings/PendingInvitationsList.tsx`: Converted section divider to `border-border`, heading to `text-foreground`, icon to `text-primary`, description to `text-muted-foreground`, refresh button to `text-muted-foreground hover:bg-muted hover:text-foreground`. Loading container converted to `border-border bg-card/50`, empty state to `border-dashed border-border bg-card/40 text-muted-foreground`. Table container converted to `border-border bg-card`, thead to `border-border bg-muted/40 text-muted-foreground`, tbody divide to `divide-border`, hover state to `hover:bg-muted/40`, email cell to `text-foreground`, role badges to `bg-muted text-muted-foreground border border-border`, copy button to `border-primary/30 bg-primary/10 text-primary hover:bg-primary/20`, resend button to `border-border bg-muted/80 text-muted-foreground hover:bg-muted hover:text-foreground`, revoke button to `text-muted-foreground hover:bg-destructive/10 hover:text-destructive`. Revoke confirmation modal backdrop strictly refactored to `bg-[var(--bg-overlay)] backdrop-blur-sm`, modal card to `border-destructive/30 bg-card`, cancel button to `border-border text-foreground hover:bg-muted`, confirm button to `bg-destructive text-destructive-foreground hover:bg-destructive/90`. Status badges annotated with inline justifications.
+     - `components/settings/InviteMemberDialog.tsx`: Dialog backdrop strictly refactored to `bg-[var(--bg-overlay)] backdrop-blur-sm`, modal container to `border-border bg-card`, header divider to `border-border`, title to `text-foreground`, icon to `text-primary`, close button to `text-muted-foreground hover:bg-muted hover:text-foreground`. Seat capacity box converted to `border-border bg-background/60`, title to `text-foreground`, meter value to `text-primary`. Email input strictly refactored to `border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary`, validation error to `text-destructive`. Role `<select>` dropdown refactored to `border-border bg-background text-foreground focus:border-primary`. Temp password section divider to `border-border/60`, checkbox to `border-border bg-background text-primary focus:ring-primary/30`, inputs strictly refactored to `border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary`. Cancel button converted to `border-border text-foreground hover:bg-muted`, send button to `bg-primary text-primary-foreground hover:bg-primary/90`. Remaining alert banners annotated with inline justifications.
+  3. **Non-Color Changes Detail**:
+     - `app/(dashboard)/settings/layout.tsx`: Non-color changes: none.
+     - `app/(dashboard)/settings/organization/page.tsx`: Non-color changes: none.
+     - `app/(dashboard)/settings/team/page.tsx`: Non-color changes: none.
+     - `components/settings/OrgProfileForm.tsx`: Non-color changes: Save button removed `shadow-sky-600/20`, applied `shadow-primary/20`.
+     - `components/settings/TeamMemberList.tsx`: Non-color changes: Single member encouragement card removed gradient (`bg-gradient-to-r from-sky-950/40 via-slate-900 to-indigo-950/30`), replaced with `bg-card`. Invite Member action button removed `shadow-sky-600/20`, applied `shadow-primary/20`. Avatar pill added explicit border (`border border-border`) for consistent contrast across themes. Remove member confirmation modal backdrop converted from `bg-slate-950/80` to `bg-[var(--bg-overlay)]`. Remove member modal cancel button hover state changed from `hover:bg-slate-800` to `hover:bg-muted`.
+     - `components/settings/PendingInvitationsList.tsx`: Non-color changes: Refresh button hover state changed from `hover:bg-slate-800 hover:text-white` to `hover:bg-muted hover:text-foreground`. Empty state container dashed border converted to `border-border`. Resend button hover state changed from `hover:bg-slate-800 hover:text-white` to `hover:bg-muted hover:text-foreground`. Revoke invitation modal backdrop converted from `bg-slate-950/80` to `bg-[var(--bg-overlay)]`. Revoke modal cancel button hover state changed from `hover:bg-slate-800` to `hover:bg-muted`.
+     - `components/settings/InviteMemberDialog.tsx`: Non-color changes: Dialog backdrop converted from `bg-slate-950/80` to `bg-[var(--bg-overlay)]`. Dialog close button hover state changed from `hover:bg-slate-800 hover:text-white` to `hover:bg-muted hover:text-foreground`. Checkbox focus ring updated from `focus:ring-sky-500/30` to `focus:ring-primary/30`. Send invite button removed `shadow-sky-600/20`, applied `shadow-primary/20`. Dialog cancel button hover state changed from `hover:bg-slate-800` to `hover:bg-muted`.
+  4. **Section 6 Greps Post-edit**:
+     - Grep 1 (raw palettes): 0 hits across all 7 files.
+     - Grep 2 (`text-white`): 0 hits across all 7 files.
+     - Grep 3 (accents): All remaining hits justified with `// intentional: <reason>` on the exact same line.
+     - Grep 4 (`bg-slate-950/` overlays): 0 hits across all 7 files. All 3 modal backdrops strictly use `bg-[var(--bg-overlay)]`.
+  5. **Modal Overlay & Input Background Discipline**:
+     - All 3 modal backdrops verified: `TeamMemberList` remove modal, `PendingInvitationsList` revoke modal, and `InviteMemberDialog` all use `bg-[var(--bg-overlay)]`.
+     - Computed dark-mode input backgrounds measured in real browser: `rgb(5, 8, 15)` (zero white input fallback).
+  6. **Automated Playwright E2E Suite**:
+     - Created `scripts/verify-settings-org-team-e2e.ts`.
+     - Captured 7 screenshots:
+       * `settings_org_light.png` & `settings_org_dark.png`
+       * `settings_team_light.png` & `settings_team_dark.png`
+       * `settings_invite_dialog_light.png` & `settings_invite_dialog_dark.png`
+       * `multi_route_settings_to_dashboard_dark.png`
+     - Verified multi-route theme persistence across `/settings/organization` → `/settings/team` → `/dashboard` in both light and dark themes.
+  7. **Quality Gate Verification**:
+     - `npx tsc --noEmit; echo "EXIT: $?"` → EXIT: 0
+     - `npm test` → 497/497 tests passed across 73 test files
+     - `npm run lint` → 4 warnings, 0 errors
+     - `npm run build` → 142 routes compiled cleanly (exit code 0)
+- **Status**: ✅ Sub-Batch 8A complete. Three atomic commits created locally. Zero remotes pushed per Push Approval Policy. Awaiting review before Sub-Batch 8B.
+
+
 
 

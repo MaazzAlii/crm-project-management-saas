@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1791963239.0731134,
-    "seen": 1791963286.3968086,
-    "ast_hash": "5e1f4bbd88d16e11bbe8852fe16f277a",
+    "mtime": 1791973224.2726026,
+    "seen": 1791973589.8530943,
+    "ast_hash": "30fae79cedd214a1deb236a3dbdaf3de",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1290,21 +1290,21 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/clients/[id]/communications/page.tsx": {
-    "mtime": 1791642567.1420598,
-    "seen": 1791772540.8368654,
-    "ast_hash": "5199592ebd195b39ae9ed3fac0407449",
+    "mtime": 1791972451.5149865,
+    "seen": 1791973589.8521879,
+    "ast_hash": "536dbc63c12bb9c83451ac954f85c87c",
     "semantic_hash": ""
   },
   "app/(dashboard)/clients/[id]/page.tsx": {
-    "mtime": 1791642555.875213,
-    "seen": 1791772540.8368673,
-    "ast_hash": "c2422fb1eecbc4aae56379907acbe293",
+    "mtime": 1791972443.640861,
+    "seen": 1791973589.8521895,
+    "ast_hash": "add0f1b9874e62690f3f9542f314a53c",
     "semantic_hash": ""
   },
   "app/(dashboard)/clients/[id]/pipeline/page.tsx": {
-    "mtime": 1791642578.912901,
-    "seen": 1791772540.836869,
-    "ast_hash": "42b53157c3c82dd733d6ddd547548db4",
+    "mtime": 1791972464.8291974,
+    "seen": 1791973589.852191,
+    "ast_hash": "68e4e59e01159a9ed1500e0769ea27c9",
     "semantic_hash": ""
   },
   "app/(dashboard)/clients/actions.ts": {
@@ -2196,21 +2196,21 @@
     "semantic_hash": ""
   },
   "components/clients/ClientActivityLogTab.tsx": {
-    "mtime": 1789721627.6019216,
-    "seen": 1791772540.8371286,
-    "ast_hash": "15f4d78aee094093397dedb8a1cc3499",
+    "mtime": 1791972570.6898243,
+    "seen": 1791973589.8524563,
+    "ast_hash": "586eece5eb509c42d966beae064aaf83",
     "semantic_hash": ""
   },
   "components/clients/ClientDetailHeader.tsx": {
-    "mtime": 1789728534.294382,
-    "seen": 1791772540.83713,
-    "ast_hash": "90e255585be1b5bd9b6c696b99a23d5f",
+    "mtime": 1791972497.9427156,
+    "seen": 1791973589.8524578,
+    "ast_hash": "516601634a0e7e187fddbb4c7165a375",
     "semantic_hash": ""
   },
   "components/clients/ClientDetailTabs.tsx": {
-    "mtime": 1789721627.6021287,
-    "seen": 1791772540.8371313,
-    "ast_hash": "67df5254a24338866848a84b2a9e00b4",
+    "mtime": 1791972508.883885,
+    "seen": 1791973589.852459,
+    "ast_hash": "79ec7e1e7f9ec22f23a4d9b5ebbf8ed1",
     "semantic_hash": ""
   },
   "components/clients/ClientEditModal.tsx": {
@@ -2232,15 +2232,15 @@
     "semantic_hash": ""
   },
   "components/clients/ClientOverviewTab.tsx": {
-    "mtime": 1789728439.8301573,
-    "seen": 1791772540.8371367,
-    "ast_hash": "a367282a4aff2246cd8ed92c1116bc2e",
+    "mtime": 1791972643.8379018,
+    "seen": 1791973589.8524642,
+    "ast_hash": "0d2a83ffdc328c77645fcc733c88850b",
     "semantic_hash": ""
   },
   "components/clients/ClientProjectsTab.tsx": {
-    "mtime": 1789721627.6030738,
-    "seen": 1791772540.8371382,
-    "ast_hash": "2bc8153c6bbc6cb051064816a004555f",
+    "mtime": 1791972586.768064,
+    "seen": 1791973589.8524652,
+    "ast_hash": "cd52b720aebf18aae346d1985559c868",
     "semantic_hash": ""
   },
   "components/clients/ClientsList.tsx": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1791971883.2858317,
-    "seen": 1791971986.2146974,
-    "ast_hash": "529ef684e87adf7c71df419894d04813",
+    "mtime": 1791973198.594283,
+    "seen": 1791973589.8531017,
+    "ast_hash": "d94bf5ea7d3ba7bca8957ca2fb4d3ed0",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7221,6 +7221,12 @@
     "mtime": 1791969821.5064085,
     "seen": 1791971986.2144814,
     "ast_hash": "d749fff962e371c9a85a127c2fc5f570",
+    "semantic_hash": ""
+  },
+  "scripts/verify-clients-tabs-e2e.ts": {
+    "mtime": 1791972989.8556294,
+    "seen": 1791973589.8528738,
+    "ast_hash": "718d3c84e060779035b20ab6069492a5",
     "semantic_hash": ""
   }
 }
