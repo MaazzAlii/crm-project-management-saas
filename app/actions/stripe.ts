@@ -31,11 +31,19 @@ export async function createCheckoutSession(priceId: string) {
         },
       ],
       mode: 'subscription',
-      success_url: `${appUrl}/settings/billing?success=true`,
+      success_url: `${appUrl}/settings/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/settings/billing?canceled=true`,
       metadata: {
+        organization_id: session.organization.id,
         organizationId: session.organization.id,
+        user_id: session.user.id,
         userId: session.user.id,
+      },
+      subscription_data: {
+        metadata: {
+          organization_id: session.organization.id,
+          organizationId: session.organization.id,
+        },
       },
     })
 
