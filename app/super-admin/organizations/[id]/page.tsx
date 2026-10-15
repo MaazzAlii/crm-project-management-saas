@@ -4,6 +4,8 @@ import { query, queryOne } from '@/lib/db'
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
 import { SuspendOrgModal, OverridePlanModal } from '@/components/super-admin/org-management-actions'
 import { StartImpersonationButton } from '@/components/super-admin/start-impersonation-button'
+import { PlanOverrideCard } from '@/components/super-admin/PlanOverrideCard'
+import { getCurrentPlan } from '@/lib/billing/current-plan'
 import { getOrganizationPlanLimits } from '@/lib/billing/plan-limits'
 import {
   Building2,
@@ -31,6 +33,8 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
   await requireSuperAdmin()
   let org: any = null
   let subscription: any = null
+  let overrideRecord: any = null
+  let effectivePlan: any = null
   let membersData: any[] = []
   let clientsCount = 0
   let projectsCount = 0
@@ -48,6 +52,19 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
          WHERE os.organization_id = $1`,
         [org.id]
       )
+
+      // 2b. Fetch Plan Override Details (BILL-3B)
+      overrideRecord = await queryOne<any>(
+        `SELECT op.plan_override, op.plan_override_expires_at, op.plan_override_granted_at,
+                op.plan_override_granted_by, op.plan_override_note, u.email as granter_email
+         FROM organization_plans op
+         LEFT JOIN users u ON u.id = op.plan_override_granted_by
+         WHERE op.organization_id = $1`,
+        [org.id]
+      )
+
+      // 2c. Fetch Effective Plan with Real Quotas (BILL-3/3B)
+      effectivePlan = await getCurrentPlan(org.id)
 
       // 3. Fetch Organization Members with Profiles
       const mRes = await query<any>(
@@ -235,6 +252,16 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
           </div>
         </div>
       </div>
+
+      {/* Access Override Management Card (BILL-3B) */}
+      {effectivePlan && (
+        <PlanOverrideCard
+          orgId={org.id}
+          orgName={org.name}
+          currentOverride={overrideRecord}
+          effectivePlan={effectivePlan}
+        />
+      )}
 
       {/* Usage vs Plan Limits Grid */}
       <div className="space-y-4">
