@@ -5,6 +5,7 @@
  * Domain data access layer for Multi-Tenant Projects, Tasks, Deliverables & Templates.
  */
 
+import type { PoolClient } from 'pg';
 import { query, queryOne, transaction } from '../index';
 import { buildSelectQuery, buildInsertQuery, buildUpdateQuery, buildDeleteQuery, PaginationOptions } from '../query-builder';
 import { Project, Task, Deliverable, ProjectStatus, TaskStatus, TaskPriority, DeliverableStatus } from '../../types/database';
@@ -39,7 +40,7 @@ export class ProjectRepository {
     priority?: string;
     startDate?: Date | string | null;
     deadline?: Date | string | null;
-  }): Promise<Project> {
+  }, options?: { client?: PoolClient }): Promise<Project> {
     try {
       const insertData = {
         organization_id: orgId,
@@ -56,7 +57,9 @@ export class ProjectRepository {
       };
 
       const q = buildInsertQuery('projects', insertData);
-      const res = await query<Project>(q.text, q.values);
+      const res = options?.client
+        ? await options.client.query<Project>(q.text, q.values)
+        : await query<Project>(q.text, q.values);
       return res.rows[0];
     } catch (error) {
       console.error('[ProjectRepository.create] Error creating project:', error);

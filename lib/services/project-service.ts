@@ -41,9 +41,10 @@ export class ProjectService {
       priority?: string;
       startDate?: Date | string | null;
       deadline?: Date | string | null;
-    }
+    },
+    options?: { client?: any }
   ): Promise<Project> {
-    const project = await projectRepo.create(orgId, data);
+    const project = await projectRepo.create(orgId, data, options);
 
     await auditRepo.log({
       organizationId: orgId,
@@ -52,7 +53,7 @@ export class ProjectService {
       resourceType: 'project',
       resourceId: project.id,
       metadata: { title: project.title, clientId: project.client_id },
-    });
+    }, options);
 
     return project;
   }
