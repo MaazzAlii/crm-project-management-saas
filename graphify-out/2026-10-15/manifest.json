@@ -90,9 +90,9 @@
     "semantic_hash": ""
   },
   "app/api/stripe/webhook/route.ts": {
-    "mtime": 1792054360.0171502,
-    "seen": 1792054487.8186355,
-    "ast_hash": "dfa6b49bd3d23a8f8af24a637cccc45e",
+    "mtime": 1792062808.1765034,
+    "seen": 1792063176.8210664,
+    "ast_hash": "b03b98786225f7d97f0573a6b550f5e0",
     "semantic_hash": ""
   },
   "app/onboarding/page.tsx": {
@@ -150,9 +150,9 @@
     "semantic_hash": ""
   },
   "lib/stripe/client.ts": {
-    "mtime": 1791784550.4324965,
-    "seen": 1791785735.6732595,
-    "ast_hash": "f8e8c06e93fde73c91d58080c81bfb36",
+    "mtime": 1792062763.794448,
+    "seen": 1792063176.8214164,
+    "ast_hash": "d5a7370b30e2c71309fe2945848c700e",
     "semantic_hash": ""
   },
   "middleware.ts": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1792054671.7666323,
-    "seen": 1792057124.3805876,
-    "ast_hash": "87c1e0c21a369483e240518dc2533312",
+    "mtime": 1792063154.7272925,
+    "seen": 1792063176.821771,
+    "ast_hash": "eff45106a8097a788623c13d37eabe8f",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1792054647.3037434,
-    "seen": 1792057124.380594,
-    "ast_hash": "b7a54cfa8f8998a8e14669b4e2b600b6",
+    "mtime": 1792063126.9752111,
+    "seen": 1792063176.8217778,
+    "ast_hash": "07eabfcbfa008f28cde5d3ea787c5bfa",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6534,9 +6534,9 @@
     "semantic_hash": ""
   },
   "app/api/stripe/checkout/route.ts": {
-    "mtime": 1791784592.1370845,
-    "seen": 1791785735.6729522,
-    "ast_hash": "7d9feb46ba62c69d945c39e8045e336a",
+    "mtime": 1792062788.7414775,
+    "seen": 1792063176.8210645,
+    "ast_hash": "6209d0c8aab005ea8eb99702b7f40f0a",
     "semantic_hash": ""
   },
   "app/invite/[token]/AcceptInviteButton.tsx": {
@@ -6594,9 +6594,9 @@
     "semantic_hash": ""
   },
   "lib/stripe/config.ts": {
-    "mtime": 1792054260.2916963,
-    "seen": 1792054487.818988,
-    "ast_hash": "1b5c0fd27dcb46d9bb5da77a0b5a758a",
+    "mtime": 1792062556.5643885,
+    "seen": 1792063176.821418,
+    "ast_hash": "c9d5fb06cac963053ae2d7457034ea8e",
     "semantic_hash": ""
   },
   "scripts/send-test-email.ts": {
@@ -8013,6 +8013,12 @@
     "mtime": 1792057052.265134,
     "seen": 1792057124.3813179,
     "ast_hash": "d3ad9aeb5fbec88ebd26fa62b9100efd",
+    "semantic_hash": ""
+  },
+  "tests/billing/stripe-config-timing.test.ts": {
+    "mtime": 1792062987.8298447,
+    "seen": 1792063176.8216765,
+    "ast_hash": "c20b60fce91d739491ad7bfdcf998a82",
     "semantic_hash": ""
   }
 }
