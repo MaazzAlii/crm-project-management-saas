@@ -1,13 +1,26 @@
 'use server'
 
 import crypto from 'crypto'
-import { hashPassword, validatePasswordStrength } from '@/lib/auth/password'
+import { hashPassword, validatePasswordStrength, calculatePasswordStrength } from '@/lib/auth/password'
 import { generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt'
 import { setRefreshTokenCookie } from '@/lib/auth/session'
 import { userRepo } from '@/lib/db/repositories/user-repo'
 import { orgRepo } from '@/lib/db/repositories/org-repo'
 import { query } from '@/lib/db'
 import { ensureAutoMigrated } from '@/lib/db/auto-migrate'
+
+export interface SignUpFieldError {
+  code: 'VALIDATION_ERROR' | 'EMAIL_ALREADY_EXISTS' | 'INTERNAL_ERROR'
+  field?: 'fullName' | 'orgName' | 'email' | 'password'
+  message: string
+}
+
+export interface SignUpActionResult {
+  success?: boolean
+  redirectUrl?: string
+  error?: string
+  errorDetail?: SignUpFieldError
+}
 
 export interface SignUpInput {
   fullName: string
@@ -16,25 +29,104 @@ export interface SignUpInput {
   password: string
 }
 
-export async function handleSignUpAction(input: SignUpInput) {
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+export async function handleSignUpAction(input: SignUpInput): Promise<SignUpActionResult> {
   const { fullName, orgName, email, password } = input
 
-  if (!fullName || !orgName || !email || !password) {
-    return { error: 'All fields are required.' }
+  if (!fullName || !fullName.trim()) {
+    return {
+      success: false,
+      error: 'Full name is required.',
+      errorDetail: {
+        code: 'VALIDATION_ERROR',
+        field: 'fullName',
+        message: 'Full name is required.',
+      },
+    }
+  }
+
+  if (!orgName || !orgName.trim()) {
+    return {
+      success: false,
+      error: 'Company / Organization name is required.',
+      errorDetail: {
+        code: 'VALIDATION_ERROR',
+        field: 'orgName',
+        message: 'Company / Organization name is required.',
+      },
+    }
+  }
+
+  if (!email || !email.trim()) {
+    return {
+      success: false,
+      error: 'Email address is required.',
+      errorDetail: {
+        code: 'VALIDATION_ERROR',
+        field: 'email',
+        message: 'Email address is required.',
+      },
+    }
+  }
+
+  const cleanEmail = email.toLowerCase().trim()
+  if (!EMAIL_REGEX.test(cleanEmail)) {
+    return {
+      success: false,
+      error: 'Please enter a valid email address.',
+      errorDetail: {
+        code: 'VALIDATION_ERROR',
+        field: 'email',
+        message: 'Please enter a valid email address.',
+      },
+    }
+  }
+
+  if (!password) {
+    return {
+      success: false,
+      error: 'Password is required.',
+      errorDetail: {
+        code: 'VALIDATION_ERROR',
+        field: 'password',
+        message: 'Password is required.',
+      },
+    }
   }
 
   const passwordValidation = validatePasswordStrength(password)
-  if (!passwordValidation.isValid) {
-    return { error: passwordValidation.errors.join('. ') }
+  const passwordStrength = calculatePasswordStrength(password)
+  if (!passwordValidation.isValid || passwordStrength.score < 3) {
+    const errorMsg =
+      passwordValidation.errors.length > 0
+        ? passwordValidation.errors.join('. ')
+        : 'Password is too weak. Please choose a stronger password (must meet at least 3 criteria).'
+    return {
+      success: false,
+      error: errorMsg,
+      errorDetail: {
+        code: 'VALIDATION_ERROR',
+        field: 'password',
+        message: errorMsg,
+      },
+    }
   }
 
   try {
     await ensureAutoMigrated()
 
-    const cleanEmail = email.toLowerCase().trim()
     const existing = await userRepo.findByEmail(cleanEmail)
     if (existing) {
-      return { error: 'User with this email already exists.' }
+      return {
+        success: false,
+        error: 'An account with this email already exists.',
+        errorDetail: {
+          code: 'EMAIL_ALREADY_EXISTS',
+          field: 'email',
+          message: 'An account with this email already exists.',
+        },
+      }
     }
 
     // 1. Hash password & create user
@@ -88,10 +180,46 @@ export async function handleSignUpAction(input: SignUpInput) {
 
     await setRefreshTokenCookie(refreshToken)
 
+    // 4. Trigger email verification token creation & send (graceful failure)
+    try {
+      const { emailVerificationRepo } = await import('@/lib/db/repositories/email-verification-repo')
+      const { generateToken, hashToken } = await import('@/lib/security/invite-token')
+      const { sendEmail } = await import('@/lib/email/sender')
+      const { renderVerifyEmail } = await import('@/lib/email/templates')
+
+      const verifyToken = generateToken()
+      const verifyTokenHash = hashToken(verifyToken)
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
+
+      await emailVerificationRepo.insertVerification(user.id, user.email, verifyTokenHash, expiresAt)
+
+      const emailContent = renderVerifyEmail({
+        rawToken: verifyToken,
+        userEmail: user.email,
+        userName: user.full_name || undefined,
+      })
+
+      await sendEmail({
+        to: user.email,
+        subject: emailContent.subject,
+        html: emailContent.html,
+        text: emailContent.text,
+      })
+    } catch (e) {
+      console.warn('[SIGNUP_VERIFICATION_EMAIL_SEND_FAILED]', e)
+    }
+
     return { success: true, redirectUrl: '/onboarding' }
   } catch (err: any) {
     console.error('[SIGNUP_ACTION_EXCEPTION]', err)
-    return { error: err.message || 'An unexpected error occurred during signup.' }
+    return {
+      success: false,
+      error: err.message || 'An unexpected error occurred during signup.',
+      errorDetail: {
+        code: 'INTERNAL_ERROR',
+        message: err.message || 'An unexpected error occurred during signup.',
+      },
+    }
   }
 }
 
@@ -108,16 +236,60 @@ export interface SignUpWithInviteInput {
  * - Accepts invitation and joins existing organization immediately.
  * - Dispatches verification email and returns redirectUrl to /dashboard.
  */
-export async function handleSignUpWithInviteAction(input: SignUpWithInviteInput) {
+export async function handleSignUpWithInviteAction(input: SignUpWithInviteInput): Promise<SignUpActionResult> {
   const { fullName, password, inviteToken } = input
 
-  if (!fullName || !password || !inviteToken) {
-    return { error: 'Full name and password are required.' }
+  if (!fullName || !fullName.trim()) {
+    return {
+      success: false,
+      error: 'Full name is required.',
+      errorDetail: {
+        code: 'VALIDATION_ERROR',
+        field: 'fullName',
+        message: 'Full name is required.',
+      },
+    }
+  }
+
+  if (!password) {
+    return {
+      success: false,
+      error: 'Password is required.',
+      errorDetail: {
+        code: 'VALIDATION_ERROR',
+        field: 'password',
+        message: 'Password is required.',
+      },
+    }
+  }
+
+  if (!inviteToken) {
+    return {
+      success: false,
+      error: 'Invite token is required.',
+      errorDetail: {
+        code: 'VALIDATION_ERROR',
+        message: 'Invite token is required.',
+      },
+    }
   }
 
   const passwordValidation = validatePasswordStrength(password)
-  if (!passwordValidation.isValid) {
-    return { error: passwordValidation.errors.join('. ') }
+  const passwordStrength = calculatePasswordStrength(password)
+  if (!passwordValidation.isValid || passwordStrength.score < 3) {
+    const errorMsg =
+      passwordValidation.errors.length > 0
+        ? passwordValidation.errors.join('. ')
+        : 'Password is too weak. Please choose a stronger password (must meet at least 3 criteria).'
+    return {
+      success: false,
+      error: errorMsg,
+      errorDetail: {
+        code: 'VALIDATION_ERROR',
+        field: 'password',
+        message: errorMsg,
+      },
+    }
   }
 
   try {
