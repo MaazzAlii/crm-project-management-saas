@@ -3451,6 +3451,57 @@ paste at the start of every batch report.
   - `npm run build`: **142 routes compiled cleanly (exact baseline preserved)**
 - **Status**: ✅ BILL-1 Phase B complete. All plan limit enforcement, concurrency locks, and feature gating verified. Ready for atomic commits.
 
+---
+
+### Step 51: Batch TEAM-4 — Team UI Polish (Real-time, Workload, Profile, Status)
+- **Date/Time**: 2026-10-15 12:15
+- **Task**: Implement TEAM-4 UI/UX polish across items #5, #13, #14, and #15 according to Phase B specifications.
+- **Actions Performed**:
+  1. **#15 — Member Status & Last Active Signals**:
+     - Evaluated `is_active` boolean as primary status signal: `is_active === false` → "Suspended" badge (`bg-muted text-muted-foreground border-border`).
+     - `is_active === true AND last_login within 30d` → "Active" badge (`bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20`).
+     - `is_active === true AND last_login >30d ago` → "Active" badge with supplementary note (`Inactive >30d`).
+     - `is_active === true AND last_login === null` → "Active" badge with note (`No login yet`).
+     - Surfaced `last_login_at` as a separate "Last Active" column using relative intervals (`formatRelativeTime`).
+  2. **#14 — Accessible MemberProfileModal**:
+     - Built modal with `role="dialog"`, `aria-modal="true"`, `aria-labelledby="member-profile-modal-title"`.
+     - Added strict focus trap on Tab / Shift+Tab looping within the modal.
+     - Implemented close on Escape key and backdrop click.
+     - Preserved and restored focus to the triggering element upon modal close.
+     - Implemented avatar display: renders `avatarUrl` via Next.js `<Image unoptimized />` when present, otherwise clean two-letter initials fallback (`bg-primary/10 text-primary`).
+     - Displays all profile metadata: Workspace Role, Account Status, Last Active, Member Since, Phone Number (`Not provided` fallback), and Invited By (`invitedByName` or `Direct / Platform Admin`).
+  3. **#13 — Client-Side Workload Filtering**:
+     - Implemented project and status filter selectors (`data-testid="workload-project-filter"`, `data-testid="workload-status-filter"`) in `components/tasks/TaskList.tsx`.
+     - Computed dynamic member metrics via `useMemo` strictly in-memory on already-fetched tasks without server re-fetches.
+     - Replaced raw `<img>` in `components/analytics/TeamWorkloadCard.tsx` with Next.js `<Image unoptimized />`, resolving the `@next/next/no-img-element` lint warning.
+  4. **#5 — Polling & Refetch Lifecycle Cleanup**:
+     - Updated `components/settings/PendingInvitationsList.tsx` with 30-second polling interval paused when `document.visibilityState === 'hidden'` and resumed on `visibilitychange`.
+     - Added `focus` event refetch on window focus.
+     - Ensured full cleanup of interval and event listeners on component unmount (`clearInterval`, `removeEventListener('focus')`, `removeEventListener('visibilitychange')`).
+     - Surfaced manual refresh button with `data-testid="refresh-pending-invites-btn"`.
+  5. **Database Query Adjustments**:
+     - Updated `orgRepo.getMembers(orgId)` and `app/(dashboard)/settings/team/page.tsx` to include `isActive`, `lastLoginAt`, `phone` (`NULL::text`), and `invitedByName` via join with `inviter`.
+- **Files Modified / Created**:
+  - `lib/db/repositories/org-repo.ts`
+  - `app/(dashboard)/settings/team/page.tsx`
+  - `components/settings/PendingInvitationsList.tsx`
+  - `components/settings/TeamMemberList.tsx`
+  - `components/tasks/TaskList.tsx`
+  - `components/analytics/TeamWorkloadCard.tsx`
+  - `tests/team/team-ui.test.ts` (created)
+  - `scripts/verify-team-4-e2e.ts` (created)
+  - `assets/screenshots/team-4/*` (8 screenshots)
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `npx tsc --noEmit`: **EXIT 0** (0 type errors)
+  - `npm test`: **79 test files, 576/576 tests passed (100% pass rate, +12 new regression tests)**
+  - `npm run lint`: **0 errors, 3 baseline warnings (0 in TEAM-4 files)**
+  - `npm run build`: **142 routes compiled cleanly (exact baseline preserved)**
+  - Playwright browser E2E captured all 8 screenshots across Light/Dark modes in `assets/screenshots/team-4/`.
+- **Status**: ✅ TEAM-4 Phase B complete. All functional refinements verified. Ready for atomic commits.
+
+
 
 
 
