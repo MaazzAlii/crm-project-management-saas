@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import jwt, { SignOptions } from 'jsonwebtoken';
 
 export function getJwtSecret(): string {
@@ -59,6 +60,7 @@ export function generateRefreshToken(payload: Omit<RefreshTokenPayload, 'iat' | 
   const options: SignOptions = {
     expiresIn,
     algorithm: 'HS256',
+    jwtid: crypto.randomUUID(),
   };
   return jwt.sign(payload, getRefreshSecret(), options);
 }
