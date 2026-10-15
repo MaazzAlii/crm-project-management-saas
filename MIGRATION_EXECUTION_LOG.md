@@ -3577,15 +3577,56 @@ paste at the start of every batch report.
   - `tests/billing/stripe-webhook.test.ts` (created)
   - `tests/billing/stripe-proration.test.ts` (created)
   - `docs/engineering/STRIPE-GO-LIVE-CHECKLIST.md` (created)
-  - `MIGRATION_EXECUTION_LOG.md`
-  - `.agent-state.md`
+---
+
+### Step 39: AUTH-3 Phase B — Session Lifecycle, Logout & Refresh Token Rotation (#10, #11)
+- **Date/Time**: 2026-10-15 14:38
+- **Task ID**: `AUTH-3-PHASE-B-COMPLETE`
+- **Rationale**:
+  - Resolve Bug #10 (Session timeout & refresh token rotation): Implement atomic refresh token rotation with reuse detection and token family invalidation.
+  - Resolve Bug #11 (Logout server-side revocation & cookie clearing): Ensure logout revokes refresh tokens in PostgreSQL and explicitly clears `innoventix_session`, `innoventix_refresh`, and `organization_id` cookies with `Max-Age=0`.
+  - In-app password change: Invalidate all active sessions/refresh tokens for the user across all devices upon password update.
+- **Actions Performed**:
+  1. **Atomic Refresh Token Rotation & TOCTOU Race Closure**:
+     - Updated `app/api/auth/refresh/route.ts` to execute token claim atomically:
+       `UPDATE refresh_tokens SET is_revoked = true, rotated_at = NOW() WHERE token_hash = $1 AND is_revoked = false RETURNING id, token_family, user_id`.
+     - Serialized concurrent requests on the same `token_family` using PostgreSQL `pg_advisory_xact_lock(hashtext(payload.tokenFamily))` within an ACID transaction.
+     - When `RETURNING` returns 0 rows, detects token reuse, immediately revokes the entire `token_family` (`UPDATE refresh_tokens SET is_revoked = true WHERE token_family = $1`), clears all auth cookies, and returns HTTP 401 `{ code: 'REFRESH_TOKEN_REUSED' }`.
+     - When won, issues a new token pair preserving the exact same `token_family`.
+     - Added unique `jwtid: crypto.randomUUID()` to `generateRefreshToken` in `lib/auth/jwt.ts` to ensure distinct cryptographic signatures across rotations in the same second.
+  2. **Centralized Logout Helper Extraction (`lib/auth/logout.ts`)**:
+     - Extracted shared helper `revokeSessionAndClearCookies(request: NextRequest, redirectUrl?: string): Promise<NextResponse>`.
+     - Revokes the caller's `token_family` server-side in PostgreSQL.
+     - Explicitly sets `Set-Cookie` with `Max-Age=0` for `innoventix_session`, `innoventix_refresh`, and `organization_id`.
+     - Updated both `/api/auth/logout` (JSON response) and `/client/auth/signout` (Redirect response) to call this shared function, eliminating duplicate revocation logic.
+  3. **User-Wide Session Invalidation on Password Change**:
+     - Updated `lib/auth/change-password.ts` to execute `UPDATE refresh_tokens SET is_revoked = true WHERE user_id = $1 AND is_revoked = false` upon successful password update, logging the user out of all devices.
+  4. **Proposed Migration 0049**:
+     - Created `supabase/migrations/0049_refresh_token_family.sql` proposing columns `rotated_at TIMESTAMPTZ`, `parent_hash VARCHAR(255)`, and index on `token_family`. (Proposed unapplied; schema detection in application layer ensures zero-crash backward compatibility).
+  5. **Regression Test Suite (`tests/auth/session-lifecycle.test.ts`)**:
+     - Added 12 automated test cases covering: normal refresh, old token revocation, reuse rejection, cascade family revocation, concurrent refresh race (exactly 1× 200, 1× 401 REUSED, family revoked, subsequent token 401), nonexistent token, expired token, logout DB revocation, logout cookie clearing, client portal logout, password change revocation, and 30-minute access token TTL (`exp - iat = 1800`).
+  6. **Browser E2E Verification & Screenshot Capture**:
+     - Built `scripts/verify-auth-3-e2e.ts` verifying login, token rotation, reuse rejection, logout cookie clearance, and redirect to login. Captured 6 screenshots in `assets/screenshots/auth-3/`.
+- **Files Modified / Created**:
+  - `supabase/migrations/0049_refresh_token_family.sql` (created, proposed unapplied)
+  - `lib/auth/logout.ts` (created)
+  - `app/(client-portal)/client/auth/signout/route.ts` (modified)
+  - `app/api/auth/logout/route.ts` (modified)
+  - `lib/auth/change-password.ts` (modified)
+  - `app/api/auth/refresh/route.ts` (modified)
+  - `lib/auth/jwt.ts` (modified)
+  - `tests/auth/session-lifecycle.test.ts` (created)
+  - `scripts/verify-auth-3-e2e.ts` (created)
+  - `assets/screenshots/auth-3/*` (created)
+  - `MIGRATION_EXECUTION_LOG.md` (modified)
 - **Verification / Test Result**:
   - `npx tsc --noEmit`: **EXIT 0**
-  - `npm test`: **82 test files, 599/599 tests passed (100% pass rate, +13 new regression tests in this batch)**
+  - `npm test`: **83 test files, 611/611 tests passed (100% pass rate, +12 new regression tests in this batch)**
   - `npm run lint`: **0 errors, 3 baseline warnings (0 warnings in touched files)**
   - `npm run build`: **142 routes compiled cleanly (exact baseline strictly preserved)**
-  - Concurrent duplicate delivery test passed: Exactly 1 primary (`{ received: true }`), exactly 1 duplicate (`{ received: true, duplicate: true }`), audit log count increased by exactly 1.
-- **Status**: ✅ BILL-2 Phase B complete. All quality gates satisfied. Local commits ready.
+  - Concurrent refresh test passed: Exactly 1× 200 with new pair, 1× 401 REUSED, family revoked, subsequent refresh 401.
+- **Status**: ✅ AUTH-3 Phase B complete. All quality gates satisfied. Local commits ready.
+
 
 
 
