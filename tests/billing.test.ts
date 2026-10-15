@@ -54,11 +54,11 @@ describe('Billing & Plan Usage Calculations', () => {
       ;(queryOne as any).mockResolvedValue(null)
 
       const limits = await getOrganizationPlanLimits('org-no-sub')
-      expect(limits.max_team_members).toBe(5)
-      expect(limits.max_clients).toBe(25)
-      expect(limits.max_projects).toBe(50)
-      expect(limits.ai_features_enabled).toBe(false)
-      expect(limits.client_portal_enabled).toBe(true)
+      expect(limits.max_team_members).toBe(3)
+      expect(limits.max_clients).toBe(5)
+      expect(limits.max_projects).toBe(3)
+      expect(limits.ai_features_enabled).toBe(true)
+      expect(limits.client_portal_enabled).toBe(false)
     })
   })
 

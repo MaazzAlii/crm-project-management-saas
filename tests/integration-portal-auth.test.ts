@@ -10,6 +10,10 @@ vi.mock('@/lib/db', () => ({
   queryOne: vi.fn(),
 }))
 
+vi.mock('@/lib/services/plan-limits', () => ({
+  checkFeatureAccess: vi.fn(),
+}))
+
 vi.mock('@/lib/audit/logger', () => ({
   logAuditEvent: vi.fn().mockResolvedValue(true),
 }))
@@ -22,6 +26,7 @@ vi.mock('next/navigation', () => ({
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
 import { queryOne } from '@/lib/db'
+import { checkFeatureAccess } from '@/lib/services/plan-limits'
 import { requirePortalSession, inviteClientToPortal } from '@/lib/portal/auth'
 
 describe('Integration: Client Portal Authentication & Session Scoping', () => {
@@ -31,6 +36,12 @@ describe('Integration: Client Portal Authentication & Session Scoping', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    ;(checkFeatureAccess as any).mockResolvedValue({
+      allowed: true,
+      feature: 'clientPortal',
+      planName: 'Pro',
+      upgradeUrl: '/settings/billing',
+    })
   })
 
   describe('requirePortalSession', () => {
@@ -78,6 +89,9 @@ describe('Integration: Client Portal Authentication & Session Scoping', () => {
     })
 
     it('redirects when organization plan does not permit client portal', async () => {
+      ;(checkFeatureAccess as any).mockResolvedValueOnce({
+        allowed: false,
+      })
       ;(getCurrentSessionContext as any).mockResolvedValue({
         user: { id: mockUserId },
       })
@@ -89,11 +103,6 @@ describe('Integration: Client Portal Authentication & Session Scoping', () => {
             client_id: mockClientId,
             organization_id: mockOrgId,
             is_active: true,
-          })
-        }
-        if (sql.includes('organization_subscriptions')) {
-          return Promise.resolve({
-            feature_limits: { client_portal_enabled: false },
           })
         }
         return Promise.resolve(null)
@@ -122,6 +131,11 @@ describe('Integration: Client Portal Authentication & Session Scoping', () => {
     })
 
     it('blocks invitation when client portal is not included in the plan', async () => {
+      ;(checkFeatureAccess as any).mockResolvedValueOnce({
+        allowed: false,
+        message: 'Client Portal is not available on your current plan. Please upgrade.',
+      })
+
       ;(getCurrentSessionContext as any).mockResolvedValue({
         user: { id: 'usr-admin' },
       })
@@ -129,11 +143,6 @@ describe('Integration: Client Portal Authentication & Session Scoping', () => {
       ;(queryOne as any).mockImplementation((sql: string) => {
         if (sql.includes('organization_members')) {
           return Promise.resolve({ role: 'admin' })
-        }
-        if (sql.includes('organization_subscriptions')) {
-          return Promise.resolve({
-            feature_limits: { client_portal_enabled: false },
-          })
         }
         return Promise.resolve(null)
       })

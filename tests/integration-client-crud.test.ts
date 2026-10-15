@@ -7,6 +7,25 @@ vi.mock('@/lib/auth/session', () => ({
 vi.mock('@/lib/db', () => ({
   query: vi.fn(),
   queryOne: vi.fn(),
+  transaction: vi.fn(async (cb) => {
+    const mockClient = {
+      query: vi.fn(async (sql: string, params: any[]) => {
+        if (sql.includes('FOR UPDATE')) {
+          return { rows: [{ id: 'org-integration-1' }] }
+        }
+        if (sql.includes('INSERT INTO clients')) {
+          await (queryOne as any)(sql, params)
+          return { rows: [{ id: 'new-client-uuid-123' }] }
+        }
+        return { rows: [] }
+      }),
+    }
+    return cb(mockClient)
+  }),
+}))
+
+vi.mock('@/lib/services/plan-limits', () => ({
+  checkClientLimit: vi.fn(),
 }))
 
 vi.mock('@/lib/billing/plan-limits', () => ({
@@ -23,7 +42,7 @@ vi.mock('next/cache', () => ({
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
 import { query, queryOne } from '@/lib/db'
-import { checkClientLimit } from '@/lib/billing/plan-limits'
+import { checkClientLimit } from '@/lib/services/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { createClientAction, deleteClientAction } from '@/app/(dashboard)/clients/actions'
 
@@ -42,6 +61,7 @@ describe('Integration: Client CRUD Server Actions with RLS & Audit', () => {
     ;(checkClientLimit as any).mockResolvedValue({
       allowed: true,
       currentCount: 5,
+      limit: 25,
       maxLimit: 25,
     })
   })

@@ -49,7 +49,7 @@ describe('Fix 1: Database-driven Lifetime Access & Zero Hardcoded Email Verifica
     expect(plan.planConfig.maxMembers).toBe(3);
   });
 
-  it('2. Organization with plan_override = "lifetime" gets Enterprise limits', async () => {
+  it('2. Organization with plan_override = "lifetime" gets Pro limits', async () => {
     await query(
       `INSERT INTO organization_plans (organization_id, plan_id, status, plan_override)
        VALUES ($1, 'free', 'active', 'lifetime')
@@ -58,9 +58,9 @@ describe('Fix 1: Database-driven Lifetime Access & Zero Hardcoded Email Verifica
     );
 
     const plan = await getCurrentPlan(testOrgId);
-    expect(plan.planId).toBe('enterprise');
-    expect(plan.effectivePlanId).toBe('enterprise');
-    expect(plan.planConfig.maxMembers).toBe(500);
+    expect(plan.planId).toBe('pro');
+    expect(plan.effectivePlanId).toBe('pro');
+    expect(plan.planConfig.maxMembers).toBe(15);
   });
 
   it('3. isSuperAdmin strictly consults database and returns false for random user without database entry', async () => {

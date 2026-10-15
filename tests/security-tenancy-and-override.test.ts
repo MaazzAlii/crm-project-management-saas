@@ -113,9 +113,9 @@ describe('Security & Multi-Tenancy Hardening', () => {
       // plan_override is strictly preserved and was not touched or overwritten by Stripe
       expect(row.plan_override).toBe('lifetime');
 
-      // Plan resolution still recognizes lifetime override as enterprise
+      // Plan resolution still recognizes lifetime override as pro (matches Pro quotas per BILL-1)
       const plan = await getCurrentPlan(testOrgId);
-      expect(plan.planId).toBe('enterprise');
+      expect(plan.planId).toBe('pro');
     });
 
     it('Stripe customer.subscription.deleted / canceled preserves plan_override = lifetime and does not restrict account', async () => {
@@ -133,7 +133,7 @@ describe('Security & Multi-Tenancy Hardening', () => {
 
       // getCurrentPlan does NOT restrict account to free tier because lifetime override protects it
       const plan = await getCurrentPlan(testOrgId);
-      expect(plan.planId).toBe('enterprise');
+      expect(plan.planId).toBe('pro');
     });
   });
 });
