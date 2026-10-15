@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest, getTenantOrgId } from '@/lib/auth/middleware';
 import { crmService } from '@/lib/services/crm-service';
-import { billingService } from '@/lib/services/billing-service';
-import { apiSuccess, apiPaginated, handleApiError, apiError } from '@/lib/utils/response';
+import { transaction } from '@/lib/db';
+import { checkClientLimit } from '@/lib/services/plan-limits';
+import { apiSuccess, apiPaginated, handleApiError, apiError, apiPlanLimitError } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,11 +41,24 @@ export async function POST(request: NextRequest) {
       return apiError('Client name is required', 400, 'VALIDATION_ERROR');
     }
 
-    // Check plan limits
-    await billingService.assertQuotaAvailable(orgId, 'clients');
+    // Atomic plan quota enforcement with row lock to eliminate race conditions
+    const result = await transaction(async (client) => {
+      await client.query('SELECT id FROM organizations WHERE id = $1 FOR UPDATE', [orgId]);
 
-    const client = await crmService.createClient(orgId, auth!.userId, body);
-    return apiSuccess(client, 201);
+      const limitCheck = await checkClientLimit(orgId, { client });
+      if (!limitCheck.allowed) {
+        return { limitError: limitCheck };
+      }
+
+      const newClient = await crmService.createClient(orgId, auth!.userId, body, { client });
+      return { client: newClient };
+    });
+
+    if ('limitError' in result) {
+      return apiPlanLimitError(result.limitError, 'CLIENT_LIMIT_REACHED');
+    }
+
+    return apiSuccess(result.client, 201);
   } catch (error) {
     return handleApiError(error);
   }

@@ -1,20 +1,33 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { query, queryOne } from '@/lib/db'
-import { checkClientLimit } from '@/lib/billing/plan-limits'
+import { query, queryOne, transaction } from '@/lib/db'
+import { checkClientLimit } from '@/lib/services/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { validateAndSanitize } from '@/lib/validation/action-wrapper'
 import { CreateClientSchema, UpdateClientSchema } from '@/lib/validation/schemas'
 import { revalidatePath } from 'next/cache'
 
-export async function createClientAction(formData: FormData) {
+export type CreateClientActionResult = {
+  success: boolean;
+  clientId?: string;
+  error?: string;
+  code?: string;
+  currentCount?: number;
+  limit?: number;
+  planName?: string;
+  upgradeUrl?: string;
+};
+
+export async function createClientAction(formData: FormData): Promise<CreateClientActionResult> {
   try {
     const session = await getCurrentSessionContext()
 
     if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized. Active session context not found.' }
+      return { success: false, error: 'Unauthorized. Active session context not found.' }
     }
+
+    const orgId = session.organization.id
 
     const rawData = {
       name: formData.get('name')?.toString(),
@@ -32,7 +45,7 @@ export async function createClientAction(formData: FormData) {
 
     const validation = validateAndSanitize(CreateClientSchema, rawData)
     if (!validation.success) {
-      return { error: validation.error }
+      return { success: false, error: validation.error }
     }
 
     const validatedData = validation.data
@@ -44,19 +57,26 @@ export async function createClientAction(formData: FormData) {
       } catch (e) {}
     }
 
-    // Server-side Plan Limit Check (CRITICAL SECURITY & BILLING REQUIREMENT)
-    const limitCheck = await checkClientLimit(session.organization.id)
-    if (!limitCheck.allowed) {
-      return {
-        error: `You've reached your plan's client limit (${limitCheck.maxLimit} clients). Please upgrade your plan to add more clients.`,
+    // Atomic server-side Plan Limit Check & Insertion with row lock
+    const txResult = await transaction(async (client) => {
+      await client.query('SELECT id FROM organizations WHERE id = $1 FOR UPDATE', [orgId]);
+
+      const limitCheck = await checkClientLimit(orgId, { client });
+      if (!limitCheck.allowed) {
+        return {
+          limitError: {
+            error: limitCheck.message || `You've reached your plan's client limit (${limitCheck.limit} clients). Please upgrade your plan to add more clients.`,
+            code: 'CLIENT_LIMIT_REACHED',
+            currentCount: limitCheck.currentCount,
+            limit: limitCheck.limit,
+            planName: limitCheck.planName,
+            upgradeUrl: limitCheck.upgradeUrl,
+          },
+          newClient: null,
+        };
       }
-    }
 
-    let newClient: { id: string } | null = null
-    let insertError: any = null
-
-    try {
-      newClient = await queryOne<{ id: string }>(
+      const insertRes = await client.query<{ id: string }>(
         `INSERT INTO clients (
           organization_id, name, company, email, phone, platform, country,
           currency, payment_schedule, status, communication_mode, notes, tags,
@@ -65,7 +85,7 @@ export async function createClientAction(formData: FormData) {
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW()
         ) RETURNING id`,
         [
-          session.organization.id,
+          orgId,
           validatedData.name,
           validatedData.company,
           validatedData.email,
@@ -79,14 +99,26 @@ export async function createClientAction(formData: FormData) {
           validatedData.notes,
           tags,
         ]
-      )
-    } catch (err: any) {
-      insertError = err
+      );
+
+      return { limitError: null, newClient: insertRes.rows[0] };
+    });
+
+    if (txResult.limitError) {
+      return {
+        success: false,
+        error: txResult.limitError.error,
+        code: txResult.limitError.code,
+        currentCount: txResult.limitError.currentCount,
+        limit: txResult.limitError.limit,
+        planName: txResult.limitError.planName,
+        upgradeUrl: txResult.limitError.upgradeUrl,
+      };
     }
 
-    if (insertError || !newClient) {
-      console.error('Failed to insert client record:', insertError)
-      return { error: insertError?.message || 'Database error occurred while creating client.' }
+    const newClient = txResult.newClient;
+    if (!newClient) {
+      return { success: false, error: 'Database error occurred while creating client.' };
     }
 
     // Audit Logging
@@ -109,7 +141,7 @@ export async function createClientAction(formData: FormData) {
     return { success: true, clientId: newClient.id }
   } catch (error: any) {
     console.error('createClientAction error:', error)
-    return { error: error?.message || 'Internal server error occurred.' }
+    return { success: false, error: error?.message || 'Internal server error occurred.' }
   }
 }
 
