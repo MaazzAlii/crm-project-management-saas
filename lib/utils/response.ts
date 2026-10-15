@@ -77,6 +77,35 @@ export function apiError(
 }
 
 /**
+ * Return a structured 402 Plan Limit Reached response matching TEAM-2 & BILL-1 specifications
+ */
+export function apiPlanLimitError(
+  check?: {
+    message?: string;
+    currentCount?: number;
+    limit?: number;
+    planName?: string;
+    upgradeUrl?: string;
+  } | null,
+  code: string = 'PLAN_LIMIT_REACHED'
+): NextResponse {
+  return NextResponse.json(
+    {
+      success: false,
+      error: {
+        code,
+        message: check?.message || 'Plan limit reached. Please upgrade your subscription.',
+        currentCount: check?.currentCount ?? 0,
+        limit: check?.limit ?? 0,
+        planName: check?.planName || 'Free',
+        upgradeUrl: check?.upgradeUrl || '/settings/billing',
+      },
+    },
+    { status: 402 }
+  );
+}
+
+/**
  * Extract standard pagination parameters from URL search params
  */
 export function extractPagination(searchParams: URLSearchParams): {
