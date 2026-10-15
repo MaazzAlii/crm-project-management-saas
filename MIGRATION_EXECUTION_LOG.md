@@ -3666,6 +3666,75 @@ paste at the start of every batch report.
   - `npm run build`: **142 routes compiled cleanly (exact baseline strictly preserved, build succeeds with empty STRIPE_PRO_PRICE_ID)**
 - **Status**: ✅ BILL-2C complete. Coolify production deployment unblocked.
 
+---
+
+### Phase / Task: BILL-3 — plan_override Resolution (Lifetime + Sponsored), Lifetime = Enterprise, Date Fix
+- **Timestamp**: 2026-10-15 18:15 PKT
+- **Action Performed**:
+  1. **Root Cause Resolution & Override Engine (`lib/billing/current-plan.ts`)**:
+     - Resolved one-line bug in `getCurrentPlan()` where `isLifetime` previously hardcoded `planId = 'pro'`.
+     - Implemented `resolveOverride(planOverride, expiresAt)` with strict multi-tier and duration support:
+       - `'lifetime'`, `'vip'`, `'lifetime_vip'` → Permanent Enterprise quotas (slug: `'lifetime'`).
+       - `'enterprise'`, `'agency'` → Permanent Enterprise quotas (slug: `'enterprise'`).
+       - `'pro'` → Permanent Pro quotas (slug: `'pro'`) — preserves manual Pro grants without unintended upgrade.
+       - `'1_month'`, `'3_month'`, `'6_month'`, `'12_month'` → Enterprise quotas until `plan_override_expires_at`; returns `null` once expired to seamlessly fall back to active Stripe subscription or Free tier.
+       - Unknown non-null values → Fail-open to Enterprise quotas with a `console.warn` log.
+     - Wired `resolveOverride()` as priority #1 in `getCurrentPlan()`, immediately unblocking `Maaz Ali Enterprise` (`e568d645-b363-4d31-90cd-0ff849b8481b`).
+  2. **Shared Enterprise Quotas (`config/plans.ts`)**:
+     - Defined `ENTERPRISE_QUOTAS` and `ENTERPRISE_FEATURES` once as constant definitions.
+     - Assigned both constants to `PLANS.enterprise` and `PLANS.lifetime`, ensuring deep equality:
+       - `maxMembers: 500`, `maxPendingInvites: 500`, `maxClients: 999999`, `maxProjects: 999999`, `maxChannels: 999`, `maxAIRequestsMonthly: 10000`.
+       - `ssoEnabled: true`, `auditLogsEnabled: true`, `apiAccessEnabled: true`, `clientPortalEnabled: true`, `emailIntegrationEnabled: true`.
+     - Updated `getPlanConfig('lifetime')` to resolve to `PLANS.lifetime`.
+  3. **Pending Invitation Expiry Date Guard (`components/settings/PendingInvitationsList.tsx`)**:
+     - Fixed field name mismatch where PostgreSQL returns `expires_at` while UI looked for `token_expires_at`.
+     - Implemented `formatInviteDate` with `isNaN(d.getTime())` guard, avoiding the `"Invalid Date"` trap when `new Date(undefined)` returns an invalid date without throwing.
+  4. **Upgrade CTA Gating Across All Components**:
+     - `components/billing/PlanUsageCard.tsx`: Never renders "Upgrade to Pro" for Lifetime, Enterprise, or active sponsored overrides. Shows "Upgrade to Enterprise" for Pro, and "Contact sales" for Enterprise/Lifetime.
+     - `components/settings/InviteMemberDialog.tsx`: Gated upgrade callout so it only renders for Free/Pro plans and is hidden for Lifetime and Enterprise.
+     - `components/settings/BillingSettingsClient.tsx`: Renders "Enterprise Access Active" badge instead of a broken "Manage subscription" or "Upgrade to Pro" when tier is Pro/Enterprise/Lifetime without a Stripe customer.
+     - `app/(dashboard)/settings/team/page.tsx`: Gated `showUpgradePromptOnLimit` to false for non-free tiers.
+  5. **Proposed Migration 0050 (`supabase/migrations/0050_plan_override_expiry.sql`)**:
+     - Authored proposed migration adding `plan_override_expires_at TIMESTAMPTZ`, `plan_override_granted_by UUID`, `plan_override_granted_at TIMESTAMPTZ`, and `plan_override_note TEXT` to `public.organization_plans` only (preserving single source of truth; zero changes to `organizations`). (Proposed unapplied).
+  6. **Automated Regression Suite (`tests/billing/plan-override-resolution.test.ts`)**:
+     - Authored 21 comprehensive tests covering: deep equality of quotas and features, all `resolveOverride` cases, production org `e568d645-b363-4d31-90cd-0ff849b8481b` resolution, manual overrides, expiration fallbacks, and date formatting guards.
+     - Updated legacy tests (`tests/billing/plan-limits.test.ts`, `tests/lifetime-access-db.test.ts`, `tests/security-tenancy-and-override.test.ts`) to align with BILL-3 business correction (Lifetime VIP = Enterprise).
+  7. **Playwright E2E Verification (`scripts/verify-bill-3-e2e.ts`)**:
+     - Verified live standalone server on port 3000 as owner of `e568d645-b363-4d31-90cd-0ff849b8481b`.
+     - Captured 4 screenshots in `assets/screenshots/bill-3/`:
+       - `lifetime_seats_light.png`: Confirmed "3 of 500 seats used" in Light Mode.
+       - `lifetime_seats_dark.png`: Confirmed "3 of 500 seats used" in Dark Mode.
+       - `no_upgrade_cta_light.png`: Confirmed absence of "Upgrade to Pro" CTA on Lifetime org.
+       - `invite_expiry_light.png`: Confirmed valid formatted expiry date ("Oct 19, 2026") with zero "Invalid Date" strings.
+- **Files Modified / Created**:
+  - `config/plans.ts` (modified)
+  - `lib/types/database.ts` (modified)
+  - `lib/billing/current-plan.ts` (modified)
+  - `components/settings/PendingInvitationsList.tsx` (modified)
+  - `components/billing/PlanUsageCard.tsx` (modified)
+  - `components/settings/InviteMemberDialog.tsx` (modified)
+  - `components/settings/BillingSettingsClient.tsx` (modified)
+  - `app/(dashboard)/settings/team/page.tsx` (modified)
+  - `app/(dashboard)/settings/billing/page.tsx` (modified)
+  - `docs/engineering/PLAN-TIERS.md` (modified)
+  - `supabase/migrations/0050_plan_override_expiry.sql` (created, proposed unapplied)
+  - `tests/billing/plan-override-resolution.test.ts` (created)
+  - `tests/billing/plan-limits.test.ts` (modified)
+  - `tests/lifetime-access-db.test.ts` (modified)
+  - `tests/security-tenancy-and-override.test.ts` (modified)
+  - `scripts/verify-bill-3-e2e.ts` (created)
+  - `assets/screenshots/bill-3/*` (created)
+  - `MIGRATION_EXECUTION_LOG.md` (modified)
+- **Verification / Test Result**:
+  - `npx tsc --noEmit`: **EXIT 0**
+  - `npm test`: **85 test files, 638 passed (100% pass rate, +22 net tests passing)**
+  - `npm run lint`: **0 errors, 3 baseline warnings (0 warnings in touched files)**
+  - `npm run build`: **142 routes compiled cleanly (exact baseline strictly preserved)**
+  - Rule 21 check: `NODE_ENV=production STRIPE_PRO_PRICE_ID= STRIPE_PUBLISHABLE_KEY= npm run build` **exited 0 with 142 routes**.
+  - Playwright E2E: **All 4 assertions passed, all 4 screenshots generated**.
+- **Status**: ✅ BILL-3 Phase B complete. All quality gates satisfied. Local commits ready.
+
+
 
 
 
