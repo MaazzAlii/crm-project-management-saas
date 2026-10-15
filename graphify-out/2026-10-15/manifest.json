@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "app/(auth)/signup/page.tsx": {
-    "mtime": 1791993997.0507498,
-    "seen": 1791994955.9968987,
-    "ast_hash": "f2852a228e0105868a4591c5dfe51683",
+    "mtime": 1792050733.7162304,
+    "seen": 1792051309.7663283,
+    "ast_hash": "e8e53430105044e2973600181122ace8",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/billing/page.tsx": {
@@ -156,9 +156,9 @@
     "semantic_hash": ""
   },
   "middleware.ts": {
-    "mtime": 1791993757.0546253,
-    "seen": 1791994955.99785,
-    "ast_hash": "3ff344c40906b541c6e41aaddc865c6e",
+    "mtime": 1792050477.3488328,
+    "seen": 1792051309.7672133,
+    "ast_hash": "016ae26dd538e5d6e0adca0fa88a3f15",
     "semantic_hash": ""
   },
   "scripts/infra/backup-postgres.sh": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1792048778.4715822,
-    "seen": 1792048803.86308,
-    "ast_hash": "cac71d7d68193d3c02614da8db35f774",
+    "mtime": 1792051273.3201976,
+    "seen": 1792051309.7675748,
+    "ast_hash": "8efe37119149cf4923078d50fd269ae3",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1608,9 +1608,9 @@
     "semantic_hash": ""
   },
   "app/actions/signup.ts": {
-    "mtime": 1791785377.7593875,
-    "seen": 1791785735.672849,
-    "ast_hash": "c812b0252f9291c92bb26c88828b13e3",
+    "mtime": 1792050578.8875885,
+    "seen": 1792051309.7664988,
+    "ast_hash": "d17cd607ec8f217897d16a4ea1ad17a1",
     "semantic_hash": ""
   },
   "app/api/auth/change-password/route.ts": {
@@ -1662,9 +1662,9 @@
     "semantic_hash": ""
   },
   "app/api/auth/signup/route.ts": {
-    "mtime": 1791616061.2726557,
-    "seen": 1791772540.8369603,
-    "ast_hash": "03d73166b5edd8e85df8b70472d3d8e1",
+    "mtime": 1792050640.6004438,
+    "seen": 1792051309.7665129,
+    "ast_hash": "2a4ca7264459509578cb91e020ecb5df",
     "semantic_hash": ""
   },
   "app/api/auth/verify-magic-link/route.ts": {
@@ -3330,9 +3330,9 @@
     "semantic_hash": ""
   },
   "middleware/rate-limit.ts": {
-    "mtime": 1791832893.1436121,
-    "seen": 1791835213.528626,
-    "ast_hash": "09feb937cfe4630fb029bf7754ae567d",
+    "mtime": 1792050449.0539026,
+    "seen": 1792051309.767215,
+    "ast_hash": "148fd51487110075e9cb4483b8db0943",
     "semantic_hash": ""
   },
   "n8n/workflows/project-delivered-invoice.json": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1792048743.9096322,
-    "seen": 1792048803.863086,
-    "ast_hash": "3f20e2e819053f2492d5af2c5f5e0276",
+    "mtime": 1792051240.9128745,
+    "seen": 1792051309.7675817,
+    "ast_hash": "201484e5752946c8df83443beda2d09c",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6300,9 +6300,9 @@
     "semantic_hash": ""
   },
   "app/api/auth/verify-email/confirm/route.ts": {
-    "mtime": 1791778156.317572,
-    "seen": 1791778843.7833173,
-    "ast_hash": "2459eb761523a0cb96c7f8dad4162822",
+    "mtime": 1792050512.979746,
+    "seen": 1792051309.7665145,
+    "ast_hash": "bcf15a74f1554395f89e9afbfe78b3c7",
     "semantic_hash": ""
   },
   "app/api/auth/verify-email/send/route.ts": {
@@ -7818,9 +7818,9 @@
     "semantic_hash": ""
   },
   "scripts/verify-team-4-e2e.ts": {
-    "mtime": 1792048555.3569255,
-    "seen": 1792048803.8628938,
-    "ast_hash": "9c470c717adcf7620701303f581f8ed6",
+    "mtime": 1792048923.0193813,
+    "seen": 1792051309.7673597,
+    "ast_hash": "c7b9534f973ad31859e986686d999c3d",
     "semantic_hash": ""
   },
   "tests/team/team-ui.test.ts": {
@@ -7875,6 +7875,60 @@
     "mtime": 1792048573.7266345,
     "seen": 1792048803.8638935,
     "ast_hash": "483b1bf51ce561411e6148c87bbf2239",
+    "semantic_hash": ""
+  },
+  "scripts/verify-auth-2-e2e.ts": {
+    "mtime": 1792050932.6197896,
+    "seen": 1792051309.7673132,
+    "ast_hash": "c5dfd655b7711ea3237c2c4f9432f2e7",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0047_backfill_email_verified.sql": {
+    "mtime": 1792050766.1431572,
+    "seen": 1792051309.7674346,
+    "ast_hash": "d1234ac49af4e3380f3e34c1738022f7",
+    "semantic_hash": ""
+  },
+  "tests/auth/signup-and-verification.test.ts": {
+    "mtime": 1792050867.483932,
+    "seen": 1792051309.7674623,
+    "ast_hash": "f53bb7b15d002804032fe2783c946d34",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-2/signup_empty_dark.png": {
+    "mtime": 1792051005.6258752,
+    "seen": 1792051309.7683291,
+    "ast_hash": "2a7eff3e24943a29bbd81cdb0a1d3adc",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-2/signup_empty_light.png": {
+    "mtime": 1792051005.1293244,
+    "seen": 1792051309.7683313,
+    "ast_hash": "54617ff4d8b3b7da91fec1833b0f7c85",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-2/signup_errors_dark.png": {
+    "mtime": 1792051006.3766732,
+    "seen": 1792051309.7683325,
+    "ast_hash": "7129f9c37535b8d36e5d153d7a8006e6",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-2/signup_errors_light.png": {
+    "mtime": 1792051006.8966293,
+    "seen": 1792051309.768334,
+    "ast_hash": "53b8bf80e3dac5763cf72b6105a8e619",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-2/unverified_banner_dark.png": {
+    "mtime": 1792051008.8286252,
+    "seen": 1792051309.7683353,
+    "ast_hash": "3465a4cc44da66c0af3fc5310c08af21",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-2/unverified_banner_light.png": {
+    "mtime": 1792051008.2116265,
+    "seen": 1792051309.768337,
+    "ast_hash": "66c2eead0b27e47d3f2cbe4d84939573",
     "semantic_hash": ""
   }
 }
