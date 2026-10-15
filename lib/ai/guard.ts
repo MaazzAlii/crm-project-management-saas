@@ -1,5 +1,6 @@
 import { queryOne } from '@/lib/db'
 import { getOrganizationPlanLimits } from '@/lib/billing/plan-limits'
+import { checkAIUsageLimit } from '@/lib/services/plan-limits'
 import { AIFeatureType, AIGateCheckResult } from './types'
 
 interface GlobalFeatureFlags {
@@ -140,6 +141,24 @@ export async function checkAIAccess(
     }
   } catch (err) {
     console.warn('[AI:Guard] Error checking organization AI feature settings:', err)
+  }
+
+  // 4. Check Monthly AI Request Quota from ai_usage_log
+  try {
+    const usageCheck = await checkAIUsageLimit(organizationId)
+    if (!usageCheck.allowed) {
+      return {
+        allowed: false,
+        reason: usageCheck.message,
+        code: 'AI_LIMIT_REACHED',
+        currentCount: usageCheck.currentCount,
+        limit: usageCheck.limit,
+        planName: usageCheck.planName,
+        upgradeUrl: usageCheck.upgradeUrl,
+      }
+    }
+  } catch (err) {
+    console.warn('[AI:Guard] Error checking organization AI usage limit:', err)
   }
 
   return { allowed: true }

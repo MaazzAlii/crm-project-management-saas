@@ -44,6 +44,7 @@ export interface AICompletionResponse {
   errorCode?:
     | 'KILL_SWITCH_ACTIVE'
     | 'PLAN_LIMIT_REACHED'
+    | 'AI_LIMIT_REACHED'
     | 'CAPABILITY_DISABLED'
     | 'FEATURE_DISABLED_BY_ORGANIZATION'
     | 'PROVIDER_ERROR'
@@ -53,7 +54,11 @@ export interface AICompletionResponse {
 export interface AIGateCheckResult {
   allowed: boolean
   reason?: string
-  code?: 'KILL_SWITCH_ACTIVE' | 'PLAN_LIMIT_REACHED' | 'CAPABILITY_DISABLED' | 'FEATURE_DISABLED_BY_ORGANIZATION'
+  code?: 'KILL_SWITCH_ACTIVE' | 'PLAN_LIMIT_REACHED' | 'AI_LIMIT_REACHED' | 'CAPABILITY_DISABLED' | 'FEATURE_DISABLED_BY_ORGANIZATION'
+  currentCount?: number
+  limit?: number
+  planName?: string
+  upgradeUrl?: string
 }
 
 export interface AIFeatureSettings {
