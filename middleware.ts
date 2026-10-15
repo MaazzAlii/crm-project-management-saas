@@ -54,14 +54,14 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 2. Sliding Window Rate Limiting Enforcement
-  const rateLimitResponse = handleRateLimiting(request)
-  if (rateLimitResponse) {
-    applySecurityHeaders(rateLimitResponse)
-    if (pathname.startsWith('/api/')) {
+  // 2. Sliding Window Rate Limiting Enforcement (strictly for API routes)
+  if (pathname.startsWith('/api/')) {
+    const rateLimitResponse = handleRateLimiting(request)
+    if (rateLimitResponse) {
+      applySecurityHeaders(rateLimitResponse)
       applyCorsHeaders(rateLimitResponse, request)
+      return rateLimitResponse
     }
-    return rateLimitResponse
   }
 
   const response = NextResponse.next({
@@ -108,6 +108,20 @@ export async function middleware(request: NextRequest) {
   if (pathname === '/auth/change-password') {
     const url = request.nextUrl.clone()
     url.pathname = '/change-password'
+    return NextResponse.rewrite(url)
+  }
+
+  // Rewrite /sign-in to /login for URL compatibility
+  if (pathname === '/sign-in') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.rewrite(url)
+  }
+
+  // Rewrite /verify-email to /api/auth/verify-email/confirm for verification link compatibility
+  if (pathname === '/verify-email') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/api/auth/verify-email/confirm'
     return NextResponse.rewrite(url)
   }
 
@@ -189,7 +203,10 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/analytics')
 
   // Auth Routes (Login / Signup)
-  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signup')
+  const isAuthRoute =
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/signup') ||
+    pathname === '/sign-in'
 
   if (isProtectedRoute && !user && !isDevSuperAdmin) {
     const url = request.nextUrl.clone()
