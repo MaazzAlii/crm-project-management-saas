@@ -20,9 +20,13 @@ export default async function TeamSettingsPage() {
 
   // Fetch all organization members with joined profile details
   const { rows: memberRows } = await query<any>(
-    `SELECT om.id, om.user_id, om.role, om.joined_at, u.full_name, u.email, u.avatar_url
+    `SELECT om.id, om.user_id, om.role, om.joined_at, om.created_at, om.invited_by,
+            u.full_name, u.email, u.avatar_url, COALESCE(u.is_active, true) as is_active,
+            u.last_login_at, NULL::text as phone,
+            inviter.full_name as invited_by_name
      FROM organization_members om
      JOIN users u ON u.id = om.user_id
+     LEFT JOIN users inviter ON inviter.id = om.invited_by
      WHERE om.organization_id = $1
      ORDER BY om.created_at ASC`,
     [session.organization.id]
@@ -32,7 +36,11 @@ export default async function TeamSettingsPage() {
     id: row.id,
     userId: row.user_id,
     role: row.role,
-    joinedAt: row.joined_at,
+    joinedAt: row.joined_at || row.created_at,
+    isActive: row.is_active !== false,
+    lastLoginAt: row.last_login_at ?? null,
+    phone: row.phone ?? null,
+    invitedByName: row.invited_by_name ?? null,
     profile: {
       fullName: row.full_name ?? null,
       email: row.email ?? 'Unspecified User',

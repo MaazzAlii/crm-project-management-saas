@@ -196,6 +196,10 @@ export class OrganizationRepository {
     email: string;
     fullName: string | null;
     avatarUrl: string | null;
+    isActive: boolean;
+    lastLoginAt: string | null;
+    phone: string | null;
+    invitedByName?: string | null;
   }>> {
     try {
       const sql = `
@@ -203,9 +207,14 @@ export class OrganizationRepository {
           m.*,
           u.email,
           u.full_name as "fullName",
-          u.avatar_url as "avatarUrl"
+          u.avatar_url as "avatarUrl",
+          COALESCE(u.is_active, true) as "isActive",
+          u.last_login_at as "lastLoginAt",
+          NULL::text as "phone",
+          inviter.full_name as "invitedByName"
         FROM organization_members m
         JOIN users u ON u.id = m.user_id
+        LEFT JOIN users inviter ON inviter.id = m.invited_by
         WHERE m.organization_id = $1
         ORDER BY m.created_at ASC
       `;

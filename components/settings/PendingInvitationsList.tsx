@@ -81,7 +81,59 @@ export function PendingInvitationsList({
   }, [])
 
   useEffect(() => {
+    // 1. Initial fetch
     fetchInvitations()
+
+    // 2. Refetch on window focus
+    const handleFocus = () => {
+      fetchInvitations()
+    }
+    window.addEventListener('focus', handleFocus)
+
+    // 3. Polling interval (30s) paused when document is hidden
+    let intervalId: ReturnType<typeof setInterval> | null = null
+
+    const startPolling = () => {
+      if (!intervalId && typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        intervalId = setInterval(() => {
+          if (document.visibilityState === 'visible') {
+            fetchInvitations()
+          }
+        }, 30000)
+      }
+    }
+
+    const stopPolling = () => {
+      if (intervalId) {
+        clearInterval(intervalId)
+        intervalId = null
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (typeof document !== 'undefined') {
+        if (document.visibilityState === 'visible') {
+          fetchInvitations()
+          startPolling()
+        } else {
+          stopPolling()
+        }
+      }
+    }
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange)
+      startPolling()
+    }
+
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+      }
+      stopPolling()
+    }
   }, [fetchInvitations, refreshTrigger])
 
   const handleResend = async (inv: PendingInvitation) => {
@@ -288,6 +340,7 @@ export function PendingInvitationsList({
         </div>
         <button
           type="button"
+          data-testid="refresh-pending-invites-btn"
           onClick={fetchInvitations}
           disabled={loading}
           title="Refresh pending invitations"

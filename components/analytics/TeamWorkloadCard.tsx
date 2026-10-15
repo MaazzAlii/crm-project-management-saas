@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { Users, AlertCircle, CheckCircle2, User } from 'lucide-react'
 import { TeamWorkloadMember } from '@/lib/analytics/data'
 
@@ -68,9 +69,12 @@ export function TeamWorkloadCard({ workload }: TeamWorkloadCardProps) {
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 font-bold text-xs shrink-0 overflow-hidden">
                       {member.avatarUrl ? (
-                        <img
+                        <Image
                           src={member.avatarUrl}
                           alt={member.name}
+                          width={36}
+                          height={36}
+                          unoptimized
                           className="h-full w-full object-cover"
                         />
                       ) : (

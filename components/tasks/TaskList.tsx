@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -49,12 +49,16 @@ export function TaskList({
   const [tasks, setTasks] = useState<GlobalTaskRecord[]>(initialTasks)
   const [viewMode, setViewMode] = useState<'all' | 'my' | 'workload'>('all')
 
-  // Filters
+  // Filters for Tasks List View
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [priorityFilter, setPriorityFilter] = useState('ALL')
   const [projectFilter, setProjectFilter] = useState('ALL')
   const [assigneeFilter, setAssigneeFilter] = useState('ALL')
+
+  // Filters for Workload View (client-side only per Bug #13)
+  const [workloadProjectFilter, setWorkloadProjectFilter] = useState('ALL')
+  const [workloadStatusFilter, setWorkloadStatusFilter] = useState('ALL')
 
   // Modals
   const [isNewModalOpen, setIsNewModalOpen] = useState(false)
@@ -148,6 +152,41 @@ export function TaskList({
   const activeCount = tasks.filter((t) => t.status !== 'done').length
   const doneCount = tasks.filter((t) => t.status === 'done').length
   const overdueCount = tasks.filter((t) => t.status !== 'done' && t.due_date && t.due_date < todayStr).length
+
+  // Client-side dynamic workload aggregation (Bug #13 refinement)
+  const filteredWorkload = useMemo(() => {
+    return workloadList.map((member) => {
+      let memberTasks = member.assigned_tasks || []
+      if (workloadProjectFilter !== 'ALL') {
+        memberTasks = memberTasks.filter((t) => t.project_id === workloadProjectFilter)
+      }
+      if (workloadStatusFilter !== 'ALL') {
+        memberTasks = memberTasks.filter((t) => t.status === workloadStatusFilter)
+      }
+
+      const activeCount = memberTasks.filter((t) => t.status !== 'done').length
+      const doneCount = memberTasks.filter((t) => t.status === 'done').length
+      const overdueCount = memberTasks.filter(
+        (t) => t.status !== 'done' && t.due_date && t.due_date < todayStr
+      ).length
+
+      let level: 'Light' | 'Optimal' | 'Heavy' | 'Overloaded' = 'Optimal'
+      if (activeCount === 0) level = 'Light'
+      else if (activeCount <= 3) level = 'Optimal'
+      else if (activeCount <= 6) level = 'Heavy'
+      else level = 'Overloaded'
+
+      return {
+        ...member,
+        active_tasks_count: activeCount,
+        done_tasks_count: doneCount,
+        overdue_tasks_count: overdueCount,
+        total_assigned_count: memberTasks.length,
+        workload_level: level,
+        assigned_tasks: memberTasks,
+      }
+    })
+  }, [workloadList, workloadProjectFilter, workloadStatusFilter, todayStr])
 
   return (
     <div className="space-y-6">
@@ -261,15 +300,52 @@ export function TaskList({
 
       {/* WORKLOAD VIEW */}
       {viewMode === 'workload' ? (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-              Team Member Workload & Capacity Breakdown
-            </h2>
+        <div className="space-y-4" data-testid="workload-view-container">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                Team Member Workload & Capacity Breakdown
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Client-side filtered workload and capacity distribution per team member.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Project Filter */}
+              <select
+                data-testid="workload-project-filter"
+                value={workloadProjectFilter}
+                onChange={(e) => setWorkloadProjectFilter(e.target.value)}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              >
+                <option value="ALL">All Projects ({projectsList.length})</option>
+                {projectsList.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.title}
+                  </option>
+                ))}
+              </select>
+
+              {/* Status Filter */}
+              <select
+                data-testid="workload-status-filter"
+                value={workloadStatusFilter}
+                onChange={(e) => setWorkloadStatusFilter(e.target.value)}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="todo">To Do</option>
+                <option value="in_progress">In Progress</option>
+                <option value="review">In Review</option>
+                <option value="done">Completed</option>
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {workloadList.map((mw) => (
+            {filteredWorkload.map((mw) => (
               <WorkloadCard key={mw.id} memberWorkload={mw} />
             ))}
           </div>
