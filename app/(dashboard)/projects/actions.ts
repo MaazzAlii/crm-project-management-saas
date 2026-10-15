@@ -1,7 +1,8 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
-import { query, queryOne } from '@/lib/db'
+import { query, queryOne, transaction } from '@/lib/db'
+import { checkProjectLimit } from '@/lib/services/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { emitAutomationEvent } from '@/lib/automation/emitter'
 import { revalidatePath } from 'next/cache'
@@ -87,13 +88,26 @@ export async function fetchProjectsAction(): Promise<ProjectRecord[]> {
   }
 }
 
-export async function createProjectAction(formData: FormData) {
+export type CreateProjectActionResult = {
+  success: boolean;
+  projectId?: string;
+  error?: string;
+  code?: string;
+  currentCount?: number;
+  limit?: number;
+  planName?: string;
+  upgradeUrl?: string;
+};
+
+export async function createProjectAction(formData: FormData): Promise<CreateProjectActionResult> {
   try {
     const session = await getCurrentSessionContext()
 
     if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized session context.' }
+      return { success: false, error: 'Unauthorized session context.' }
     }
+
+    const orgId = session.organization.id
 
     const clientId = formData.get('client_id')?.toString().trim()
     const title = formData.get('title')?.toString().trim()
@@ -111,25 +125,40 @@ export async function createProjectAction(formData: FormData) {
     const template_id = formData.get('template_id')?.toString().trim() || null
 
     if (!clientId) {
-      return { error: 'Client selection is required for a project.' }
+      return { success: false, error: 'Client selection is required for a project.' }
     }
 
     if (!title) {
-      return { error: 'Project title is required.' }
+      return { success: false, error: 'Project title is required.' }
     }
 
-    let newProject: { id: string } | null = null
-    let insertError: any = null
+    // Atomic server-side Plan Limit Check & Insertion with row lock
+    const txResult = await transaction(async (client) => {
+      await client.query('SELECT id FROM organizations WHERE id = $1 FOR UPDATE', [orgId]);
 
-    try {
-      newProject = await queryOne<{ id: string }>(
+      const limitCheck = await checkProjectLimit(orgId, { client });
+      if (!limitCheck.allowed) {
+        return {
+          limitError: {
+            error: limitCheck.message || `You've reached your plan's project limit (${limitCheck.limit} projects). Please upgrade your plan to add more projects.`,
+            code: 'PROJECT_LIMIT_REACHED',
+            currentCount: limitCheck.currentCount,
+            limit: limitCheck.limit,
+            planName: limitCheck.planName,
+            upgradeUrl: limitCheck.upgradeUrl,
+          },
+          newProject: null,
+        };
+      }
+
+      const insertRes = await client.query<{ id: string }>(
         `INSERT INTO projects (
            organization_id, client_id, title, description, type, brief_source,
            amount, currency, status, priority, start_date, deadline, assigned_to, notes
          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
          RETURNING id`,
         [
-          session.organization.id,
+          orgId,
           clientId,
           title,
           description,
@@ -144,7 +173,27 @@ export async function createProjectAction(formData: FormData) {
           assigned_to || null,
           notes,
         ]
-      )
+      );
+
+      return { limitError: null, newProject: insertRes.rows[0] };
+    });
+
+    if (txResult.limitError) {
+      return {
+        success: false,
+        error: txResult.limitError.error,
+        code: txResult.limitError.code,
+        currentCount: txResult.limitError.currentCount,
+        limit: txResult.limitError.limit,
+        planName: txResult.limitError.planName,
+        upgradeUrl: txResult.limitError.upgradeUrl,
+      };
+    }
+
+    const newProject = txResult.newProject;
+    if (!newProject) {
+      return { success: false, error: 'Database error occurred while creating project.' };
+    }
 
       // Scaffold tasks and deliverables if template_id is provided
       if (newProject && template_id) {
@@ -206,14 +255,6 @@ export async function createProjectAction(formData: FormData) {
           console.error('Template scaffolding error:', scaffoldErr)
         }
       }
-    } catch (err: any) {
-      insertError = err
-    }
-
-    if (insertError || !newProject) {
-      console.error('Failed to create project:', insertError)
-      return { error: insertError?.message || 'Database error occurred while creating project.' }
-    }
 
     try {
       await logAuditEvent({
@@ -235,7 +276,7 @@ export async function createProjectAction(formData: FormData) {
     return { success: true, projectId: newProject.id }
   } catch (error: any) {
     console.error('createProjectAction error:', error)
-    return { error: error?.message || 'Internal server error.' }
+    return { success: false, error: error?.message || 'Internal server error.' }
   }
 }
 

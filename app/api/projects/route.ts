@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest, getTenantOrgId } from '@/lib/auth/middleware';
 import { projectService } from '@/lib/services/project-service';
-import { billingService } from '@/lib/services/billing-service';
-import { apiSuccess, apiPaginated, handleApiError, apiError } from '@/lib/utils/response';
+import { transaction } from '@/lib/db';
+import { checkProjectLimit } from '@/lib/services/plan-limits';
+import { apiSuccess, apiPaginated, handleApiError, apiError, apiPlanLimitError } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest) {
   try {
@@ -41,11 +42,24 @@ export async function POST(request: NextRequest) {
       return apiError('Title and clientId are required', 400, 'VALIDATION_ERROR');
     }
 
-    // Check plan quota
-    await billingService.assertQuotaAvailable(orgId, 'projects');
+    // Atomic plan quota enforcement with row lock to eliminate race conditions
+    const result = await transaction(async (client) => {
+      await client.query('SELECT id FROM organizations WHERE id = $1 FOR UPDATE', [orgId]);
 
-    const project = await projectService.createProject(orgId, auth!.userId, body);
-    return apiSuccess(project, 201);
+      const limitCheck = await checkProjectLimit(orgId, { client });
+      if (!limitCheck.allowed) {
+        return { limitError: limitCheck };
+      }
+
+      const project = await projectService.createProject(orgId, auth!.userId, body, { client });
+      return { project };
+    });
+
+    if ('limitError' in result) {
+      return apiPlanLimitError(result.limitError, 'PROJECT_LIMIT_REACHED');
+    }
+
+    return apiSuccess(result.project, 201);
   } catch (error) {
     return handleApiError(error);
   }
