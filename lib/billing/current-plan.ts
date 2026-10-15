@@ -20,8 +20,15 @@ interface CacheEntry {
   expiresAt: number;
 }
 
-// In-memory 30-second TTL cache keyed by organizationId
-const planCache = new Map<string, CacheEntry>();
+// Shared global 30-second TTL cache keyed by organizationId to maintain
+// coherence across Next.js standalone chunks, server actions, and server components.
+declare global {
+  var __innoventix_plan_cache__: Map<string, CacheEntry> | undefined;
+}
+
+const planCache: Map<string, CacheEntry> =
+  globalThis.__innoventix_plan_cache__ ||
+  (globalThis.__innoventix_plan_cache__ = new Map<string, CacheEntry>());
 const CACHE_TTL_MS = 30 * 1000;
 
 /**
@@ -92,8 +99,8 @@ export function resolveOverride(
     };
   }
 
-  // 4. Sponsored overrides: '1_month', '3_month', '6_month', '12_month'
-  if (['1_month', '3_month', '6_month', '12_month'].includes(raw)) {
+  // 4. Sponsored overrides: '1_month', '3_month', '6_month', '12_month', 'custom'
+  if (['1_month', '3_month', '6_month', '12_month', 'custom'].includes(raw)) {
     const parsedExpiry = expiresAt ? new Date(expiresAt) : null;
     const isExpired = parsedExpiry ? !isNaN(parsedExpiry.getTime()) && parsedExpiry.getTime() < Date.now() : false;
     if (isExpired) {
