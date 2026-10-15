@@ -39,9 +39,10 @@ export class CrmService {
       status?: 'active' | 'paused' | 'completed' | 'archived';
       communicationMode?: 'manual' | 'connected';
       notes?: string | null;
-    }
+    },
+    options?: { client?: any }
   ): Promise<Client> {
-    const client = await clientRepo.create(orgId, data);
+    const client = await clientRepo.create(orgId, data, options);
 
     await auditRepo.log({
       organizationId: orgId,
@@ -50,7 +51,7 @@ export class CrmService {
       resourceType: 'client',
       resourceId: client.id,
       metadata: { name: client.name, email: client.email },
-    });
+    }, options);
 
     return client;
   }

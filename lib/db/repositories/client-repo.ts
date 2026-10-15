@@ -5,6 +5,7 @@
  * Domain data access layer for Multi-Tenant Clients, Leads, Pipeline, and Tags.
  */
 
+import type { PoolClient } from 'pg';
 import { query, queryOne, transaction } from '../index';
 import { buildSelectQuery, buildInsertQuery, buildUpdateQuery, buildDeleteQuery, PaginationOptions } from '../query-builder';
 import { Client, Lead, LeadStatus, Tag } from '../../types/database';
@@ -40,7 +41,7 @@ export class ClientRepository {
     currency?: string;
     paymentSchedule?: string;
     notes?: string | null;
-  }): Promise<Client> {
+  }, options?: { client?: PoolClient }): Promise<Client> {
     try {
       const insertData = {
         organization_id: orgId,
@@ -58,7 +59,9 @@ export class ClientRepository {
       };
 
       const q = buildInsertQuery('clients', insertData);
-      const res = await query<Client>(q.text, q.values);
+      const res = options?.client
+        ? await options.client.query<Client>(q.text, q.values)
+        : await query<Client>(q.text, q.values);
       return res.rows[0];
     } catch (error) {
       console.error('[ClientRepository.create] Error creating client:', error);
