@@ -8,11 +8,14 @@ import type Stripe from 'stripe'
 export const dynamic = 'force-dynamic'
 
 /**
- * POST /api/stripe/webhook (Prompt 47)
+ * POST /api/stripe/webhook (Prompt 47 / BILL-2 Phase B)
  * - Verifies cryptographic signature with STRIPE_WEBHOOK_SECRET.
- * - Deduplicates processed events via stripe_processed_events table.
- * - Handles checkout.session.completed, customer.subscription.updated, customer.subscription.deleted.
- * - Updates organization_plans and logs audit events.
+ * - Production hardening: Fails loudly with 500 if STRIPE_WEBHOOK_SECRET is unconfigured in production.
+ * - Atomic upfront deduplication: INSERT ... ON CONFLICT (id) DO NOTHING RETURNING id.
+ * - If already processed/claimed, returns { received: true, duplicate: true } without running handlers.
+ * - Handler failure recovery: If handler fails after row insertion, deletes row so Stripe's retry reprocesses it.
+ * - Handles checkout.session.completed, customer.subscription.updated, customer.subscription.deleted,
+ *   invoice.paid, invoice.payment_failed.
  */
 export async function POST(req: NextRequest) {
   let body: string
@@ -30,7 +33,7 @@ export async function POST(req: NextRequest) {
   try {
     if (!webhookSecret) {
       if (process.env.NODE_ENV === 'production') {
-        console.error('[STRIPE_WEBHOOK_ERROR] STRIPE_WEBHOOK_SECRET is unconfigured in production.')
+        console.error('[FATAL_SECURITY_ERROR] STRIPE_WEBHOOK_SECRET is unconfigured in production.')
         return NextResponse.json({ error: 'Webhook secret unconfigured' }, { status: 500 })
       }
       // Dev mode fallback only if no secret set
@@ -47,14 +50,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Webhook Error: ${errorMessage}` }, { status: 400 })
   }
 
-  // Idempotency check: skip already processed event IDs (Prompt 47)
-  const existingEvent = await queryOne<{ id: string }>(
-    'SELECT id FROM stripe_processed_events WHERE id = $1',
-    [event.id]
-  )
+  // 1. Atomic upfront idempotency claim
+  let insertResult: { rows: Array<{ id: string }> }
+  try {
+    insertResult = await query<{ id: string }>(
+      `INSERT INTO stripe_processed_events (id, event_type, payload)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (id) DO NOTHING
+       RETURNING id`,
+      [event.id, event.type, JSON.stringify(event)]
+    )
+  } catch (colErr: any) {
+    // Graceful fallback if migration 0048 (payload column) is unapplied in local database
+    if (colErr?.message?.includes('payload')) {
+      insertResult = await query<{ id: string }>(
+        `INSERT INTO stripe_processed_events (id, event_type)
+         VALUES ($1, $2)
+         ON CONFLICT (id) DO NOTHING
+         RETURNING id`,
+        [event.id, event.type]
+      )
+    } else {
+      throw colErr
+    }
+  }
 
-  if (existingEvent) {
-    return NextResponse.json({ received: true, idempotent: true }, { status: 200 })
+  // If RETURNING array is empty, this event was already inserted by a prior/concurrent request
+  if (!insertResult.rows || insertResult.rows.length === 0) {
+    return NextResponse.json({ received: true, duplicate: true }, { status: 200 })
   }
 
   let matchedOrgId: string | null = null
@@ -216,19 +239,92 @@ export async function POST(req: NextRequest) {
         }
         break
       }
+
+      case 'invoice.paid': {
+        const invoice = event.data.object as Stripe.Invoice
+        const customerId = invoice.customer as string
+        const subscriptionId = ((invoice as any).subscription as string) || null
+
+        const orgRow = await queryOne<{ id: string }>(
+          'SELECT organization_id as id FROM organization_plans WHERE stripe_customer_id = $1 OR stripe_subscription_id = $2',
+          [customerId, subscriptionId]
+        )
+
+        if (orgRow?.id) {
+          matchedOrgId = orgRow.id
+          try {
+            await logAuditEvent({
+              organizationId: orgRow.id,
+              action: 'STRIPE_INVOICE_PAID',
+              targetType: 'invoice',
+              targetId: invoice.id,
+              details: {
+                customerId,
+                subscriptionId,
+                amountPaid: invoice.amount_paid,
+                currency: invoice.currency,
+              },
+            })
+          } catch (e) {}
+        }
+        break
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice
+        const customerId = invoice.customer as string
+        const subscriptionId = ((invoice as any).subscription as string) || null
+
+        const orgRow = await queryOne<{ id: string }>(
+          'SELECT organization_id as id FROM organization_plans WHERE stripe_customer_id = $1 OR stripe_subscription_id = $2',
+          [customerId, subscriptionId]
+        )
+
+        if (orgRow?.id) {
+          matchedOrgId = orgRow.id
+          try {
+            await logAuditEvent({
+              organizationId: orgRow.id,
+              action: 'STRIPE_INVOICE_PAYMENT_FAILED',
+              targetType: 'invoice',
+              targetId: invoice.id,
+              details: {
+                customerId,
+                subscriptionId,
+                amountDue: invoice.amount_due,
+                attemptCount: invoice.attempt_count,
+              },
+            })
+          } catch (e) {}
+        }
+        break
+      }
     }
 
-    // Record idempotency token in stripe_processed_events table (Prompt 47)
-    await query(
-      `INSERT INTO stripe_processed_events (id, event_type, organization_id)
-       VALUES ($1, $2, $3)
-       ON CONFLICT (id) DO NOTHING`,
-      [event.id, event.type, matchedOrgId]
-    )
+    // Enrich processed event with organization ID if resolved
+    if (matchedOrgId) {
+      try {
+        await query(
+          'UPDATE stripe_processed_events SET organization_id = $1 WHERE id = $2',
+          [matchedOrgId, event.id]
+        )
+      } catch (enrichErr) {
+        console.warn('[STRIPE_WEBHOOK_ENRICH_WARN] Could not update organization_id:', enrichErr)
+      }
+    }
 
     return NextResponse.json({ received: true }, { status: 200 })
   } catch (error: any) {
     console.error('[STRIPE_WEBHOOK_PROCESSING_EXCEPTION]', error)
+
+    // Option (b) Handler failure recovery:
+    // Delete the row from stripe_processed_events so Stripe retry is re-processed rather than silently skipped as duplicate.
+    try {
+      await query('DELETE FROM stripe_processed_events WHERE id = $1', [event.id])
+    } catch (cleanupErr) {
+      console.error('[STRIPE_WEBHOOK_CLEANUP_ERROR] Failed to delete event on handler error:', cleanupErr)
+    }
+
     return NextResponse.json({ error: error.message || 'Webhook processing error' }, { status: 500 })
   }
 }
