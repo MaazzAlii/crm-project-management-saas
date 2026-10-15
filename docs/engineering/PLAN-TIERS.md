@@ -8,21 +8,29 @@
 
 | Dimension / Resource | Free Tier (Tight) | Pro Plan | Enterprise Plan | Lifetime VIP Access |
 |---|---|---|---|---|
-| **Max Team Members** | 3 | 15 | 500 | 15 |
-| **Max Pending Invites** | 2 | 20 | 500 | 20 |
-| **Max Clients** | 5 | 100 | 999,999 (Unlimited) | 100 |
-| **Max Projects** | 3 | 50 | 999,999 (Unlimited) | 50 |
-| **Max Connected Channels** | 1 | 3 | 999 | 3 |
-| **Max AI Requests / Month** | 25 | 500 | 10,000 | 500 |
+| **Max Team Members** | 3 | 15 | 500 | 500 |
+| **Max Pending Invites** | 2 | 20 | 500 | 500 |
+| **Max Clients** | 5 | 100 | 999,999 (Unlimited) | 999,999 (Unlimited) |
+| **Max Projects** | 3 | 50 | 999,999 (Unlimited) | 999,999 (Unlimited) |
+| **Max Connected Channels** | 1 | 3 | 999 | 999 |
+| **Max AI Requests / Month** | 25 | 500 | 10,000 | 10,000 |
 | **Client Portal Enabled** | ❌ No (`UPGRADE_REQUIRED`) | ✅ Yes | ✅ Yes | ✅ Yes |
 | **Email Integration Enabled**| ❌ No (`UPGRADE_REQUIRED`) | ✅ Yes | ✅ Yes | ✅ Yes |
-| **SSO / SAML Enabled** | ❌ No | ❌ No | ✅ Yes (Enterprise-only)| ❌ No |
-| **Audit Logs Enabled** | ❌ No | ❌ No | ✅ Yes (Enterprise-only)| ❌ No |
-| **API Access Enabled** | ❌ No | ❌ No | ✅ Yes (Enterprise-only)| ❌ No |
+| **SSO / SAML Enabled** | ❌ No | ❌ No | ✅ Yes (Enterprise-only)| ✅ Yes |
+| **Audit Logs Enabled** | ❌ No | ❌ No | ✅ Yes (Enterprise-only)| ✅ Yes |
+| **API Access Enabled** | ❌ No | ❌ No | ✅ Yes (Enterprise-only)| ✅ Yes |
 | **Price (Monthly / Yearly)** | $0 | $79 / $790 | $199 / $1,990 | One-time / VIP |
 
 > [!NOTE]
-> **Lifetime VIP Tier Policy**: Lifetime VIP access maps strictly to the **Pro** tier quotas and feature capabilities (15 members, 100 clients, 50 projects, 3 channels, 500 AI requests, Client Portal, Email Integration). It does **NOT** receive Enterprise-only features (SSO, Audit Logs, API Access) to prevent cannibalization of high-value Enterprise sales.
+> **Lifetime VIP Tier Policy (BILL-3 Correction)**: Lifetime VIP access maps strictly to **Enterprise** tier quotas and feature capabilities (500 members, 500 pending invites, unlimited clients/projects, 999 channels, 10,000 AI requests, Client Portal, Email Integration, SSO, Audit Logs, and API Access).
+>
+> **Multi-Duration Plan Overrides (`organization_plans.plan_override`)**:
+> - `lifetime`: Permanent Enterprise access (`maxMembers: 500`, all enterprise features enabled).
+> - `enterprise`: Permanent Enterprise access.
+> - `pro`: Permanent Pro access (`maxMembers: 15`).
+> - `1_month`, `3_month`, `6_month`, `12_month`: Sponsored Enterprise access until `plan_override_expires_at`. Once expired, access falls back to the active Stripe subscription or Free tier.
+> - Unknown override: Fails open to Enterprise quotas with a warning log.
+
 
 ---
 
