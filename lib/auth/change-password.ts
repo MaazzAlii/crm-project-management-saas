@@ -1,9 +1,11 @@
-import { queryOne } from '@/lib/db';
+import { query, queryOne } from '@/lib/db';
 import { User } from '@/lib/types/database';
 import { hashPassword, verifyPassword, validatePasswordStrength } from '@/lib/auth/password';
 
 /**
- * Change password for an authenticated user
+ * Change password for an authenticated user.
+ * Upon successful password update, revokes all active refresh tokens
+ * across all devices for this user.
  */
 export async function changePassword(
   userId: string,
@@ -35,6 +37,12 @@ export async function changePassword(
   await queryOne(
     'UPDATE users SET password_hash = $1, require_password_change = false, updated_at = NOW() WHERE id = $2',
     [newHash, userId]
+  );
+
+  // Revoke all active refresh tokens across all devices for this user
+  await query(
+    'UPDATE refresh_tokens SET is_revoked = true WHERE user_id = $1 AND is_revoked = false',
+    [userId]
   );
 
   return { success: true };
