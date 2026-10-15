@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { execSync } from 'child_process'
-import { getProPriceId, getWebhookSecret } from '@/lib/stripe/config'
+import { getProPriceId, getWebhookSecret, getStripePublishableKey } from '@/lib/stripe/config'
 
 describe('BILL-2C: Stripe Config Request-Time Validation', () => {
   const originalEnv = { ...process.env }
@@ -74,5 +74,12 @@ describe('BILL-2C: Stripe Config Request-Time Validation', () => {
 
     process.env.STRIPE_WEBHOOK_SECRET = '  whsec_test_secret_12345  '
     expect(getWebhookSecret()).toBe('whsec_test_secret_12345')
+  })
+
+  it('6. Publishable key fallback accepts NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY if STRIPE_PUBLISHABLE_KEY is unset', () => {
+    delete process.env.STRIPE_PUBLISHABLE_KEY
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = 'pk_test_coolify_pub_key_999'
+
+    expect(getStripePublishableKey()).toBe('pk_test_coolify_pub_key_999')
   })
 })

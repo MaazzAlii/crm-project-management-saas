@@ -47,7 +47,7 @@ export function getProPriceId(): string {
 export function validateStripeConfig(): StripeConfig {
   const isProd = process.env.NODE_ENV === 'production'
   const secretKey = (process.env.STRIPE_SECRET_KEY || '').trim()
-  const publishableKey = (process.env.STRIPE_PUBLISHABLE_KEY || '').trim()
+  const publishableKey = (process.env.STRIPE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '').trim()
   const webhookSecret = (process.env.STRIPE_WEBHOOK_SECRET || '').trim()
   const proPriceId = getProPriceId()
 
@@ -91,7 +91,7 @@ export function validateStripeConfig(): StripeConfig {
 }
 
 export function getStripePublishableKey(): string {
-  return (process.env.STRIPE_PUBLISHABLE_KEY || '').trim()
+  return (process.env.STRIPE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '').trim()
 }
 
 export function getWebhookSecret(): string | undefined {
