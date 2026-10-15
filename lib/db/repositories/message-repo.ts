@@ -17,14 +17,19 @@ export class MessageRepository {
     orgId: string,
     provider: ChannelType,
     externalAccountId: string,
-    channelName?: string
+    channelName?: string,
+    options?: { client?: any }
   ): Promise<CommunicationChannel> {
     try {
-      let channel = await queryOne<CommunicationChannel>(
-        `SELECT * FROM communication_channels 
-         WHERE organization_id = $1 AND provider = $2 AND external_account_id = $3`,
-        [orgId, provider, externalAccountId]
-      );
+      const selectSql = `SELECT * FROM communication_channels 
+         WHERE organization_id = $1 AND provider = $2 AND external_account_id = $3`;
+      let channel: CommunicationChannel | null = null;
+      if (options?.client) {
+        const res = await options.client.query(selectSql, [orgId, provider, externalAccountId]);
+        channel = res.rows[0] || null;
+      } else {
+        channel = await queryOne<CommunicationChannel>(selectSql, [orgId, provider, externalAccountId]);
+      }
 
       if (!channel) {
         const insert = buildInsertQuery('communication_channels', {
@@ -34,8 +39,14 @@ export class MessageRepository {
           channel_name: channelName || `${provider} channel`,
           status: 'active',
         });
-        const res = await query<CommunicationChannel>(insert.text, insert.values);
-        channel = res.rows[0];
+        const res = options?.client
+          ? await options.client.query(insert.text, insert.values)
+          : await query<CommunicationChannel>(insert.text, insert.values);
+        channel = (res.rows[0] as CommunicationChannel) || null;
+      }
+
+      if (!channel) {
+        throw new Error('Failed to retrieve or create communication channel');
       }
 
       return channel;

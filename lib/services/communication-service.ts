@@ -134,12 +134,15 @@ export class CommunicationService {
       provider: ChannelType;
       externalAccountId: string;
       name?: string;
-    }
+    },
+    options?: { client?: any }
   ) {
     const channel = await messageRepo.getOrCreateChannel(
       orgId,
       data.provider,
-      data.externalAccountId
+      data.externalAccountId,
+      data.name,
+      options
     );
 
     await auditRepo.log({
@@ -149,7 +152,7 @@ export class CommunicationService {
       resourceType: 'channel',
       resourceId: channel.id,
       metadata: { provider: data.provider, externalAccountId: data.externalAccountId },
-    });
+    }, options);
 
     return channel;
   }
