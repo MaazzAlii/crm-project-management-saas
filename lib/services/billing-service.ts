@@ -59,6 +59,9 @@ export const PLAN_LIMITS_MAP: Record<string, PlanLimits> = {
   },
 };
 
+import { getCurrentPlan } from '../billing/current-plan';
+import { checkClientLimit, checkProjectLimit, checkMemberLimit } from './plan-limits';
+
 export class BillingService {
   /**
    * List all available subscription plans
@@ -79,8 +82,9 @@ export class BillingService {
       throw new NotFoundError('Organization not found');
     }
 
-    const planTier = (org as any).plan_tier || 'free';
-    const limits = PLAN_LIMITS_MAP[planTier] || PLAN_LIMITS_MAP.free;
+    const planInfo = await getCurrentPlan(orgId);
+    const planConfig = planInfo.planConfig;
+    const planTier = planInfo.planId;
 
     // Aggregate counts
     const [clientsRes, projectsRes, membersRes] = await Promise.all([
@@ -95,26 +99,31 @@ export class BillingService {
 
     return {
       planTier,
-      limits,
+      limits: {
+        name: planConfig.name,
+        priceMonthly: planConfig.priceMonthlyUsd ?? 0,
+        maxClients: planConfig.maxClients,
+        maxProjects: planConfig.maxProjects,
+        maxTeamMembers: planConfig.maxMembers,
+        aiFeaturesEnabled: planConfig.maxAIRequestsMonthly > 0,
+        clientPortalEnabled: planConfig.clientPortalEnabled,
+      },
       usage: {
-        clients: { current: clientsCount, max: limits.maxClients, percentage: Math.min(100, (clientsCount / limits.maxClients) * 100) },
-        projects: { current: projectsCount, max: limits.maxProjects, percentage: Math.min(100, (projectsCount / limits.maxProjects) * 100) },
-        teamMembers: { current: membersCount, max: limits.maxTeamMembers, percentage: Math.min(100, (membersCount / limits.maxTeamMembers) * 100) },
+        clients: { current: clientsCount, max: planConfig.maxClients, percentage: Math.min(100, (clientsCount / planConfig.maxClients) * 100) },
+        projects: { current: projectsCount, max: planConfig.maxProjects, percentage: Math.min(100, (projectsCount / planConfig.maxProjects) * 100) },
+        teamMembers: { current: membersCount, max: planConfig.maxMembers, percentage: Math.min(100, (membersCount / planConfig.maxMembers) * 100) },
       },
     };
   }
 
   /**
-   * Assert that an organization has not exceeded a specific resource quota
+   * @deprecated All quota checks must route through lib/services/plan-limits.ts
    */
   async assertQuotaAvailable(orgId: string, resource: 'clients' | 'projects' | 'teamMembers'): Promise<void> {
-    const { limits, usage } = await this.getUsageAndLimits(orgId);
-    const resourceUsage = usage[resource];
-
-    if (resourceUsage.current >= resourceUsage.max) {
-      throw new ForbiddenError(
-        `Plan limit exceeded: Your current plan allows up to ${resourceUsage.max} ${resource}. Please upgrade your subscription to continue.`
-      );
+    const details = await this.getUsageAndLimits(orgId);
+    const quota = details.usage[resource];
+    if (quota && quota.current >= quota.max) {
+      throw new ForbiddenError(`${resource} limit reached for ${details.planTier} tier.`);
     }
   }
 
