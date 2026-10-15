@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/client'
+import { getWebhookSecret } from '@/lib/stripe/config'
 import { query, queryOne } from '@/lib/db'
 import { setOrganizationPlan } from '@/lib/billing/current-plan'
 import { logAuditEvent } from '@/lib/audit/logger'
@@ -8,7 +9,7 @@ import type Stripe from 'stripe'
 export const dynamic = 'force-dynamic'
 
 /**
- * POST /api/stripe/webhook (Prompt 47 / BILL-2 Phase B)
+ * POST /api/stripe/webhook (Prompt 47 / BILL-2 Phase B & BILL-2C)
  * - Verifies cryptographic signature with STRIPE_WEBHOOK_SECRET.
  * - Production hardening: Fails loudly with 500 if STRIPE_WEBHOOK_SECRET is unconfigured in production.
  * - Atomic upfront deduplication: INSERT ... ON CONFLICT (id) DO NOTHING RETURNING id.
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
   }
 
   const signature = req.headers.get('stripe-signature') || ''
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  const webhookSecret = getWebhookSecret()
 
   let event: Stripe.Event
 
