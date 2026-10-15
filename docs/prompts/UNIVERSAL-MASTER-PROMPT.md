@@ -443,3 +443,10 @@ For every batch, report and compare these numbers to the previous batch:
 - After every successful batch, propose a push (do not execute it — the human pushes).
 
 Rationale: local-only commits are one disk failure away from being lost. Two stacked batches = 38 commits is a real risk, not a theoretical one.
+
+---
+
+## 22. BUILD-TIME ENVIRONMENT VARIABLE SAFETY (RULE 21) ⭐ NEW
+
+> **Rule 21 — No `process.env.*` reads at module top-level in files reachable from route handlers.** All env access must happen inside a function that is called at request time. Build-time evaluation of route modules means any module-load env access can break `next build`.
+
