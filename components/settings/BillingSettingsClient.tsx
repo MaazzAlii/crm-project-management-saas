@@ -95,9 +95,9 @@ export function BillingSettingsClient({
           </p>
         </div>
 
-        {/* Free org sees Upgrade to Pro; Pro org (or org with customer) sees Manage subscription */}
+        {/* Free org sees Upgrade to Pro; Pro org with customer sees Manage subscription; Lifetime/Enterprise org without Stripe customer sees active badge */}
         <div>
-          {isPro || hasCustomer ? (
+          {hasCustomer ? (
             <button
               type="button"
               data-testid="manage-subscription-button"
@@ -112,6 +112,14 @@ export function BillingSettingsClient({
               )}
               Manage subscription
             </button>
+          ) : isPro ? (
+            <span
+              data-testid="active-tier-badge"
+              className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 py-2.5 text-xs font-bold text-primary shadow-sm"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Enterprise Access Active
+            </span>
           ) : (
             <button
               type="button"

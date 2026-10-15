@@ -396,13 +396,23 @@ export function InviteMemberDialog({
               </div>
 
               <div>
-                <Link
-                  href="/settings/billing"
-                  data-testid="upgrade-cta"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm hover:bg-primary/90 transition"
-                >
-                  Upgrade to Pro →
-                </Link>
+                {(!usage || usage.planTier === 'free') ? (
+                  <Link
+                    href="/settings/billing"
+                    data-testid="upgrade-cta"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm hover:bg-primary/90 transition"
+                  >
+                    Upgrade to Pro →
+                  </Link>
+                ) : usage.planTier === 'pro' ? (
+                  <a
+                    href="mailto:sales@innoventixhub.tech?subject=Enterprise%20Upgrade%20Inquiry"
+                    data-testid="upgrade-cta"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted px-3 py-1.5 text-xs font-bold text-foreground shadow-sm hover:bg-muted/80 transition"
+                  >
+                    Contact Sales for Enterprise →
+                  </a>
+                ) : null}
               </div>
             </div>
           )}

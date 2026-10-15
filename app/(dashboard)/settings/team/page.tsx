@@ -56,8 +56,10 @@ export default async function TeamSettingsPage() {
         userEmail={session.user.email}
       />
 
-      {/* Plan Usage & Seat Capacity Card (Prompt 40 & 41) */}
-      <PlanUsageCard />
+      {/* Plan Usage & Seat Capacity Card (Prompt 40 & 41 / BILL-3) */}
+      <PlanUsageCard
+        showUpgradePromptOnLimit={session.organization.plan_tier === 'free'}
+      />
 
       {/* Team Member List & Pending Invitations (Prompts 34, 35, 36) */}
       <TeamMemberList

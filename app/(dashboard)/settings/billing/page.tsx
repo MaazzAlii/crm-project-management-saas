@@ -56,7 +56,9 @@ export default async function BillingSettingsPage({ searchParams }: PageProps) {
     }
   }
 
-  const isPro = org?.plan_tier === 'pro' || org?.plan_tier === 'enterprise'
+  const { getCurrentPlan } = await import('@/lib/billing/current-plan')
+  const planInfo = await getCurrentPlan(session.organization.id)
+  const isPro = planInfo.effectivePlanId !== 'free'
 
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10 space-y-8">

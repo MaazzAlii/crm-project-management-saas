@@ -299,9 +299,17 @@ export function PlanUsageCard({
             <Sparkles className="h-3.5 w-3.5" />
             Upgrade to Pro
           </Link>
+        ) : data.plan.isPro ? (
+          <a
+            href="mailto:sales@innoventixhub.tech?subject=Enterprise%20Upgrade%20Inquiry"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-700 transition"
+          >
+            Upgrade to Enterprise
+            <ArrowRight className="h-3.5 w-3.5" />
+          </a>
         ) : (
           <a
-            href="mailto:sales@innoventix.io?subject=Enterprise%20Inquiry"
+            href="mailto:sales@innoventixhub.tech?subject=Enterprise%20Support%20Inquiry"
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-700 transition"
           >
             Contact sales
