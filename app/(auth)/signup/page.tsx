@@ -18,6 +18,12 @@ function SignUpForm() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<{
+    fullName?: string
+    orgName?: string
+    email?: string
+    password?: string
+  }>({})
   const [inviteOrgName, setInviteOrgName] = useState<string | null>(null)
   const [loadingInvite, setLoadingInvite] = useState(!!inviteToken)
 
@@ -53,6 +59,7 @@ function SignUpForm() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setFieldErrors({})
 
     try {
       if (isInvite && inviteToken) {
@@ -62,7 +69,10 @@ function SignUpForm() {
           inviteToken,
         })
 
-        if (res.error) {
+        if (res.errorDetail?.field) {
+          setFieldErrors({ [res.errorDetail.field]: res.errorDetail.message })
+          setError(res.errorDetail.message)
+        } else if (res.error) {
           setError(res.error)
         } else if (res.redirectUrl) {
           window.location.assign(res.redirectUrl)
@@ -76,7 +86,10 @@ function SignUpForm() {
           password,
         })
 
-        if (res.error) {
+        if (res.errorDetail?.field) {
+          setFieldErrors({ [res.errorDetail.field]: res.errorDetail.message })
+          setError(res.errorDetail.message)
+        } else if (res.error) {
           setError(res.error)
         } else if (res.redirectUrl) {
           window.location.assign(res.redirectUrl)
@@ -123,7 +136,7 @@ function SignUpForm() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl py-8 px-4 shadow-xl dark:shadow-2xl border border-slate-200 dark:border-slate-800/80 sm:rounded-2xl sm:px-10 transition-colors">
-          {error && (
+          {error && !Object.keys(fieldErrors).length && (
             <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 text-destructive text-sm">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <span>{error}</span>
@@ -136,7 +149,7 @@ function SignUpForm() {
               <p className="text-xs text-muted-foreground">Verifying invitation...</p>
             </div>
           ) : (
-            <form className="space-y-4" onSubmit={handleSignUp}>
+            <form className="space-y-4" onSubmit={handleSignUp} noValidate>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Full Name
@@ -149,11 +162,24 @@ function SignUpForm() {
                     type="text"
                     required
                     value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    onChange={(e) => {
+                      setFullName(e.target.value)
+                      if (fieldErrors.fullName) setFieldErrors(prev => ({ ...prev, fullName: undefined }))
+                    }}
                     placeholder="Jane Doe"
-                    className="block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl text-foreground placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm"
+                    className={`block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border rounded-xl text-foreground placeholder:text-placeholder focus:outline-none transition-all text-sm ${
+                      fieldErrors.fullName
+                        ? 'border-rose-500 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20'
+                        : 'border-slate-300 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500'
+                    }`}
                   />
                 </div>
+                {fieldErrors.fullName && (
+                  <p className="mt-1.5 text-xs text-rose-500 font-medium flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{fieldErrors.fullName}</span>
+                  </p>
+                )}
               </div>
 
               {/* Organization name field is hidden when signing up with an invitation (Prompt 38) */}
@@ -170,11 +196,24 @@ function SignUpForm() {
                       type="text"
                       required
                       value={orgName}
-                      onChange={(e) => setOrgName(e.target.value)}
+                      onChange={(e) => {
+                        setOrgName(e.target.value)
+                        if (fieldErrors.orgName) setFieldErrors(prev => ({ ...prev, orgName: undefined }))
+                      }}
                       placeholder="Acme Agency"
-                      className="block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl text-foreground placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm"
+                      className={`block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border rounded-xl text-foreground placeholder:text-placeholder focus:outline-none transition-all text-sm ${
+                        fieldErrors.orgName
+                          ? 'border-rose-500 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20'
+                          : 'border-slate-300 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.orgName && (
+                    <p className="mt-1.5 text-xs text-rose-500 font-medium flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{fieldErrors.orgName}</span>
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -191,11 +230,16 @@ function SignUpForm() {
                     required
                     readOnly={isInvite}
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value)
+                      if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined }))
+                    }}
                     placeholder="name@company.com"
                     className={`block w-full pl-10 pr-4 py-2 border rounded-xl text-foreground placeholder:text-placeholder focus:outline-none text-sm transition-all ${
                       isInvite
                         ? 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700/80 cursor-not-allowed opacity-90'
+                        : fieldErrors.email
+                        ? 'bg-slate-50 dark:bg-slate-950/60 border-rose-500 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20'
                         : 'bg-slate-50 dark:bg-slate-950/60 border-slate-300 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500'
                     }`}
                   />
@@ -203,6 +247,12 @@ function SignUpForm() {
                 {isInvite && (
                   <p className="text-[11px] text-subtle-foreground mt-1">
                     Locked to the invitation recipient address.
+                  </p>
+                )}
+                {fieldErrors.email && (
+                  <p className="mt-1.5 text-xs text-rose-500 font-medium flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{fieldErrors.email}</span>
                   </p>
                 )}
               </div>
@@ -218,13 +268,25 @@ function SignUpForm() {
                   <input
                     type="password"
                     required
-                    minLength={6}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="•••••••• (Min 6 chars)"
-                    className="block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl text-foreground placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm"
+                    onChange={(e) => {
+                      setPassword(e.target.value)
+                      if (fieldErrors.password) setFieldErrors(prev => ({ ...prev, password: undefined }))
+                    }}
+                    placeholder="•••••••• (Min 8 chars, mixed case & numbers)"
+                    className={`block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border rounded-xl text-foreground placeholder:text-placeholder focus:outline-none transition-all text-sm ${
+                      fieldErrors.password
+                        ? 'border-rose-500 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20'
+                        : 'border-slate-300 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500'
+                    }`}
                   />
                 </div>
+                {fieldErrors.password && (
+                  <p className="mt-1.5 text-xs text-rose-500 font-medium flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{fieldErrors.password}</span>
+                  </p>
+                )}
                 <PasswordStrengthMeter password={password} className="mt-2" />
               </div>
 
