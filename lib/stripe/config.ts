@@ -1,11 +1,12 @@
 /**
- * Innoventix Platform — Stripe Configuration & Validation (Prompt 45 / BILL-2 Phase B)
+ * Innoventix Platform — Stripe Configuration & Validation (Prompt 45 / BILL-2 Phase B & BILL-2C)
  * 
  * Rules:
  * - Read only: STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRO_PRICE_ID.
- * - In production: All required Stripe env vars must be set, or the app refuses to boot.
+ * - Validation is deferred to request-time to avoid breaking Next.js build-time page collection.
+ * - In production: All required Stripe env vars must be set when requested at runtime.
  * - In development: Safe fallback to test mode price ID with explicit console warning.
- * - sk_live_ outside production throws error and refuses to start.
+ * - sk_live_ outside production throws error.
  * - sk_test_ in production logs a warning that test mode is active.
  * - Never log keys or leak secrets to the client.
  */
@@ -18,21 +19,37 @@ export interface StripeConfig {
   isTestMode: boolean
 }
 
+function resolveProPriceId(): string {
+  const id = process.env.STRIPE_PRO_PRICE_ID?.trim()
+  if (id) return id
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      '[stripe] STRIPE_PRO_PRICE_ID is required in production. ' +
+      'Set it in your deployment environment variables.'
+    )
+  }
+  console.warn('[stripe] STRIPE_PRO_PRICE_ID not set — using test price (dev only)')
+  return 'price_1UPcesKO8Y3ohhlUm5KdI8hO'
+}
+
+/**
+ * Request-time resolver for the Stripe Pro price ID.
+ * Throws in production if unconfigured; falls back to test price in development.
+ */
+export function getProPriceId(): string {
+  return resolveProPriceId()
+}
+
+/**
+ * Validate full Stripe configuration at runtime.
+ * Should be invoked from request handlers or runtime operations, never at top-level module load.
+ */
 export function validateStripeConfig(): StripeConfig {
   const isProd = process.env.NODE_ENV === 'production'
   const secretKey = (process.env.STRIPE_SECRET_KEY || '').trim()
   const publishableKey = (process.env.STRIPE_PUBLISHABLE_KEY || '').trim()
   const webhookSecret = (process.env.STRIPE_WEBHOOK_SECRET || '').trim()
-
-  const proPriceId =
-    (process.env.STRIPE_PRO_PRICE_ID || '').trim() ||
-    (() => {
-      if (isProd) {
-        throw new Error('STRIPE_PRO_PRICE_ID required in production')
-      }
-      console.warn('[stripe] using test price — dev only')
-      return 'price_1UPcesKO8Y3ohhlUm5KdI8hO'
-    })()
+  const proPriceId = getProPriceId()
 
   // Safety rule: Never allow sk_live_ outside production
   if (secretKey.startsWith('sk_live_') && !isProd) {
@@ -41,7 +58,7 @@ export function validateStripeConfig(): StripeConfig {
     )
   }
 
-  // Safety rule: Startup validation in production (refuse to boot if required vars are missing)
+  // Safety rule: Validation in production (refuse to proceed if required vars are missing)
   if (isProd) {
     if (!secretKey) {
       throw new Error('STRIPE_SECRET_KEY is required in production. Refusing to start.')
@@ -75,4 +92,8 @@ export function validateStripeConfig(): StripeConfig {
 
 export function getStripePublishableKey(): string {
   return (process.env.STRIPE_PUBLISHABLE_KEY || '').trim()
+}
+
+export function getWebhookSecret(): string | undefined {
+  return process.env.STRIPE_WEBHOOK_SECRET?.trim() || undefined
 }
