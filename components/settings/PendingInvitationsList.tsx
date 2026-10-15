@@ -21,10 +21,21 @@ export interface PendingInvitation {
   role: 'admin' | 'member' | 'viewer'
   invited_by: string
   status: 'pending' | 'accepted' | 'revoked' | 'expired'
-  token_expires_at: string
+  expires_at?: string
+  token_expires_at?: string
   send_failed?: boolean
   created_at: string
   updated_at: string
+}
+export function formatInviteDate(isoStr?: string | null): string {
+  if (!isoStr) return '—'
+  const d = new Date(isoStr)
+  if (isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 interface PendingInvitationsListProps {
@@ -279,7 +290,9 @@ export function PendingInvitationsList({
   }
 
   const getStatusBadge = (inv: PendingInvitation) => {
-    const isExpired = new Date(inv.token_expires_at) < new Date()
+    const expRaw = inv.expires_at || inv.token_expires_at
+    const expDate = expRaw ? new Date(expRaw) : null
+    const isExpired = expDate ? !isNaN(expDate.getTime()) && expDate.getTime() < Date.now() : false
     if (inv.send_failed) {
       return (
         <span
@@ -311,19 +324,6 @@ export function PendingInvitationsList({
         Pending
       </span>
     )
-  }
-
-  const formatDate = (isoStr: string) => {
-    try {
-      const d = new Date(isoStr)
-      return d.toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    } catch {
-      return isoStr
-    }
   }
 
   return (
@@ -417,8 +417,8 @@ export function PendingInvitationsList({
                       <td className="px-5 py-3.5 text-muted-foreground font-mono text-[11px]">
                         {inv.invited_by ? inv.invited_by.slice(0, 8) + '...' : 'System'}
                       </td>
-                      <td className="px-5 py-3.5 text-muted-foreground">{formatDate(inv.created_at)}</td>
-                      <td className="px-5 py-3.5 text-muted-foreground">{formatDate(inv.token_expires_at)}</td>
+                      <td className="px-5 py-3.5 text-muted-foreground">{formatInviteDate(inv.created_at)}</td>
+                      <td className="px-5 py-3.5 text-muted-foreground">{formatInviteDate(inv.expires_at || inv.token_expires_at)}</td>
                       <td className="px-5 py-3.5">{getStatusBadge(inv)}</td>
                       {canManage && (
                         <td className="px-5 py-3.5 text-right">
