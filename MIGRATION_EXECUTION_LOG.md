@@ -3367,6 +3367,91 @@ paste at the start of every batch report.
   - `npm run build`: 142 routes compiled cleanly (strict baseline preserved)
 - **Status**: ✅ TEAM-3 complete. All authorization bypasses closed and regression-tested. 3 atomic local commits. Zero remotes pushed per Push Approval Policy. Ready for review.
 
+---
+
+### Step 22: BILL-1 Plan Limit Enforcement & Tier Quotas
+- **Timestamp**: 2026-10-15T11:32:00+05:00
+- **Task ID**: `BILL-1-PLAN-LIMIT-ENFORCEMENT`
+- **Actions Performed**:
+  1. **Consolidated Quota Architecture (§1)**:
+     - Deprecated legacy quota methods in `lib/services/billing-service.ts` and unified all enforcement through modern `lib/services/plan-limits.ts`.
+     - Extended `lib/services/plan-limits.ts` with atomic transaction-aware check methods: `checkClientLimit`, `checkProjectLimit`, `checkChannelLimit`, `checkAIUsageLimit`, and `checkFeatureAccess`.
+     - Added optional `{ client?: PoolClient }` support across data layers (`clientRepo`, `projectRepo`, `messageRepo`, `auditRepo`, `crmService`, `projectService`, `communicationService`) to prevent foreign key deadlocks under transaction row locks.
+  2. **Config & Database Synchronization (§2)**:
+     - Updated `config/plans.ts` with explicit tier quotas (Free: 3 members, 2 pending invites, 5 clients, 3 projects, 1 channel, 25 monthly AI requests, portal=false, email=false; Pro: 15 members, 20 pending invites, 100 clients, 50 projects, 3 channels, 500 AI requests, portal=true, email=true; Enterprise: 500 members, 500 pending invites, unlimited clients/projects, 999 channels, 10,000 AI requests, sso=true, auditLogs=true, apiAccess=true; Lifetime VIP: matches Pro quotas strictly).
+     - Applied Migration `supabase/migrations/0046_sync_plan_feature_limits.sql` to synchronize `subscription_plans.feature_limits` JSON across all database rows.
+     - Updated `lib/billing/current-plan.ts` and `lib/billing/plan-limits.ts` so `lifetime` maps to `pro` instead of `enterprise`.
+  3. **Atomic Concurrency Protection with Row Locks (§3)**:
+     - Enforced `SELECT id FROM organizations WHERE id = $1 FOR UPDATE` within the same transaction as insertions across `POST /api/crm/clients`, `createClientAction`, `POST /api/projects`, `createProjectAction`, and `POST /api/communications/channels`.
+     - Eliminated Time-of-Check to Time-of-Use (TOCTOU) race conditions under concurrent resource creation.
+  4. **Structured 402 Error Response (§4)**:
+     - Updated `lib/utils/response.ts` with `apiPlanLimitError` returning standard HTTP 402 with structured error body (`code`, `message`, `currentCount`, `limit`, `planName`, `upgradeUrl`).
+     - Added standard codes: `CLIENT_LIMIT_REACHED`, `PROJECT_LIMIT_REACHED`, `CHANNEL_LIMIT_REACHED`, `AI_LIMIT_REACHED`, `UPGRADE_REQUIRED`.
+  5. **Closed Missing Enforcement Points (§5)**:
+     - Added missing server-side enforcement to `createProjectAction` in `app/(dashboard)/projects/actions.ts:90`.
+     - Added missing enforcement to `POST /api/communications/channels`.
+     - Standardized `createClientAction` and `POST /api/crm/clients` to return 402 structured plan limit errors instead of generic 403 or unhandled exceptions.
+  6. **AI Usage Quota & Production Blocker Fix (§6)**:
+     - Removed obsolete fallback `ai_features_enabled: false` from `lib/billing/plan-limits.ts:73` so Free users can access 25 free AI requests/month.
+     - Enforced pre-flight quota checks via `date_trunc('month', now())` query against `ai_usage_log`.
+  7. **Feature Gating (§7)**:
+     - Integrated `checkFeatureAccess('clientPortal')` in `requirePortalSession` and `inviteClientToPortal`. Free tier attempts return 402 `UPGRADE_REQUIRED`.
+     - Integrated `checkFeatureAccess('emailIntegration')` in channel configuration and email integration actions.
+  8. **Comprehensive Regression Test Suite (§9)**:
+     - Created `tests/billing/plan-limits.test.ts` covering 14 comprehensive tests (Free limits, Pro limits, Enterprise capacity, Lifetime VIP = Pro, AI 25 quota, Concurrency lock, Channel limit, Client Portal gating, Email integration gating, Cross-tenant isolation).
+  9. **Browser E2E Playwright Verification & Screenshots**:
+     - Created `scripts/verify-bill-1-e2e.ts`.
+     - Captured all 8 required screenshots in `assets/screenshots/bill-1/` and artifact directory:
+       * `client_limit_light.png` (139.5 KB), `client_limit_dark.png` (138.3 KB)
+       * `project_limit_light.png` (162.8 KB), `project_limit_dark.png` (123.7 KB)
+       * `channel_limit_light.png` (150.9 KB), `channel_limit_dark.png` (150.2 KB)
+       * `ai_limit_light.png` (132.2 KB), `ai_limit_dark.png` (131.4 KB)
+  10. **Engineering Documentation (§10)**:
+      - Authored `docs/engineering/PLAN-TIERS.md` as the source of truth for tier quotas, concurrency locking, and feature gating.
+- **Files Modified / Created**:
+  - `config/plans.ts`
+  - `lib/billing/current-plan.ts`
+  - `lib/billing/plan-limits.ts`
+  - `lib/services/plan-limits.ts`
+  - `lib/services/billing-service.ts`
+  - `lib/utils/response.ts`
+  - `lib/ai/types.ts`
+  - `lib/ai/guard.ts`
+  - `lib/portal/auth.ts`
+  - `lib/db/repositories/client-repo.ts`
+  - `lib/db/repositories/project-repo.ts`
+  - `lib/db/repositories/message-repo.ts`
+  - `lib/db/repositories/audit-repo.ts`
+  - `lib/services/crm-service.ts`
+  - `lib/services/project-service.ts`
+  - `lib/services/communication-service.ts`
+  - `app/api/crm/clients/route.ts`
+  - `app/api/projects/route.ts`
+  - `app/api/communications/channels/route.ts`
+  - `app/(dashboard)/clients/actions.ts`
+  - `app/(dashboard)/projects/actions.ts`
+  - `app/(dashboard)/settings/integrations/email/actions.ts`
+  - `supabase/migrations/0046_sync_plan_feature_limits.sql` (created)
+  - `docs/engineering/PLAN-TIERS.md` (created)
+  - `tests/billing/plan-limits.test.ts` (created)
+  - `tests/billing.test.ts`
+  - `tests/lifetime-access-db.test.ts`
+  - `tests/security-tenancy-and-override.test.ts`
+  - `tests/integration-client-crud.test.ts`
+  - `tests/integration-project-templates.test.ts`
+  - `tests/integration-portal-auth.test.ts`
+  - `scripts/verify-bill-1-e2e.ts` (created)
+  - `assets/screenshots/bill-1/*` (8 screenshots)
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `npx tsc --noEmit`: **EXIT 0** (0 type errors)
+  - `npm test`: **78 test files, 564/564 tests passed (100% pass rate, +14 new regression tests)**
+  - `npm run lint`: **0 errors, 4 baseline warnings**
+  - `npm run build`: **142 routes compiled cleanly (exact baseline preserved)**
+- **Status**: ✅ BILL-1 Phase B complete. All plan limit enforcement, concurrency locks, and feature gating verified. Ready for atomic commits.
+
+
 
 
 
