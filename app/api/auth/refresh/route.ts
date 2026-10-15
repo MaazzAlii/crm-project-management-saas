@@ -9,7 +9,10 @@ import {
   getRefreshSessionConfig,
 } from '@/lib/auth/session';
 import { clearAuthCookies } from '@/lib/auth/logout';
-import { query, queryOne } from '@/lib/db';
+import { transaction } from '@/lib/db';
+
+let hasRotatedAtColumn: boolean | null = null;
+let hasParentHashColumn: boolean | null = null;
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,156 +49,148 @@ export async function POST(request: NextRequest) {
       .update(refreshToken)
       .digest('hex');
 
-    // CRITICAL: Atomic token claim with RETURNING clause.
-    // Closes TOCTOU race condition for concurrent refresh requests.
-    let updateRes;
-    try {
-      updateRes = await query<{ id: string; token_family: string; user_id: string }>(
-        `UPDATE refresh_tokens
-         SET is_revoked = true, rotated_at = NOW()
-         WHERE token_hash = $1 AND is_revoked = false
-         RETURNING id, token_family, user_id`,
-        [refreshTokenHash]
-      );
-    } catch (err: any) {
-      if (err?.code === '42703') {
-        // Fallback if rotated_at column has not been added yet (pre-migration 0049)
-        updateRes = await query<{ id: string; token_family: string; user_id: string }>(
-          `UPDATE refresh_tokens
+    // Execute atomic rotation inside an ACID transaction with advisory transaction lock.
+    // Serializes concurrent requests within the same tokenFamily to prevent TOCTOU race conditions.
+    const result = await transaction(async (client) => {
+      await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [payload.tokenFamily]);
+
+      // Check migration 0049 columns compatibility once
+      if (hasRotatedAtColumn === null) {
+        const checkRotated = await client.query(
+          "SELECT 1 FROM information_schema.columns WHERE table_name = 'refresh_tokens' AND column_name = 'rotated_at'"
+        );
+        hasRotatedAtColumn = checkRotated.rows.length > 0;
+      }
+
+      if (hasParentHashColumn === null) {
+        const checkParent = await client.query(
+          "SELECT 1 FROM information_schema.columns WHERE table_name = 'refresh_tokens' AND column_name = 'parent_hash'"
+        );
+        hasParentHashColumn = checkParent.rows.length > 0;
+      }
+
+      // CRITICAL: Atomic token claim with RETURNING clause
+      const updateQuery = hasRotatedAtColumn
+        ? `UPDATE refresh_tokens
+           SET is_revoked = true, rotated_at = NOW()
+           WHERE token_hash = $1 AND is_revoked = false
+           RETURNING id, token_family, user_id`
+        : `UPDATE refresh_tokens
            SET is_revoked = true
            WHERE token_hash = $1 AND is_revoked = false
-           RETURNING id, token_family, user_id`,
-          [refreshTokenHash]
-        );
-      } else {
-        throw err;
-      }
-    }
+           RETURNING id, token_family, user_id`;
 
-    // If 0 rows returned, the token either never existed or was already revoked/rotated.
-    if (updateRes.rows.length === 0) {
-      const existing = await queryOne<{ token_family: string; is_revoked: boolean }>(
-        'SELECT token_family, is_revoked FROM refresh_tokens WHERE token_hash = $1',
+      const updateRes = await client.query<{ id: string; token_family: string; user_id: string }>(
+        updateQuery,
         [refreshTokenHash]
       );
 
-      const familyId = existing?.token_family || payload.tokenFamily;
-      if (familyId) {
-        // Reuse detection: revoke all tokens belonging to this family immediately
-        await query(
-          'UPDATE refresh_tokens SET is_revoked = true WHERE token_family = $1',
-          [familyId]
+      // If 0 rows returned, the token either never existed or was already revoked/rotated.
+      if (updateRes.rows.length === 0) {
+        const existingRes = await client.query<{ token_family: string; is_revoked: boolean }>(
+          'SELECT token_family, is_revoked FROM refresh_tokens WHERE token_hash = $1',
+          [refreshTokenHash]
         );
-        try {
-          await query(
-            `INSERT INTO refresh_tokens (user_id, token_hash, token_family, is_revoked, expires_at)
-             VALUES ($1, $2, $3, true, NOW() + INTERVAL '7 days')`,
-            [payload.userId, `family_revoked:${familyId}`, familyId]
+        const existing = existingRes.rows[0];
+
+        const familyId = existing?.token_family || payload.tokenFamily;
+        if (familyId) {
+          // Reuse detection: revoke all tokens belonging to this family immediately
+          await client.query(
+            'UPDATE refresh_tokens SET is_revoked = true WHERE token_family = $1',
+            [familyId]
           );
-        } catch {
-          // Ignore unique conflict
         }
+
+        const isReuse = existing && existing.is_revoked;
+        return {
+          status: 401 as const,
+          errorBody: isReuse
+            ? { error: 'Refresh token has been reused', code: 'REFRESH_TOKEN_REUSED' }
+            : { error: 'Refresh token not found', code: 'REFRESH_TOKEN_NOT_FOUND' },
+        };
       }
 
-      await deleteRefreshTokenCookie();
+      // Exactly 1 row returned — won atomic claim
+      const { token_family: tokenFamily, user_id: userId } = updateRes.rows[0];
 
-      const isReuse = existing && existing.is_revoked;
-      const errorResponse = NextResponse.json(
-        isReuse
-          ? { error: 'Refresh token has been reused', code: 'REFRESH_TOKEN_REUSED' }
-          : { error: 'Refresh token not found', code: 'REFRESH_TOKEN_NOT_FOUND' },
-        { status: 401 }
+      // Verify user is active
+      const userResult = await client.query<{ id: string; email: string; role: any }>(
+        'SELECT id, email, role FROM users WHERE id = $1 AND is_active = true',
+        [userId]
       );
-      clearAuthCookies(errorResponse, request.headers);
-      return errorResponse;
-    }
 
-    // Exactly 1 row returned — this request won the atomic claim
-    const { token_family: tokenFamily, user_id: userId } = updateRes.rows[0];
+      if (userResult.rows.length === 0) {
+        return {
+          status: 401 as const,
+          errorBody: { error: 'User not found or inactive' },
+        };
+      }
 
-    // Verify user is active
-    const userResult = await query(
-      'SELECT id, email, role FROM users WHERE id = $1 AND is_active = true',
-      [userId]
-    );
+      const user = userResult.rows[0];
 
-    if (userResult.rows.length === 0) {
-      await deleteRefreshTokenCookie();
-      const response = NextResponse.json(
-        { error: 'User not found or inactive' },
-        { status: 401 }
-      );
-      clearAuthCookies(response, request.headers);
-      return response;
-    }
+      // Issue new token pair preserving the exact tokenFamily
+      const newAccessToken = generateAccessToken({
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        orgId: payload.orgId,
+      });
 
-    const user = userResult.rows[0];
+      const newRefreshToken = generateRefreshToken({
+        userId: user.id,
+        tokenFamily,
+        email: user.email,
+        role: user.role,
+        orgId: payload.orgId,
+      });
 
-    // Issue new token pair preserving the exact tokenFamily
-    const newAccessToken = generateAccessToken({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-      orgId: payload.orgId,
-    });
+      const newRefreshTokenHash = crypto
+        .createHash('sha256')
+        .update(newRefreshToken)
+        .digest('hex');
 
-    const newRefreshToken = generateRefreshToken({
-      userId: user.id,
-      tokenFamily,
-      email: user.email,
-      role: user.role,
-      orgId: payload.orgId,
-    });
-
-    const newRefreshTokenHash = crypto
-      .createHash('sha256')
-      .update(newRefreshToken)
-      .digest('hex');
-
-    // Store new refresh token
-    try {
-      await query(
-        `INSERT INTO refresh_tokens (user_id, token_hash, token_family, parent_hash, expires_at)
-         VALUES ($1, $2, $3, $4, NOW() + INTERVAL '7 days')`,
-        [user.id, newRefreshTokenHash, tokenFamily, refreshTokenHash]
-      );
-    } catch (err: any) {
-      if (err?.code === '42703') {
-        // Fallback if parent_hash column not present yet (pre-migration 0049)
-        await query(
+      // Store new refresh token
+      if (hasParentHashColumn) {
+        await client.query(
+          `INSERT INTO refresh_tokens (user_id, token_hash, token_family, parent_hash, expires_at)
+           VALUES ($1, $2, $3, $4, NOW() + INTERVAL '7 days')`,
+          [user.id, newRefreshTokenHash, tokenFamily, refreshTokenHash]
+        );
+      } else {
+        await client.query(
           `INSERT INTO refresh_tokens (user_id, token_hash, token_family, expires_at)
            VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
           [user.id, newRefreshTokenHash, tokenFamily]
         );
-      } else {
-        throw err;
       }
-    }
 
-    // In concurrent race conditions, check if the family was revoked by another request during rotation
-    const familyRevokedMarker = await queryOne<{ id: string }>(
-      'SELECT id FROM refresh_tokens WHERE token_hash = $1',
-      [`family_revoked:${tokenFamily}`]
-    );
-    if (familyRevokedMarker) {
-      await query(
-        'UPDATE refresh_tokens SET is_revoked = true WHERE token_family = $1',
-        [tokenFamily]
-      );
+      return {
+        status: 200 as const,
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+    });
+
+    if (result.status === 401) {
+      await deleteRefreshTokenCookie();
+      const response = NextResponse.json(result.errorBody, { status: 401 });
+      clearAuthCookies(response, request.headers);
+      return response;
     }
 
     const sessionConfig = getDefaultSessionConfig(request.headers);
 
     // Set new refresh token cookie via helper
-    await setRefreshTokenCookie(newRefreshToken, refreshConfig, request.headers);
+    await setRefreshTokenCookie(result.refreshToken, refreshConfig, request.headers);
 
     const response = NextResponse.json(
-      { accessToken: newAccessToken },
+      { accessToken: result.accessToken },
       { status: 200 }
     );
 
     // Set access token in session cookie
-    response.cookies.set(sessionConfig.cookieName, newAccessToken, {
+    response.cookies.set(sessionConfig.cookieName, result.accessToken, {
       httpOnly: sessionConfig.cookieHttpOnly,
       secure: sessionConfig.cookieSecure,
       sameSite: sessionConfig.cookieSameSite,
@@ -205,7 +200,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Set new refresh token in refresh cookie
-    response.cookies.set(refreshConfig.cookieName, newRefreshToken, {
+    response.cookies.set(refreshConfig.cookieName, result.refreshToken, {
       httpOnly: refreshConfig.cookieHttpOnly,
       secure: refreshConfig.cookieSecure,
       sameSite: refreshConfig.cookieSameSite,
