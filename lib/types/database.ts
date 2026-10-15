@@ -139,7 +139,7 @@ export interface Subscription {
 
 export type OrganizationSubscription = Subscription;
 
-export type PlanTier = 'free' | 'pro' | 'enterprise';
+export type PlanTier = 'free' | 'pro' | 'enterprise' | 'lifetime';
 export type PlanStatus = 'active' | 'past_due' | 'canceled';
 
 export interface OrganizationPlan {
@@ -147,6 +147,7 @@ export interface OrganizationPlan {
   plan_id: PlanTier;
   status: PlanStatus;
   plan_override?: string | null;
+  plan_override_expires_at?: Timestamp | null;
   stripe_customer_id?: string | null;
   stripe_subscription_id?: string | null;
   current_period_end?: Timestamp | null;

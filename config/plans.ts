@@ -11,7 +11,7 @@
  * =============================================================================
  */
 
-export type PlanId = 'free' | 'pro' | 'enterprise'
+export type PlanId = 'free' | 'pro' | 'enterprise' | 'lifetime'
 
 export interface PlanConfig {
   id: PlanId
@@ -32,7 +32,37 @@ export interface PlanConfig {
   features: string[] // List of features displayed in the upgrade UI
 }
 
-export const PLANS: Record<'free' | 'pro' | 'enterprise', PlanConfig> = {
+export const ENTERPRISE_QUOTAS = {
+  maxMembers: 500,
+  maxPendingInvites: 500,
+  maxClients: 999999,
+  maxProjects: 999999,
+  maxChannels: 999,
+  maxAIRequestsMonthly: 10000,
+  clientPortalEnabled: true,
+  emailIntegrationEnabled: true,
+  ssoEnabled: true,
+  auditLogsEnabled: true,
+  apiAccessEnabled: true,
+  canUseAllFeatures: true,
+} as const
+
+export const ENTERPRISE_FEATURES = [
+  'Up to 500 team members',
+  'Up to 500 pending invitations',
+  'Unlimited clients & projects',
+  '999 connected communication channels',
+  '10,000 monthly AI requests',
+  'Single Sign-On (SSO)',
+  'Enterprise audit log export',
+  'Direct API access',
+  'Dedicated account manager',
+  'Custom domain & branding options',
+  'Custom SLA guarantees',
+  'Tailored security and audit compliance',
+]
+
+export const PLANS: Record<PlanId, PlanConfig> = {
   free: {
     id: 'free',
     name: 'Free',
@@ -92,32 +122,15 @@ export const PLANS: Record<'free' | 'pro' | 'enterprise', PlanConfig> = {
     id: 'enterprise',
     name: 'Enterprise',
     priceMonthlyUsd: null, // Contact sales
-    maxMembers: 500,
-    maxPendingInvites: 500,
-    maxClients: 999999,
-    maxProjects: 999999,
-    maxChannels: 999,
-    maxAIRequestsMonthly: 10000,
-    clientPortalEnabled: true,
-    emailIntegrationEnabled: true,
-    ssoEnabled: true,
-    auditLogsEnabled: true,
-    apiAccessEnabled: true,
-    canUseAllFeatures: true,
-    features: [
-      'Up to 500 team members',
-      'Up to 500 pending invitations',
-      'Unlimited clients & projects',
-      '999 connected communication channels',
-      '10,000 monthly AI requests',
-      'Single Sign-On (SSO)',
-      'Enterprise audit log export',
-      'Direct API access',
-      'Dedicated account manager',
-      'Custom domain & branding options',
-      'Custom SLA guarantees',
-      'Tailored security and audit compliance',
-    ],
+    ...ENTERPRISE_QUOTAS,
+    features: ENTERPRISE_FEATURES,
+  },
+  lifetime: {
+    id: 'lifetime',
+    name: 'Lifetime VIP',
+    priceMonthlyUsd: null, // Lifetime grant
+    ...ENTERPRISE_QUOTAS,
+    features: ENTERPRISE_FEATURES,
   },
 }
 
@@ -127,11 +140,14 @@ export const PLANS: Record<'free' | 'pro' | 'enterprise', PlanConfig> = {
 export function getPlanConfig(planId?: string | null): PlanConfig {
   if (!planId) return PLANS.free
   const normalized = planId.toLowerCase()
-  if (normalized === 'pro' || normalized === 'starter' || normalized === 'professional' || normalized === 'lifetime') {
-    return PLANS.pro
+  if (normalized === 'lifetime' || normalized === 'vip' || normalized === 'lifetime_vip') {
+    return PLANS.lifetime
   }
-  if (normalized === 'enterprise') {
+  if (normalized === 'enterprise' || normalized === 'agency') {
     return PLANS.enterprise
+  }
+  if (normalized === 'pro' || normalized === 'starter' || normalized === 'professional') {
+    return PLANS.pro
   }
   return PLANS.free
 }
