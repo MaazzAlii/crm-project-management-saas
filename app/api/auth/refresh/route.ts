@@ -86,6 +86,15 @@ export async function POST(request: NextRequest) {
           'UPDATE refresh_tokens SET is_revoked = true WHERE token_family = $1',
           [familyId]
         );
+        try {
+          await query(
+            `INSERT INTO refresh_tokens (user_id, token_hash, token_family, is_revoked, expires_at)
+             VALUES ($1, $2, $3, true, NOW() + INTERVAL '7 days')`,
+            [payload.userId, `family_revoked:${familyId}`, familyId]
+          );
+        } catch {
+          // Ignore unique conflict
+        }
       }
 
       await deleteRefreshTokenCookie();
@@ -161,6 +170,18 @@ export async function POST(request: NextRequest) {
       } else {
         throw err;
       }
+    }
+
+    // In concurrent race conditions, check if the family was revoked by another request during rotation
+    const familyRevokedMarker = await queryOne<{ id: string }>(
+      'SELECT id FROM refresh_tokens WHERE token_hash = $1',
+      [`family_revoked:${tokenFamily}`]
+    );
+    if (familyRevokedMarker) {
+      await query(
+        'UPDATE refresh_tokens SET is_revoked = true WHERE token_family = $1',
+        [tokenFamily]
+      );
     }
 
     const sessionConfig = getDefaultSessionConfig(request.headers);
