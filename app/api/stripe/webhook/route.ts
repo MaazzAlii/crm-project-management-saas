@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     )
   } catch (colErr: any) {
     // Graceful fallback if migration 0048 (payload column) is unapplied in local database
-    if (colErr?.message?.includes('payload')) {
+    if (colErr?.message?.includes('payload') || colErr?.code === '42703') {
       insertResult = await query<{ id: string }>(
         `INSERT INTO stripe_processed_events (id, event_type)
          VALUES ($1, $2)
