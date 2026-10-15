@@ -203,7 +203,7 @@ describe('BILL-2 Phase B: Stripe Webhook Ingestion & Deduplication', () => {
       const originalSecret = process.env.STRIPE_WEBHOOK_SECRET
 
       try {
-        process.env.NODE_ENV = 'production'
+        ;(process.env as any).NODE_ENV = 'production'
         delete process.env.STRIPE_WEBHOOK_SECRET
 
         const bodyStr = JSON.stringify({ id: 'evt_prod_missing_secret', type: 'test' })
@@ -218,7 +218,7 @@ describe('BILL-2 Phase B: Stripe Webhook Ingestion & Deduplication', () => {
         const json = await res.json()
         expect(json.error).toBe('Webhook secret unconfigured')
       } finally {
-        process.env.NODE_ENV = originalEnv
+        ;(process.env as any).NODE_ENV = originalEnv
         if (originalSecret) {
           process.env.STRIPE_WEBHOOK_SECRET = originalSecret
         }
