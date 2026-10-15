@@ -1,44 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
-import { deleteRefreshTokenCookie, getRefreshTokenFromCookie, getDefaultSessionConfig } from '@/lib/auth/session';
-import { query } from '@/lib/db';
+import { revokeSessionAndClearCookies } from '@/lib/auth/logout';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const refreshToken = await getRefreshTokenFromCookie();
-
-    if (refreshToken) {
-      // Revoke the token in database
-      const refreshTokenHash = crypto
-        .createHash('sha256')
-        .update(refreshToken)
-        .digest('hex');
-
-      await query(
-        'UPDATE refresh_tokens SET is_revoked = true WHERE token_hash = $1',
-        [refreshTokenHash]
-      );
-    }
-
-    // Delete cookie via helper
-    await deleteRefreshTokenCookie();
-
-    const response = NextResponse.json(
-      { message: 'Logged out successfully' },
-      { status: 200 }
-    );
-
-    const sessionConfig = getDefaultSessionConfig(request.headers);
-    response.cookies.set(sessionConfig.cookieName, '', {
-      httpOnly: sessionConfig.cookieHttpOnly,
-      secure: sessionConfig.cookieSecure,
-      sameSite: sessionConfig.cookieSameSite,
-      maxAge: 0,
-      domain: sessionConfig.cookieDomain,
-      path: '/',
-    });
-
-    return response;
+    return await revokeSessionAndClearCookies(request);
   } catch (error) {
     console.error('Logout error:', error);
     return NextResponse.json(
