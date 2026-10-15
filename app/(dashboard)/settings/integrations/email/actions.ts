@@ -4,6 +4,7 @@ import { getCurrentSessionContext } from '@/lib/auth/session'
 import { query, queryOne } from '@/lib/db'
 import { encryptSecret, decryptSecret } from '@/lib/security/encrypt'
 import { sendEmailOutboundMessage } from '@/lib/providers/email'
+import { checkFeatureAccess } from '@/lib/services/plan-limits'
 import { revalidatePath } from 'next/cache'
 
 export interface EmailChannelConfig {
@@ -74,6 +75,17 @@ export async function saveEmailIntegrationAction(formData: FormData) {
     const canManage = session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin
     if (!canManage) {
       return { error: 'Forbidden. Only organization owners and admins can configure integrations.' }
+    }
+
+    // Plan feature gate check: emailIntegrationEnabled must be true
+    const featureCheck = await checkFeatureAccess(session.organization.id, 'emailIntegration')
+    if (!featureCheck.allowed) {
+      return {
+        error: featureCheck.message || 'Email Integration is not available on your current plan. Please upgrade to Pro.',
+        code: 'UPGRADE_REQUIRED',
+        planName: featureCheck.planName,
+        upgradeUrl: featureCheck.upgradeUrl,
+      }
     }
 
     const channelName = formData.get('channel_name')?.toString().trim() || 'Support Email'
