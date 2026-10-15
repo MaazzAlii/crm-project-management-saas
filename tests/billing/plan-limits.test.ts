@@ -334,7 +334,7 @@ describe('BILL-1: Plan Limit Enforcement & Tier Quotas', () => {
     expect(res.status).toBe(201);
   });
 
-  it('10. Lifetime VIP: exactly matches Pro quotas (15 seats, 100 clients, 50 projects, 3 channels, 500 AI)', async () => {
+  it('10. Lifetime VIP: grants Enterprise quotas (500 seats, 10,000 AI, SSO allowed) per BILL-3', async () => {
     await query(
       `INSERT INTO organization_plans (organization_id, plan_id, status, plan_override)
        VALUES ($1, 'free', 'active', 'lifetime')
@@ -344,14 +344,14 @@ describe('BILL-1: Plan Limit Enforcement & Tier Quotas', () => {
     invalidatePlanCache(testOrgId);
 
     const memberCheck = await checkMemberLimit(testOrgId);
-    expect(memberCheck.limit).toBe(15);
+    expect(memberCheck.limit).toBe(500);
 
     const aiCheck = await checkAIUsageLimit(testOrgId);
-    expect(aiCheck.limit).toBe(500);
+    expect(aiCheck.limit).toBe(10000);
 
-    // Does not get enterprise-only features
+    // BILL-3 correction: Lifetime VIP gets enterprise features including SSO
     const ssoCheck = await checkFeatureAccess(testOrgId, 'sso');
-    expect(ssoCheck.allowed).toBe(false);
+    expect(ssoCheck.allowed).toBe(true);
   });
 
   it('11. Feature gating: Free plan cannot invite to Client Portal (UPGRADE_REQUIRED)', async () => {
