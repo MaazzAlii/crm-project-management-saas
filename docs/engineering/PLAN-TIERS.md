@@ -92,3 +92,33 @@ Enforcement occurs **pre-flight** prior to calling external LLM providers. Free 
 ## 4. Database Schema Synchronization
 
 Migration `0046_sync_plan_feature_limits.sql` synchronizes `subscription_plans.feature_limits` JSON columns across all four standard slugs (`starter`, `pro`, `agency`/`enterprise`, `lifetime`).
+
+---
+
+## 5. Super-Admin Plan Override Management (BILL-3B)
+
+### 5.1 Architecture & Overview
+Super-admins can directly grant, modify, and revoke workspace plan overrides via the administrative interface at `/super-admin/organizations/[id]`. This eliminates manual database updates and enforces strict authorization, validation, cache invalidation, and immutable audit logging.
+
+### 5.2 Supported Override Durations
+Overrides map to full **Enterprise** tier quotas (`maxMembers: 500`, unlimited clients/projects, 999 channels, 10,000 AI requests, and all enterprise feature flags):
+- **Lifetime VIP (`lifetime`)**: Permanent Enterprise access (`plan_override_expires_at = NULL`).
+- **1 Month (`1_month`)**: Sponsored Enterprise access (`NOW() + INTERVAL '1 month'`).
+- **3 Months (`3_month`)**: Sponsored Enterprise access (`NOW() + INTERVAL '3 months'`).
+- **6 Months (`6_month`)**: Sponsored Enterprise access (`NOW() + INTERVAL '6 months'`).
+- **12 Months (`12_month`)**: Sponsored Enterprise access (`NOW() + INTERVAL '12 months'`).
+- **Custom Expiration (`custom`)**: Admin-selected future calendar date (`customExpiresAt::timestamptz`).
+
+### 5.3 Database Schema (`public.organization_plans`)
+Applied via migration `0050_plan_override_expiry.sql`:
+- `plan_override_expires_at TIMESTAMPTZ`: Expiration timestamp (NULL for lifetime).
+- `plan_override_granted_by UUID REFERENCES users(id)`: User ID of super-admin granter.
+- `plan_override_granted_at TIMESTAMPTZ`: Timestamp when override was granted.
+- `plan_override_note TEXT`: Optional administrative audit note (up to 500 characters).
+
+### 5.4 Backend Service & Cache Invalidation
+- **Service Layer**: `lib/services/plan-override.ts` provides `grantPlanOverride()`, `revokePlanOverride()`, and `getPlanOverrideDetails()`.
+- **Server Actions**: `app/super-admin/plan-override-actions.ts` provides `grantPlanOverrideAction()` and `revokePlanOverrideAction()`, strictly guarded by `requireSuperAdmin()`.
+- **Cache Invalidation**: Backed by `globalThis.__innoventix_plan_cache__` singleton. All grants and revocations execute `invalidatePlanCache(orgId)` followed by Next.js `revalidatePath` and client `router.refresh()`.
+- **Audit Trails**: Every grant and revoke logs an immutable audit event (`PLAN_OVERRIDE_GRANTED`, `PLAN_OVERRIDE_REVOKED`) with target organization ID, granter ID, duration, expiry date, and admin note.
+
