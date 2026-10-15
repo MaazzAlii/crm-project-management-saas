@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/billing/page.tsx": {
-    "mtime": 1791975594.1126328,
-    "seen": 1791976486.5971506,
-    "ast_hash": "24c33a7c51ee4f079d95b9b98c855cfe",
+    "mtime": 1792069101.25819,
+    "seen": 1792070276.7369144,
+    "ast_hash": "54b477740f690ec24e08de04f007c6ce",
     "semantic_hash": ""
   },
   "app/actions/onboarding.ts": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1792063154.7272925,
-    "seen": 1792063176.821771,
-    "ast_hash": "eff45106a8097a788623c13d37eabe8f",
+    "mtime": 1792070251.8730297,
+    "seen": 1792070276.737786,
+    "ast_hash": "9278acaeb0ada5098711b733ae4c4ae2",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1548,9 +1548,9 @@
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/team/page.tsx": {
-    "mtime": 1792048110.207822,
-    "seen": 1792048803.8623009,
-    "ast_hash": "29ccf7be65f42ef5f990a69fdce6255c",
+    "mtime": 1792068924.4442015,
+    "seen": 1792070276.736945,
+    "ast_hash": "e4e6fcdbd8e31a7bd52505aa1c522714",
     "semantic_hash": ""
   },
   "app/(dashboard)/settings/templates/actions.ts": {
@@ -2574,9 +2574,9 @@
     "semantic_hash": ""
   },
   "components/settings/BillingSettingsClient.tsx": {
-    "mtime": 1791975648.7610178,
-    "seen": 1791976486.5974588,
-    "ast_hash": "10f10e5f27bfc933b51d27ca12531d7c",
+    "mtime": 1792069076.4079306,
+    "seen": 1792070276.7372243,
+    "ast_hash": "a1a4ac2023597c236278763677c23341",
     "semantic_hash": ""
   },
   "components/settings/IntegrationsList.tsx": {
@@ -2694,9 +2694,9 @@
     "semantic_hash": ""
   },
   "config/plans.ts": {
-    "mtime": 1792043460.03599,
-    "seen": 1792046018.400679,
-    "ast_hash": "3719b08365e8727a851249937b9ce911",
+    "mtime": 1792068787.276379,
+    "seen": 1792070276.7372673,
+    "ast_hash": "28e73ad27e36a616164c0c350ef215d1",
     "semantic_hash": ""
   },
   "e2e/billing.spec.ts": {
@@ -2952,9 +2952,9 @@
     "semantic_hash": ""
   },
   "lib/billing/current-plan.ts": {
-    "mtime": 1792043478.5207005,
-    "seen": 1792046018.40075,
-    "ast_hash": "9303e4a1dc71cfcd22acf758480013ee",
+    "mtime": 1792069551.8420908,
+    "seen": 1792070276.737337,
+    "ast_hash": "8f5578640b5b98f52b15469dce004f72",
     "semantic_hash": ""
   },
   "lib/clients/communication-mode.ts": {
@@ -3282,9 +3282,9 @@
     "semantic_hash": ""
   },
   "lib/types/database.ts": {
-    "mtime": 1792000889.817187,
-    "seen": 1792001700.5489762,
-    "ast_hash": "5a0c53cf85bbc4ce07f21554b36d567b",
+    "mtime": 1792068817.8428106,
+    "seen": 1792070276.7374194,
+    "ast_hash": "3145305667e10f4f5a15e1575bd3b52a",
     "semantic_hash": ""
   },
   "lib/types/pipeline.ts": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1792063126.9752111,
-    "seen": 1792063176.8217778,
-    "ast_hash": "07eabfcbfa008f28cde5d3ea787c5bfa",
+    "mtime": 1792070216.7691116,
+    "seen": 1792070276.7377927,
+    "ast_hash": "1b11f6283531950c0a28b30e39db3390",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -6564,9 +6564,9 @@
     "semantic_hash": ""
   },
   "components/billing/PlanUsageCard.tsx": {
-    "mtime": 1791809647.4426243,
-    "seen": 1791810373.477915,
-    "ast_hash": "85676ad0ab85e7f2d85bfdf2b1bacbf9",
+    "mtime": 1792068964.7386863,
+    "seen": 1792070276.73713,
+    "ast_hash": "34e86631365202471e92cece4066ca58",
     "semantic_hash": ""
   },
   "components/dashboard/DashboardTeamWidgets.tsx": {
@@ -6576,15 +6576,15 @@
     "semantic_hash": ""
   },
   "components/settings/InviteMemberDialog.tsx": {
-    "mtime": 1791998422.308481,
-    "seen": 1791999308.9226184,
-    "ast_hash": "18f1f102e2c2e48201effcbdf9cf57e3",
+    "mtime": 1792068991.9310021,
+    "seen": 1792070276.7372267,
+    "ast_hash": "fd06e18f13fbc1f3e5ad5abbb347207e",
     "semantic_hash": ""
   },
   "components/settings/PendingInvitationsList.tsx": {
-    "mtime": 1792047226.1811793,
-    "seen": 1792048803.862568,
-    "ast_hash": "0aafaa1407674c50d10bf434968453af",
+    "mtime": 1792069517.14485,
+    "seen": 1792070276.73723,
+    "ast_hash": "2f2cc4e06132573721910b641e3e4dd7",
     "semantic_hash": ""
   },
   "e2e/invite-dialog.spec.ts": {
@@ -6744,9 +6744,9 @@
     "semantic_hash": ""
   },
   "tests/lifetime-access-db.test.ts": {
-    "mtime": 1792044159.9026096,
-    "seen": 1792046018.4011347,
-    "ast_hash": "64eb9991cdd7657b112578b894b45440",
+    "mtime": 1792069616.2311826,
+    "seen": 1792070276.7377412,
+    "ast_hash": "f8145035aa7eb5b0d6c3aaac603a934b",
     "semantic_hash": ""
   },
   "tests/invitation-checklist-part1.test.ts": {
@@ -6756,9 +6756,9 @@
     "semantic_hash": ""
   },
   "tests/security-tenancy-and-override.test.ts": {
-    "mtime": 1792045606.0223608,
-    "seen": 1792046018.4011571,
-    "ast_hash": "424737c957b9641f230142b6ecbaf7a9",
+    "mtime": 1792069631.0159922,
+    "seen": 1792070276.7377632,
+    "ast_hash": "bb5596135d4c9a5155e1506fd9bf7aee",
     "semantic_hash": ""
   },
   "scripts/grant-super-admin.ts": {
@@ -7758,15 +7758,15 @@
     "semantic_hash": ""
   },
   "tests/billing/plan-limits.test.ts": {
-    "mtime": 1792046084.1638212,
-    "seen": 1792048803.862993,
-    "ast_hash": "255233f0f51572bf4b4a0a7aa913fecc",
+    "mtime": 1792069600.1973965,
+    "seen": 1792070276.7376902,
+    "ast_hash": "7466f4778dfc9525360f7f0f8710ba5f",
     "semantic_hash": ""
   },
   "docs/engineering/PLAN-TIERS.md": {
-    "mtime": 1792045902.8331206,
-    "seen": 1792046018.401455,
-    "ast_hash": "3a9e7cc4d7cea0ab6ccc62d45c966b0b",
+    "mtime": 1792069269.416805,
+    "seen": 1792070276.7380598,
+    "ast_hash": "9db0db41eff0d420f232371482feadae",
     "semantic_hash": ""
   },
   "assets/screenshots/bill-1/ai_limit_dark.png": {
@@ -8019,6 +8019,48 @@
     "mtime": 1792065257.5208466,
     "seen": 1792065329.6850033,
     "ast_hash": "69ac911574b9d8ad87d8bc1497620a2b",
+    "semantic_hash": ""
+  },
+  "scripts/verify-bill-3-e2e.ts": {
+    "mtime": 1792070022.7767937,
+    "seen": 1792070276.73753,
+    "ast_hash": "921d4bc5c03a6b2bfcd1d64b03fd52bf",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0050_plan_override_expiry.sql": {
+    "mtime": 1792068905.092961,
+    "seen": 1792070276.7376597,
+    "ast_hash": "5b0febfbb7c45a32b9ffdbef18affe85",
+    "semantic_hash": ""
+  },
+  "tests/billing/plan-override-resolution.test.ts": {
+    "mtime": 1792069456.8123808,
+    "seen": 1792070276.7376912,
+    "ast_hash": "67501bc8c7d2e52397946b7e0d1c6c0b",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/bill-3/invite_expiry_light.png": {
+    "mtime": 1792070038.0037239,
+    "seen": 1792070276.7385292,
+    "ast_hash": "1ba4f5b2c550eff31816ef7fc4b0d2f5",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/bill-3/lifetime_seats_dark.png": {
+    "mtime": 1792070035.2617362,
+    "seen": 1792070276.7385309,
+    "ast_hash": "b832510ac3a94aa411e1fcd93acbd3d3",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/bill-3/lifetime_seats_light.png": {
+    "mtime": 1792070034.662739,
+    "seen": 1792070276.7385318,
+    "ast_hash": "b9492357b0fe4f36fd1d07ee40dadef0",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/bill-3/no_upgrade_cta_light.png": {
+    "mtime": 1792070036.4507058,
+    "seen": 1792070276.738533,
+    "ast_hash": "8c8133beb9c7712e508e7c9bb90786b3",
     "semantic_hash": ""
   }
 }
