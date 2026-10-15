@@ -70,7 +70,7 @@ export async function getCurrentPlan(orgId: string): Promise<CurrentPlanResult> 
 
   const isLifetime = (row as any)?.plan_override === 'lifetime';
   if (isLifetime) {
-    planId = 'enterprise';
+    planId = 'pro';
     status = 'active';
   }
 

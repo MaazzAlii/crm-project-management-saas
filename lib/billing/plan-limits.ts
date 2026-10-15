@@ -63,14 +63,14 @@ export async function getOrganizationPlanLimits(organizationId: string): Promise
     }
   }
 
-  // Default fallback limits (Starter Tier)
+  // Default fallback limits (Free/Starter Tier)
   return {
-    max_team_members: 5,
-    max_clients: 25,
-    max_projects: 50,
+    max_team_members: 3,
+    max_clients: 5,
+    max_projects: 3,
     storage_limit_gb: 10,
-    client_portal_enabled: true,
-    ai_features_enabled: false,
+    client_portal_enabled: false,
+    ai_features_enabled: true,
     communication_channels_included: 1,
     analytics_level: 'basic',
   }
