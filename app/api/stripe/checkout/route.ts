@@ -1,27 +1,22 @@
 import { NextRequest } from 'next/server'
 import { getAuthFromRequest } from '@/lib/auth/middleware'
 import { stripe } from '@/lib/stripe/client'
-import { validateStripeConfig } from '@/lib/stripe/config'
+import { getProPriceId } from '@/lib/stripe/config'
 import { queryOne } from '@/lib/db'
 import { apiSuccess, apiError, handleApiError } from '@/lib/utils/response'
 
 /**
- * POST /api/stripe/checkout (Prompt 46)
+ * POST /api/stripe/checkout (Prompt 46 / BILL-2C)
  * Creates a Stripe Checkout Session in subscription mode for Pro tier.
  * Organization ID strictly derived from session context, never request body.
  */
 export async function POST(request: NextRequest) {
   try {
+    const proPriceId = getProPriceId()
+
     const auth = getAuthFromRequest(request)
     if (!auth || !auth.orgId) {
       return apiError('Unauthorized: Active organization session required', 401, 'UNAUTHORIZED')
-    }
-
-    const config = validateStripeConfig()
-    const proPriceId = config.proPriceId || process.env.STRIPE_PRO_PRICE_ID
-
-    if (!proPriceId) {
-      return apiError('Stripe Pro price ID is not configured on the server', 500, 'CONFIGURATION_ERROR')
     }
 
     // Fetch organization and existing customer ID if any
@@ -70,7 +65,10 @@ export async function POST(request: NextRequest) {
       url: checkoutSession.url,
       sessionId: checkoutSession.id,
     })
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.message?.includes('STRIPE_PRO_PRICE_ID')) {
+      return apiError(error.message, 500, 'CONFIGURATION_ERROR')
+    }
     return handleApiError(error)
   }
 }
