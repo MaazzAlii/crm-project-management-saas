@@ -35,6 +35,89 @@ export function invalidatePlanCache(orgId?: string): void {
   }
 }
 
+export type OverrideKind = 'lifetime' | 'sponsored' | 'manual_tier';
+
+export interface ResolvedOverride {
+  kind: OverrideKind;
+  planSlug: PlanTier;
+  isActive: boolean;
+  expiresAt?: Date | null;
+}
+
+/**
+ * Resolve organization plan override with multi-duration sponsorship & expiry support (Prompt BILL-3)
+ * Rules:
+ * - 'lifetime' | 'vip' | 'lifetime_vip' -> Permanent Enterprise quotas (slug: 'lifetime')
+ * - 'enterprise' | 'agency'            -> Permanent Enterprise quotas (slug: 'enterprise')
+ * - 'pro'                              -> Permanent Pro quotas (slug: 'pro') — preserves manual Pro grants
+ * - '1_month'|'3_month'|'6_month'|'12_month'
+ *                                      -> Enterprise quotas until plan_override_expires_at; falls back when expired
+ * - Any other non-null value           -> Enterprise quotas with warning log (fail-open)
+ */
+export function resolveOverride(
+  planOverride: string | null | undefined,
+  expiresAt?: Date | string | null
+): ResolvedOverride | null {
+  if (!planOverride) return null;
+  const raw = planOverride.trim().toLowerCase();
+  if (!raw) return null;
+
+  // 1. Permanent Lifetime
+  if (raw === 'lifetime' || raw === 'vip' || raw === 'lifetime_vip') {
+    return {
+      kind: 'lifetime',
+      planSlug: 'lifetime',
+      isActive: true,
+      expiresAt: null,
+    };
+  }
+
+  // 2. Permanent Enterprise
+  if (raw === 'enterprise' || raw === 'agency') {
+    return {
+      kind: 'manual_tier',
+      planSlug: 'enterprise',
+      isActive: true,
+      expiresAt: null,
+    };
+  }
+
+  // 3. Permanent Pro (preserve manual pro grants)
+  if (raw === 'pro' || raw === 'starter' || raw === 'professional') {
+    return {
+      kind: 'manual_tier',
+      planSlug: 'pro',
+      isActive: true,
+      expiresAt: null,
+    };
+  }
+
+  // 4. Sponsored overrides: '1_month', '3_month', '6_month', '12_month'
+  if (['1_month', '3_month', '6_month', '12_month'].includes(raw)) {
+    const parsedExpiry = expiresAt ? new Date(expiresAt) : null;
+    const isExpired = parsedExpiry ? !isNaN(parsedExpiry.getTime()) && parsedExpiry.getTime() < Date.now() : false;
+    if (isExpired) {
+      return null;
+    }
+
+    return {
+      kind: 'sponsored',
+      planSlug: 'enterprise',
+      isActive: true,
+      expiresAt: parsedExpiry,
+    };
+  }
+
+  // 5. Unknown override values: fail-open to Enterprise with warning log
+  console.warn(`[resolveOverride] Unknown plan_override "${planOverride}" — defaulting to Enterprise access.`);
+  return {
+    kind: 'lifetime',
+    planSlug: 'enterprise',
+    isActive: true,
+    expiresAt: null,
+  };
+}
+
 /**
  * Fetch real-time active plan and seat limits for an organization
  */
@@ -68,15 +151,23 @@ export async function getCurrentPlan(orgId: string): Promise<CurrentPlanResult> 
     currentPeriodEnd = row.current_period_end || null;
   }
 
-  const isLifetime = (row as any)?.plan_override === 'lifetime';
-  if (isLifetime) {
-    planId = 'pro';
+  // Resolve override with sponsor duration and expiry support (BILL-3)
+  const override = resolveOverride(row?.plan_override, row?.plan_override_expires_at);
+
+  let effectivePlanId: PlanTier;
+
+  if (override && override.isActive) {
+    // 1. ACTIVE OVERRIDE (Highest priority — grants Enterprise/Lifetime/Pro quotas)
+    effectivePlanId = override.planSlug;
+    planId = override.planSlug;
     status = 'active';
+  } else {
+    // 2. ACTIVE SUBSCRIPTION / PLAN TIER FALLBACK
+    // If status is past_due or canceled (and no active override), treat as free for limits
+    const isRestricted = status === 'past_due' || status === 'canceled';
+    effectivePlanId = isRestricted ? 'free' : planId;
   }
 
-  // If status is past_due or canceled and no lifetime override exists, treat as free for limits
-  const isRestricted = (status === 'past_due' || status === 'canceled') && !isLifetime;
-  const effectivePlanId: PlanTier = isRestricted ? 'free' : planId;
   const planConfig: PlanConfig = PLANS[effectivePlanId as PlanId] || PLANS.free;
 
   const result: CurrentPlanResult = {
@@ -88,8 +179,10 @@ export async function getCurrentPlan(orgId: string): Promise<CurrentPlanResult> 
     stripeCustomerId,
     stripeSubscriptionId,
     currentPeriodEnd,
-    showBanner: isRestricted,
-    bannerType: isRestricted ? (status as 'past_due' | 'canceled') : null,
+    showBanner: (status === 'past_due' || status === 'canceled') && (!override || !override.isActive),
+    bannerType: (status === 'past_due' || status === 'canceled') && (!override || !override.isActive)
+      ? (status as 'past_due' | 'canceled')
+      : null,
   };
 
   planCache.set(orgId, {
