@@ -3544,9 +3544,48 @@ paste at the start of every batch report.
   - Playwright browser E2E captured all 6 screenshots across Light/Dark modes in `assets/screenshots/auth-2/` and verified 20 consecutive `/sign-in` loads return HTTP 200.
 - **Status**: ✅ AUTH-2 Phase B complete. All quality gates satisfied.
 
+---
 
-
-
+### Step 31: BILL-2 — Stripe Test Mode: Checkout, Webhooks, Proration
+- **Date/Time**: 2026-10-15 13:55
+- **Task**: Stripe Integration Hardening: Webhook Atomic Deduplication (#5), Checkout Session Configuration (#4), Safe Price Fallback & Startup Validation, Proration & Subscription Lifecycle Verification (#8), and Production Go-Live Checklist.
+- **Actions Performed**:
+  1. **#5 — Atomic Webhook Deduplication & TOCTOU Race Condition Elimination**:
+     - Investigated and confirmed the TOCTOU race condition in Phase A (two concurrent identical webhook delivery attempts resulted in duplicate handler execution and duplicate audit logs).
+     - Proposed migration `supabase/migrations/0048_stripe_processed_events_payload.sql` (unapplied proposal) reusing `stripe_processed_events` table (migration 0043) and adding `payload JSONB`.
+     - Refactored `app/api/stripe/webhook/route.ts` to perform atomic upfront insertion:
+       `INSERT INTO stripe_processed_events (id, event_type, payload) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING RETURNING id`.
+     - When `RETURNING` returns 0 rows (concurrent or duplicate delivery), immediately returns `{ received: true, duplicate: true }` with status 200 without executing the handler switch statement or logging duplicate audit events.
+     - Implemented **Option (b) Handler Failure Recovery**: Wrapped handler execution in try/catch; if the handler throws an error, deletes the row from `stripe_processed_events` and returns status 500 so Stripe's retry is not swallowed as a false duplicate.
+     - Added support for `invoice.paid` and `invoice.payment_failed` logging.
+  2. **Production Webhook Hardening & Dev CLI Secret Capture**:
+     - Captured dev signing secret using Stripe CLI v1.53.1 and updated `.env.local` (`STRIPE_WEBHOOK_SECRET` and `STRIPE_PRO_PRICE_ID`).
+     - Hardened `app/api/stripe/webhook/route.ts`: When `NODE_ENV === 'production'` and `STRIPE_WEBHOOK_SECRET` is missing, logs a fatal error and returns status 500 (`Webhook secret unconfigured`) instead of falling back to unsigned payload parsing.
+  3. **#4 — Safe Price Fallback & Startup Boot Validation**:
+     - Updated `lib/stripe/config.ts` so `STRIPE_PRO_PRICE_ID` uses safe development fallback (`price_1UPcesKO8Y3ohhlUm5KdI8hO`) with a console warning, while throwing in production (`STRIPE_PRO_PRICE_ID required in production`).
+     - Added production startup validation in `validateStripeConfig()`: In production, requires `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, and `STRIPE_PRO_PRICE_ID` or refuses to start.
+     - Updated `app/actions/stripe.ts` to attach `subscription_data.metadata.organization_id` and dual-cased IDs to ensure created subscriptions retain organization linkage.
+  4. **#8 — Proration & Subscription Lifecycle Verification (Option A)**:
+     - Verified Stripe Checkout redirect URLs (`checkout=success&session_id={CHECKOUT_SESSION_ID}`) and Customer Portal session creation.
+     - Documented and verified that cancellations scheduled for period end preserve Pro tier access until period expiration, while `customer.subscription.deleted` downgrades the tenant to Free tier.
+     - Created comprehensive runbook [`docs/engineering/STRIPE-GO-LIVE-CHECKLIST.md`](file:///home/maazzalii/Desktop/100%20days%20of%20code/91-crm-project-management-saas/docs/engineering/STRIPE-GO-LIVE-CHECKLIST.md) covering key migration, webhook secret rotation, $0 verification tests, emergency rollback procedures, and support escalation.
+- **Files Modified / Created**:
+  - `supabase/migrations/0048_stripe_processed_events_payload.sql` (created, proposed unapplied)
+  - `app/api/stripe/webhook/route.ts`
+  - `lib/stripe/config.ts`
+  - `app/actions/stripe.ts`
+  - `tests/billing/stripe-webhook.test.ts` (created)
+  - `tests/billing/stripe-proration.test.ts` (created)
+  - `docs/engineering/STRIPE-GO-LIVE-CHECKLIST.md` (created)
+  - `MIGRATION_EXECUTION_LOG.md`
+  - `.agent-state.md`
+- **Verification / Test Result**:
+  - `npx tsc --noEmit`: **EXIT 0**
+  - `npm test`: **82 test files, 599/599 tests passed (100% pass rate, +13 new regression tests in this batch)**
+  - `npm run lint`: **0 errors, 3 baseline warnings (0 warnings in touched files)**
+  - `npm run build`: **142 routes compiled cleanly (exact baseline strictly preserved)**
+  - Concurrent duplicate delivery test passed: Exactly 1 primary (`{ received: true }`), exactly 1 duplicate (`{ received: true, duplicate: true }`), audit log count increased by exactly 1.
+- **Status**: ✅ BILL-2 Phase B complete. All quality gates satisfied. Local commits ready.
 
 
 
