@@ -3627,6 +3627,46 @@ paste at the start of every batch report.
   - Concurrent refresh test passed: Exactly 1× 200 with new pair, 1× 401 REUSED, family revoked, subsequent refresh 401.
 - **Status**: ✅ AUTH-3 Phase B complete. All quality gates satisfied. Local commits ready.
 
+---
+
+### Phase / Task: BILL-2C — Move Stripe Config Validation from Build-Time to Request-Time
+- **Timestamp**: 2026-10-15 16:15 PKT
+- **Action Performed**:
+  1. **Root Cause Resolution**:
+     - Identified build-time crash during Coolify production Docker deployment (`Error: STRIPE_PRO_PRICE_ID required in production at .next/server/app/api/stripe/checkout/route.js`).
+     - Root cause: Module-load time execution of `validateStripeConfig()` in `lib/stripe/client.ts` (`const config = validateStripeConfig()`) and `app/api/stripe/checkout/route.ts` caused Next.js page data collection during `next build` (where `NODE_ENV=production`) to throw when `STRIPE_PRO_PRICE_ID` or other Stripe environment variables were absent from build args.
+  2. **Lazy Request-Time Validation**:
+     - Refactored `lib/stripe/config.ts` to export lazy `getProPriceId()` and `getWebhookSecret()`. In development, safely falls back to test price ID with a warning; in production, throws only when invoked at runtime if missing.
+     - Updated `lib/stripe/client.ts` to instantiate `Stripe` using `process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_build'` directly, eliminating top-level `validateStripeConfig()` execution at module load time.
+     - Refactored `app/api/stripe/checkout/route.ts` to resolve `proPriceId = getProPriceId()` inside `POST` handler at request time. If `STRIPE_PRO_PRICE_ID` is missing in production, returns HTTP 500 with explicit `CONFIGURATION_ERROR` and informative message without crashing server start or build.
+     - Refactored `app/api/stripe/webhook/route.ts` to resolve webhook secret using `getWebhookSecret()` inside `POST` handler at request time.
+  3. **Regression Tests (`tests/billing/stripe-config-timing.test.ts`)**:
+     - Added 5 regression tests covering:
+       - Import test in a fresh production process without `STRIPE_PRO_PRICE_ID` or `STRIPE_SECRET_KEY` does not throw.
+       - Calling `getProPriceId()` with `NODE_ENV=production` without env var throws clear error.
+       - Calling `getProPriceId()` with `NODE_ENV=development` without env var returns test price with console warning.
+       - Calling `getProPriceId()` with `NODE_ENV=production` and env var set returns value.
+       - `getWebhookSecret()` returns undefined if unset, or trimmed secret when provided.
+  4. **Runtime & Local Build Verification**:
+     - Production build test (`NODE_ENV=production STRIPE_PRO_PRICE_ID= npm run build`): Successfully built standalone output with exactly 142 routes.
+     - Runtime test: Started standalone server without `STRIPE_PRO_PRICE_ID`; verified `POST /api/stripe/checkout` returns `HTTP 500` with clear configuration message.
+     - Happy path test: Started server with `STRIPE_PRO_PRICE_ID=price_1UPcesKO8Y3ohhlUm5KdI8hO`; verified `POST /api/stripe/checkout` passes configuration check and returns `HTTP 401 Unauthorized` (auth guard active).
+- **Files Modified / Created**:
+  - `lib/stripe/config.ts` (modified)
+  - `lib/stripe/client.ts` (modified)
+  - `app/api/stripe/checkout/route.ts` (modified)
+  - `app/api/stripe/webhook/route.ts` (modified)
+  - `tests/billing/stripe-config-timing.test.ts` (created)
+  - `MIGRATION_EXECUTION_LOG.md` (modified)
+  - `.agent-state.md` (modified)
+- **Verification / Test Result**:
+  - `npx tsc --noEmit`: **EXIT 0**
+  - `npm test`: **84 test files, 616/616 tests passed (100% pass rate, +5 new regression tests in this batch)**
+  - `npm run lint`: **0 errors, 3 baseline warnings (0 warnings in touched files)**
+  - `npm run build`: **142 routes compiled cleanly (exact baseline strictly preserved, build succeeds with empty STRIPE_PRO_PRICE_ID)**
+- **Status**: ✅ BILL-2C complete. Coolify production deployment unblocked.
+
+
 
 
 
