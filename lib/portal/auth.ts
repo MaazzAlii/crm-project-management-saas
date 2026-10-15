@@ -6,6 +6,8 @@ import { getCurrentSessionContext, deleteRefreshTokenCookie } from '@/lib/auth/s
 import { createMagicLinkToken } from '@/lib/auth/magic-link'
 import { logAuditEvent } from '@/lib/audit/logger'
 
+import { checkFeatureAccess } from '@/lib/services/plan-limits'
+
 /**
  * Validates the current session is an active portal user with plan access.
  * Call at the top of every server component in the (client-portal) group.
@@ -36,17 +38,8 @@ export async function requirePortalSession() {
   }
 
   // Check plan gate: client_portal_enabled must be true on the org's plan
-  const planRow = await queryOne<{ feature_limits: any }>(
-    `SELECT sp.feature_limits
-     FROM organization_subscriptions os
-     JOIN subscription_plans sp ON sp.id = os.plan_id
-     WHERE os.organization_id = $1 AND os.status IN ('active', 'trialing')
-     LIMIT 1`,
-    [clientUser.organization_id]
-  )
-
-  const featureLimits = planRow?.feature_limits ?? {}
-  if (!featureLimits.client_portal_enabled) {
+  const featureCheck = await checkFeatureAccess(clientUser.organization_id, 'clientPortal')
+  if (!featureCheck.allowed) {
     redirect('/client/login?error=portal_not_available')
   }
 
@@ -65,7 +58,7 @@ export async function inviteClientToPortal(
   clientId: string,
   email: string,
   organizationId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; code?: string }> {
   const session = await getCurrentSessionContext()
   if (!session || !session.user) return { success: false, error: 'Unauthorized' }
 
@@ -80,18 +73,13 @@ export async function inviteClientToPortal(
   }
 
   // Plan gate check
-  const planRow = await queryOne<{ feature_limits: any }>(
-    `SELECT sp.feature_limits
-     FROM organization_subscriptions os
-     JOIN subscription_plans sp ON sp.id = os.plan_id
-     WHERE os.organization_id = $1 AND os.status IN ('active', 'trialing')
-     LIMIT 1`,
-    [organizationId]
-  )
-
-  const featureLimits = planRow?.feature_limits ?? {}
-  if (!featureLimits.client_portal_enabled) {
-    return { success: false, error: 'Client Portal is not available on your current plan. Please upgrade.' }
+  const featureCheck = await checkFeatureAccess(organizationId, 'clientPortal')
+  if (!featureCheck.allowed) {
+    return {
+      success: false,
+      error: featureCheck.message || 'Client Portal is not available on your current plan. Please upgrade.',
+      code: 'UPGRADE_REQUIRED',
+    }
   }
 
   // Verify client belongs to this org
