@@ -128,14 +128,13 @@ async function verifyTeam4E2E() {
 
   // 4. Create pending invitation
   try {
-    await createInvitation({
-      organizationId: org.id,
-      email: `invitee_${id}@example.com`,
-      role: 'member',
-      invitedBy: ownerUser.id,
-      inviterEmail: ownerUser.email,
-      organizationName: org.name,
-    });
+    await createInvitation(
+      { userId: ownerUser.id, orgId: org.id, userRole: 'owner' } as any,
+      {
+        email: `invitee_${id}@example.com`,
+        role: 'member',
+      }
+    );
   } catch (e: any) {
     console.log('[E2E] Pending invitation creation notice:', e.message);
   }
