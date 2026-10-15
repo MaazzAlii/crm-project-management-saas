@@ -84,15 +84,15 @@
     "semantic_hash": ""
   },
   "app/actions/stripe.ts": {
-    "mtime": 1791785456.5802915,
-    "seen": 1791785735.67285,
-    "ast_hash": "ed8e20ab92d5c93918d858e4e4b92dca",
+    "mtime": 1792054275.3336115,
+    "seen": 1792054487.8185213,
+    "ast_hash": "6a951ef76017b7c936103cbefefab142",
     "semantic_hash": ""
   },
   "app/api/stripe/webhook/route.ts": {
-    "mtime": 1791785516.624939,
-    "seen": 1791785735.6729536,
-    "ast_hash": "856f4d9485afe99e3f17aa0679f3b945",
+    "mtime": 1792054360.0171502,
+    "seen": 1792054487.8186355,
+    "ast_hash": "dfa6b49bd3d23a8f8af24a637cccc45e",
     "semantic_hash": ""
   },
   "app/onboarding/page.tsx": {
@@ -6594,9 +6594,9 @@
     "semantic_hash": ""
   },
   "lib/stripe/config.ts": {
-    "mtime": 1791784537.3183215,
-    "seen": 1791785735.6732605,
-    "ast_hash": "bf2a24f4bcc038082ff6a5a50b8ce8f6",
+    "mtime": 1792054260.2916963,
+    "seen": 1792054487.818988,
+    "ast_hash": "1b5c0fd27dcb46d9bb5da77a0b5a758a",
     "semantic_hash": ""
   },
   "scripts/send-test-email.ts": {
@@ -7929,6 +7929,30 @@
     "mtime": 1792051008.2116265,
     "seen": 1792051309.768337,
     "ast_hash": "66c2eead0b27e47d3f2cbe4d84939573",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0048_stripe_processed_events_payload.sql": {
+    "mtime": 1792054158.3112965,
+    "seen": 1792054487.819209,
+    "ast_hash": "9d24c32c453dfa21ce5005cbaa2278a8",
+    "semantic_hash": ""
+  },
+  "tests/billing/stripe-proration.test.ts": {
+    "mtime": 1792054423.1228223,
+    "seen": 1792054487.8192394,
+    "ast_hash": "d45b07e99f9d6c781950e6e3df129789",
+    "semantic_hash": ""
+  },
+  "tests/billing/stripe-webhook.test.ts": {
+    "mtime": 1792054338.7592638,
+    "seen": 1792054487.8192408,
+    "ast_hash": "166e34249a2ce291017ff7147c9f04e6",
+    "semantic_hash": ""
+  },
+  "docs/engineering/STRIPE-GO-LIVE-CHECKLIST.md": {
+    "mtime": 1792054467.3525996,
+    "seen": 1792054487.8196065,
+    "ast_hash": "c87cbdbdeac83a3a66915f01d2c74473",
     "semantic_hash": ""
   }
 }

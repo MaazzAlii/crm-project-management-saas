@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   ".agent-state.md": {
-    "mtime": 1792051273.3201976,
-    "seen": 1792051309.7675748,
-    "ast_hash": "8efe37119149cf4923078d50fd269ae3",
+    "mtime": 1792054671.7666323,
+    "seen": 1792057124.3805876,
+    "ast_hash": "87c1e0c21a369483e240518dc2533312",
     "semantic_hash": ""
   },
   "Prompts To Build System/.agent-state.md": {
@@ -1212,9 +1212,9 @@
     "semantic_hash": ""
   },
   "app/(client-portal)/client/auth/signout/route.ts": {
-    "mtime": 1791352514.4893787,
-    "seen": 1791772540.836846,
-    "ast_hash": "c794bcfb697881c2899f8ce9196c1b6b",
+    "mtime": 1792056353.6481528,
+    "seen": 1792057124.3796964,
+    "ast_hash": "4c85d7af14875fb455d15c5f2b94cf25",
     "semantic_hash": ""
   },
   "app/(client-portal)/client/dashboard/page.tsx": {
@@ -1632,9 +1632,9 @@
     "semantic_hash": ""
   },
   "app/api/auth/logout/route.ts": {
-    "mtime": 1791616079.8635654,
-    "seen": 1791772540.8369534,
-    "ast_hash": "c770b7fee37f26db3f343e70c647130c",
+    "mtime": 1792056374.8264496,
+    "seen": 1792057124.3797984,
+    "ast_hash": "bed87dda7b8b88df619e344ff9a49252",
     "semantic_hash": ""
   },
   "app/api/auth/magic-link/route.ts": {
@@ -1644,9 +1644,9 @@
     "semantic_hash": ""
   },
   "app/api/auth/refresh/route.ts": {
-    "mtime": 1791825156.7479858,
-    "seen": 1791825409.8119702,
-    "ast_hash": "d9ad3f86efebab4886c21fda69490de4",
+    "mtime": 1792056834.7725852,
+    "seen": 1792057124.379801,
+    "ast_hash": "85160cc54c421f3fc65db4ce69015036",
     "semantic_hash": ""
   },
   "app/api/auth/reset-password/route.ts": {
@@ -2892,9 +2892,9 @@
     "semantic_hash": ""
   },
   "lib/auth/change-password.ts": {
-    "mtime": 1791890726.797665,
-    "seen": 1791891378.1440232,
-    "ast_hash": "02940b3ef13643a53e14bed2ea4987de",
+    "mtime": 1792056396.9537523,
+    "seen": 1792057124.380146,
+    "ast_hash": "3b90ea1f3f7176d28008309a474452b3",
     "semantic_hash": ""
   },
   "lib/auth/edge-jwt.ts": {
@@ -2910,9 +2910,9 @@
     "semantic_hash": ""
   },
   "lib/auth/jwt.ts": {
-    "mtime": 1791890693.6977506,
-    "seen": 1791891378.1440282,
-    "ast_hash": "d11cdc5605d5fce7df4e9630fc331b06",
+    "mtime": 1792056600.3062322,
+    "seen": 1792057124.3801498,
+    "ast_hash": "8e668522e8829bc85b72b3d191034dac",
     "semantic_hash": ""
   },
   "lib/auth/magic-link.ts": {
@@ -3924,9 +3924,9 @@
     "semantic_hash": ""
   },
   "MIGRATION_EXECUTION_LOG.md": {
-    "mtime": 1792051240.9128745,
-    "seen": 1792051309.7675817,
-    "ast_hash": "201484e5752946c8df83443beda2d09c",
+    "mtime": 1792054647.3037434,
+    "seen": 1792057124.380594,
+    "ast_hash": "b7a54cfa8f8998a8e14669b4e2b600b6",
     "semantic_hash": ""
   },
   "docker-compose.app.yml": {
@@ -7944,15 +7944,75 @@
     "semantic_hash": ""
   },
   "tests/billing/stripe-webhook.test.ts": {
-    "mtime": 1792054338.7592638,
-    "seen": 1792054487.8192408,
-    "ast_hash": "166e34249a2ce291017ff7147c9f04e6",
+    "mtime": 1792054524.1643212,
+    "seen": 1792057124.3804991,
+    "ast_hash": "163e15dacfbe6f69447142e53eed9e4f",
     "semantic_hash": ""
   },
   "docs/engineering/STRIPE-GO-LIVE-CHECKLIST.md": {
     "mtime": 1792054467.3525996,
     "seen": 1792054487.8196065,
     "ast_hash": "c87cbdbdeac83a3a66915f01d2c74473",
+    "semantic_hash": ""
+  },
+  "lib/auth/logout.ts": {
+    "mtime": 1792056332.6628516,
+    "seen": 1792057124.3801515,
+    "ast_hash": "5ed7102394baf2ea45ab7ae34e12944e",
+    "semantic_hash": ""
+  },
+  "scripts/verify-auth-3-e2e.ts": {
+    "mtime": 1792057038.033336,
+    "seen": 1792057124.3803475,
+    "ast_hash": "66445e2b2b0b30cd2fbe9b739f92499f",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/0049_refresh_token_family.sql": {
+    "mtime": 1792056106.4050655,
+    "seen": 1792057124.3804643,
+    "ast_hash": "02f472295228176aad682c34172cbaaa",
+    "semantic_hash": ""
+  },
+  "tests/auth/session-lifecycle.test.ts": {
+    "mtime": 1792056498.1440492,
+    "seen": 1792057124.3804924,
+    "ast_hash": "af5d7b9ac873c6d3544b18d57c10def6",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-3/01-login-screen.png": {
+    "mtime": 1792057048.4333062,
+    "seen": 1792057124.3813112,
+    "ast_hash": "d3ad9aeb5fbec88ebd26fa62b9100efd",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-3/02-dashboard-active-session.png": {
+    "mtime": 1792057051.3132713,
+    "seen": 1792057124.3813128,
+    "ast_hash": "2c0baa9552512357f74b64e0bb57539d",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-3/03-api-token-refresh-success.png": {
+    "mtime": 1792057051.4245756,
+    "seen": 1792057124.3813138,
+    "ast_hash": "2c0baa9552512357f74b64e0bb57539d",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-3/04-reuse-attempt-rejected.png": {
+    "mtime": 1792057051.516435,
+    "seen": 1792057124.381315,
+    "ast_hash": "2c0baa9552512357f74b64e0bb57539d",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-3/05-logout-cookies-cleared.png": {
+    "mtime": 1792057051.6105065,
+    "seen": 1792057124.3813167,
+    "ast_hash": "2c0baa9552512357f74b64e0bb57539d",
+    "semantic_hash": ""
+  },
+  "assets/screenshots/auth-3/06-logged-out-login-screen.png": {
+    "mtime": 1792057052.265134,
+    "seen": 1792057124.3813179,
+    "ast_hash": "d3ad9aeb5fbec88ebd26fa62b9100efd",
     "semantic_hash": ""
   }
 }
