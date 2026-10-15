@@ -28,7 +28,7 @@ export class AuditRepository {
     metadata?: Record<string, any>;
     ipAddress?: string | null;
     userAgent?: string | null;
-  }): Promise<AuditLog> {
+  }, options?: { client?: any }): Promise<AuditLog> {
     try {
       const insertData = {
         organization_id: data.organizationId || null,
@@ -46,7 +46,9 @@ export class AuditRepository {
       };
 
       const q = buildInsertQuery('audit_logs', insertData);
-      const res = await query<AuditLog>(q.text, q.values);
+      const res = options?.client
+        ? await options.client.query(q.text, q.values)
+        : await query<AuditLog>(q.text, q.values);
       return res.rows[0];
     } catch (error) {
       console.error('[AuditRepository.log] Error recording audit log:', error);
