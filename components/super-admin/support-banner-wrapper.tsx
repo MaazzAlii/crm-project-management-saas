@@ -8,6 +8,8 @@ export async function SupportBannerWrapper() {
     <ImpersonationBanner
       initialActive={ctx.active}
       orgName={ctx.orgName}
+      userName={ctx.userName}
+      userEmail={ctx.userEmail}
       expiresAt={ctx.expiresAt}
     />
   )
