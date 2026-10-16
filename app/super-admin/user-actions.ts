@@ -80,8 +80,10 @@ export async function updateSuperAdminUserAction(
       },
     })
 
-    revalidatePath('/super-admin/organizations')
-    revalidatePath('/super-admin/dashboard')
+    try {
+      revalidatePath('/super-admin/organizations')
+      revalidatePath('/super-admin/dashboard')
+    } catch {}
     return { success: true }
   } catch (err: any) {
     console.error('[updateSuperAdminUserAction] Error:', err)
@@ -130,8 +132,10 @@ export async function toggleSuperAdminUserActiveAction(
       details: { isActive },
     })
 
-    revalidatePath('/super-admin/organizations')
-    revalidatePath('/super-admin/dashboard')
+    try {
+      revalidatePath('/super-admin/organizations')
+      revalidatePath('/super-admin/dashboard')
+    } catch {}
     return { success: true }
   } catch (err: any) {
     console.error('[toggleSuperAdminUserActiveAction] Error:', err)
@@ -219,8 +223,10 @@ export async function deleteSuperAdminUserAction(
       },
     })
 
-    revalidatePath('/super-admin/organizations')
-    revalidatePath('/super-admin/dashboard')
+    try {
+      revalidatePath('/super-admin/organizations')
+      revalidatePath('/super-admin/dashboard')
+    } catch {}
     return { success: true }
   } catch (err: any) {
     console.error('[deleteSuperAdminUserAction] Error:', err)
