@@ -3799,6 +3799,81 @@ paste at the start of every batch report.
   - Playwright E2E: **6/6 screenshots verified and matching design standards**.
 - **Status**: ✅ BILL-3B Phase B complete. All quality gates satisfied. Local commits ready.
 
+---
+
+### [2026-10-16 11:45] Batch AUTH-4 Phase B: Server Action RBAC & Cross-Tenant Tenancy Hardening
+
+- **Phase / Task ID**: `AUTH-4-PHASE-B-SERVER-ACTION-RBAC-AND-CROSS-TENANT-HARDENING`
+- **Rationale**:
+  - Remediate all 6 CRITICAL (cross-tenant foreign resource injection) and 33 HIGH (missing role authorization guards) security vulnerabilities identified in the Phase A comprehensive audit across 28 server action files.
+  - Eliminate the risk of cross-tenant resource injection where Org A can insert records referencing Org B's clients or projects, preventing cross-tenant data exposure in reporting views.
+  - Enforce least-privilege role boundaries ensuring `viewer` and `billing_manager` roles cannot execute data mutations, while reserving template management and destructive actions strictly for `owner` and `admin`.
+- **Action Performed**:
+  1. **Server Guard Utility (`lib/auth/server-guard.ts`)**:
+     - Built `requireRole(allowedRoles: OrgRole[])` providing type-narrowed non-null session context with `organization` and `user`.
+     - Throws standardized error codes: `UNAUTHENTICATED` (no session) and `INSUFFICIENT_ROLE` (unauthorized role).
+  2. **6 CRITICAL Cross-Tenant Foreign Resource Injection Remediations**:
+     - `logCommunicationAction` (`app/(dashboard)/clients/[id]/communications/actions.ts`): Verified `client_id` belongs to `session.organization.id` via `SELECT id FROM clients WHERE id = $1 AND organization_id = $2`. Throws `NOT_FOUND` on cross-tenant reference.
+     - `createProjectAction` (`app/(dashboard)/projects/actions.ts`): Verified optional `client_id` belongs to `session.organization.id` before insert. Throws `NOT_FOUND` if client is in another tenant.
+     - `createDeliverableAction` (`app/(dashboard)/projects/actions.ts`): Verified parent `projectId` belongs to `session.organization.id` via `SELECT id FROM projects WHERE id = $1 AND organization_id = $2`. Throws `NOT_FOUND` on cross-tenant reference.
+     - `createProjectTaskAction` (`app/(dashboard)/projects/actions.ts`): Verified parent `projectId` belongs to `session.organization.id` via `SELECT id FROM projects WHERE id = $1 AND organization_id = $2`. Throws `NOT_FOUND` on cross-tenant reference.
+     - `createGlobalTaskAction` (`app/(dashboard)/tasks/actions.ts`): Verified optional `project_id` belongs to `session.organization.id` before insert. Throws `NOT_FOUND` on cross-tenant reference.
+     - `createExtractedTaskAction` (`app/(dashboard)/inbox/actions.ts`): Verified parent `projectId` belongs to `session.organization.id` before insert. Throws `NOT_FOUND` on cross-tenant reference.
+  3. **33 HIGH Missing Role Authorization Remediations**:
+     - Protected all mutation actions in:
+       - `app/(dashboard)/clients/actions.ts` (`createClientAction`, `updateClientAction`, `updateClientNotesAction`)
+       - `app/(dashboard)/clients/tags/actions.ts` (`createTagAction`, `updateClientTagsAction`)
+       - `app/(dashboard)/leads/actions.ts` (`updateLeadStageAction`, `createLeadAction`, `scoreLeadAction`, `batchScoreLeadsAction`)
+       - `app/(dashboard)/projects/actions.ts` (`deleteDeliverableAction` [`owner/admin`], `updateProjectAction`, `updateProjectStatusAction`, `updateDeliverableStatusAction`, `updateTaskStatusAction`, `updateProjectTeamAssigneeAction`)
+       - `app/(dashboard)/tasks/actions.ts` (`updateGlobalTaskAction`, `toggleGlobalTaskStatusAction`)
+       - `app/(dashboard)/inbox/actions.ts` (`assignMessageClientAction`, `sendOutboundMessageAction`, `generateReplySuggestionsAction`, `extractTasksFromThreadAction`)
+       - `app/(dashboard)/reports/actions.ts` (`generateWeeklyReportAction`, `sendWeeklyReportAction`)
+       - `app/(dashboard)/settings/templates/actions.ts` (`createProjectTemplateAction` [`owner/admin`], `saveProjectAsTemplateAction` [`owner/admin`])
+       - `app/actions/ai.ts` (`testAICompletionAction`)
+       - `app/actions/analytics.ts` (`generateAnalyticsNarrativeAction`)
+  4. **Automated Regression Suite (`tests/auth/server-action-rbac.test.ts`)**:
+     - Implemented 84 automated regression tests covering:
+       - Unauthenticated rejections across actions (`UNAUTHENTICATED`).
+       - All 6 CRITICAL cross-tenant injection rejections (`NOT_FOUND`).
+       - Role authorization rejections for `viewer` and `billing_manager` (`INSUFFICIENT_ROLE`).
+       - Admin/owner restrictions for template operations and deliverable deletion (`INSUFFICIENT_ROLE` for `member`).
+       - Authorized executions succeeding cleanly for authorized roles.
+  5. **Playwright E2E Role-Gated Verification (`scripts/verify-auth-4-e2e.ts`)**:
+     - Started standalone server on port 3000.
+     - Automated login and role switching between Owner and Viewer test accounts.
+     - Captured 4 verified screenshots saved under `assets/screenshots/auth-4/`:
+       - `01-owner-templates.png`: Owner session on Project Templates page with full access.
+       - `02-owner-projects.png`: Owner session on Projects list with create buttons.
+       - `03-viewer-templates.png`: Viewer session on Project Templates page demonstrating RBAC protection.
+       - `04-viewer-clients.png`: Viewer session on CRM Clients directory.
+- **Files Modified / Created**:
+  - `lib/auth/server-guard.ts` (created)
+  - `app/(dashboard)/clients/[id]/communications/actions.ts` (modified)
+  - `app/(dashboard)/projects/actions.ts` (modified)
+  - `app/(dashboard)/tasks/actions.ts` (modified)
+  - `app/(dashboard)/inbox/actions.ts` (modified)
+  - `app/(dashboard)/clients/actions.ts` (modified)
+  - `app/(dashboard)/clients/tags/actions.ts` (modified)
+  - `app/(dashboard)/leads/actions.ts` (modified)
+  - `app/(dashboard)/reports/actions.ts` (modified)
+  - `app/(dashboard)/settings/templates/actions.ts` (modified)
+  - `app/actions/ai.ts` (modified)
+  - `app/actions/analytics.ts` (modified)
+  - `tests/auth/server-action-rbac.test.ts` (created)
+  - `tests/integration-project-templates.test.ts` (modified: mock client resolution)
+  - `scripts/verify-auth-4-e2e.ts` (created)
+  - `assets/screenshots/auth-4/*` (4 screenshots created)
+  - `MIGRATION_EXECUTION_LOG.md` (modified)
+  - `.agent-state.md` (modified)
+- **Verification / Test Result**:
+  - `npx tsc --noEmit`: **Exit code 0 (0 type errors)**
+  - `npm test`: **87 test files, 736/736 tests passing (100% pass rate, +84 new tests in this batch)**
+  - `npm run lint`: **0 errors, 3 baseline warnings (0 warnings in touched files)**
+  - `npm run build`: **142 routes compiled cleanly (exact baseline strictly preserved)**
+  - Rule 21 check: `NODE_ENV=production STRIPE_PRO_PRICE_ID= STRIPE_PUBLISHABLE_KEY= npm run build` **exited 0 with 142 routes**.
+  - Playwright E2E: **4/4 screenshots captured and verified**.
+- **Status**: ✅ AUTH-4 Phase B complete. All quality gates satisfied. Local commits ready for push approval.
+
 
 
 
