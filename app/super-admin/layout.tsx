@@ -2,6 +2,8 @@ import { SuperAdminNav } from '@/components/super-admin/super-admin-nav'
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
 import { getCurrentSessionContext } from '@/lib/auth/session'
 
+export const dynamic = 'force-dynamic'
+
 export default async function SuperAdminLayout({
   children,
 }: {
