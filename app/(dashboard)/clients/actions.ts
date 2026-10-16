@@ -1,6 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { requireRole } from '@/lib/auth/server-guard'
 import { query, queryOne, transaction } from '@/lib/db'
 import { checkClientLimit } from '@/lib/services/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
@@ -20,14 +21,9 @@ export type CreateClientActionResult = {
 };
 
 export async function createClientAction(formData: FormData): Promise<CreateClientActionResult> {
-  try {
-    const session = await getCurrentSessionContext()
+  const session = await requireRole(['owner', 'admin', 'member'])
 
-    if (!session || !session.user || !session.organization) {
-      return { success: false, error: 'Unauthorized. Active session context not found.' }
-    }
-
-    const orgId = session.organization.id
+  const orgId = session.organization.id
 
     const rawData = {
       name: formData.get('name')?.toString(),
@@ -140,6 +136,9 @@ export async function createClientAction(formData: FormData): Promise<CreateClie
     revalidatePath('/clients')
     return { success: true, clientId: newClient.id }
   } catch (error: any) {
+    if (error.message === 'UNAUTHENTICATED' || error.message === 'INSUFFICIENT_ROLE' || error.message === 'NOT_FOUND') {
+      throw error
+    }
     console.error('createClientAction error:', error)
     return { success: false, error: error?.message || 'Internal server error occurred.' }
   }
@@ -189,12 +188,9 @@ export async function deleteClientAction(clientId: string) {
 }
 
 export async function updateClientAction(clientId: string, formData: FormData) {
-  try {
-    const session = await getCurrentSessionContext()
+  const session = await requireRole(['owner', 'admin', 'member'])
 
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized session.' }
-    }
+  try {
 
     const rawData = {
       name: formData.get('name')?.toString(),
@@ -308,29 +304,29 @@ export async function updateClientAction(clientId: string, formData: FormData) {
     revalidatePath(`/clients/${clientId}`)
     return { success: true }
   } catch (error: any) {
+    if (error.message === 'UNAUTHENTICATED' || error.message === 'INSUFFICIENT_ROLE' || error.message === 'NOT_FOUND') {
+      throw error
+    }
     console.error('updateClientAction error:', error)
     return { error: error?.message || 'Internal server error.' }
   }
 }
 
 export async function updateClientNotesAction(clientId: string, notes: string) {
+  const session = await requireRole(['owner', 'admin', 'member'])
+
   try {
-    const session = await getCurrentSessionContext()
-
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized session.' }
-    }
-
-    try {
-      await query(
-        `UPDATE clients SET notes = $1, updated_at = NOW() WHERE id = $2 AND organization_id = $3`,
-        [notes, clientId, session.organization.id]
-      )
-    } catch (e) {}
+    await query(
+      `UPDATE clients SET notes = $1, updated_at = NOW() WHERE id = $2 AND organization_id = $3`,
+      [notes, clientId, session.organization.id]
+    )
 
     revalidatePath(`/clients/${clientId}`)
     return { success: true }
   } catch (error: any) {
+    if (error.message === 'UNAUTHENTICATED' || error.message === 'INSUFFICIENT_ROLE' || error.message === 'NOT_FOUND') {
+      throw error
+    }
     return { error: error?.message || 'Failed to update notes.' }
   }
 }
