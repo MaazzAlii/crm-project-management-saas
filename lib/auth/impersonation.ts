@@ -44,7 +44,7 @@ export function getImpersonationOriginSecret(): string {
 
   if (process.env.NODE_ENV === 'production') {
     const error: any = new Error(
-      'Server configuration error: IMPERSONATION_ORIGIN_SECRET is missing or shorter than 32 characters in production'
+      'CONFIG_ERROR: IMPERSONATION_ORIGIN_SECRET is missing or shorter than 32 characters in production'
     )
     error.code = 'CONFIG_ERROR'
     throw error
