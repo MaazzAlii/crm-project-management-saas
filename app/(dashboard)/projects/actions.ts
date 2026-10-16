@@ -486,12 +486,17 @@ export async function updateProjectStatusAction(projectId: string, newStatus: st
   }
 }
 
-export async function deleteProjectAction(projectId: string) {
+export async function deleteProjectAction(projectId: string, confirmOrgName?: string) {
   try {
     const session = await getCurrentSessionContext()
 
     if (!session || !session.user || !session.organization) {
       return { error: 'Unauthorized.' }
+    }
+
+    if (session.impersonation?.isImpersonated) {
+      const { assertDestructiveActionAllowed } = await import('@/lib/auth/impersonation')
+      assertDestructiveActionAllowed(session, confirmOrgName)
     }
 
     const canDelete = session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin
@@ -519,6 +524,9 @@ export async function deleteProjectAction(projectId: string) {
     revalidatePath('/projects')
     return { success: true }
   } catch (error: any) {
+    if (error?.code === 'TYPED_CONFIRMATION_REQUIRED') {
+      return { error: error.message, code: 'TYPED_CONFIRMATION_REQUIRED', status: 400 }
+    }
     return { error: error?.message || 'Failed to delete project.' }
   }
 }
@@ -761,10 +769,14 @@ export async function updateDeliverableStatusAction(
 }
 
 // Delete deliverable
-export async function deleteDeliverableAction(deliverableId: string, projectId: string) {
+export async function deleteDeliverableAction(deliverableId: string, projectId: string, confirmOrgName?: string) {
   const session = await requireRole(['owner', 'admin'])
 
   try {
+    if (session.impersonation?.isImpersonated) {
+      const { assertDestructiveActionAllowed } = await import('@/lib/auth/impersonation')
+      assertDestructiveActionAllowed(session, confirmOrgName)
+    }
 
     await query(
       `DELETE FROM deliverables WHERE id = $1 AND organization_id = $2`,
@@ -789,6 +801,9 @@ export async function deleteDeliverableAction(deliverableId: string, projectId: 
     revalidatePath(`/projects/${projectId}`)
     return { success: true }
   } catch (err: any) {
+    if (err?.code === 'TYPED_CONFIRMATION_REQUIRED') {
+      return { error: err.message, code: 'TYPED_CONFIRMATION_REQUIRED', status: 400 }
+    }
     if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
       throw err
     }
