@@ -68,6 +68,9 @@ describe('Integration: Project Creation with Template Scaffolding', () => {
 
   it('scaffolds tasks and deliverables when template_id is provided', async () => {
     ;(queryOne as any).mockImplementation((sql: string) => {
+      if (sql.includes('clients')) {
+        return Promise.resolve({ id: 'client-1' })
+      }
       if (sql.includes('INSERT INTO projects')) {
         return Promise.resolve({ id: 'new-project-uuid-999' })
       }
