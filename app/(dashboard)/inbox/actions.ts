@@ -355,24 +355,6 @@ export async function generateReplySuggestionsAction(
   const orgId = session.organization.id
 
   try {
-      // In dev fallback scenario without session, run with mock execution
-      const mockResult = await getReplySuggestions({
-        organizationId: 'dev-org',
-        channel: params.channelProvider || 'email',
-        communicationMode: params.communicationMode || 'connected',
-        clientName: params.clientName || 'Valued Client',
-        clientCompany: params.clientCompany,
-        conversationHistory: (params.messages || []).map((m) => ({
-          sender: m.sender_name || m.sender_identifier || (m.direction === 'outbound' ? 'You' : 'Client'),
-          body: m.body,
-          isClient: m.direction === 'inbound',
-          sentAt: m.sent_at,
-        })),
-        agencyName: 'Agency Support',
-      })
-      return mockResult
-    }
-
     // 1. Dual-tier gating check: Platform kill switch + organization subscription plan limit
     const gateCheck = await checkAIAccess(orgId, 'reply_suggestions')
     if (!gateCheck.allowed) {
