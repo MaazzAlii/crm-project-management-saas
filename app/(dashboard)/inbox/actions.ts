@@ -1,6 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { requireRole } from '@/lib/auth/server-guard'
 import { query, queryOne } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { fetchInboxMessages, getInboxSummary, markMessageRead, markAllMessagesRead, assignMessageClient, InboxMessageRecord, InboxSummary } from '@/lib/inbox/query'
@@ -155,26 +156,24 @@ export async function markAllReadAction(channelId?: string) {
 }
 
 export async function assignMessageClientAction(messageId: string, clientId: string) {
-  try {
-    const session = await getCurrentSessionContext()
-    if (!session || !session.organization) {
-      return { success: false, error: 'Unauthorized' }
-    }
+  const session = await requireRole(['owner', 'admin', 'member'])
 
+  try {
     const ok = await assignMessageClient(messageId, clientId, session.organization.id)
     if (ok) revalidatePath('/inbox')
     return { success: ok }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { success: false, error: err.message }
   }
 }
 
 export async function sendOutboundMessageAction(formData: FormData) {
+  const session = await requireRole(['owner', 'admin', 'member'])
+
   try {
-    const session = await getCurrentSessionContext()
-    if (!session || !session.organization || !session.user) {
-      return { error: 'Unauthorized session.' }
-    }
 
     const channelId = formData.get('channel_id')?.toString()
     const body = formData.get('body')?.toString().trim()
@@ -314,6 +313,9 @@ export async function sendOutboundMessageAction(formData: FormData) {
     revalidatePath('/inbox')
     return { success: true, newMessage: insertedMsg }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { error: err.message || 'Failed to send outbound message' }
   }
 }
@@ -349,11 +351,10 @@ export async function generateReplySuggestionsAction(
   error?: string
   errorCode?: string
 }> {
-  try {
-    const session = await getCurrentSessionContext()
-    const orgId = session?.organization?.id
+  const session = await requireRole(['owner', 'admin', 'member'])
+  const orgId = session.organization.id
 
-    if (!orgId) {
+  try {
       // In dev fallback scenario without session, run with mock execution
       const mockResult = await getReplySuggestions({
         organizationId: 'dev-org',
@@ -441,6 +442,9 @@ export async function generateReplySuggestionsAction(
 
     return result
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     console.error('[CommunicationHub:Actions] Error generating AI reply suggestions:', err)
     return {
       success: false,
@@ -487,20 +491,10 @@ export interface ExtractTasksActionResult {
 export async function extractTasksFromThreadAction(
   params: ExtractTasksActionParams
 ): Promise<ExtractTasksActionResult> {
-  try {
-    const session = await getCurrentSessionContext()
-    if (!session || !session.organization) {
-      return {
-        success: false,
-        tasks: [],
-        projects: [],
-        teamMembers: [],
-        error: 'Unauthorized organization session.',
-        errorCode: 'UNAUTHORIZED',
-      }
-    }
+  const session = await requireRole(['owner', 'admin', 'member'])
+  const orgId = session.organization.id
 
-    const orgId = session.organization.id
+  try {
     const gateCheck = await checkAIAccess(orgId, 'task_extraction')
     if (!gateCheck.allowed) {
       return {
@@ -584,6 +578,9 @@ export async function extractTasksFromThreadAction(
       teamMembers,
     }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     console.error('[CommunicationHub:Actions] Error in extractTasksFromThreadAction:', err)
     return {
       success: false,
@@ -614,32 +611,38 @@ export interface CreateExtractedTaskParams {
 export async function createExtractedTaskAction(
   params: CreateExtractedTaskParams
 ) {
+  const session = await requireRole(['owner', 'admin', 'member'])
+
+  const {
+    projectId,
+    title,
+    description = '',
+    priority = 'medium',
+    dueDate = null,
+    assignedTo = null,
+    sourceSnippet,
+    clientId,
+    messageId,
+  } = params
+
+  if (!title || !title.trim()) {
+    return { success: false, error: 'Task title is required.' }
+  }
+
+  if (!projectId) {
+    return { success: false, error: 'Please select a target project.' }
+  }
+
+  // Cross-tenant parent resource verification: project must belong to caller's org
+  const parent = await queryOne<{ id: string }>(
+    'SELECT id FROM projects WHERE id = $1 AND organization_id = $2',
+    [projectId, session.organization.id]
+  )
+  if (!parent) {
+    throw new Error('NOT_FOUND')
+  }
+
   try {
-    const session = await getCurrentSessionContext()
-    if (!session || !session.user || !session.organization) {
-      return { success: false, error: 'Unauthorized.' }
-    }
-
-    const {
-      projectId,
-      title,
-      description = '',
-      priority = 'medium',
-      dueDate = null,
-      assignedTo = null,
-      sourceSnippet,
-      clientId,
-      messageId,
-    } = params
-
-    if (!title || !title.trim()) {
-      return { success: false, error: 'Task title is required.' }
-    }
-
-    if (!projectId) {
-      return { success: false, error: 'Please select a target project.' }
-    }
-
     let fullDescription = description.trim()
     if (sourceSnippet) {
       fullDescription += `\n\n> "${sourceSnippet}"\n— Extracted via AI from client communication`
@@ -694,6 +697,9 @@ export async function createExtractedTaskAction(
 
     return { success: true, taskId: data.id }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     console.error('[CommunicationHub:Actions] Error creating extracted task:', err)
     return { success: false, error: err.message || 'Failed to create task.' }
   }
