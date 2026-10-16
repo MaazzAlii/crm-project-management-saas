@@ -5,6 +5,7 @@ import { requireSuperAdmin } from '@/lib/auth/super-admin'
 import { SuspendOrgModal, OverridePlanModal } from '@/components/super-admin/org-management-actions'
 import { StartImpersonationButton } from '@/components/super-admin/start-impersonation-button'
 import { PlanOverrideCard } from '@/components/super-admin/PlanOverrideCard'
+import { UserManagementModal } from '@/components/super-admin/user-management-modal'
 import { getCurrentPlan } from '@/lib/billing/current-plan'
 import { getOrganizationPlanLimits } from '@/lib/billing/plan-limits'
 import {
@@ -68,7 +69,7 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
 
       // 3. Fetch Organization Members with Profiles
       const mRes = await query<any>(
-        `SELECT om.id, om.role, om.joined_at, u.id as user_id, u.email, u.full_name, u.avatar_url
+        `SELECT om.id, om.role, om.joined_at, u.id as user_id, u.email, u.full_name, u.avatar_url, COALESCE(u.is_active, true) as is_active
          FROM organization_members om
          LEFT JOIN users u ON u.id = om.user_id
          WHERE om.organization_id = $1
@@ -85,6 +86,7 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
           email: row.email,
           full_name: row.full_name,
           avatar_url: row.avatar_url,
+          is_active: row.is_active,
         },
       }))
 
@@ -402,14 +404,14 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
         </div>
       </div>
 
-      {/* Read-Only Team Members List */}
+      {/* Organization Members Management */}
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <h2 className="text-base font-bold text-foreground flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            Organization Members ({members.length})
+            Organization Members & User Management ({members.length})
           </h2>
-          <span className="text-xs text-muted-foreground font-mono">Read-Only Audit View</span>
+          <span className="text-xs text-muted-foreground font-mono">Super-Admin Controlled</span>
         </div>
 
         <div className="overflow-x-auto">
@@ -421,13 +423,16 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
                 <tr>
                   <th className="py-3 px-2 font-medium">User Profile</th>
                   <th className="py-3 px-2 font-medium">Email</th>
+                  <th className="py-3 px-2 font-medium">Status</th>
                   <th className="py-3 px-2 font-medium">Assigned Role</th>
                   <th className="py-3 px-2 font-medium">Joined Date</th>
+                  <th className="py-3 px-2 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border text-foreground">
                 {members.map((m: any) => {
                   const profile = m.profiles
+                  const isActive = profile?.is_active ?? true
                   return (
                     <tr key={m.id} className="hover:bg-muted/50 transition-colors">
                       <td className="py-3 px-2 font-semibold text-foreground">
@@ -435,6 +440,17 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
                       </td>
                       <td className="py-3 px-2 font-mono text-muted-foreground">
                         {profile?.email || 'N/A'}
+                      </td>
+                      <td className="py-3 px-2">
+                        <span
+                          className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold border ${
+                            isActive
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                              : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                          }`}
+                        >
+                          {isActive ? 'Active' : 'Deactivated'}
+                        </span>
                       </td>
                       <td className="py-3 px-2">
                         <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary border border-primary/20 capitalize">
@@ -447,6 +463,19 @@ export default async function SuperAdminOrgDetailPage({ params }: OrgDetailPageP
                           day: 'numeric',
                           year: 'numeric',
                         })}
+                      </td>
+                      <td className="py-3 px-2 text-right">
+                        <UserManagementModal
+                          user={{
+                            id: profile?.id || m.id,
+                            fullName: profile?.full_name || '',
+                            email: profile?.email || '',
+                            isActive,
+                            role: m.role,
+                            orgId: org.id,
+                            orgName: org.name,
+                          }}
+                        />
                       </td>
                     </tr>
                   )
