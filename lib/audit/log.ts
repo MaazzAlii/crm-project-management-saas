@@ -113,8 +113,13 @@ export interface AuditLogRecord {
 
 /**
  * Log a sensitive system, org, or super-admin event into the immutable audit_logs store.
+ * Automatically injects impersonation provenance (impersonated_by, impersonated_as)
+ * from the active session context if an impersonation session is active.
  */
-export async function logAuditEvent(event: AuditLogEvent): Promise<boolean> {
+export async function logAuditEvent(
+  event: AuditLogEvent,
+  explicitSession?: any
+): Promise<boolean> {
   try {
     let actorId = event.actorId
     let actorEmail = event.actorEmail
@@ -122,26 +127,41 @@ export async function logAuditEvent(event: AuditLogEvent): Promise<boolean> {
     let actorIsSuperAdmin = event.actorIsSuperAdmin ?? false
     let organizationId = event.organizationId ?? null
 
-    // If actor details are not supplied, attempt to resolve from current session
-    if (!actorId || !actorEmail) {
+    // Attempt to resolve session if not passed explicitly
+    let session: any = explicitSession || null
+    if (!session) {
       try {
         const { getCurrentSessionContext } = await import('@/lib/auth/session')
-        const session = await getCurrentSessionContext()
-        if (session?.user) {
-          actorId = actorId || session.user.id
-          actorEmail = actorEmail || session.user.email || null
-          actorName = actorName || session.user.full_name || session.user.email?.split('@')[0] || null
-          if (session.isSuperAdmin) actorIsSuperAdmin = true
-        }
+        session = await getCurrentSessionContext()
       } catch {
         // Fallback gracefully if request context is not standard
       }
     }
 
+    if (session?.user) {
+      if (!actorId) actorId = session.user.id
+      if (!actorEmail) actorEmail = session.user.email || null
+      if (!actorName) actorName = session.user.full_name || session.user.email?.split('@')[0] || null
+      if (session.isSuperAdmin) actorIsSuperAdmin = true
+      if (!organizationId && session.organization?.id) {
+        organizationId = session.organization.id
+      }
+    }
 
     const effectiveEntityType = event.entityType || event.targetType || 'unknown'
     const effectiveEntityId = event.entityId || event.targetId || null
     const mergedDetails = { ...(event.details || {}), ...(event.metadata || {}) }
+
+    // Guardrail 3: Auto-inject impersonation metadata at the helper level
+    if (session?.impersonation?.isImpersonated) {
+      mergedDetails.impersonated_by = session.impersonation.impersonatedBy
+      mergedDetails.impersonated_by_email = session.impersonation.impersonatedByEmail
+      mergedDetails.impersonated_as = session.impersonation.impersonatedAs
+      mergedDetails.impersonated_org_id = session.impersonation.impersonatedOrgId
+      if (!organizationId && session.impersonation.impersonatedOrgId) {
+        organizationId = session.impersonation.impersonatedOrgId
+      }
+    }
 
     const record: AuditLogRecord = {
       id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `log_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
