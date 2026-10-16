@@ -1,6 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { requireRole } from '@/lib/auth/server-guard'
 import { query, queryOne } from '@/lib/db'
 import { checkAIAccess } from '@/lib/ai/guard'
 import { isAIAccessible } from '@/lib/ai/client'
@@ -147,18 +148,10 @@ export async function fetchWeeklyReportMetricsAction(): Promise<WeeklyReportData
 export async function generateWeeklyReportAction(
   customFigures?: Partial<WeeklyReportFigures>
 ) {
+  const session = await requireRole(['owner', 'admin', 'member'])
+  const orgId = session.organization.id
+
   try {
-    const session = await getCurrentSessionContext()
-
-    if (!session || !session.organization) {
-      return {
-        success: false,
-        error: 'Unauthorized organization session.',
-        errorCode: 'UNAUTHORIZED',
-      }
-    }
-
-    const orgId = session.organization.id
 
     // Dual-Tier Gating
     const gateCheck = await checkAIAccess(orgId, 'weekly_narrative')
@@ -200,6 +193,9 @@ export async function generateWeeklyReportAction(
       model: result.model,
     }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     console.error('[WeeklyReport:Actions] Error in generateWeeklyReportAction:', err)
     return {
       success: false,
@@ -216,12 +212,9 @@ export async function sendWeeklyReportAction(params: {
   narrative: string
   subject?: string
 }) {
-  try {
-    const session = await getCurrentSessionContext()
+  const session = await requireRole(['owner', 'admin', 'member'])
 
-    if (!session || !session.organization || !session.user) {
-      return { success: false, error: 'Unauthorized.' }
-    }
+  try {
 
     // Stub email delivery / logging
     console.log(`[WEEKLY_REPORT_DISPATCH_STUB] Sending report to: ${params.recipientEmails.join(', ')}`)
@@ -243,6 +236,9 @@ export async function sendWeeklyReportAction(params: {
 
     return { success: true }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { success: false, error: err.message || 'Failed to dispatch report.' }
   }
 }
