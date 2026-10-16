@@ -25,6 +25,7 @@ export async function createClientAction(formData: FormData): Promise<CreateClie
 
   const orgId = session.organization.id
 
+  try {
     const rawData = {
       name: formData.get('name')?.toString(),
       company: formData.get('company')?.toString() || null,
