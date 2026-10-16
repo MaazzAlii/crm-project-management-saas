@@ -1,129 +1,42 @@
-import { query, queryOne } from '@/lib/db'
+import { query } from '@/lib/db'
 import { requireSuperAdmin } from '@/lib/auth/super-admin'
-import { PlatformMetricsCards, type PlatformMetrics } from '@/components/super-admin/platform-metrics-cards'
-import { RecentActivityTables } from '@/components/super-admin/recent-activity-tables'
-import { ShieldCheck } from 'lucide-react'
+import { PlatformMetricsCards } from '@/components/super-admin/platform-metrics-cards'
+import { RecentActivityTables, type RecentOrganization } from '@/components/super-admin/recent-activity-tables'
+import { getAdminDashboardMetrics } from '@/lib/services/dashboard-metrics'
+import { ShieldCheck, RefreshCw } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SuperAdminDashboardPage() {
   await requireSuperAdmin()
 
-  let orgs: any[] = []
-  let totalMrr = 0
-  let clientsCount = 0
-  let projectsCount = 0
-  let messagesCount = 0
+  // 1. Fetch Aggregated Platform Metrics (Cached for 60s in-memory, Guardrail 4 MRR computation)
+  const metrics = await getAdminDashboardMetrics()
+
+  // 2. Fetch Recent Organizations (Strictly bounded with LIMIT 10 to prevent heap exhaustion)
+  let recentOrganizations: RecentOrganization[] = []
+  let flaggedOrganizations: RecentOrganization[] = []
 
   try {
-    // 1. Fetch Organizations
-    const orgsRes = await query<any>(
+    const recentRes = await query<RecentOrganization>(
       `SELECT id, name, slug, plan_tier, billing_status, is_suspended, created_at
        FROM organizations
-       ORDER BY created_at DESC`
+       ORDER BY created_at DESC
+       LIMIT 10`
     )
-    if (orgsRes.rows && orgsRes.rows.length > 0) {
-      orgs = orgsRes.rows
-    }
+    recentOrganizations = recentRes.rows || []
 
-    // 2. Fetch Subscriptions & Plan Prices for MRR Calculation
-    const subsRes = await query<any>(
-      `SELECT os.id, os.status, os.plan_id, sp.price_monthly, sp.price_yearly
-       FROM organization_subscriptions os
-       LEFT JOIN subscription_plans sp ON sp.id = os.plan_id`
+    const flaggedRes = await query<RecentOrganization>(
+      `SELECT id, name, slug, plan_tier, billing_status, is_suspended, created_at
+       FROM organizations
+       WHERE is_suspended IS TRUE OR billing_status IN ('past_due', 'canceled')
+       ORDER BY created_at DESC
+       LIMIT 10`
     )
-
-    if (subsRes.rows) {
-      subsRes.rows.forEach((sub: any) => {
-        if (sub.status === 'active' && sub.price_monthly) {
-          const monthly = Number(sub.price_monthly) || 0
-          totalMrr += monthly
-        }
-      })
-    }
-
-    // 3. Aggregate Counts across Platform
-    const cCount = await queryOne<{ count: number }>(`SELECT COUNT(*)::int as count FROM clients`)
-    const pCount = await queryOne<{ count: number }>(`SELECT COUNT(*)::int as count FROM projects`)
-    let mCount: { count: number } | null = null
-    try {
-      mCount = await queryOne<{ count: number }>(`SELECT COUNT(*)::int as count FROM communication_messages`)
-    } catch {}
-
-    clientsCount = cCount?.count || 0
-    projectsCount = pCount?.count || 0
-    messagesCount = mCount?.count || 0
+    flaggedOrganizations = flaggedRes.rows || []
   } catch (err) {
-    console.warn('[SUPER_ADMIN_DASHBOARD] Using fallback seed data:', err)
+    console.error('[SUPER_ADMIN_DASHBOARD] Error loading recent organizations:', err)
   }
-
-  // Fallback seed data if database is empty or offline
-  if (orgs.length === 0) {
-    orgs = [
-      {
-        id: '00000000-0000-0000-0000-000000000001',
-        name: 'Innoventix Hub',
-        slug: 'innoventix-hub',
-        plan_tier: 'enterprise',
-        billing_status: 'active',
-        is_suspended: false,
-        created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
-      },
-      {
-        id: '00000000-0000-0000-0000-000000000002',
-        name: 'Acme Digital Agency',
-        slug: 'acme-digital',
-        plan_tier: 'pro',
-        billing_status: 'active',
-        is_suspended: false,
-        created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-      },
-      {
-        id: '00000000-0000-0000-0000-000000000003',
-        name: 'Apex Studio',
-        slug: 'apex-studio',
-        plan_tier: 'starter',
-        billing_status: 'trialing',
-        is_suspended: false,
-        created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
-      },
-      {
-        id: '00000000-0000-0000-0000-000000000004',
-        name: 'Vanguard Media Labs',
-        slug: 'vanguard-media',
-        plan_tier: 'pro',
-        billing_status: 'past_due',
-        is_suspended: false,
-        created_at: new Date(Date.now() - 45 * 86400000).toISOString(),
-      },
-    ]
-    totalMrr = 199.0 + 79.0 + 79.0
-    clientsCount = 42
-    projectsCount = 88
-    messagesCount = 1240
-  }
-
-  // 4. Compute Breakdown Metrics
-  const activeOrgs = orgs.filter((o) => o.billing_status === 'active' && !o.is_suspended).length
-  const trialOrgs = orgs.filter((o) => o.billing_status === 'trialing').length
-  const canceledOrgs = orgs.filter((o) => o.billing_status === 'canceled').length
-  const suspendedOrgs = orgs.filter((o) => o.is_suspended).length
-
-  const metrics: PlatformMetrics = {
-    totalOrganizations: orgs.length,
-    activeOrganizations: activeOrgs,
-    trialOrganizations: trialOrgs,
-    canceledOrganizations: canceledOrgs,
-    suspendedOrganizations: suspendedOrgs,
-    totalMrr: totalMrr,
-    totalClients: clientsCount,
-    totalProjects: projectsCount,
-    totalMessages: messagesCount,
-  }
-
-  const flaggedOrgs = orgs.filter(
-    (o) => o.is_suspended || o.billing_status === 'past_due' || o.billing_status === 'canceled'
-  )
 
   return (
     <div className="space-y-8">
@@ -140,13 +53,14 @@ export default async function SuperAdminDashboardPage() {
             </span>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Real-time cross-tenant metrics, subscription revenue, and platform system health.
+            Real-time cross-tenant metrics, verified subscription revenue, and platform health.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground">
-            Last synced: {new Date().toLocaleTimeString()}
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <RefreshCw className="h-3 w-3 animate-pulse text-muted-foreground" />
+            Live DB Telemetry (60s Cache)
           </span>
         </div>
       </div>
@@ -156,8 +70,8 @@ export default async function SuperAdminDashboardPage() {
 
       {/* Tables Grid */}
       <RecentActivityTables
-        recentOrganizations={orgs}
-        flaggedOrganizations={flaggedOrgs}
+        recentOrganizations={recentOrganizations}
+        flaggedOrganizations={flaggedOrganizations}
       />
     </div>
   )
