@@ -212,6 +212,7 @@ export function assertDestructiveActionAllowed(session: any, confirmOrgName?: st
         `TYPED_CONFIRMATION_REQUIRED: You must type the organization name '${expectedName}' to confirm this destructive action while impersonating.`
       )
       err.code = 'TYPED_CONFIRMATION_REQUIRED'
+      err.status = 400
       throw err
     }
   }
