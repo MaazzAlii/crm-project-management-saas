@@ -182,6 +182,15 @@ export interface SessionContext {
   userOrganizations: UserOrganizationItem[];
   role: string;
   isSuperAdmin: boolean;
+  impersonation?: {
+    isImpersonated: boolean;
+    impersonatedBy?: string;
+    impersonatedByEmail?: string;
+    impersonatedAs?: string;
+    impersonatedOrgId?: string;
+    startedAt?: string;
+    expiresAt?: string;
+  };
 }
 
 export interface UserOrganizationItem {
@@ -226,21 +235,57 @@ export async function getCurrentSessionContext(): Promise<SessionContext | null>
       return null;
     }
 
+    // Check for active Super Admin impersonation origin
+    let impersonationContext: {
+      isImpersonated: boolean;
+      impersonatedBy?: string;
+      impersonatedByEmail?: string;
+      impersonatedAs?: string;
+      impersonatedOrgId?: string;
+      startedAt?: string;
+      expiresAt?: string;
+    } = { isImpersonated: false };
+
+    try {
+      const { getImpersonationOriginContext } = await import('./impersonation');
+      const origin = await getImpersonationOriginContext();
+      if (origin) {
+        impersonationContext = {
+          isImpersonated: true,
+          impersonatedBy: origin.superAdminId,
+          impersonatedByEmail: origin.superAdminEmail,
+          impersonatedAs: origin.impersonatedUserId,
+          impersonatedOrgId: origin.impersonatedOrgId,
+          startedAt: origin.startedAt,
+          expiresAt: origin.expiresAt,
+        };
+      }
+    } catch {}
+
     const memberships = await userRepo.getMemberships(userId);
     let organization: any = null;
     let role: string = user.role || 'user';
-
 
     const userOrganizations: UserOrganizationItem[] = memberships.map((m, idx) => ({
       id: m.organizationId,
       name: m.organizationName,
       slug: m.organizationSlug,
       role: m.role,
-      isCurrent: idx === 0,
+      isCurrent: impersonationContext.isImpersonated
+        ? m.organizationId === impersonationContext.impersonatedOrgId
+        : idx === 0,
     }));
 
-    if (memberships.length > 0) {
-      const primary = memberships[0];
+    // Target organization resolution: scope strictly to impersonatedOrgId if active
+    let primary = memberships[0];
+    if (impersonationContext.isImpersonated && impersonationContext.impersonatedOrgId) {
+      const targetMatch = memberships.find((m) => m.organizationId === impersonationContext.impersonatedOrgId);
+      if (targetMatch) {
+        primary = targetMatch;
+      }
+    }
+
+    if (primary) {
       const orgRecord = await orgRepo.findById(primary.organizationId);
       organization = {
         id: primary.organizationId,
@@ -251,21 +296,38 @@ export async function getCurrentSessionContext(): Promise<SessionContext | null>
         billing_status: (orgRecord as any)?.billing_status || 'active',
       };
       role = primary.role || role;
+    } else if (impersonationContext.isImpersonated && impersonationContext.impersonatedOrgId) {
+      // User may be impersonated directly in org context where memberships row is pending or direct
+      const directOrg = await orgRepo.findById(impersonationContext.impersonatedOrgId);
+      if (directOrg) {
+        organization = {
+          id: directOrg.id,
+          name: directOrg.name,
+          slug: directOrg.slug,
+          logo_url: directOrg.logo_url || null,
+          plan_tier: (directOrg as any)?.plan_tier || 'free',
+          billing_status: (directOrg as any)?.billing_status || 'active',
+        };
+      }
     }
 
-    let isSuperAdminUser: boolean = user.role === 'super_admin';
-    if (!isSuperAdminUser) {
-      try {
-        const { queryOne: dbQueryOne } = await import('../db');
-        const saRecord = await dbQueryOne<{ id: string }>(
-          'SELECT id FROM super_admins WHERE user_id = $1',
-          [user.id]
-        );
-        if (saRecord) {
-          isSuperAdminUser = true;
+    let isSuperAdminUser: boolean = false;
+    // When impersonating, caller operates under target user's role and tenant scope
+    if (!impersonationContext.isImpersonated) {
+      isSuperAdminUser = user.role === 'super_admin';
+      if (!isSuperAdminUser) {
+        try {
+          const { queryOne: dbQueryOne } = await import('../db');
+          const saRecord = await dbQueryOne<{ id: string }>(
+            'SELECT id FROM super_admins WHERE user_id = $1',
+            [user.id]
+          );
+          if (saRecord) {
+            isSuperAdminUser = true;
+          }
+        } catch {
+          // Ignore if query fails
         }
-      } catch {
-        // Ignore if query fails
       }
     }
 
@@ -284,10 +346,8 @@ export async function getCurrentSessionContext(): Promise<SessionContext | null>
       userOrganizations,
       role: isSuperAdminUser && role !== 'owner' ? 'owner' : role,
       isSuperAdmin: isSuperAdminUser,
+      impersonation: impersonationContext,
     };
-
-
-
   } catch (error) {
     return null;
   }
