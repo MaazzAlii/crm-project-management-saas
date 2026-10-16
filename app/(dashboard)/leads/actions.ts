@@ -1,6 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { requireRole } from '@/lib/auth/server-guard'
 import { query, queryOne } from '@/lib/db'
 import { checkClientLimit } from '@/lib/billing/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
@@ -24,12 +25,9 @@ export async function updateLeadStageAction(
   newStage: PipelineStage,
   lostReason?: string
 ) {
-  try {
-    const session = await getCurrentSessionContext()
+  const session = await requireRole(['owner', 'admin', 'member'])
 
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized session.' }
-    }
+  try {
 
     if (!VALID_PIPELINE_STAGES.includes(newStage)) {
       return { error: 'Invalid pipeline stage value.' }
@@ -75,18 +73,18 @@ export async function updateLeadStageAction(
     revalidatePath(`/clients/${clientId}/pipeline`)
     return { success: true }
   } catch (error: any) {
+    if (error.message === 'UNAUTHENTICATED' || error.message === 'INSUFFICIENT_ROLE' || error.message === 'NOT_FOUND') {
+      throw error
+    }
     console.error('updateLeadStageAction error:', error)
     return { error: error?.message || 'Internal server error.' }
   }
 }
 
 export async function createLeadAction(formData: FormData) {
-  try {
-    const session = await getCurrentSessionContext()
+  const session = await requireRole(['owner', 'admin', 'member'])
 
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized. Active session context not found.' }
-    }
+  try {
 
     const name = formData.get('name')?.toString().trim()
     const company = formData.get('company')?.toString().trim() || null
@@ -170,6 +168,9 @@ export async function createLeadAction(formData: FormData) {
     revalidatePath('/clients')
     return { success: true, leadId: newLead.id }
   } catch (error: any) {
+    if (error.message === 'UNAUTHENTICATED' || error.message === 'INSUFFICIENT_ROLE' || error.message === 'NOT_FOUND') {
+      throw error
+    }
     console.error('createLeadAction error:', error)
     return { error: error?.message || 'Internal server error occurred.' }
   }
@@ -187,12 +188,9 @@ export async function scoreLeadAction(clientId: string): Promise<{
   error?: string
   errorCode?: string
 }> {
-  try {
-    const session = await getCurrentSessionContext()
+  const session = await requireRole(['owner', 'admin', 'member'])
 
-    if (!session || !session.user || !session.organization) {
-      return { success: false, error: 'Unauthorized session.' }
-    }
+  try {
 
     // 1. Dual-Tier Gating Check
     const gateCheck = await checkAIAccess(session.organization.id, 'lead_scoring')
@@ -231,6 +229,9 @@ export async function scoreLeadAction(clientId: string): Promise<{
       breakdown: result.breakdown,
     }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     console.error('scoreLeadAction error:', err)
     return { success: false, error: err.message || 'Internal error scoring lead.' }
   }
@@ -246,12 +247,9 @@ export async function batchScoreLeadsAction(): Promise<{
   totalCount: number
   error?: string
 }> {
-  try {
-    const session = await getCurrentSessionContext()
+  const session = await requireRole(['owner', 'admin', 'member'])
 
-    if (!session || !session.user || !session.organization) {
-      return { success: false, scoredCount: 0, totalCount: 0, error: 'Unauthorized session.' }
-    }
+  try {
 
     // Dual-tier gating check
     const gateCheck = await checkAIAccess(session.organization.id, 'lead_scoring')
@@ -292,6 +290,9 @@ export async function batchScoreLeadsAction(): Promise<{
       totalCount: leadIds.length,
     }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     console.error('batchScoreLeadsAction error:', err)
     return { success: false, scoredCount: 0, totalCount: 0, error: err.message || 'Batch scoring failed.' }
   }
