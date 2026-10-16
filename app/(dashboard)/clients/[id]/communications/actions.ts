@@ -1,6 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { requireRole } from '@/lib/auth/server-guard'
 import { query, queryOne } from '@/lib/db'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
@@ -24,31 +25,36 @@ export interface CommunicationItem {
 }
 
 export async function logCommunicationAction(formData: FormData) {
+  const session = await requireRole(['owner', 'admin', 'member'])
+
+  const clientId = formData.get('client_id')?.toString().trim()
+  const channelType = formData.get('channel_type')?.toString().trim() || 'email'
+  const direction = (formData.get('direction')?.toString().trim() || 'outbound') as 'inbound' | 'outbound'
+  const subject = formData.get('subject')?.toString().trim() || null
+  const body = formData.get('body')?.toString().trim()
+  const senderName = formData.get('sender_name')?.toString().trim() || session.user.full_name || session.user.email
+  const senderIdentifier = formData.get('sender_identifier')?.toString().trim() || session.user.email
+  const sentAtInput = formData.get('sent_at')?.toString().trim()
+  const sentAt = sentAtInput ? new Date(sentAtInput).toISOString() : new Date().toISOString()
+
+  if (!clientId) {
+    return { error: 'Client ID is required.' }
+  }
+
+  if (!body && !subject) {
+    return { error: 'Communication log must include a message body or subject.' }
+  }
+
+  // Cross-tenant verification: parent client must belong to the caller's organization
+  const parent = await queryOne<{ id: string }>(
+    'SELECT id FROM clients WHERE id = $1 AND organization_id = $2',
+    [clientId, session.organization.id]
+  )
+  if (!parent) {
+    throw new Error('NOT_FOUND')
+  }
+
   try {
-    const session = await getCurrentSessionContext()
-
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized. Session not found.' }
-    }
-
-    const clientId = formData.get('client_id')?.toString().trim()
-    const channelType = formData.get('channel_type')?.toString().trim() || 'email'
-    const direction = (formData.get('direction')?.toString().trim() || 'outbound') as 'inbound' | 'outbound'
-    const subject = formData.get('subject')?.toString().trim() || null
-    const body = formData.get('body')?.toString().trim()
-    const senderName = formData.get('sender_name')?.toString().trim() || session.user.full_name || session.user.email
-    const senderIdentifier = formData.get('sender_identifier')?.toString().trim() || session.user.email
-    const sentAtInput = formData.get('sent_at')?.toString().trim()
-    const sentAt = sentAtInput ? new Date(sentAtInput).toISOString() : new Date().toISOString()
-
-    if (!clientId) {
-      return { error: 'Client ID is required.' }
-    }
-
-    if (!body && !subject) {
-      return { error: 'Communication log must include a message body or subject.' }
-    }
-
     let insertedMessage: any = null
     let insertError: any = null
 
@@ -103,6 +109,9 @@ export async function logCommunicationAction(formData: FormData) {
     revalidatePath(`/clients/${clientId}/communications`)
     return { success: true, message: insertedMessage }
   } catch (error: any) {
+    if (error.message === 'UNAUTHENTICATED' || error.message === 'INSUFFICIENT_ROLE' || error.message === 'NOT_FOUND') {
+      throw error
+    }
     console.error('logCommunicationAction error:', error)
     return { error: error?.message || 'Internal server error.' }
   }
