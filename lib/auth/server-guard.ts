@@ -1,7 +1,10 @@
 import { getCurrentSessionContext, SessionContext } from '@/lib/auth/session'
 import { OrgRole } from '@/lib/auth/permissions'
 
-export type Session = SessionContext
+export type Session = SessionContext & {
+  organization: NonNullable<SessionContext['organization']>
+  user: NonNullable<SessionContext['user']>
+}
 
 /**
  * Enforces role-based access control (RBAC) on server actions.
@@ -14,22 +17,24 @@ export type Session = SessionContext
  */
 export async function requireRole(
   allowedRoles: OrgRole[]
-): Promise<SessionContext> {
+): Promise<Session> {
   const session = await getCurrentSessionContext()
 
   if (!session || !session.user || !session.organization) {
     throw new Error('UNAUTHENTICATED')
   }
 
+  const authenticatedSession = session as Session
+
   // Super-admin impersonation bypasses standard role restrictions
-  if (session.isSuperAdmin) {
-    return session
+  if (authenticatedSession.isSuperAdmin) {
+    return authenticatedSession
   }
 
-  const role = session.role as OrgRole
+  const role = authenticatedSession.role as OrgRole
   if (!allowedRoles.includes(role)) {
     throw new Error('INSUFFICIENT_ROLE')
   }
 
-  return session
+  return authenticatedSession
 }
