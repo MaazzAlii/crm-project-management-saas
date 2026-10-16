@@ -124,6 +124,10 @@ export async function createProjectAction(formData: FormData): Promise<CreatePro
     return { success: false, error: 'Client selection is required for a project.' }
   }
 
+  if (!title) {
+    return { success: false, error: 'Project title is required.' }
+  }
+
   // Cross-tenant parent resource verification: client must belong to caller's org
   const parent = await queryOne<{ id: string }>(
     'SELECT id FROM clients WHERE id = $1 AND organization_id = $2',
@@ -131,10 +135,6 @@ export async function createProjectAction(formData: FormData): Promise<CreatePro
   )
   if (!parent) {
     throw new Error('NOT_FOUND')
-  }
-
-  if (!title) {
-    return { success: false, error: 'Project title is required.' }
   }
 
   try {
