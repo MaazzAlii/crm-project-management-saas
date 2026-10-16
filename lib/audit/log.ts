@@ -154,12 +154,15 @@ export async function logAuditEvent(
 
     // Guardrail 3: Auto-inject impersonation metadata at the helper level
     if (session?.impersonation?.isImpersonated) {
-      mergedDetails.impersonated_by = session.impersonation.impersonatedBy
+      mergedDetails.impersonated_by =
+        session.impersonation.impersonatedBy || session.impersonation.superAdminId
       mergedDetails.impersonated_by_email = session.impersonation.impersonatedByEmail
-      mergedDetails.impersonated_as = session.impersonation.impersonatedAs
-      mergedDetails.impersonated_org_id = session.impersonation.impersonatedOrgId
-      if (!organizationId && session.impersonation.impersonatedOrgId) {
-        organizationId = session.impersonation.impersonatedOrgId
+      mergedDetails.impersonated_as =
+        session.impersonation.impersonatedAs || session.impersonation.impersonatedUserId || session.user?.id
+      mergedDetails.impersonated_org_id =
+        session.impersonation.impersonatedOrgId || session.organization?.id
+      if (!organizationId && mergedDetails.impersonated_org_id) {
+        organizationId = mergedDetails.impersonated_org_id
       }
     }
 
