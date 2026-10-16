@@ -1,18 +1,16 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { requireRole } from '@/lib/auth/server-guard'
 import { generateAICompletion, isAIAccessible, getAIProviderConfig } from '@/lib/ai/client'
 import { getOrganizationAIUsageSummary } from '@/lib/ai/usage'
 import { buildTestPrompt } from '@/lib/ai/prompts'
 import { AIFeatureType } from '@/lib/ai/types'
 
 export async function testAICompletionAction(promptMessage: string = 'Hello AI assistant') {
-  try {
-    const session = await getCurrentSessionContext()
-    if (!session || !session.organization) {
-      return { success: false, error: 'Unauthorized: No active organization session.' }
-    }
+  const session = await requireRole(['owner', 'admin', 'member'])
 
+  try {
     const orgId = session.organization.id
     const messages = buildTestPrompt(promptMessage)
 
@@ -26,6 +24,9 @@ export async function testAICompletionAction(promptMessage: string = 'Hello AI a
 
     return response
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return {
       success: false,
       error: err.message || 'An error occurred while testing AI completion.',
