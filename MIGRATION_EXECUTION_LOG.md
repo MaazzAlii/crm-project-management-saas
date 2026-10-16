@@ -3874,6 +3874,76 @@ paste at the start of every batch report.
   - Playwright E2E: **4/4 screenshots captured and verified**.
 - **Status**: ✅ AUTH-4 Phase B complete. All quality gates satisfied. Local commits ready for push approval.
 
+---
+
+### Phase ADMIN-1 Phase B: Super-Admin Impersonation Write Support, User Management & Dashboard Metrics Integrity
+- **Timestamp**: 2026-10-16 13:36:00 UTC
+- **Task ID**: ADMIN-1 Phase B (Bugs #9, #8, #1)
+- **Action Performed**:
+  1. **#9 — Super-Admin Impersonation Write Support & Tenant Scoping**:
+     - Redesigned impersonation architecture from read-only cookie banner to a cryptographically signed provenance model.
+     - Implemented `lib/auth/impersonation.ts` with Rule 21 request-time secret evaluation (`IMPERSONATION_ORIGIN_SECRET`). Throws 500 `CONFIG_ERROR` in production if missing; falls back to `JWT_SECRET` in development with a security warning.
+     - Signed origin cookie `innoventix_super_admin_origin` storing `{ superAdminId, impersonatedUserId, impersonatedOrgId, startedAt, expiresAt }` with flags `HttpOnly`, `SameSite=Lax`, `Path=/`, and `Secure` in production.
+     - Updated `lib/auth/session.ts` (`getCurrentSessionContext`) to verify origin cookie and strictly scope `session.organization` to `impersonatedOrgId` (not user's first membership), strip `isSuperAdmin = false` to enforce tenant RBAC, and populate `session.impersonation`.
+     - Updated `app/api/super-admin/impersonate/route.ts` with atomic rollback (if setting cookies fails, both origin and session cookies are cleared) and implemented exit action (`DELETE` / `POST { action: 'exit' }`) restoring the super-admin session.
+     - Guardrail 2: Added `assertDestructiveActionAllowed(session, confirmOrgName)` requiring typed organization name confirmation for destructive operations (`deleteClientAction`, `deleteProjectAction`, `deleteDeliverableAction`, `deleteGlobalTaskAction`, `removeMember`, `revokePlanOverrideAction`). Returns 400 `TYPED_CONFIRMATION_REQUIRED` if confirmation is missing or mismatched.
+     - Guardrail 3: Refactored `logAuditEvent` in `lib/audit/log.ts` to auto-inject provenance (`impersonated_by`, `impersonated_as`, `impersonated_org_id`) at the helper level.
+  2. **#8 — User Management Modal (Preserving 142 Route Baseline)**:
+     - Implemented server actions in `app/super-admin/user-actions.ts`:
+       - `updateSuperAdminUserAction`: edits full name and email, validates format, prevents duplicate email takeovers.
+       - `toggleSuperAdminUserActiveAction`: toggles `is_active` (soft delete / reactivate), revokes sessions and refresh tokens on deactivation, prevents self-deactivation.
+       - `deleteSuperAdminUserAction`: safe hard delete with guardrails — blocks self-deletion (`SELF_DELETION_BLOCKED`), requires typed email confirmation matching user email (`TYPED_CONFIRMATION_REQUIRED`, 400), blocks deletion if user is an owner/admin of ANY organization (`USER_HAS_ACTIVE_OWNERSHIP`, 400), cascades safely with transactional nullification.
+     - Created `components/super-admin/user-management-modal.tsx` with Profile & Status tab and Delete Account danger zone tab.
+     - Updated `app/super-admin/organizations/[id]/page.tsx` to mount `UserManagementModal` in the members table alongside status badges, strictly preserving the 142 route baseline (no `/super-admin/users` page added).
+  3. **#1 — Dashboard Metrics Integrity & Hardcoded Mock Removal**:
+     - Created `lib/services/dashboard-metrics.ts` executing a single aggregate SQL query for all platform telemetry (49ms execution across 15,232 orgs and 37,809 users).
+     - Guardrail 4: Enforced MRR query logic excluding lifetime/sponsored override orgs with $0 payment.
+     - Implemented a 60-second in-memory cache singleton on `globalThis.__innoventix_admin_metrics_cache__` with `clearAdminDashboardMetricsCache()`.
+     - Completely eliminated the 44-line hardcoded mock fallback block (`Innoventix Hub`, `$357 MRR`, `42 Clients`, `88 Projects`) from `app/super-admin/dashboard/page.tsx`. Bounded recent and flagged organization queries with `LIMIT 10`.
+     - Updated `components/super-admin/platform-metrics-cards.tsx` to display 6 metrics cards including Platform Users.
+  4. **Playwright E2E Verification (`scripts/verify-admin-1-e2e.ts`)**:
+     - Captured all 6 required screenshots saved to `assets/screenshots/admin-1/` and copied to conversation artifacts:
+       1. `impersonation_banner_light.png`
+       2. `impersonation_banner_dark.png`
+       3. `user_edit_light.png`
+       4. `user_delete_modal_light.png`
+       5. `dashboard_metrics_light.png`
+       6. `dashboard_metrics_dark.png`
+- **Files Modified / Created**:
+  - `lib/auth/impersonation.ts` (created/updated)
+  - `lib/auth/session.ts` (updated)
+  - `lib/audit/log.ts` (updated)
+  - `app/api/super-admin/impersonate/route.ts` (updated)
+  - `components/super-admin/impersonation-banner.tsx` (updated)
+  - `components/super-admin/support-banner-wrapper.tsx` (updated)
+  - `app/(dashboard)/clients/actions.ts` (updated)
+  - `app/(dashboard)/projects/actions.ts` (updated)
+  - `app/(dashboard)/tasks/actions.ts` (updated)
+  - `lib/team/actions.ts` (updated)
+  - `app/super-admin/plan-override-actions.ts` (updated)
+  - `app/super-admin/user-actions.ts` (created)
+  - `components/super-admin/user-management-modal.tsx` (created)
+  - `app/super-admin/organizations/[id]/page.tsx` (updated)
+  - `lib/services/dashboard-metrics.ts` (created)
+  - `components/super-admin/platform-metrics-cards.tsx` (updated)
+  - `app/super-admin/dashboard/page.tsx` (updated)
+  - `app/super-admin/layout.tsx` (updated: dynamic = 'force-dynamic')
+  - `app/super-admin/page.tsx` (updated: dynamic = 'force-dynamic')
+  - `tests/admin/admin-impersonation.test.ts` (created)
+  - `tests/admin/admin-user-management.test.ts` (created)
+  - `tests/admin/dashboard-metrics.test.ts` (created)
+  - `scripts/verify-admin-1-e2e.ts` (created)
+  - `assets/screenshots/admin-1/*` (6 screenshots created)
+- **Verification / Test Result**:
+  - `npx tsc --noEmit`: **Exit code 0 (0 type errors)**
+  - `npm run lint`: **Exit code 0 (0 errors, 3 baseline warnings)**
+  - `npm test`: **90 test files, 761/761 tests passing (100% pass rate, +25 new tests in this batch)**
+  - `npm run build`: **142 routes compiled cleanly (exact 142 route baseline strictly preserved)**
+  - Rule 21 check: `NODE_ENV=production STRIPE_PRO_PRICE_ID= STRIPE_PUBLISHABLE_KEY= npm run build` **exited 0 with 142 routes**.
+  - Playwright E2E: **6/6 screenshots captured and verified**.
+- **Status**: ✅ ADMIN-1 Phase B complete. All quality gates and required safety guardrails satisfied. Local commits ready for push approval.
+
+
 
 
 
