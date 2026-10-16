@@ -1,6 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { requireRole } from '@/lib/auth/server-guard'
 import { query, queryOne, transaction } from '@/lib/db'
 import { checkProjectLimit } from '@/lib/services/plan-limits'
 import { logAuditEvent } from '@/lib/audit/logger'
@@ -100,38 +101,43 @@ export type CreateProjectActionResult = {
 };
 
 export async function createProjectAction(formData: FormData): Promise<CreateProjectActionResult> {
+  const session = await requireRole(['owner', 'admin', 'member'])
+
+  const orgId = session.organization.id
+
+  const clientId = formData.get('client_id')?.toString().trim()
+  const title = formData.get('title')?.toString().trim()
+  const description = formData.get('description')?.toString().trim() || null
+  const type = formData.get('type')?.toString().trim() || 'Combined'
+  const brief_source = formData.get('brief_source')?.toString().trim() || 'WhatsApp'
+  const amount = parseFloat(formData.get('amount')?.toString() || '0')
+  const currency = formData.get('currency')?.toString().trim() || 'USD'
+  const status = formData.get('status')?.toString().trim() || 'Active'
+  const priority = formData.get('priority')?.toString().trim() || 'medium'
+  const start_date = formData.get('start_date')?.toString().trim() || null
+  const deadline = formData.get('deadline')?.toString().trim() || null
+  const assigned_to = formData.get('assigned_to')?.toString().trim() || null
+  const notes = formData.get('notes')?.toString().trim() || null
+  const template_id = formData.get('template_id')?.toString().trim() || null
+
+  if (!clientId) {
+    return { success: false, error: 'Client selection is required for a project.' }
+  }
+
+  // Cross-tenant parent resource verification: client must belong to caller's org
+  const parent = await queryOne<{ id: string }>(
+    'SELECT id FROM clients WHERE id = $1 AND organization_id = $2',
+    [clientId, orgId]
+  )
+  if (!parent) {
+    throw new Error('NOT_FOUND')
+  }
+
+  if (!title) {
+    return { success: false, error: 'Project title is required.' }
+  }
+
   try {
-    const session = await getCurrentSessionContext()
-
-    if (!session || !session.user || !session.organization) {
-      return { success: false, error: 'Unauthorized session context.' }
-    }
-
-    const orgId = session.organization.id
-
-    const clientId = formData.get('client_id')?.toString().trim()
-    const title = formData.get('title')?.toString().trim()
-    const description = formData.get('description')?.toString().trim() || null
-    const type = formData.get('type')?.toString().trim() || 'Combined'
-    const brief_source = formData.get('brief_source')?.toString().trim() || 'WhatsApp'
-    const amount = parseFloat(formData.get('amount')?.toString() || '0')
-    const currency = formData.get('currency')?.toString().trim() || 'USD'
-    const status = formData.get('status')?.toString().trim() || 'Active'
-    const priority = formData.get('priority')?.toString().trim() || 'medium'
-    const start_date = formData.get('start_date')?.toString().trim() || null
-    const deadline = formData.get('deadline')?.toString().trim() || null
-    const assigned_to = formData.get('assigned_to')?.toString().trim() || null
-    const notes = formData.get('notes')?.toString().trim() || null
-    const template_id = formData.get('template_id')?.toString().trim() || null
-
-    if (!clientId) {
-      return { success: false, error: 'Client selection is required for a project.' }
-    }
-
-    if (!title) {
-      return { success: false, error: 'Project title is required.' }
-    }
-
     // Atomic server-side Plan Limit Check & Insertion with row lock
     const txResult = await transaction(async (client) => {
       await client.query('SELECT id FROM organizations WHERE id = $1 FOR UPDATE', [orgId]);
@@ -275,19 +281,18 @@ export async function createProjectAction(formData: FormData): Promise<CreatePro
     revalidatePath(`/clients/${clientId}`)
     return { success: true, projectId: newProject.id }
   } catch (error: any) {
+    if (error.message === 'UNAUTHENTICATED' || error.message === 'INSUFFICIENT_ROLE' || error.message === 'NOT_FOUND') {
+      throw error
+    }
     console.error('createProjectAction error:', error)
     return { success: false, error: error?.message || 'Internal server error.' }
   }
 }
 
 export async function updateProjectAction(projectId: string, formData: FormData) {
+  const session = await requireRole(['owner', 'admin', 'member'])
+
   try {
-    const session = await getCurrentSessionContext()
-
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized.' }
-    }
-
     const title = formData.get('title')?.toString().trim()
     const description = formData.get('description')?.toString().trim() || null
     const type = formData.get('type')?.toString().trim() || 'Combined'
@@ -360,18 +365,17 @@ export async function updateProjectAction(projectId: string, formData: FormData)
     revalidatePath('/projects')
     return { success: true }
   } catch (error: any) {
+    if (error.message === 'UNAUTHENTICATED' || error.message === 'INSUFFICIENT_ROLE' || error.message === 'NOT_FOUND') {
+      throw error
+    }
     return { error: error?.message || 'Failed to update project.' }
   }
 }
 
 export async function updateProjectStatusAction(projectId: string, newStatus: string) {
+  const session = await requireRole(['owner', 'admin', 'member'])
+
   try {
-    const session = await getCurrentSessionContext()
-
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized.' }
-    }
-
     // 1. Fetch current project and client info
     let project: any = null
     try {
@@ -475,6 +479,9 @@ export async function updateProjectStatusAction(projectId: string, newStatus: st
     revalidatePath(`/projects/${projectId}`)
     return { success: true, invoiceTriggered }
   } catch (error: any) {
+    if (error.message === 'UNAUTHENTICATED' || error.message === 'INSUFFICIENT_ROLE' || error.message === 'NOT_FOUND') {
+      throw error
+    }
     return { error: error?.message || 'Failed to update project status.' }
   }
 }
@@ -653,12 +660,18 @@ export async function fetchProjectDeliverablesAction(projectId: string): Promise
 
 // Create deliverable action
 export async function createDeliverableAction(projectId: string, formData: FormData) {
-  try {
-    const session = await getCurrentSessionContext()
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized.' }
-    }
+  const session = await requireRole(['owner', 'admin', 'member'])
 
+  // Cross-tenant parent resource verification: project must belong to caller's org
+  const parent = await queryOne<{ id: string }>(
+    'SELECT id FROM projects WHERE id = $1 AND organization_id = $2',
+    [projectId, session.organization.id]
+  )
+  if (!parent) {
+    throw new Error('NOT_FOUND')
+  }
+
+  try {
     const title = formData.get('title')?.toString().trim()
     const file_url = formData.get('file_url')?.toString().trim() || null
     const drive_link = formData.get('drive_link')?.toString().trim() || null
@@ -693,6 +706,9 @@ export async function createDeliverableAction(projectId: string, formData: FormD
     revalidatePath(`/projects/${projectId}`)
     return { success: true, deliverableId: data.id }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { error: err.message || 'Failed to create deliverable.' }
   }
 }
@@ -704,9 +720,9 @@ export async function updateDeliverableStatusAction(
   status: 'pending' | 'approved' | 'revision_required',
   clientFeedback?: string
 ) {
+  const session = await requireRole(['owner', 'admin', 'member'])
+
   try {
-    const session = await getCurrentSessionContext()
-    if (!session || !session.organization) return { error: 'Unauthorized.' }
 
     await query(
       `UPDATE deliverables
@@ -737,15 +753,18 @@ export async function updateDeliverableStatusAction(
     revalidatePath(`/projects/${projectId}`)
     return { success: true }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { error: err.message || 'Failed to update deliverable status.' }
   }
 }
 
 // Delete deliverable
 export async function deleteDeliverableAction(deliverableId: string, projectId: string) {
+  const session = await requireRole(['owner', 'admin'])
+
   try {
-    const session = await getCurrentSessionContext()
-    if (!session || !session.organization) return { error: 'Unauthorized.' }
 
     await query(
       `DELETE FROM deliverables WHERE id = $1 AND organization_id = $2`,
@@ -770,6 +789,9 @@ export async function deleteDeliverableAction(deliverableId: string, projectId: 
     revalidatePath(`/projects/${projectId}`)
     return { success: true }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { error: err.message || 'Failed to delete deliverable.' }
   }
 }
@@ -814,10 +836,18 @@ export async function fetchProjectTasksAction(projectId: string): Promise<TaskRe
 
 // Create task action
 export async function createProjectTaskAction(projectId: string, formData: FormData) {
-  try {
-    const session = await getCurrentSessionContext()
-    if (!session || !session.user || !session.organization) return { error: 'Unauthorized.' }
+  const session = await requireRole(['owner', 'admin', 'member'])
 
+  // Cross-tenant parent resource verification: project must belong to caller's org
+  const parent = await queryOne<{ id: string }>(
+    'SELECT id FROM projects WHERE id = $1 AND organization_id = $2',
+    [projectId, session.organization.id]
+  )
+  if (!parent) {
+    throw new Error('NOT_FOUND')
+  }
+
+  try {
     const title = formData.get('title')?.toString().trim()
     const description = formData.get('description')?.toString().trim() || null
     const priority = (formData.get('priority')?.toString().trim() || 'medium') as any
@@ -839,6 +869,9 @@ export async function createProjectTaskAction(projectId: string, formData: FormD
     revalidatePath(`/projects/${projectId}`)
     return { success: true, taskId: data.id }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { error: err.message || 'Failed to create task.' }
   }
 }
@@ -849,9 +882,9 @@ export async function updateTaskStatusAction(
   projectId: string,
   newStatus: 'todo' | 'in_progress' | 'review' | 'done'
 ) {
+  const session = await requireRole(['owner', 'admin', 'member'])
+
   try {
-    const session = await getCurrentSessionContext()
-    if (!session || !session.organization) return { error: 'Unauthorized.' }
 
     if (newStatus === 'done') {
       await query(
@@ -871,15 +904,18 @@ export async function updateTaskStatusAction(
     revalidatePath(`/projects/${projectId}`)
     return { success: true }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { error: err.message || 'Failed to update task status.' }
   }
 }
 
 // Update project team assignee
 export async function updateProjectTeamAssigneeAction(projectId: string, assignedToId: string | null) {
+  const session = await requireRole(['owner', 'admin', 'member'])
+
   try {
-    const session = await getCurrentSessionContext()
-    if (!session || !session.organization) return { error: 'Unauthorized.' }
 
     await query(
       `UPDATE projects SET assigned_to = $1, updated_at = NOW() WHERE id = $2 AND organization_id = $3`,
@@ -890,6 +926,9 @@ export async function updateProjectTeamAssigneeAction(projectId: string, assigne
     revalidatePath(`/projects/${projectId}`)
     return { success: true }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { error: err.message || 'Failed to update team assignee.' }
   }
 }
