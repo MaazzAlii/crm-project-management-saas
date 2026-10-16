@@ -249,12 +249,17 @@ export async function toggleGlobalTaskStatusAction(taskId: string, newStatus: 't
 }
 
 // Delete task
-export async function deleteGlobalTaskAction(taskId: string) {
+export async function deleteGlobalTaskAction(taskId: string, confirmOrgName?: string) {
   try {
     const session = await getCurrentSessionContext()
 
     if (!session || !session.user || !session.organization) {
       return { error: 'Unauthorized.' }
+    }
+
+    if (session.impersonation?.isImpersonated) {
+      const { assertDestructiveActionAllowed } = await import('@/lib/auth/impersonation')
+      assertDestructiveActionAllowed(session, confirmOrgName)
     }
 
     const canDelete = session.role === 'owner' || session.role === 'admin' || session.isSuperAdmin
@@ -281,6 +286,9 @@ export async function deleteGlobalTaskAction(taskId: string) {
     revalidatePath('/tasks')
     return { success: true }
   } catch (err: any) {
+    if (err?.code === 'TYPED_CONFIRMATION_REQUIRED') {
+      return { error: err.message, code: 'TYPED_CONFIRMATION_REQUIRED', status: 400 }
+    }
     return { error: err.message || 'Failed to delete task.' }
   }
 }
