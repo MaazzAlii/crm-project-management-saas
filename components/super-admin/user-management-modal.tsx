@@ -317,7 +317,7 @@ export function UserManagementModal({ user }: UserManagementModalProps) {
 
                 <div>
                   <label className="block font-semibold text-foreground mb-1">
-                    Type user email <span className="font-mono text-destructive">'{user.email}'</span> to
+                    Type user email <span className="font-mono text-destructive">&apos;{user.email}&apos;</span> to
                     confirm:
                   </label>
                   <input
