@@ -10,6 +10,10 @@ export interface PlatformMetrics {
   totalClients: number
   totalProjects: number
   totalMessages: number
+  totalUsers?: number
+  activeUsers?: number
+  pendingInvites?: number
+  monthlyAiTokens?: number
 }
 
 interface PlatformMetricsCardsProps {
@@ -35,6 +39,15 @@ export function PlatformMetricsCards({ metrics }: PlatformMetricsCardsProps) {
       color: 'from-emerald-500 to-teal-600',
       badge: 'Stripe Synced',
       badgeColor: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+    },
+    {
+      title: 'Platform Users',
+      value: (metrics.totalUsers ?? 0).toLocaleString(),
+      subtitle: `${metrics.activeUsers ?? 0} active · ${metrics.pendingInvites ?? 0} invites`,
+      icon: Users,
+      color: 'from-violet-500 to-purple-600',
+      badge: 'User Accounts',
+      badgeColor: 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20',
     },
     {
       title: 'Total Platform Clients',
@@ -67,7 +80,7 @@ export function PlatformMetricsCards({ metrics }: PlatformMetricsCardsProps) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {cards.map((card, idx) => {
           const Icon = card.icon
           return (
