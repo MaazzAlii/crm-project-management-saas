@@ -59,13 +59,19 @@ export async function grantPlanOverrideAction(
 }
 
 export async function revokePlanOverrideAction(
-  organizationId: string
+  organizationId: string,
+  confirmOrgName?: string
 ): Promise<RevokeOverrideResult> {
   try {
     await requireSuperAdmin();
     const session = await getCurrentSessionContext();
     if (!session || !session.user) {
       return { success: false, error: 'Unauthorized: No active super admin session found' };
+    }
+
+    if (session.impersonation?.isImpersonated) {
+      const { assertDestructiveActionAllowed } = await import('@/lib/auth/impersonation');
+      assertDestructiveActionAllowed(session, confirmOrgName);
     }
 
     const result = await revokePlanOverride(organizationId, session.user.id);
@@ -78,6 +84,9 @@ export async function revokePlanOverrideAction(
 
     return result;
   } catch (err: any) {
+    if (err?.code === 'TYPED_CONFIRMATION_REQUIRED') {
+      return { success: false, error: err.message, code: 'TYPED_CONFIRMATION_REQUIRED', status: 400 } as any;
+    }
     console.error('[revokePlanOverrideAction] Error:', err);
     return { success: false, error: err.message || 'Failed to revoke plan override' };
   }
