@@ -1,6 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { requireRole } from '@/lib/auth/server-guard'
 import { query, queryOne } from '@/lib/db'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
@@ -94,13 +95,9 @@ export async function fetchProjectTemplatesAction(): Promise<ProjectTemplateReco
 
 // Create new template action
 export async function createProjectTemplateAction(formData: FormData) {
+  const session = await requireRole(['owner', 'admin'])
+
   try {
-    const session = await getCurrentSessionContext()
-
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized.' }
-    }
-
     const name = formData.get('name')?.toString().trim()
     const description = formData.get('description')?.toString().trim() || null
     const type = formData.get('type')?.toString().trim() || 'Combined'
@@ -163,6 +160,9 @@ export async function createProjectTemplateAction(formData: FormData) {
     revalidatePath('/projects')
     return { success: true, templateId: templateData.id }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { error: err.message || 'Failed to create project template.' }
   }
 }
@@ -196,12 +196,9 @@ export async function deleteProjectTemplateAction(templateId: string) {
 
 // Save existing project as reusable template
 export async function saveProjectAsTemplateAction(projectId: string, templateName: string) {
-  try {
-    const session = await getCurrentSessionContext()
+  const session = await requireRole(['owner', 'admin'])
 
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized.' }
-    }
+  try {
 
     // Query source project
     const project = await queryOne<any>(
@@ -261,6 +258,9 @@ export async function saveProjectAsTemplateAction(projectId: string, templateNam
     revalidatePath('/settings/templates')
     return { success: true, templateId: newTemplate.id }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { error: err.message || 'Failed to save project as template.' }
   }
 }
