@@ -30,6 +30,7 @@ export interface UpdateRoleInput {
 
 export interface RemoveMemberInput {
   memberId: string
+  confirmOrgName?: string
 }
 
 /**
@@ -257,6 +258,21 @@ export async function removeMember(input: RemoveMemberInput) {
     return { success: false, error: 'Unauthorized: No active session.' }
   }
 
+  // Guardrail 2: Destructive actions while impersonating require typed organization name confirmation
+  if (session.impersonation?.isImpersonated) {
+    const { assertDestructiveActionAllowed } = await import('@/lib/auth/impersonation')
+    try {
+      assertDestructiveActionAllowed(session, input.confirmOrgName)
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err.message,
+        code: 'TYPED_CONFIRMATION_REQUIRED',
+        status: 400,
+      }
+    }
+  }
+
   try {
     // Fetch the target member record
     const targetMember = await queryOne<{ id: string; organization_id: string; user_id: string; role: string }>(
@@ -279,6 +295,14 @@ export async function removeMember(input: RemoveMemberInput) {
     revalidatePath('/settings/team')
     return { success: true }
   } catch (err: any) {
+    if (err?.code === 'TYPED_CONFIRMATION_REQUIRED') {
+      return {
+        success: false,
+        error: err.message,
+        code: 'TYPED_CONFIRMATION_REQUIRED',
+        status: 400,
+      }
+    }
     console.error('Error removing org member:', err)
     return {
       success: false,
