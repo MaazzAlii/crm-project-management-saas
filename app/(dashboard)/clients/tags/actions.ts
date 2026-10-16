@@ -1,6 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { requireRole } from '@/lib/auth/server-guard'
 import { query, queryOne } from '@/lib/db'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
@@ -29,13 +30,9 @@ export async function fetchTagsAction(): Promise<TagRecord[]> {
 }
 
 export async function createTagAction(name: string, color: string = 'sky') {
+  const session = await requireRole(['owner', 'admin', 'member'])
+
   try {
-    const session = await getCurrentSessionContext()
-
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized session.' }
-    }
-
     const trimmedName = name.trim()
     if (!trimmedName) {
       return { error: 'Tag name is required.' }
@@ -65,6 +62,9 @@ export async function createTagAction(name: string, color: string = 'sky') {
     revalidatePath('/clients')
     return { success: true, tag: newTag }
   } catch (error: any) {
+    if (error.message === 'UNAUTHENTICATED' || error.message === 'INSUFFICIENT_ROLE' || error.message === 'NOT_FOUND') {
+      throw error
+    }
     console.error('createTagAction error:', error)
     return { error: error?.message || 'Internal server error.' }
   }
@@ -100,12 +100,9 @@ export async function deleteTagAction(tagId: string) {
 }
 
 export async function updateClientTagsAction(clientId: string, tags: string[]) {
-  try {
-    const session = await getCurrentSessionContext()
+  const session = await requireRole(['owner', 'admin', 'member'])
 
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized.' }
-    }
+  try {
 
     try {
       await query(
@@ -130,6 +127,9 @@ export async function updateClientTagsAction(clientId: string, tags: string[]) {
     revalidatePath(`/clients/${clientId}`)
     return { success: true }
   } catch (error: any) {
+    if (error.message === 'UNAUTHENTICATED' || error.message === 'INSUFFICIENT_ROLE' || error.message === 'NOT_FOUND') {
+      throw error
+    }
     return { error: error?.message || 'Failed to update client tags.' }
   }
 }
