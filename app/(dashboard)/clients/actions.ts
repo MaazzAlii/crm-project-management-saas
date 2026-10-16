@@ -145,12 +145,18 @@ export async function createClientAction(formData: FormData): Promise<CreateClie
   }
 }
 
-export async function deleteClientAction(clientId: string) {
+export async function deleteClientAction(clientId: string, confirmOrgName?: string) {
   try {
     const session = await getCurrentSessionContext()
 
     if (!session || !session.user || !session.organization) {
       return { error: 'Unauthorized session.' }
+    }
+
+    // Guardrail 2: Destructive action typed confirmation during impersonation
+    if (session.impersonation?.isImpersonated) {
+      const { assertDestructiveActionAllowed } = await import('@/lib/auth/impersonation')
+      assertDestructiveActionAllowed(session, confirmOrgName)
     }
 
     const canDelete =
@@ -183,6 +189,9 @@ export async function deleteClientAction(clientId: string) {
     revalidatePath('/clients')
     return { success: true }
   } catch (error: any) {
+    if (error?.code === 'TYPED_CONFIRMATION_REQUIRED') {
+      return { error: error.message, code: 'TYPED_CONFIRMATION_REQUIRED', status: 400 }
+    }
     console.error('deleteClientAction error:', error)
     return { error: error?.message || 'Internal server error.' }
   }
