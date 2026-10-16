@@ -1,18 +1,16 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { requireRole } from '@/lib/auth/server-guard'
 import { fetchOrganizationAnalytics, AnalyticsDateRange } from '@/lib/analytics/data'
 import { generateWeeklyReportNarrative } from '@/lib/ai/features/report-narrative'
 import { isAIAccessible } from '@/lib/ai/client'
 
 export async function generateAnalyticsNarrativeAction(range: AnalyticsDateRange = '30d') {
-  try {
-    const session = await getCurrentSessionContext()
-    if (!session || !session.organization) {
-      return { success: false, error: 'Unauthorized: active session required.' }
-    }
+  const session = await requireRole(['owner', 'admin', 'member'])
+  const orgId = session.organization.id
 
-    const orgId = session.organization.id
+  try {
 
     // Dual-tier gating check
     const gateCheck = await isAIAccessible(orgId, 'weekly_narrative')
@@ -70,6 +68,9 @@ export async function generateAnalyticsNarrativeAction(range: AnalyticsDateRange
       narrative: result.narrative,
     }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     console.error('[Analytics:Action] Error generating narrative:', err)
     return {
       success: false,
