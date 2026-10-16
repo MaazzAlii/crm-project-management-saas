@@ -1,6 +1,7 @@
 'use server'
 
 import { getCurrentSessionContext } from '@/lib/auth/session'
+import { requireRole } from '@/lib/auth/server-guard'
 import { query, queryOne } from '@/lib/db'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
@@ -81,29 +82,34 @@ export async function fetchAllTasksAction(): Promise<GlobalTaskRecord[]> {
 
 // Create new task
 export async function createGlobalTaskAction(formData: FormData) {
+  const session = await requireRole(['owner', 'admin', 'member'])
+
+  const title = formData.get('title')?.toString().trim()
+  const description = formData.get('description')?.toString().trim() || null
+  const project_id = formData.get('project_id')?.toString().trim()
+  const assigned_to = formData.get('assigned_to')?.toString().trim() || null
+  const priority = (formData.get('priority')?.toString().trim() || 'medium') as any
+  const status = (formData.get('status')?.toString().trim() || 'todo') as any
+  const due_date = formData.get('due_date')?.toString().trim() || null
+
+  if (!title) {
+    return { error: 'Task title is required.' }
+  }
+
+  if (!project_id) {
+    return { error: 'Please select a target project.' }
+  }
+
+  // Cross-tenant parent resource verification: project must belong to caller's org
+  const parent = await queryOne<{ id: string }>(
+    'SELECT id FROM projects WHERE id = $1 AND organization_id = $2',
+    [project_id, session.organization.id]
+  )
+  if (!parent) {
+    throw new Error('NOT_FOUND')
+  }
+
   try {
-    const session = await getCurrentSessionContext()
-
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized.' }
-    }
-
-    const title = formData.get('title')?.toString().trim()
-    const description = formData.get('description')?.toString().trim() || null
-    const project_id = formData.get('project_id')?.toString().trim()
-    const assigned_to = formData.get('assigned_to')?.toString().trim() || null
-    const priority = (formData.get('priority')?.toString().trim() || 'medium') as any
-    const status = (formData.get('status')?.toString().trim() || 'todo') as any
-    const due_date = formData.get('due_date')?.toString().trim() || null
-
-    if (!title) {
-      return { error: 'Task title is required.' }
-    }
-
-    if (!project_id) {
-      return { error: 'Please select a target project.' }
-    }
-
     const data = await queryOne<{ id: string }>(
       `INSERT INTO tasks (
         organization_id, project_id, title, description, assigned_to,
@@ -141,18 +147,18 @@ export async function createGlobalTaskAction(formData: FormData) {
     revalidatePath(`/projects/${project_id}`)
     return { success: true, taskId: data.id }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { error: err.message || 'Failed to create task.' }
   }
 }
 
 // Update task action
 export async function updateGlobalTaskAction(taskId: string, formData: FormData) {
-  try {
-    const session = await getCurrentSessionContext()
+  const session = await requireRole(['owner', 'admin', 'member'])
 
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized.' }
-    }
+  try {
 
     const title = formData.get('title')?.toString().trim()
     const description = formData.get('description')?.toString().trim() || null
@@ -199,18 +205,18 @@ export async function updateGlobalTaskAction(taskId: string, formData: FormData)
     revalidatePath('/tasks')
     return { success: true }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { error: err.message || 'Failed to update task.' }
   }
 }
 
 // Quick status toggle
 export async function toggleGlobalTaskStatusAction(taskId: string, newStatus: 'todo' | 'in_progress' | 'review' | 'done') {
-  try {
-    const session = await getCurrentSessionContext()
+  const session = await requireRole(['owner', 'admin', 'member'])
 
-    if (!session || !session.user || !session.organization) {
-      return { error: 'Unauthorized.' }
-    }
+  try {
 
     const completedAt = newStatus === 'done' ? new Date().toISOString() : null
 
@@ -235,6 +241,9 @@ export async function toggleGlobalTaskStatusAction(taskId: string, newStatus: 't
     revalidatePath('/tasks')
     return { success: true }
   } catch (err: any) {
+    if (err.message === 'UNAUTHENTICATED' || err.message === 'INSUFFICIENT_ROLE' || err.message === 'NOT_FOUND') {
+      throw err
+    }
     return { error: err.message || 'Failed to toggle status.' }
   }
 }
