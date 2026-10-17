@@ -1,7 +1,7 @@
 # Graph Report - 91-crm-project-management-saas  (2026-10-17)
 
 ## Corpus Check
-- 1228 files · ~2,459,263 words
+- 1228 files · ~2,459,279 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 18 file(s) not represented in the graph (top: .conf 7, (none) 5, .example 4)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `10c67cf7`
+- Built from commit: `b28f9186`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -738,16 +738,16 @@
 10. `react` - 104 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `3. Client Card "Connected" Badge Breakdown` --references--> `createClientAction()`  [INFERRED]
-  docs/audit-tenancy-and-mock-data.md → app/(dashboard)/clients/actions.ts
-- `4. Dashboard Data Sources & Metric Fidelity` --references--> `fetchWeeklyReportMetricsAction()`  [INFERRED]
-  docs/audit-invites-dashboard.md → app/(dashboard)/reports/actions.ts
-- `Implementation Steps` --references--> `handleSignUpWithInviteAction()`  [INFERRED]
-  docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md → app/actions/signup.ts
-- `Step 51: Batch TEAM-4 — Team UI Polish (Real-time, Workload, Profile, Status)` --references--> `formatRelativeTime()`  [INFERRED]
-  MIGRATION_EXECUTION_LOG.md → components/settings/TeamMemberList.tsx
-- `What happens:` --references--> `generateWeeklyReportNarrative()`  [INFERRED]
-  documentation/infra/n8n-deployment.md → lib/ai/features/report-narrative.ts
+- `3. Session Lifecycle & Token Architecture` --references--> `getCurrentSessionContext()`  [INFERRED]
+  docs/engineering/AUTH-AND-RBAC.md → lib/auth/session.ts
+- `1. Current Architecture Overview` --references--> `getCurrentSessionContext()`  [INFERRED]
+  docs/pipeline-plan.md → lib/auth/session.ts
+- `2. PROJECT CONTEXT (READ FIRST)` --references--> `getCurrentSessionContext()`  [INFERRED]
+  docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md → lib/auth/session.ts
+- `Implementation Steps` --references--> `getCurrentSessionContext()`  [INFERRED]
+  docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md → lib/auth/session.ts
+- `Positive` --references--> `ingestMessage()`  [INFERRED]
+  documentation/adr/002-communication-hub.md → lib/inbox/ingest.ts
 
 ## Import Cycles
 - None detected.
@@ -2827,7 +2827,7 @@ Cohesion: 0.50
 Nodes (3): 1. Prerequisites Checklist, 2. Verification Steps, Stripe Test Payment & Upgrade Verification Runbook (Prompt 49)
 
 ## Knowledge Gaps
-- **24 isolated node(s):** `next/core-web-vitals`, `RFC-822`, `RFC-5321`, `@stripe/stripe-js`, `clsx` (+19 more)
+- **24 isolated node(s):** `autoprefixer`, `clsx`, `eslint`, `eslint-config-next`, `postcss` (+19 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 7750 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **249 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -2835,15 +2835,15 @@ Nodes (3): 1. Prerequisites Checklist, 2. Verification Steps, Stripe Test Paymen
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `next` connect `next` to `package.json`, `db/index.ts`, `getPipelineSession`, `leads/actions.ts`, `client/dashboard/page.tsx`, `getCurrentSessionContext`, `lucide-react`, `security/rate-limit.ts`, `ai/actions.ts`, `whatsapp/actions.ts`, `billing/page.tsx`, `app/layout.tsx`, `react`, `Topbar.tsx`, `decryptSecret`, `emitter.ts`, `webhook/route.ts`, `run-e2e-full-system.ts`, `pipeline.ts`, `team/page.tsx`, `server-actions-auth.test.ts`, `platform-settings.ts`, `settings/audit-log/page.tsx`, `current-plan.ts`, `middleware.ts`, `super-admin/dashboard/page.tsx`, `jwt.ts`, `data.ts`, `notifications/actions.ts`, `ingest.ts`, `organizations/[id]/page.tsx`, `ClientsList.tsx`, `slack/actions.ts`, `TemplateList.tsx`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `(dashboard)/dashboard/page.tsx`, `TeamMemberList.tsx`, `sender.ts`, `ClientForm.tsx`, `client/projects/[id]/page.tsx`, `logAuditEvent`, `tasks/actions.ts`, `activity/route.ts`, `ClientCommunicationsView.tsx`, `requirePortalSession`, `InviteMemberDialog.tsx`, `ThemeToggle`?**
-  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+  _High betweenness centrality (0.022) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `query()` (e.g. with `Step 9: Coolify Deployment Fix — Complete Supabase Elimination & Edge JWT Auth` and `communication-mode.test.ts`) actually correct?**
   _`query()` has 4 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `next/core-web-vitals`, `RFC-822`, `RFC-5321` to the rest of the system?**
+- **What connects `autoprefixer`, `clsx`, `eslint` to the rest of the system?**
   _24 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `package.json` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Why does `query()` connect `query` to `ref_fs`, `next`, `db/index.ts`, `getPipelineSession`, `leads/actions.ts`, `client/dashboard/page.tsx`, `getCurrentSessionContext`, `lucide-react`, `ai/actions.ts`, `whatsapp/actions.ts`, `log.ts`, `PaginationOptions`, `react`, `queryOne`, `decryptSecret`, `emitter.ts`, `webhook/route.ts`, `team/page.tsx`, `transaction`, `pipeline.ts`, `server-actions-auth.test.ts`, `platform-settings.ts`, `current-plan.ts`, `buildInsertQuery`, `User`, `database.ts`, `super-admin/dashboard/page.tsx`, `jwt.ts`, `data.ts`, `notifications/actions.ts`, `ingest.ts`, `Invitation`, `deal-service.ts`, `organizations/[id]/page.tsx`, `crmService`, `ClientsList.tsx`, `slack/actions.ts`, `TemplateList.tsx`, `automationService`, `isValidEmail`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `database-layer.test.ts`, `(dashboard)/dashboard/page.tsx`, `📝 Execution History`, `ai/client.ts`, `org-service.ts`, `sender.ts`, `client/projects/[id]/page.tsx`, `logAuditEvent`, `tasks/actions.ts`, `activity/route.ts`, `requirePortalSession`, `projectService`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+  _High betweenness centrality (0.022) - this node is a cross-community bridge._
 - **Are the 8 inferred relationships involving `getCurrentSessionContext()` (e.g. with `3. Session Lifecycle & Token Architecture` and `1. Current Architecture Overview`) actually correct?**
   _`getCurrentSessionContext()` has 8 INFERRED edges - model-reasoned connections that need verification._
 - **Should `compilerOptions` be split into smaller, more focused modules?**

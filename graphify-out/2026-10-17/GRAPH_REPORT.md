@@ -1,25 +1,25 @@
 # Graph Report - 91-crm-project-management-saas  (2026-10-17)
 
 ## Corpus Check
-- 1112 files · ~2,282,730 words
+- 1228 files · ~2,459,279 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 18 file(s) not represented in the graph (top: .conf 7, (none) 5, .example 4)
 
 ## Summary
-- 7782 nodes · 14344 edges · 670 communities (417 shown, 253 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 398 edges (avg confidence: 0.93)
+- 10754 nodes · 17197 edges · 767 communities (518 shown, 249 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 395 edges (avg confidence: 0.93)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `cbfa2791`
+- Built from commit: `b28f9186`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - package.json
 - compilerOptions
-- getAuthFromRequest
-- verify-admin-1-e2e.ts
+- next
+- ISSUE-S1.10-Session-Refresh-Rotation-Test — Session timeout and refresh token rotation
 - devDependencies
 - dependencies
 - UNIVERSAL MASTER PROMPT v1.1
@@ -30,10 +30,10 @@
 - getPipelineSession
 - Assignment — SMB Project Management Tool
 - Assignment — SMB Project Management Tool
-- next
-- session.ts
-- projects/actions.ts
-- 2026-10-14 — Correction Entry
+- ISSUE-S1.11-Logout-Revoke-And-Clear-Cookies — Logout: revoke refresh token and clear cookies
+- getCurrentSessionContext
+- lucide-react
+- security/rate-limit.ts
 - ai/actions.ts
 - log.ts
 - TASK 01 — Repository & Monorepo Foundation
@@ -63,7 +63,7 @@
 - TASK 25 — Status Tag System — Shared Component Library
 - TASK 26 — Communication Hub — Architecture & Unified Inbox Data Layer
 - TASK 27 — Communication Hub — Slack Integration
-- team/actions.ts
+- ISSUE-S1.12-Email-Verification-Banner — Email verification banner and confirmation
 - jwt.ts
 - TASK 28 — Communication Hub — WhatsApp Integration
 - TASK 31 — Communication Hub — Unified Inbox UI
@@ -166,18 +166,18 @@
 - Agent State
 - generate-production-secrets.ts
 - 7. Step-by-Step Manual Test Procedures
-- lucide-react
-- crm-service.ts
-- email/actions.ts
+- react
+- queryOne
+- decryptSecret
 - emitter.ts
 - pipeline.ts
 - run-e2e-full-system.ts
 - TASK 29 — Communication Hub — Email Integration
 - Innoventix Platform v2 — Multi-Tenant CRM, Project Management & AI SaaS
-- onboarding/page.tsx
+- server-actions-auth.test.ts
 - platform-settings.ts
-- query
-- apiError
+- current-plan.ts
+- ISSUE-S1.13A-MFA-TOTP-Backend — MFA / TOTP foundation: secrets, verification, recovery codes
 - README.md
 - DNS Record Setup & Let's Encrypt SSL Automated Renewal
 - Contabo VPS Server Inventory & Infrastructure Setup
@@ -186,23 +186,23 @@
 - Self-Hosted Supabase Architecture & Deployment Guide
 - 2. Design Tokens
 - 1. Hardcoded Sample Values Search Results
-- auth/middleware.ts
-- OrganizationRepository
-- analytics/page.tsx
-- ai.ts
-- ITEM 4 — Fix Sign-In Rate Limiting (No 429 on HTML Pages)
-- getCurrentSessionContext
+- ISSUE-S1.13B-MFA-TOTP-UI — MFA / TOTP: enrollment and challenge UI
+- query
+- data.ts
+- ISSUE-S1.14A-OAuth-Google-GitHub-Backend — OAuth login: provider configuration and account linking
+- BATCH A — Auth Core Hardening
+- notifications/actions.ts
 - ingest.ts
-- theme-provider.tsx
-- invitation-service.ts
+- ISSUE-S1.14B-OAuth-Login-UI — OAuth login: buttons and linking UI
+- Invitation
 - deal-service.ts
-- ai/types.ts
-- logAuditEvent
+- ISSUE-S1.15-Password-Strength-Meter — Password strength meter on signup, reset, and invite
+- organizations/[id]/page.tsx
 - Stripe Production Go-Live Checklist & Runbook
-- report-narrative.ts
-- settings/layout.tsx
-- decryptSecret
-- server-actions-auth.test.ts
+- ISSUE-S1.1-Forgot-Password-Flow — Forgot password flow end to end
+- ISSUE-S1.2-Reset-Password-Link — Password reset link handling end to end
+- slack/actions.ts
+- TemplateList.tsx
 - signin-fix/00-CONTEXT.md
 - 01-diagnose-signin-request.md
 - 02-confirm-deployed-commit.md
@@ -212,7 +212,7 @@
 - 06-landing-page-honest-content.md
 - 07-single-canonical-host.md
 - BATCH E — Foundations & Polish
-- hashToken
+- isValidEmail
 - 08-signin-e2e-tests.md
 - Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)
 - 09-deploy-gate.md
@@ -224,9 +224,9 @@
 - Tokens
 - ClientForm.tsx
 - AUTH-HARDENING-MASTER-PROMPT.md
-- requirePortalSession
-- billing/plan-limits.ts
-- server-action-rbac.test.ts
+- client/projects/[id]/page.tsx
+- ISSUE-S1.3-Sign-Up-Validation-And-Email-Verify — Sign-up: server-side validation, error messages, email verification
+- logAuditEvent
 - tasks/actions.ts
 - Comprehensive Page & Route Error Audit (Prompt 54)
 - scripts
@@ -245,29 +245,29 @@
 - 09-security-recheck.md
 - 10-release-gate.md
 - release-gate/README.md
-- portal-settings.ts
-- upwork/actions.ts
+- requirePortalSession
+- ISSUE-S1.4-Sign-In-Rate-Limit-HTML-429 — Sign-in: 429 returned on HTML page loads
 - ITEM 3 — Signup Page Server-Side Validation
 - ADR NNN: [Title]
 - InviteMemberDialog.tsx
 - ADR 001: Migration to Self-Hosted PostgreSQL and Custom JWT Auth
 - Motion Guidelines
 - Data & API Architecture
-- RevenuePipelineCard.tsx
+- ISSUE-S1.5-Temp-Password-On-Invite — Invite: direct temporary password option
 - Engineering Specification: Plan Tiers, Quotas & Feature Gating
 - ThemeToggle
 - Deployment & Operations
-- revenue/page.tsx
+- ISSUE-S1.6-Invite-Acceptance-Set-Password — Invite acceptance: set password and join organization
 - Testing Strategy
-- queryCache
+- ISSUE-S1.7-Server-Action-Auth-Audit — Server actions: session and role validation audit
 - Coding Standards
 - Data & API
 - Deployment
 - Project Context
-- capture_screens.js
+- ref_fs
 - Surface Hierarchy
 - Critical Decisions & Context
-- signup.ts
+- ISSUE-S1.8-Role-Based-Access-Consistency — Role-based access: owner, admin, member, viewer, billing_manager
 - idx_org_plans_override_expires
 - INNOVENTIX-COLOR-TYPOGRAPHY-PROTOCOL.md
 - UNIVERSAL-UI-AND-ENGINEERING-PROTOCOL.md
@@ -276,7 +276,7 @@
 - Component Library
 - Testing Strategy
 - Motion Guidelines
-- features/lead-scoring.ts
+- leads/actions.ts
 - client/dashboard/page.tsx
 - ADR-002: Redirect stubs for /settings and /settings/profile
 - Agent State — Project Build Continuity Log
@@ -286,17 +286,17 @@
 - app/layout.tsx
 - 7. EACH MD FILE MUST BE SELF-CONTAINED
 - 7. EACH MD FILE MUST BE SELF-CONTAINED
-- data.ts
-- features/reply-suggestions.ts
+- ISSUE-S2.10-Invite-Role-Restrictions-UI — Invite roles: admin cannot invite admin, only owner can
+- ISSUE-S2.11-Member-Removal-Rules — Member removal: last owner protected, admin cannot remove admin
 - super-admin-isolation.test.ts
 - 51. FINAL COMPLETION REPORT
 - 51. FINAL COMPLETION REPORT
 - test-validation.ts
 - Agent State
 - Agent State
-- Theme System
-- channels/route.ts
-- weekly-summary/route.ts
+- theme-provider.tsx
+- buildInsertQuery
+- ISSUE-S2.12-Role-Change-Rules — Role change: owner-only, admin changes member and viewer
 - ADR 001: Multi-Tenant Architecture, Data Isolation & Super Admin Platform Tier
 - idx_refresh_tokens_family
 - 00-MASTER-PROMPT-v2-self-hosted.md
@@ -305,7 +305,7 @@
 - ITEM 9 — Super Admin Impersonation (Read + Write with Audit)
 - 50. FINAL PROJECT AUDIT
 - 50. FINAL PROJECT AUDIT
-- invoices/page.tsx
+- ISSUE-S2.13-Team-Workload-Project-Filter — Team workload view: filter by project
 - schemas.ts
 - super-admin/dashboard/page.tsx
 - audit-tenancy.ts
@@ -313,17 +313,17 @@
 - stripe-config-timing.test.ts
 - ITEM 15 — Password Strength Meter (Signup + Reset + Invite)
 - text.tsx
-- test-phase3-auth-api.ts
-- Coding Standards
-- MembershipRole
-- TeamWorkloadCard.tsx
+- ISSUE-S2.14-Member-Avatar-And-Profile — Team member profile: avatar upload and fields
+- crmService
+- ISSUE-S2.15-Member-Status-And-Last-Login — Team member status: active or inactive, last login
+- ISSUE-S2.1-Invite-Email-Delivery — Invite email not received
 - ITEM 5 — Direct Password Creation During Invite
-- clients/actions.ts
+- ClientsList.tsx
 - 39. IF REQUIREMENTS ARE AMBIGUOUS
 - 39. IF REQUIREMENTS ARE AMBIGUOUS
-- ITEM 12 — Email Verification End-to-End
-- ITEM 13 — MFA / TOTP Foundation (Optional but Recommended)
-- automation/history/route.ts
+- ITEM 11 — Logout Hardening
+- ISSUE-S2.2-Invite-Expiry-Message — Invite link expiry (7 days) shows the correct message
+- automationService
 - ITEM 14 — OAuth Foundation (Google + GitHub)
 - Auth & Role-Based Access Control (RBAC)
 - UNIVERSAL AI PROJECT BUILD ORCHESTRATOR
@@ -333,70 +333,125 @@
 - restore-postgres.sh
 - UNIVERSAL AI PROJECT BUILD ORCHESTRATOR
 - V2 Prompt to build system/README.md
-- transaction
+- database-layer.test.ts
 - 📝 Execution History
-- ITEM 10 — Session Timeout & Refresh Token Rotation
+- ISSUE-S2.3-Resend-Invalidates-Old-Link — Resend invite: old link must be invalidated
 - ai/client.ts
-- ITEM 11 — Logout Hardening
+- ISSUE-S2.4-Revoke-Invite-JSON-Error — Revoke invite shows raw JSON error
 - org-service.ts
-- capture-live-domain.ts
+- ISSUE-S2.5-Pending-Invites-Live-Update — Pending invites list: update without manual reload
 - Supabase → PostgreSQL Migration Guide
-- DeadlinesAndOverdueCard.tsx
-- capture-live-interactive-suite.ts
-- crmService
-- usage/route.ts
+- ISSUE-S2.6-Seat-Limits-Everywhere — Seat limits enforced on invite creation, acceptance, and direct add
+- ISSUE-S2.7-Upgrade-CTA-At-Limit — Upgrade prompt when a seat limit is reached
+- ISSUE-S2.9-Bulk-Invites — Bulk invites
+- ISSUE-S3.11-Free-Plan-Limitations — Free plan: only team size and pending invites limited
 - combined_migrations.sql
 - tailwindcss
 - Feature Comparison: Supabase vs Direct PostgreSQL
-- client/login/page.tsx
+- ISSUE-S3.12-Trial-Period-14-Day — 14-day trial implementation
+- ISSUE-S3.13-Billing-Email-Notifications — Billing emails (for example, payment failed)
+- ISSUE-S3.1-Plan-Limits-Server-Enforced — Plan limits enforced server-side (clients, projects, members, channels, AI)
+- ISSUE-S3.2-Lifetime-VIP-Grants-All-Features — Lifetime VIP access grants all features
+- ISSUE-S3.6-Billing-Portal-UI — Billing portal: UI improvements
 - Migration Strategy: Step-by-Step Execution Plan
+- ISSUE-S3.7-Invoice-History-Missing-Customer — Invoice history fails when Stripe customer ID is missing
+- ISSUE-S3.8-Upgrade-Downgrade-Proration — Upgrade and downgrade proration
 - ADR: Supabase → Direct PostgreSQL Migration
-- react
+- ISSUE-S3.9-Plan-Usage-Card-Realtime — Plan usage card updates in real time
+- ISSUE-S4.10-System-Health-Dashboard — System health dashboard
+- ISSUE-S4.11-Announcements — Global announcements to all tenants
+- ClientCommunicationsView.tsx
 - n8n Workflow Activation & Deployment Guide — Contabo VPS
 - 0034_sales_pipeline_tables.sql
+- ISSUE-S4.12-Maintenance-Mode — Maintenance mode
 - Innoventix Plan & Tier Rules
+- ISSUE-S4.2-Org-Management-Actions — Org management: list, suspend, resume, plan override, impersonate
+- ISSUE-S4.3-Global-Platform-Settings — Global settings: feature flags, AI kill switch, plan limits editing
 - 0001_init_auth_system.sql
 - Deployment Steps
+- ISSUE-S4.4-Audit-Log-Filters-And-Export — Audit log: more filters and export
+- ISSUE-S4.5-Platform-Branding — Platform logo and app name customization
 - run-load-test.ts
+- ISSUE-S4.7-Sponsored-Free-Access — Grant free or sponsored access (for example, 1-year Pro)
+- ISSUE-S4.8-User-Management-Edit-Delete — User management: edit and delete users
+- ISSUE-S5.10-Inline-Form-Validation — Inline form validation and real-time feedback
 - 05: Fixes for Antigravity (run before any other email or invite work)
 - Supabase → PostgreSQL Migration Guide
 - Dependency Audit: All Supabase References in Codebase
+- ISSUE-S5.11-Accessibility-Pass — Accessibility: keyboard, ARIA labels, contrast
+- ISSUE-S5.12-Theme-Preference-Persistence — Light and dark preference persists
+- ISSUE-S5.14-Logo-Upload-Org-And-Client — Logo upload for organizations and clients
 - 4. Tracked Action Taxonomy
 - N8N Automation Architecture & Webhook Contracts
+- ISSUE-S5.15-Favicon-Customization — Customizable favicon
+- ISSUE-S5.1-Light-Dark-Mode-Verify — Dark mode only: verify light mode toggle
 - Core Modules
 - generate_dump.js
+- ISSUE-S5.2-Responsive-Design — Responsive design across screens
+- ISSUE-S5.3-Spacing-And-Typography — Consistent spacing and typography
 - Innoventix Platform v2 — Production Deployment & Operations Runbook
+- ISSUE-S5.4-Header-Navigation-Fixes — Sidebar and topbar: active states and mobile menu
+- ISSUE-S5.5-Loading-Skeletons — Loading states and skeletons
+- ISSUE-S5.6-Empty-States — Empty states across pages
+- ISSUE-S5.7-Friendly-Error-States — User-friendly error messages instead of raw JSON
 - Team Invitation Email Rules & Architecture
 - 📸 Visual Showcase & Platform Tour
+- ISSUE-S5.8-Toast-Notifications — Global toast notification system
 - ADR 003: AI Feature Architecture, Model Provider Abstraction & Multi-Tenant Usage Governance
 - TASK 66 — Performance, Load & Multi-Tenant Scale Analysis
+- ISSUE-S5.9-Unified-Modal-Drawer — Unified modal and drawer component
 - Route Refactoring
 - Core Components
 - Server Setup
+- ISSUE-10-Client-Tags — Client tags: create, assign, filter
 - CI/CD Deployment Pipeline — Contabo VPS
 - public.domain_verifications
+- ISSUE-11-Kanban-Duplicate-Cards — Pipeline kanban creates duplicate cards on drag/move
+- ISSUE-12-Lead-Score-Rescore-Button — Lead scoring: add re-score button
+- ISSUE-13-Deal-Value-Currency — Deal value currency formatting
+- ISSUE-14-Lost-Reason-Modal — Lost reason modal when marking a deal lost
+- ISSUE-15-Customizable-Pipeline-Stages — Pipeline stages: customizable (checklist says not implemented)
 - middleware.ts
+- ISSUE-16-Client-Portal-Access — Client portal access: invite and revoke
+- ISSUE-17-Client-CSV-Import-Export — Client CSV import and export
 - idx_invitations_send_failed
 - TASK 67 — Production Environment & Secrets Deployment Checklist
+- ISSUE-19-Projects-List-Filters-Health — Projects list: filters, status badges, health indicators
+- ISSUE-20-Projects-Kanban-DnD — Projects kanban: drag-and-drop between statuses
 - 0005_projects_tasks_deliverables.sql
 - Core Topics Covered
+- ISSUE-21-Project-Detail-Tabs — Project detail: tasks, deliverables, activity log
+- ISSUE-22-Deliverables-Lifecycle — Deliverables: upload, link, approve, request revision
 - Custom Authentication Architecture
 - generate-full-dump.ts
 - 📋 The 7-Section Testing Breakdown
 - Mailcow Email Setup & Administrator Runbook
 - 0029_performance_indexes.sql
+- ISSUE-23-Project-Templates — Project templates: create, apply, manage
+- ISSUE-24-Global-Tasks-Workload — Global tasks and workload view
 - dump_project.js
 - Deployment Day
 - ADR 002: Communication Hub Architecture & Unified Inbox Data Layer
+- ISSUE-25-Task-Assignment — Task assignment to team members
 - Transactional Email Setup & Configuration (Mailcow SMTP)
 - Innoventix Sales Pipeline — Architectural Plan & Audit
+- ISSUE-26A-Task-Dependencies-Backend — Task dependencies: data model, service, and API
+- ISSUE-26B-Task-Dependencies-UI — Task dependencies: UI
+- ISSUE-27A-Gantt-Chart-Data — Gantt chart: data layer
 - rls-isolation.test.ts
 - 📜 Agent Operating Rules
 - MANDATORY RULE — Individual Commits + Push After Every Change
 - 🚀 Coolify Configuration Matrix
 - @playwright/test
+- ISSUE-27B-Gantt-Chart-UI — Gantt chart: rendering
 - 01: Test invitation emails now, using Resend SMTP (temporary)
 - 04: Coolify environment variables (innoventix-app)
+- ISSUE-28A-Time-Tracking-Backend — Time tracking: data model and API
+- ISSUE-28B-Time-Tracking-UI — Time tracking: UI
+- ISSUE-29-Project-Budget-Tracking — Project budget: track spending vs budget
+- ISSUE-30-Project-File-Attachments — Project files: attachments beyond deliverables
+- ISSUE-31-Project-Notes-Rich-Text — Project notes: rich text editor
+- ISSUE-33-Unified-Inbox — Unified inbox across channels
 - Migration Phase (Template)
 - Migration Phase (Template)
 - Migration Phase (Template)
@@ -448,6 +503,48 @@
 - Migration Phase (Template)
 - Migration Phase (Template)
 - local_proxy.py
+- ISSUE-34-Channel-Integrations — Channel integrations: Slack, WhatsApp, Email, Discord, Upwork
+- ISSUE-35-Webhook-Signature-Verification — Webhook handling: signature verification and ingestion (SECURITY PRIORITY)
+- ISSUE-36-Auto-Match-Clients — Auto-matching messages to clients by email and phone
+- ISSUE-37-Manual-Mode-Clients — Manual mode clients (no auto-sync)
+- ISSUE-38-Connected-Mode-One-Way — Connected mode: one-way transition enforcement
+- ISSUE-39-AI-Reply-Suggestions-Three-Options — AI reply suggestions: three options, human-in-the-loop
+- ISSUE-40-AI-Task-Extraction — AI task extraction from messages
+- ISSUE-41-Read-Unread-State — Read and unread message state
+- ISSUE-42-Message-Search-Full-Text — Message search: full text
+- ISSUE-43-Channel-Status-Badge — Channel status: connected and disconnected display
+- ISSUE-44-Send-Outbound-Messages — Send outbound messages via platform
+- ISSUE-45A-Attachment-Support-Backend — Attachment support: storage and send path
+- ISSUE-45B-Attachment-Support-UI — Attachment support: UI
+- ISSUE-47-Mistral-AI-Provider — Mistral AI provider integration
+- ISSUE-48-Per-Org-AI-Provider-Selection — AI provider selection per organization
+- ISSUE-49-AI-Usage-Reporting — AI usage logging and reporting
+- ISSUE-50-AI-Feature-Toggles-Per-Org — AI feature toggles per organization
+- ISSUE-51-AI-Kill-Switch — AI kill switch (super admin)
+- ISSUE-53-Reply-Suggestion-Context — Reply suggestions: better context
+- ISSUE-54-Task-Extraction-Parsing — Task extraction: parsing robustness
+- ISSUE-55-Weekly-Narrative-Customization — Weekly narrative customization
+- ISSUE-57-Per-Org-AI-Rate-Limit — AI rate limiting per organization
+- ISSUE-58A-Editable-AI-Prompts-Backend — Editable AI prompts: storage, versioning, service
+- ISSUE-58B-Editable-AI-Prompts-UI — Editable AI prompts: admin UI
+- ISSUE-7-Client-List-Search-Badges — Client list search, filters, pagination, and communication-mode badges
+- ISSUE-8-Client-Detail-Tabs — Client detail tabs (overview, projects, communications, activity)
+- ISSUE-9-Client-Communication-Log — Client communication log timeline and manual logging
+- whatsapp/actions.ts
+- projectService
+- PaginationOptions
+- Topbar.tsx
+- TASK 30 — Communication Hub — Discord & Upwork Channel Stubs
+- transaction
+- User
+- webhook/route.ts
+- team/page.tsx
+- Project Context
+- ITEM 4 — Fix Sign-In Rate Limiting (No 429 on HTML Pages)
+- settings/audit-log/page.tsx
+- 4. TESTING REQUIREMENTS (ALL BATCHES)
+- Innoventix — Triage Table
+- Innoventix — Triage Table (Batch 2: Auth, Team, Billing, Admin, UI)
 - Mailcow Email Patch (apply on top of the current invite work)
 - Innoventix Screen-by-Screen Fix Pack
 - Innoventix Team Invitations, Verification, Plans, and Stripe Test Pack
@@ -641,21 +738,21 @@
 10. `react` - 104 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Implementation Steps` --references--> `createRateLimitExceededResponse()`  [INFERRED]
-  docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md → lib/security/rate-limit.ts
-- `Step 11: Production Cookie Protocol Adaptation & JWT Secret Hardening` --references--> `getCookieSecure()`  [INFERRED]
-  MIGRATION_EXECUTION_LOG.md → lib/auth/session.ts
-- `[2026-10-12 22:05] Security Audit Review: Strict Isolation & Lifetime Decoupling` --references--> `getTenantOrgId()`  [INFERRED]
-  MIGRATION_EXECUTION_LOG.md → lib/auth/middleware.ts
-- `Files to Inspect` --references--> `withRole()`  [INFERRED]
-  docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md → lib/auth/middleware.ts
 - `3. Session Lifecycle & Token Architecture` --references--> `getCurrentSessionContext()`  [INFERRED]
   docs/engineering/AUTH-AND-RBAC.md → lib/auth/session.ts
+- `1. Current Architecture Overview` --references--> `getCurrentSessionContext()`  [INFERRED]
+  docs/pipeline-plan.md → lib/auth/session.ts
+- `2. PROJECT CONTEXT (READ FIRST)` --references--> `getCurrentSessionContext()`  [INFERRED]
+  docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md → lib/auth/session.ts
+- `Implementation Steps` --references--> `getCurrentSessionContext()`  [INFERRED]
+  docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md → lib/auth/session.ts
+- `Positive` --references--> `ingestMessage()`  [INFERRED]
+  documentation/adr/002-communication-hub.md → lib/inbox/ingest.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (670 total, 253 thin omitted)
+## Communities (767 total, 249 thin omitted)
 
 ### Community 0 - "package.json"
 Cohesion: 0.09
@@ -665,13 +762,13 @@ Nodes (21): name, private, version, autoprefixer, clsx, @dnd-kit/utilities, esli
 Cohesion: 0.11
 Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+10 more)
 
-### Community 2 - "getAuthFromRequest"
-Cohesion: 0.14
-Nodes (32): POST(), GET(), GET(), GET(), GET(), POST(), GET(), POST() (+24 more)
+### Community 2 - "next"
+Cohesion: 0.06
+Nodes (102): POST(), POST(), GET(), POST(), GET(), GET(), POST(), GET() (+94 more)
 
-### Community 3 - "verify-admin-1-e2e.ts"
-Cohesion: 0.50
-Nodes (4): BATCH_ASSETS_DIR, copyToArtifact(), envPath, verifyAdmin1E2E()
+### Community 3 - "ISSUE-S1.10-Session-Refresh-Rotation-Test — Session timeout and refresh token rotation"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 4 - "devDependencies"
 Cohesion: 0.11
@@ -695,7 +792,7 @@ Nodes (49): 10. DEPENDENCY ORDER, 11. STRICT SEQUENTIAL EXECUTION, 12. READ MD F
 
 ### Community 10 - "db/index.ts"
 Cohesion: 0.08
-Nodes (44): PlanUsageResult, initializePool(), clientRepo, invitationRepo, memberRepo, orgRepo, projectRepo, userRepo (+36 more)
+Nodes (52): GET(), AcceptInviteButton(), AcceptInviteButtonProps, InviteAcceptancePage(), PageProps, Files to Inspect, INVITATION_AUDIT_EVENTS, InvitationAuditEventType (+44 more)
 
 ### Community 12 - "getPipelineSession"
 Cohesion: 0.11
@@ -709,29 +806,29 @@ Nodes (29): Assignment — SMB Project Management Tool, Big Picture — Where Th
 Cohesion: 0.07
 Nodes (29): Assignment — SMB Project Management Tool, Big Picture — Where This Fits, clients table, deliverables table, How the System Will Work (Full Vision), Important Notes, N8N Flow 1 — Project Delivered → Invoice Trigger:, N8N Flow 2 — Task Deadline Alert: (+21 more)
 
-### Community 15 - "next"
+### Community 15 - "ISSUE-S1.11-Logout-Revoke-And-Clear-Cookies — Logout: revoke refresh token and clear cookies"
 Cohesion: 0.08
-Nodes (25): POST(), POST(), POST(), POST(), POST(), metadata, dynamic, Detailed Findings (+17 more)
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
-### Community 16 - "session.ts"
+### Community 16 - "getCurrentSessionContext"
+Cohesion: 0.06
+Nodes (66): setActiveOrgAction(), createCheckoutSession(), createCustomerPortalSession(), DELETE(), handleExitImpersonation(), POST(), CreateClientActionResult, dynamic (+58 more)
+
+### Community 17 - "lucide-react"
 Cohesion: 0.09
-Nodes (35): setActiveOrgAction(), DELETE(), handleExitImpersonation(), POST(), DashboardLayout(), dynamic, DashboardShell(), DashboardShellProps (+27 more)
+Nodes (34): ClientLoginForm(), ClientLoginPage(), deleteProjectAction(), ProjectRecord, settingsTabs, DeliverProjectConfirmModal(), DeliverProjectConfirmModalProps, EditProjectModal() (+26 more)
 
-### Community 17 - "projects/actions.ts"
-Cohesion: 0.10
-Nodes (39): createProjectAction(), CreateProjectActionResult, deleteProjectAction(), fetchProjectsAction(), ProjectRecord, updateProjectAction(), updateProjectStatusAction(), updateProjectTeamAssigneeAction() (+31 more)
-
-### Community 18 - "2026-10-14 — Correction Entry"
-Cohesion: 0.10
-Nodes (19): 2026-10-14 — Correction Entry, [2026-10-17 12:32] Batch ADMIN-1 Push & Graphify Hook Integration, Migration Execution & Audit Log, 📌 Migration Roadmap Summary, Phase / Task: BILL-3B — Super-Admin Override Grant UI (Duration Picker + Revoke + Audit), Pre-Push Deep Class Audit & Legacy Token Clean-up, Step 30: AUTH-2 — Account Creation & Access (Signup, Rate Limiting, Email Verification), Step 39: AUTH-3 Phase B — Session Lifecycle, Logout & Refresh Token Rotation (#10, #11) (+11 more)
+### Community 18 - "security/rate-limit.ts"
+Cohesion: 0.07
+Nodes (27): applyRateLimitHeaders(), RATE_LIMIT_TIERS, RateLimitOptions, RateLimitRecord, RateLimitResult, rateLimitStore, handleRateLimiting(), resolveRateLimitTier() (+19 more)
 
 ### Community 19 - "ai/actions.ts"
 Cohesion: 0.23
 Nodes (13): AIFeatureSettingsData, DEFAULT_SETTINGS, FEATURE_METADATA, FeatureUsageStats, fetchAIFeatureSettingsAction(), updateAIFeatureToggleAction(), AISettingsPage(), dynamic (+5 more)
 
 ### Community 20 - "log.ts"
-Cohesion: 0.15
-Nodes (18): AuditLogOrgView(), AuditLogOrgViewProps, dynamic, OrgAuditLogPage(), AuditLogAdminView(), AuditLogAdminViewProps, dynamic, SuperAdminAuditLogPage() (+10 more)
+Cohesion: 0.18
+Nodes (14): AuditLogOrgViewProps, AuditLogAdminView(), AuditLogAdminViewProps, dynamic, SuperAdminAuditLogPage(), AUDIT_ACTIONS, AuditActionType, AuditLogEvent (+6 more)
 
 ### Community 21 - "TASK 01 — Repository & Monorepo Foundation"
 Cohesion: 0.10
@@ -838,16 +935,16 @@ Cohesion: 0.10
 Nodes (19): Acceptance Criteria, API Requirements, Backend Requirements, Current State, Database Requirements, Dependencies, Files To Create, Files To Inspect (+11 more)
 
 ### Community 47 - "TASK 27 — Communication Hub — Slack Integration"
-Cohesion: 0.05
-Nodes (38): Acceptance Criteria, API Requirements, Backend Requirements, Current State, Database Requirements, Dependencies, Files To Create, Files To Inspect (+30 more)
-
-### Community 48 - "team/actions.ts"
 Cohesion: 0.10
-Nodes (20): dynamic, OrganizationSettingsPage(), COMMON_TIMEZONES, OrgData, OrgProfileForm(), OrgProfileFormProps, 1. Invite Entry Points in UI, 2. Existing Invitation API Routes & Server Actions (+12 more)
+Nodes (19): Acceptance Criteria, API Requirements, Backend Requirements, Current State, Database Requirements, Dependencies, Files To Create, Files To Inspect (+11 more)
+
+### Community 48 - "ISSUE-S1.12-Email-Verification-Banner — Email verification banner and confirmation"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 49 - "jwt.ts"
-Cohesion: 0.13
-Nodes (33): POST(), POST(), POST(), GET(), POST(), GET(), POST(), GET() (+25 more)
+Cohesion: 0.06
+Nodes (77): handleSignUpAction(), handleSignUpWithInviteAction(), SignUpActionResult, SignUpFieldError, SignUpInput, SignUpWithInviteInput, POST(), POST() (+69 more)
 
 ### Community 50 - "TASK 28 — Communication Hub — WhatsApp Integration"
 Cohesion: 0.10
@@ -1253,21 +1350,21 @@ Nodes (4): base64url(), generateAlphanumeric(), generateProductionSecrets(), sig
 Cohesion: 0.14
 Nodes (14): 7. Step-by-Step Manual Test Procedures, Direct n8n Test:, Manual Trigger via Curl:, Option A: Via App Cron Endpoint, Option A: Via App Cron Endpoint, Option A: Via Next.js UI, Option B: Via Direct Signed `curl`, Option B: Via Direct Signed `curl` to n8n (+6 more)
 
-### Community 151 - "lucide-react"
-Cohesion: 0.10
-Nodes (46): assignMessageClientAction(), ChannelInfo, ClientSelectItem, CreateExtractedTaskParams, ExtractTasksActionParams, fetchInboxDataAction(), FetchInboxDataResult, GenerateReplySuggestionsParams (+38 more)
+### Community 151 - "react"
+Cohesion: 0.09
+Nodes (48): assignMessageClientAction(), ChannelInfo, ClientSelectItem, CreateExtractedTaskParams, ExtractTasksActionParams, ExtractTasksActionResult, fetchInboxDataAction(), FetchInboxDataResult (+40 more)
 
-### Community 152 - "crm-service.ts"
-Cohesion: 0.22
-Nodes (8): GET(), POST(), DELETE(), GET(), PUT(), GET(), POST(), apiPlanLimitError()
+### Community 152 - "queryOne"
+Cohesion: 0.31
+Nodes (7): queryOne(), auditRepo, clientRepo, messageRepo, projectRepo, AutomationEventPayload, PlanLimits
 
-### Community 153 - "email/actions.ts"
-Cohesion: 0.33
-Nodes (10): disconnectEmailIntegrationAction(), EmailChannelConfig, getEmailIntegrationStatusAction(), saveEmailIntegrationAction(), testEmailConnectionAction(), EmailClientPage(), Props, EmailIntegrationPage() (+2 more)
+### Community 153 - "decryptSecret"
+Cohesion: 0.23
+Nodes (18): disconnectEmailIntegrationAction(), EmailChannelConfig, getEmailIntegrationStatusAction(), saveEmailIntegrationAction(), testEmailConnectionAction(), EmailClientPage(), Props, EmailIntegrationPage() (+10 more)
 
 ### Community 154 - "emitter.ts"
-Cohesion: 0.14
-Nodes (18): AlertSummary, dynamic, GET(), POST(), processDeadlineChecks(), timingSafeCheck(), emitAutomationEvent(), EVENT_WEBHOOK_PATHS (+10 more)
+Cohesion: 0.09
+Nodes (30): dynamic, POST(), AlertSummary, dynamic, GET(), POST(), processDeadlineChecks(), timingSafeCheck() (+22 more)
 
 ### Community 155 - "pipeline.ts"
 Cohesion: 0.07
@@ -1278,28 +1375,28 @@ Cohesion: 0.25
 Nodes (12): dynamic, POST(), buildSlackSystemTestBlocks(), dispatchSystemReport(), E2ESystemReport, sendSlackWebhook(), SlackBlock, SlackMessagePayload (+4 more)
 
 ### Community 157 - "TASK 29 — Communication Hub — Email Integration"
-Cohesion: 0.11
-Nodes (18): Acceptance Criteria, API Requirements, Backend Requirements, Current State, Database Requirements, Dependencies, Files To Create, Files To Inspect (+10 more)
+Cohesion: 0.10
+Nodes (19): Acceptance Criteria, API Requirements, Backend Requirements, Current State, Database Requirements, Dependencies, Files To Create, Files To Inspect (+11 more)
 
 ### Community 158 - "Innoventix Platform v2 — Multi-Tenant CRM, Project Management & AI SaaS"
 Cohesion: 0.20
 Nodes (10): 1. Clone & Setup Environment, 2. Launch Local Backend Services, 3. Install Dependencies & Start Dev Server, 📢 Automated Slack & Weekly Performance Reporting, 📚 Documentation & Infrastructure Guides, Innoventix Platform v2 — Multi-Tenant CRM, Project Management & AI SaaS, 🚀 Quick Start (Local Development), Sub-Menu Screenshot Directory (+2 more)
 
-### Community 159 - "onboarding/page.tsx"
-Cohesion: 0.16
-Nodes (13): completeOnboarding(), CompleteOnboardingInput, OnboardingPage(), ChoosePlanStep(), ChoosePlanStepProps, PLANS, InviteTeamStep(), InviteTeamStepProps (+5 more)
+### Community 159 - "server-actions-auth.test.ts"
+Cohesion: 0.09
+Nodes (22): completeOnboarding(), CompleteOnboardingInput, OnboardingPage(), ChoosePlanStep(), ChoosePlanStepProps, PLANS, InviteTeamStep(), InviteTeamStepProps (+14 more)
 
 ### Community 160 - "platform-settings.ts"
 Cohesion: 0.29
 Nodes (11): FeatureFlagsInput, OnboardingDefaultsInput, PlanUpdateInput, updateGlobalFeatureFlagsAction(), updateGlobalOnboardingDefaultsAction(), updatePlanLimitsAction(), dynamic, SuperAdminSettingsPage() (+3 more)
 
-### Community 161 - "query"
-Cohesion: 0.05
-Nodes (54): dynamic, POST(), formatInviteDate(), PlanOverrideCardProps, ENTERPRISE_FEATURES, ENTERPRISE_QUOTAS, getPlanConfig(), PlanConfig (+46 more)
+### Community 161 - "current-plan.ts"
+Cohesion: 0.07
+Nodes (41): formatInviteDate(), PlanOverrideCardProps, ENTERPRISE_FEATURES, ENTERPRISE_QUOTAS, getPlanConfig(), PlanConfig, PlanId, PLANS (+33 more)
 
-### Community 162 - "apiError"
-Cohesion: 0.17
-Nodes (22): POST(), POST(), DELETE(), GET(), PUT(), GET(), PATCH(), POST() (+14 more)
+### Community 162 - "ISSUE-S1.13A-MFA-TOTP-Backend — MFA / TOTP foundation: secrets, verification, recovery codes"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 163 - "README.md"
 Cohesion: 0.25
@@ -1314,8 +1411,8 @@ Cohesion: 0.29
 Nodes (6): 1. Service Topology & Port Allocation, 2. Server Access & User Policy, 3. Pre-Installed Runtimes & Dependencies, 4. Maintenance & Health Verification Commands, Contabo VPS Server Inventory & Infrastructure Setup, Overview
 
 ### Community 166 - "database.ts"
-Cohesion: 0.04
-Nodes (60): buildDeleteQuery(), buildInsertQuery(), buildSelectQuery(), buildUpdateQuery(), PaginationOptions, QueryResultWithCount, WhereCondition, ClientRepository (+52 more)
+Cohesion: 0.06
+Nodes (33): AiFeatureSettings, AiUsageLog, ClientPortalSettings, ClientPortalUser, ClientStatus, ClientTag, ClientTagAssignment, CommunicationLog (+25 more)
 
 ### Community 167 - "Local Development Environment Setup Guide"
 Cohesion: 0.33
@@ -1333,97 +1430,101 @@ Nodes (13): 1. Executive Summary, 2.1.1 Semantic Text Tokens (Innoventix Color P
 Cohesion: 0.09
 Nodes (22): 1. Hardcoded Sample Values Search Results, 1. "Invite Member" Route Analysis, 1. Route Handlers (`app/api`), 2. Analytics Quotas: Computed vs Hardcoded Breakdown, 2. Git Commit Hash Comparison, 3. Client Card "Connected" Badge Breakdown, 3. Server Components & Pages Querying Database Directly, `Connected` (+14 more)
 
-### Community 171 - "auth/middleware.ts"
-Cohesion: 0.18
-Nodes (14): GET(), GET(), GET(), POST(), GET(), POST(), GET(), POST() (+6 more)
+### Community 171 - "ISSUE-S1.13B-MFA-TOTP-UI — MFA / TOTP: enrollment and challenge UI"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
-### Community 176 - "OrganizationRepository"
+### Community 176 - "query"
+Cohesion: 0.05
+Nodes (61): query(), OrganizationRepository, UserRepository, OrganizationMember, OrganizationSubscription, bcryptjs, playwright, { chromium } (+53 more)
+
+### Community 177 - "data.ts"
 Cohesion: 0.04
-Nodes (66): envLocalPath, OrganizationRepository, UserRepository, Step 19: Innoventix Invite System & Seat Limits — Prompts 01 to 15 & Mailcow Patch, bcryptjs, playwright, { chromium }, path (+58 more)
+Nodes (62): checkAIAccessAction(), generateAnalyticsNarrativeAction(), AnalyticsPage(), metadata, metadata, PlanUsageAnalyticsPage(), metadata, RevenueAnalyticsPage() (+54 more)
 
-### Community 177 - "analytics/page.tsx"
-Cohesion: 0.15
-Nodes (9): AnalyticsPage(), metadata, metadata, PlanUsageAnalyticsPage(), AnalyticsHeader(), AnalyticsHeaderProps, AnalyticsNav(), PlanUsageCard() (+1 more)
+### Community 178 - "ISSUE-S1.14A-OAuth-Google-GitHub-Backend — OAuth login: provider configuration and account linking"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
-### Community 178 - "ai.ts"
+### Community 179 - "BATCH A — Auth Core Hardening"
+Cohesion: 0.18
+Nodes (11): Acceptance Criteria, Acceptance Criteria, BATCH A — Auth Core Hardening, Files to Inspect, Files to Inspect, Implementation Steps, Implementation Steps, ITEM 1 — Fix Forgot Password Flow (+3 more)
+
+### Community 180 - "notifications/actions.ts"
 Cohesion: 0.31
-Nodes (5): getAIUsageAction(), getAIProviderConfig(), buildTestPrompt(), AIChatMessage, getOrganizationAIUsageSummary()
-
-### Community 179 - "ITEM 4 — Fix Sign-In Rate Limiting (No 429 on HTML Pages)"
-Cohesion: 0.10
-Nodes (21): Acceptance Criteria, Acceptance Criteria, Acceptance Criteria, Acceptance Criteria, BATCH A — Auth Core Hardening, Files to Inspect, Files to Inspect, Files to Inspect (+13 more)
-
-### Community 180 - "getCurrentSessionContext"
-Cohesion: 0.09
-Nodes (30): createCheckoutSession(), createCustomerPortalSession(), fetchClientCommunicationsAction(), ClientCommunicationsPage(), createInAppNotificationAction(), fetchInAppNotificationsAction(), InAppNotificationRecord, markAllNotificationsAsReadAction() (+22 more)
+Nodes (7): createInAppNotificationAction(), fetchInAppNotificationsAction(), InAppNotificationRecord, markAllNotificationsAsReadAction(), markNotificationAsReadAction(), ProjectHealthStatus, NotificationPanel()
 
 ### Community 181 - "ingest.ts"
 Cohesion: 0.08
-Nodes (38): dynamic, POST(), dynamic, POST(), dynamic, POST(), dynamic, POST() (+30 more)
+Nodes (30): dynamic, POST(), dynamic, POST(), dynamic, POST(), dynamic, POST() (+22 more)
 
-### Community 182 - "theme-provider.tsx"
-Cohesion: 0.31
-Nodes (8): applyThemeToDOM(), getSystemTheme(), ResolvedTheme, ThemeContext, ThemeContextValue, ThemeProvider(), useTheme(), 1.3 State Management & Hook (`components/providers/theme-provider.tsx`)
+### Community 182 - "ISSUE-S1.14B-OAuth-Login-UI — OAuth login: buttons and linking UI"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
-### Community 183 - "invitation-service.ts"
-Cohesion: 0.06
-Nodes (38): INVITATION_AUDIT_EVENTS, InvitationAuditEventType, logInvitationAudit(), LogInvitationAuditParams, InvitationRepository, canAccept(), canResend(), canRevoke() (+30 more)
+### Community 183 - "Invitation"
+Cohesion: 0.10
+Nodes (18): InvitationRepository, canAccept(), canResend(), canRevoke(), computeStatus(), DEFAULT_INVITATION_EXPIRY_DAYS, getInvitationExpiry(), StatusEvaluationInvite (+10 more)
 
 ### Community 184 - "deal-service.ts"
 Cohesion: 0.28
 Nodes (10): SessionContext, dealRepo, pipelineRepo, canUserManage(), canUserWrite(), ServiceResult, pipelineService, needsRebalance() (+2 more)
 
-### Community 185 - "ai/types.ts"
-Cohesion: 0.28
-Nodes (7): GlobalFeatureFlags, AIFeatureType, AIGateCheckResult, AIMessageRole, AIModelConfig, AIUsageMetrics, AIUsageRecord
-
-### Community 186 - "logAuditEvent"
+### Community 185 - "ISSUE-S1.15-Password-Strength-Meter — Password strength meter on signup, reset, and invite"
 Cohesion: 0.08
-Nodes (47): overrideOrganizationPlan(), toggleSuspendOrganization(), dynamic, SuperAdminLayout(), dynamic, OrgDetailPageProps, SuperAdminOrgDetailPage(), dynamic (+39 more)
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 186 - "organizations/[id]/page.tsx"
+Cohesion: 0.10
+Nodes (29): dynamic, OrgDetailPageProps, SuperAdminOrgDetailPage(), dynamic, SuperAdminOrganizationsPage(), GrantOverrideActionInput, grantPlanOverrideAction(), revokePlanOverrideAction() (+21 more)
 
 ### Community 187 - "Stripe Production Go-Live Checklist & Runbook"
 Cohesion: 0.15
 Nodes (12): 🧪 Live Verification: $0 / Minimum Authorization Test, 🎯 Pre-Flight Checklist, 🔑 Production Environment Variables Setup, 🚨 Rollback & Emergency Contingency Plan, Step 1: Immediate Checkout Freeze, Step 2: Cancel Active Live Subscriptions (If Erroneously Billed), Step 3: Database Plan Tier Reversion, Step 4: Revert Environment Variables (+4 more)
 
-### Community 188 - "report-narrative.ts"
-Cohesion: 0.36
-Nodes (6): GenerateWeeklyNarrativeParams, GenerateWeeklyNarrativeResult, ExtractTasksResponse, buildWeeklyNarrativePrompt(), WeeklyNarrativeInput, AIProviderType
+### Community 188 - "ISSUE-S1.1-Forgot-Password-Flow — Forgot password flow end to end"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
-### Community 190 - "decryptSecret"
-Cohesion: 0.15
-Nodes (25): dynamic, POST(), disconnectSlackIntegrationAction(), getSlackIntegrationStatusAction(), saveSlackIntegrationAction(), SlackChannelConfig, testSlackConnectionAction(), metadata (+17 more)
+### Community 189 - "ISSUE-S1.2-Reset-Password-Link — Password reset link handling end to end"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
-### Community 191 - "server-actions-auth.test.ts"
-Cohesion: 0.18
-Nodes (13): dynamic, ProjectsPage(), deleteProjectTemplateAction(), fetchProjectTemplatesAction(), ProjectTemplateRecord, TemplateTaskRecord, dynamic, SettingsTemplatesPage() (+5 more)
+### Community 190 - "slack/actions.ts"
+Cohesion: 0.33
+Nodes (10): disconnectSlackIntegrationAction(), getSlackIntegrationStatusAction(), saveSlackIntegrationAction(), SlackChannelConfig, testSlackConnectionAction(), metadata, SlackIntegrationPage(), Props (+2 more)
+
+### Community 191 - "TemplateList.tsx"
+Cohesion: 0.22
+Nodes (10): deleteProjectTemplateAction(), fetchProjectTemplatesAction(), ProjectTemplateRecord, dynamic, SettingsTemplatesPage(), NewTemplateModal(), NewTemplateModalProps, TaskDraft (+2 more)
 
 ### Community 200 - "BATCH E — Foundations & Polish"
 Cohesion: 0.20
-Nodes (10): 4. TESTING REQUIREMENTS (ALL BATCHES), 5. FINAL ACCEPTANCE CHECKLIST, 6. BATCH EXECUTION SCRIPT (FOR THE USER), 7. REPORTING FORMAT (END OF EACH BATCH), 8. FINAL NOTES, BATCH E — Foundations & Polish, E2E Tests (`e2e/auth/*.spec.ts`), Integration Tests (`tests/integration/*.test.ts`) (+2 more)
+Nodes (10): 5. FINAL ACCEPTANCE CHECKLIST, 6. BATCH EXECUTION SCRIPT (FOR THE USER), 7. REPORTING FORMAT (END OF EACH BATCH), 8. FINAL NOTES, Acceptance Criteria, BATCH E — Foundations & Polish, Files to Create, Implementation Steps (+2 more)
 
-### Community 201 - "hashToken"
-Cohesion: 0.07
-Nodes (30): GET(), POST(), AcceptInviteButton(), InviteAcceptancePage(), PageProps, RFC-5321, Files to Inspect, domainVerificationRepo (+22 more)
+### Community 201 - "isValidEmail"
+Cohesion: 0.14
+Nodes (9): RFC-5321, EmailVerificationRepository, EmailVerification, isValidEmail(), normalizeEmail(), Step 20: Innoventix Invite System & Seat Limits — Prompts 16 to 26, main(), main() (+1 more)
 
 ### Community 203 - "Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)"
-Cohesion: 0.15
-Nodes (23): disconnectDiscordIntegrationAction(), DiscordChannelConfig, getDiscordIntegrationStatusAction(), saveDiscordIntegrationAction(), testDiscordConnectionAction(), DiscordClientPage(), Props, DiscordIntegrationPage() (+15 more)
+Cohesion: 0.14
+Nodes (24): disconnectDiscordIntegrationAction(), DiscordChannelConfig, getDiscordIntegrationStatusAction(), saveDiscordIntegrationAction(), testDiscordConnectionAction(), DiscordClientPage(), Props, DiscordIntegrationPage() (+16 more)
 
 ### Community 206 - "(dashboard)/dashboard/page.tsx"
-Cohesion: 0.18
-Nodes (14): DashboardPage(), dynamic, DashboardTeamWidgets(), DashboardTeamWidgetsProps, RecentInvitation, RecentMember, ROLE_ICONS, QuickActions() (+6 more)
+Cohesion: 0.09
+Nodes (32): DashboardPage(), dynamic, fetchWeeklyReportMetricsAction(), generateWeeklyReportAction(), WeeklyReportData, dynamic, metadata, ReportsPage() (+24 more)
 
 ### Community 208 - "TeamMemberList.tsx"
-Cohesion: 0.23
-Nodes (14): InviteMemberDialog(), PendingInvitation, PendingInvitationsList(), PendingInvitationsListProps, formatRelativeTime(), getMemberStatus(), MemberProfileModal(), ROLE_LABELS (+6 more)
+Cohesion: 0.25
+Nodes (13): InviteMemberDialog(), PendingInvitation, PendingInvitationsList(), PendingInvitationsListProps, formatRelativeTime(), getMemberStatus(), MemberProfileModal(), ROLE_LABELS (+5 more)
 
 ### Community 209 - "generate_jwt.js"
 Cohesion: 0.29
 Nodes (7): anonPayload, anonToken, base64url(), crypto, servicePayload, serviceToken, signJwt()
 
 ### Community 210 - "sender.ts"
-Cohesion: 0.11
-Nodes (29): EmailConfig, EmailProviderType, formatSenderAddress(), getEmailConfig(), printEmailConfigStatus(), validateEmailConfig(), ConsoleEmailProvider, EmailProvider (+21 more)
+Cohesion: 0.10
+Nodes (33): POST(), EmailConfig, EmailProviderType, formatSenderAddress(), getEmailConfig(), printEmailConfigStatus(), validateEmailConfig(), ConsoleEmailProvider (+25 more)
 
 ### Community 211 - "Tokens"
 Cohesion: 0.18
@@ -1434,24 +1535,24 @@ Cohesion: 0.19
 Nodes (10): metadata, NewClientPage(), ClientForm(), ClientFormProps, ClientFormValues, CommunicationMode, getDefaultCommunicationMode(), getModeBadgeInfo() (+2 more)
 
 ### Community 214 - "AUTH-HARDENING-MASTER-PROMPT.md"
-Cohesion: 0.25
-Nodes (7): 0. ROLE & OBJECTIVE, 1. GLOBAL RULES (APPLY TO EVERY BATCH), 2. PROJECT CONTEXT (READ FIRST), 3. BATCH PLAN, BATCH C — Roles, Impersonation, Sessions, BATCH D — Logout & Verification, 🔐 Master Prompt — Authentication & Authorization Hardening
+Cohesion: 0.17
+Nodes (11): 0. ROLE & OBJECTIVE, 1. GLOBAL RULES (APPLY TO EVERY BATCH), 2. PROJECT CONTEXT (READ FIRST), 3. BATCH PLAN, Acceptance Criteria, BATCH C — Roles, Impersonation, Sessions, Files to Inspect, Implementation Steps (+3 more)
 
-### Community 216 - "requirePortalSession"
-Cohesion: 0.32
-Nodes (8): approveDeliverable(), requestRevision(), DELIVERABLE_STATUS, PortalProjectDetailPage(), STATUS_MAP, ApprovalForm(), ApprovalFormProps, requirePortalSession()
+### Community 216 - "client/projects/[id]/page.tsx"
+Cohesion: 0.14
+Nodes (16): DerivedInvoice, deriveStatus(), InvoiceStatus, metadata, PortalInvoicesPage(), STATUS_CONFIG, approveDeliverable(), requestRevision() (+8 more)
 
-### Community 217 - "billing/plan-limits.ts"
-Cohesion: 0.27
-Nodes (12): PlanUsageCardProps, calculateMetricStatus(), checkClientLimit(), checkProjectLimit(), checkTeamMemberLimit(), FeatureLimits, getOrganizationPlanLimits(), getOrganizationPlanUsageDetails() (+4 more)
-
-### Community 218 - "server-action-rbac.test.ts"
+### Community 217 - "ISSUE-S1.3-Sign-Up-Validation-And-Email-Verify — Sign-up: server-side validation, error messages, email verification"
 Cohesion: 0.08
-Nodes (54): checkAIAccessAction(), testAICompletionAction(), generateAnalyticsNarrativeAction(), logCommunicationAction(), ClientPipelinePage(), updateClientTagsAction(), createExtractedTaskAction(), generateReplySuggestionsAction() (+46 more)
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 218 - "logAuditEvent"
+Cohesion: 0.11
+Nodes (51): testAICompletionAction(), createClientAction(), updateClientAction(), logCommunicationAction(), updateClientTagsAction(), createExtractedTaskAction(), extractTasksFromThreadAction(), generateReplySuggestionsAction() (+43 more)
 
 ### Community 219 - "tasks/actions.ts"
-Cohesion: 0.18
-Nodes (19): createGlobalTaskAction(), deleteGlobalTaskAction(), fetchAllTasksAction(), fetchTeamWorkloadAction(), GlobalTaskRecord, TeamWorkloadRecord, toggleGlobalTaskStatusAction(), updateGlobalTaskAction() (+11 more)
+Cohesion: 0.14
+Nodes (20): fetchProjectsAction(), dynamic, ProjectsKanbanPage(), dynamic, ProjectsPage(), deleteGlobalTaskAction(), fetchAllTasksAction(), fetchTeamWorkloadAction() (+12 more)
 
 ### Community 221 - "scripts"
 Cohesion: 0.20
@@ -1469,13 +1570,13 @@ Nodes (4): 1. Location of Silent Catch Block in `lib/db/auto-migrate.ts`, 2. Tra
 Cohesion: 0.31
 Nodes (6): GET(), RouteContext, calculateDealDiff(), listActivity(), recordActivity(), DealActivityType
 
-### Community 237 - "portal-settings.ts"
-Cohesion: 0.18
-Nodes (16): UpdateBillingInput, UpdateNotificationsInput, updatePortalBillingAction(), updatePortalNotificationsAction(), updatePortalProfileAction(), UpdateProfileInput, ClientPortalSettingsPage(), metadata (+8 more)
+### Community 237 - "requirePortalSession"
+Cohesion: 0.20
+Nodes (17): UpdateBillingInput, UpdateNotificationsInput, updatePortalBillingAction(), updatePortalNotificationsAction(), updatePortalProfileAction(), UpdateProfileInput, ClientPortalSettingsPage(), metadata (+9 more)
 
-### Community 238 - "upwork/actions.ts"
-Cohesion: 0.33
-Nodes (10): disconnectUpworkIntegrationAction(), getUpworkIntegrationStatusAction(), saveUpworkIntegrationAction(), testUpworkConnectionAction(), UpworkChannelConfig, metadata, UpworkIntegrationPage(), Props (+2 more)
+### Community 238 - "ISSUE-S1.4-Sign-In-Rate-Limit-HTML-429 — Sign-in: 429 returned on HTML page loads"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 239 - "ITEM 3 — Signup Page Server-Side Validation"
 Cohesion: 0.20
@@ -1501,33 +1602,33 @@ Nodes (7): 1. Principles, 2.1 Durations, 2.2 Easings, 2. Timing & Easing Scale, 
 Cohesion: 0.25
 Nodes (7): 1. Relational Database Schema Overview, 2. Multi-Tenancy Architecture, 3.1 Standard Response Shape, 3.2 Key Route Endpoints, 3. API Conventions & Standards, 4. Related Files, Data & API Architecture
 
-### Community 245 - "RevenuePipelineCard.tsx"
-Cohesion: 0.67
-Nodes (3): RevenuePipelineCard(), RevenuePipelineCardProps, RevenuePipelineStats
+### Community 245 - "ISSUE-S1.5-Temp-Password-On-Invite — Invite: direct temporary password option"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 246 - "Engineering Specification: Plan Tiers, Quotas & Feature Gating"
 Cohesion: 0.15
 Nodes (12): 1. Plan Tier Matrix & Quotas, 2.1 Unified Quota Engine: `lib/services/plan-limits.ts`, 2.2 Concurrency & Race Condition Protection, 2.3 Structured 402 Error Response, 2. Server-Side Enforcement Architecture, 3. AI Usage Accounting, 4. Database Schema Synchronization, 5.1 Architecture & Overview (+4 more)
 
 ### Community 247 - "ThemeToggle"
-Cohesion: 0.22
-Nodes (10): ChangePasswordForm(), ChangePasswordPage(), LoginForm(), LoginPage(), HomePage(), navLinks, PortalNavProps, ThemeMode (+2 more)
+Cohesion: 0.30
+Nodes (8): ChangePasswordForm(), ChangePasswordPage(), LoginForm(), LoginPage(), HomePage(), useTheme(), ThemeToggle(), ThemeToggleProps
 
 ### Community 248 - "Deployment & Operations"
 Cohesion: 0.29
 Nodes (6): 1. Environments & Endpoints, 2. Environment Variables Specification, 3. Dual-Repository & Rollout Workflow, 4. Rollback Runbook, 5. Related Files, Deployment & Operations
 
-### Community 249 - "revenue/page.tsx"
-Cohesion: 0.16
-Nodes (11): metadata, RevenueAnalyticsPage(), MonthlyTrendsChart(), RevenueBreakdownTable(), RevenueBreakdownTableProps, SortField, SortOrder, RevenueByClientChart() (+3 more)
+### Community 249 - "ISSUE-S1.6-Invite-Acceptance-Set-Password — Invite acceptance: set password and join organization"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 250 - "Testing Strategy"
 Cohesion: 0.33
 Nodes (5): 1. Testing Pyramid, 2. Coverage & Quality Targets, 3. Mandatory Testing Rules, 4. Related Files, Testing Strategy
 
-### Community 251 - "queryCache"
-Cohesion: 0.20
-Nodes (3): CacheEntry, CacheStats, queryCache
+### Community 251 - "ISSUE-S1.7-Server-Action-Auth-Audit — Server actions: session and role validation audit"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 252 - "Coding Standards"
 Cohesion: 0.33
@@ -1545,9 +1646,9 @@ Nodes (6): CI/CD, Deployment, Env Vars, Environments, Related Files, Rollback
 Cohesion: 0.33
 Nodes (6): Constraints, Key Decisions, Project Context, Purpose, Related Files, Tech Stack
 
-### Community 256 - "capture_screens.js"
-Cohesion: 0.33
-Nodes (5): fetchPage(), fs, http, path, run()
+### Community 256 - "ref_fs"
+Cohesion: 0.03
+Nodes (52): envLocalPath, fetchPage(), fs, http, path, run(), runLiveCapture(), SCREENSHOT_DIR (+44 more)
 
 ### Community 257 - "Surface Hierarchy"
 Cohesion: 0.40
@@ -1555,11 +1656,11 @@ Nodes (4): 1. Elevation & Material Scale, 2. Non-Negotiable Surface Rules, 3. Re
 
 ### Community 259 - "Critical Decisions & Context"
 Cohesion: 0.26
-Nodes (10): Critical Decisions & Context, validateAndSanitize(), ValidationResult, DANGEROUS_PROTOCOLS, escapeHtml(), HTML_ESCAPE_MAP, sanitizeObject(), sanitizeString() (+2 more)
+Nodes (9): Critical Decisions & Context, ValidationResult, DANGEROUS_PROTOCOLS, escapeHtml(), HTML_ESCAPE_MAP, sanitizeObject(), sanitizeString(), sanitizeUrl() (+1 more)
 
-### Community 260 - "signup.ts"
+### Community 260 - "ISSUE-S1.8-Role-Based-Access-Consistency — Role-based access: owner, admin, member, viewer, billing_manager"
 Cohesion: 0.08
-Nodes (40): handleSignUpAction(), handleSignUpWithInviteAction(), SignUpActionResult, SignUpFieldError, SignUpInput, SignUpWithInviteInput, POST(), POST() (+32 more)
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 262 - "INNOVENTIX-COLOR-TYPOGRAPHY-PROTOCOL.md"
 Cohesion: 0.40
@@ -1589,13 +1690,13 @@ Nodes (5): Coverage Targets, Pyramid, Related Files, Rules, Testing Strategy
 Cohesion: 0.40
 Nodes (5): Durations, Easings, Motion Guidelines, Related Files, Rules
 
-### Community 269 - "features/lead-scoring.ts"
-Cohesion: 0.32
-Nodes (6): LeadScoreFactor, parseLeadScoreResponse(), ScoreLeadParams, ScoreLeadResult, buildLeadScoringPrompt(), LeadScoringInput
+### Community 269 - "leads/actions.ts"
+Cohesion: 0.11
+Nodes (27): batchScoreLeadsAction(), PipelineStage, scoreLeadAction(), VALID_PIPELINE_STAGES, COLUMNS, KanbanBoard(), handleBatchScore(), handleConfirmLost() (+19 more)
 
 ### Community 271 - "client/dashboard/page.tsx"
-Cohesion: 0.21
-Nodes (11): metadata, PortalDashboardPage(), PortalDeliverableRow(), PortalDeliverableRowProps, STATUS_CONFIG, PortalNav(), PortalProjectCard(), PortalProjectCardProps (+3 more)
+Cohesion: 0.22
+Nodes (10): metadata, PortalDashboardPage(), PortalDeliverableRow(), PortalDeliverableRowProps, STATUS_CONFIG, PortalProjectCard(), PortalProjectCardProps, ProgressRing() (+2 more)
 
 ### Community 272 - "ADR-002: Redirect stubs for /settings and /settings/profile"
 Cohesion: 0.33
@@ -1614,8 +1715,8 @@ Cohesion: 0.11
 Nodes (19): Acceptance Criteria, API Requirements, Backend Requirements, Current State, Database Requirements, Dependencies, Files To Create, Files To Inspect (+11 more)
 
 ### Community 277 - "billing/page.tsx"
-Cohesion: 0.15
-Nodes (14): BillingSettingsPage(), dynamic, metadata, PageProps, dynamic, TeamSettingsPage(), EmailVerificationBanner(), PlanUsageCard() (+6 more)
+Cohesion: 0.20
+Nodes (10): BillingSettingsPage(), dynamic, metadata, PageProps, PlanUsageCard(), PlanUsageCardProps, PlanUsageData, BillingSettingsClient() (+2 more)
 
 ### Community 278 - "app/layout.tsx"
 Cohesion: 0.24
@@ -1629,13 +1730,13 @@ Nodes (18): 7. EACH MD FILE MUST BE SELF-CONTAINED, Acceptance criteria, API req
 Cohesion: 0.11
 Nodes (18): 7. EACH MD FILE MUST BE SELF-CONTAINED, Acceptance criteria, API requirements, Backend requirements, Context, Database requirements, Dependencies, Files to create (+10 more)
 
-### Community 281 - "data.ts"
-Cohesion: 0.17
-Nodes (12): MonthlyCompletionRateCard(), MonthlyCompletionRateCardProps, MonthlyTrendsChartProps, ProjectsByStatusChart(), ProjectsByStatusChartProps, MonthlyTrendMetric, MonthlyVelocityItem, OrganizationAnalyticsData (+4 more)
+### Community 281 - "ISSUE-S2.10-Invite-Role-Restrictions-UI — Invite roles: admin cannot invite admin, only owner can"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
-### Community 282 - "features/reply-suggestions.ts"
-Cohesion: 0.36
-Nodes (6): getReplySuggestions(), GetReplySuggestionsParams, GetReplySuggestionsResult, parseReplySuggestions(), buildReplySuggestionsPrompt(), ReplySuggestionInput
+### Community 282 - "ISSUE-S2.11-Member-Removal-Rules — Member removal: last owner protected, admin cannot remove admin"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 284 - "51. FINAL COMPLETION REPORT"
 Cohesion: 0.12
@@ -1647,7 +1748,7 @@ Nodes (16): 51. FINAL COMPLETION REPORT, API, Architecture, Authentication, Comp
 
 ### Community 286 - "test-validation.ts"
 Cohesion: 0.09
-Nodes (20): CreateClientSchema, emptyClient, emptyRevision, escaped, executableFile, invalidUuidProj, malformedEmailClient, maliciousUrl (+12 more)
+Nodes (20): FileUploadVerificationSchema, emptyClient, emptyRevision, escaped, executableFile, invalidUuidProj, malformedEmailClient, maliciousUrl (+12 more)
 
 ### Community 287 - "Agent State"
 Cohesion: 0.14
@@ -1657,17 +1758,17 @@ Nodes (13): Agent State, Architecture Decisions Made, Blockers, Completed, Defer
 Cohesion: 0.14
 Nodes (13): Agent State, Architecture Decisions Made, Blockers, Completed, Deferred, Deployment Status, In Progress, Known Bugs (+5 more)
 
-### Community 289 - "Theme System"
-Cohesion: 0.22
-Nodes (8): 1.1 Token Layer (`app/globals.css`), 1.2 Anti-Flash Pre-Paint Script (SSR), 1. Architecture, 2. Resolution Order, 3. UI Controls & Topbar Toggle, 4. Email & External Surface Rules, 5. Related Files, Theme System
+### Community 289 - "theme-provider.tsx"
+Cohesion: 0.12
+Nodes (16): applyThemeToDOM(), getSystemTheme(), ResolvedTheme, ThemeContext, ThemeContextValue, ThemeMode, ThemeProvider(), 1.1 Token Layer (`app/globals.css`) (+8 more)
 
-### Community 290 - "channels/route.ts"
-Cohesion: 0.24
-Nodes (5): GET(), POST(), communicationService, checkChannelLimit(), Step 22: BILL-1 Plan Limit Enforcement & Tier Quotas
+### Community 290 - "buildInsertQuery"
+Cohesion: 0.17
+Nodes (10): buildInsertQuery(), buildSelectQuery(), PaginationOptions, QueryResultWithCount, WhereCondition, MessageRepository, ChannelType, CommunicationChannel (+2 more)
 
-### Community 291 - "weekly-summary/route.ts"
-Cohesion: 0.43
-Nodes (6): dynamic, GET(), POST(), processWeeklySummary(), timingSafeCheck(), WeeklySummaryRunResult
+### Community 291 - "ISSUE-S2.12-Role-Change-Rules — Role change: owner-only, admin changes member and viewer"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 292 - "ADR 001: Multi-Tenant Architecture, Data Isolation & Super Admin Platform Tier"
 Cohesion: 0.17
@@ -1697,13 +1798,13 @@ Nodes (8): 50. FINAL PROJECT AUDIT, Agent Continuity, Code, Deployment, Document
 Cohesion: 0.25
 Nodes (8): 50. FINAL PROJECT AUDIT, Agent Continuity, Code, Deployment, Documentation, Functionality, GitHub, Security
 
-### Community 302 - "invoices/page.tsx"
-Cohesion: 0.33
-Nodes (6): DerivedInvoice, deriveStatus(), InvoiceStatus, metadata, PortalInvoicesPage(), STATUS_CONFIG
+### Community 302 - "ISSUE-S2.13-Team-Workload-Project-Filter — Team workload view: filter by project"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 303 - "schemas.ts"
 Cohesion: 0.08
-Nodes (23): ALLOWED_MIME_TYPES, CreateDeliverableSchema, CreateProjectSchema, CreateTaskSchema, CurrencySchema, DeliverableApprovalSchema, DeliverableRevisionSchema, EmailSchema (+15 more)
+Nodes (23): ALLOWED_MIME_TYPES, CreateClientSchema, CreateDeliverableSchema, CreateProjectSchema, CreateTaskSchema, CurrencySchema, DeliverableApprovalSchema, DeliverableRevisionSchema (+15 more)
 
 ### Community 304 - "super-admin/dashboard/page.tsx"
 Cohesion: 0.18
@@ -1719,7 +1820,7 @@ Nodes (5): 1. Plan Tiers & Feature Matrix, 2. Feature Limits JSON Schema (`subsc
 
 ### Community 310 - "stripe-config-timing.test.ts"
 Cohesion: 0.22
-Nodes (12): getProPriceId(), getStripePublishableKey(), getWebhookSecret(), resolveProPriceId(), StripeConfig, validateStripeConfig(), Phase / Task: BILL-2C — Move Stripe Config Validation from Build-Time to Request-Time, Step 31: BILL-2 — Stripe Test Mode: Checkout, Webhooks, Proration (+4 more)
+Nodes (11): getProPriceId(), getStripePublishableKey(), resolveProPriceId(), StripeConfig, validateStripeConfig(), Phase / Task: BILL-2C — Move Stripe Config Validation from Build-Time to Request-Time, Step 31: BILL-2 — Stripe Test Mode: Checkout, Webhooks, Proration, ./app/api/stripe/checkout/route.ts (+3 more)
 
 ### Community 311 - "ITEM 15 — Password Strength Meter (Signup + Reset + Invite)"
 Cohesion: 0.40
@@ -1729,25 +1830,29 @@ Nodes (5): Acceptance Criteria, Files to Create, Implementation Steps, ITEM 15 �
 Cohesion: 0.33
 Nodes (5): defaultElementMap, Text, TextProps, TextVariant, variantStyles
 
-### Community 313 - "test-phase3-auth-api.ts"
-Cohesion: 0.20
-Nodes (14): POST(), POST(), POST(), createMagicLinkToken(), hashToken(), createPasswordResetToken(), PasswordResetTokenResult, resetPassword() (+6 more)
+### Community 313 - "ISSUE-S2.14-Member-Avatar-And-Profile — Team member profile: avatar upload and fields"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
-### Community 314 - "Coding Standards"
-Cohesion: 0.29
-Nodes (5): 1. Naming Conventions, 2. Directory & Architecture Structure, 4. Forbidden Anti-Patterns, 5. Related Files, Coding Standards
+### Community 314 - "crmService"
+Cohesion: 0.09
+Nodes (12): 1. Naming Conventions, 2. Directory & Architecture Structure, 4. Forbidden Anti-Patterns, 5. Related Files, Coding Standards, buildUpdateQuery(), ClientRepository, crmService (+4 more)
 
-### Community 316 - "TeamWorkloadCard.tsx"
-Cohesion: 0.67
-Nodes (3): TeamWorkloadCard(), TeamWorkloadCardProps, TeamWorkloadMember
+### Community 315 - "ISSUE-S2.15-Member-Status-And-Last-Login — Team member status: active or inactive, last login"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 316 - "ISSUE-S2.1-Invite-Email-Delivery — Invite email not received"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 317 - "ITEM 5 — Direct Password Creation During Invite"
 Cohesion: 0.40
 Nodes (5): Acceptance Criteria, Files to Inspect, Implementation Steps, ITEM 5 — Direct Password Creation During Invite, Objective
 
-### Community 318 - "clients/actions.ts"
-Cohesion: 0.06
-Nodes (57): createClientAction(), CreateClientActionResult, deleteClientAction(), switchClientToConnectedModeAction(), updateClientAction(), updateClientNotesAction(), ClientDetailPage(), ClientsPage() (+49 more)
+### Community 318 - "ClientsList.tsx"
+Cohesion: 0.05
+Nodes (62): deleteClientAction(), switchClientToConnectedModeAction(), updateClientNotesAction(), fetchClientCommunicationsAction(), ClientCommunicationsPage(), ClientDetailPage(), ClientsPage(), metadata (+54 more)
 
 ### Community 319 - "39. IF REQUIREMENTS ARE AMBIGUOUS"
 Cohesion: 0.50
@@ -1757,17 +1862,13 @@ Nodes (4): 39. IF REQUIREMENTS ARE AMBIGUOUS, Confirmed, Needs clarification, Re
 Cohesion: 0.50
 Nodes (4): 39. IF REQUIREMENTS ARE AMBIGUOUS, Confirmed, Needs clarification, Reasonable assumption
 
-### Community 321 - "ITEM 12 — Email Verification End-to-End"
-Cohesion: 0.40
-Nodes (5): Acceptance Criteria, Files to Inspect, Implementation Steps, ITEM 12 — Email Verification End-to-End, Objective
+### Community 321 - "ITEM 11 — Logout Hardening"
+Cohesion: 0.18
+Nodes (11): Acceptance Criteria, Acceptance Criteria, BATCH D — Logout & Verification, Files to Inspect, Files to Inspect, Implementation Steps, Implementation Steps, ITEM 11 — Logout Hardening (+3 more)
 
-### Community 322 - "ITEM 13 — MFA / TOTP Foundation (Optional but Recommended)"
-Cohesion: 0.40
-Nodes (5): Acceptance Criteria, Files to Create, Implementation Steps, ITEM 13 — MFA / TOTP Foundation (Optional but Recommended), Objective
-
-### Community 323 - "automation/history/route.ts"
-Cohesion: 0.22
-Nodes (3): GET(), POST(), automationService
+### Community 322 - "ISSUE-S2.2-Invite-Expiry-Message — Invite link expiry (7 days) shows the correct message"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 324 - "ITEM 14 — OAuth Foundation (Google + GitHub)"
 Cohesion: 0.40
@@ -1777,45 +1878,53 @@ Nodes (5): Acceptance Criteria, Files to Create, Implementation Steps, ITEM 14 �
 Cohesion: 0.25
 Nodes (7): 1. Role Hierarchy, 2. Capability Matrix, 3. Session Lifecycle & Token Architecture, 4. Super Admin Impersonation, 5. Invitation Direct Temporary Password & First-Login Gate, 6. Related Files, Auth & Role-Based Access Control (RBAC)
 
-### Community 333 - "transaction"
-Cohesion: 0.11
-Nodes (17): closePool(), getPool(), transaction(), getMigrationStatus(), initializeMigrationTable(), MigrationRecord, runMigrations(), DatabaseHealth (+9 more)
+### Community 333 - "database-layer.test.ts"
+Cohesion: 0.08
+Nodes (15): CacheEntry, CacheStats, queryCache, DatabaseHealth, DatabaseMonitor, dbMonitor, PoolStats, QueryMetrics (+7 more)
 
 ### Community 334 - "📝 Execution History"
 Cohesion: 0.04
-Nodes (49): register(), [2026-10-12 21:58] Security Audit Review: Auth & Billing Hardening, [2026-10-12 22:05] Security Audit Review: Strict Isolation & Lifetime Decoupling, [2026-10-12 22:15] Security Audit Review: Refresh Fallback Removal, Script Decoupling & DB Integration Tests, [2026-10-13 01:10] Sign-In Fix Pack Prompts 06–09: Honest Landing Page, 301 Canonical Host, E2E Browser Testing & Deploy Gate, [2026-10-13 01:25] Sign-In Fix Pack Refinement: Canonical Redirect Reverse Proxy Port Stripping & E2E Env Loading, [2026-10-13 12:00] Release Gate Fix Pack: Relative /team Redirect, Allowed Hosts Guard, Boot-time Instrumentation Check & Real-DB Verification, 📝 Execution History (+41 more)
+Nodes (49): [2026-10-12 21:58] Security Audit Review: Auth & Billing Hardening, [2026-10-12 22:05] Security Audit Review: Strict Isolation & Lifetime Decoupling, [2026-10-12 22:15] Security Audit Review: Refresh Fallback Removal, Script Decoupling & DB Integration Tests, [2026-10-13 01:00] Dashboard Crash Fix: Register Embedded Migrations 0035-0044 & Defensive Query Boundaries, [2026-10-13 01:10] Sign-In Fix Pack Prompts 06–09: Honest Landing Page, 301 Canonical Host, E2E Browser Testing & Deploy Gate, [2026-10-13 01:25] Sign-In Fix Pack Refinement: Canonical Redirect Reverse Proxy Port Stripping & E2E Env Loading, 📝 Execution History, Phase 6: Deployment & Operations — Complete (+41 more)
 
-### Community 335 - "ITEM 10 — Session Timeout & Refresh Token Rotation"
-Cohesion: 0.40
-Nodes (5): Acceptance Criteria, Files to Inspect, Implementation Steps, ITEM 10 — Session Timeout & Refresh Token Rotation, Objective
+### Community 335 - "ISSUE-S2.3-Resend-Invalidates-Old-Link — Resend invite: old link must be invalidated"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 336 - "ai/client.ts"
-Cohesion: 0.33
-Nodes (11): generateAICompletion(), resolveAIProvider(), executeAnthropicCompletion(), executeGeminiCompletion(), executeMockCompletion(), executeOpenAICompletion(), AICompletionRequest, AICompletionResponse (+3 more)
+Cohesion: 0.12
+Nodes (28): getAIUsageAction(), generateAICompletion(), getAIProviderConfig(), resolveAIProvider(), getReplySuggestions(), GetReplySuggestionsParams, GetReplySuggestionsResult, parseReplySuggestions() (+20 more)
 
-### Community 337 - "ITEM 11 — Logout Hardening"
-Cohesion: 0.40
-Nodes (5): Acceptance Criteria, Files to Inspect, Implementation Steps, ITEM 11 — Logout Hardening, Objective
+### Community 337 - "ISSUE-S2.4-Revoke-Invite-JSON-Error — Revoke invite shows raw JSON error"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 338 - "org-service.ts"
-Cohesion: 0.04
-Nodes (33): 3. Approved Engineering Patterns, Actor, canChangeRole(), canInviteWithRole(), canRemoveMember(), OrgRole, PermissionResult, Target (+25 more)
+Cohesion: 0.06
+Nodes (21): 3. Approved Engineering Patterns, Actor, canChangeRole(), canRemoveMember(), PermissionResult, Target, billingService, PLAN_LIMITS_MAP (+13 more)
 
-### Community 339 - "capture-live-domain.ts"
-Cohesion: 0.67
-Nodes (3): runLiveCapture(), SCREENSHOT_DIR, snap()
+### Community 339 - "ISSUE-S2.5-Pending-Invites-Live-Update — Pending invites list: update without manual reload"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 340 - "Supabase → PostgreSQL Migration Guide"
 Cohesion: 0.07
 Nodes (28): 📚 Additional Resources, Complete 60-File Documentation Package, ⚠️ Critical Success Factors, 📊 Expected Outcomes, File Breakdown, 💾 File Contents Preview, 🚀 How to Use This Guide, 🔄 Implementation with Antigravity/DeepSeek (+20 more)
 
-### Community 341 - "DeadlinesAndOverdueCard.tsx"
-Cohesion: 0.67
-Nodes (3): DeadlinesAndOverdueCard(), DeadlinesAndOverdueCardProps, DeadlineItem
+### Community 341 - "ISSUE-S2.6-Seat-Limits-Everywhere — Seat limits enforced on invite creation, acceptance, and direct add"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
-### Community 342 - "capture-live-interactive-suite.ts"
-Cohesion: 0.67
-Nodes (3): capture(), runInteractiveSuite(), SCREENSHOT_DIR
+### Community 342 - "ISSUE-S2.7-Upgrade-CTA-At-Limit — Upgrade prompt when a seat limit is reached"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 343 - "ISSUE-S2.9-Bulk-Invites — Bulk invites"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 344 - "ISSUE-S3.11-Free-Plan-Limitations — Free plan: only team size and pending invites limited"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 345 - "combined_migrations.sql"
 Cohesion: 0.10
@@ -1825,17 +1934,57 @@ Nodes (44): idx_channels_organization_id, idx_clients_communication_mode, idx_cl
 Cohesion: 0.08
 Nodes (25): Application-Level Authorization (New), Authentication, Backup & Recovery, Cost Comparison, Current Supabase Flow, Custom JWT + Sessions (New), Development Experience, Edge Functions (+17 more)
 
+### Community 348 - "ISSUE-S3.12-Trial-Period-14-Day — 14-day trial implementation"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 349 - "ISSUE-S3.13-Billing-Email-Notifications — Billing emails (for example, payment failed)"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 350 - "ISSUE-S3.1-Plan-Limits-Server-Enforced — Plan limits enforced server-side (clients, projects, members, channels, AI)"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 351 - "ISSUE-S3.2-Lifetime-VIP-Grants-All-Features — Lifetime VIP access grants all features"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 352 - "ISSUE-S3.6-Billing-Portal-UI — Billing portal: UI improvements"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
 ### Community 353 - "Migration Strategy: Step-by-Step Execution Plan"
 Cohesion: 0.08
 Nodes (23): Day 13: Unit Tests, Day 14: Integration Tests, Day 15: Load Testing, Day 16: Contabo Setup, Day 17: Application Deployment, Day 18: Cutover & Validation, Day 1: Data Export & Backup, Day 2: Documentation (+15 more)
+
+### Community 354 - "ISSUE-S3.7-Invoice-History-Missing-Customer — Invoice history fails when Stripe customer ID is missing"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 355 - "ISSUE-S3.8-Upgrade-Downgrade-Proration — Upgrade and downgrade proration"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 356 - "ADR: Supabase → Direct PostgreSQL Migration"
 Cohesion: 0.09
 Nodes (22): ADR: Supabase → Direct PostgreSQL Migration, ✅ Advantages, Alternative Approaches Considered, Approval & Signoff, Decision, Implementation Roadmap, Implications, Layer 1: Authentication System (Days 1-2) (+14 more)
 
-### Community 360 - "react"
+### Community 357 - "ISSUE-S3.9-Plan-Usage-Card-Realtime — Plan usage card updates in real time"
 Cohesion: 0.08
-Nodes (35): CommunicationItem, ExtractTasksActionResult, extractTasksFromThreadAction(), TaskCandidateAssignee, TaskCandidateProject, AcceptInviteButtonProps, EmailVerificationBannerProps, AuditItem (+27 more)
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 358 - "ISSUE-S4.10-System-Health-Dashboard — System health dashboard"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 359 - "ISSUE-S4.11-Announcements — Global announcements to all tenants"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 360 - "ClientCommunicationsView.tsx"
+Cohesion: 0.16
+Nodes (20): CommunicationItem, TaskCandidateAssignee, TaskCandidateProject, ClientCommunicationsViewProps, CommunicationThread(), CommunicationThreadProps, CHANNEL_OPTIONS, LogCommunicationModal() (+12 more)
 
 ### Community 361 - "n8n Workflow Activation & Deployment Guide — Contabo VPS"
 Cohesion: 0.10
@@ -1845,9 +1994,21 @@ Nodes (21): 10. Troubleshooting & Common Pitfalls, 1. Overview & Architecture, 2
 Cohesion: 0.16
 Nodes (23): idx_deal_activities_deal_date, idx_deal_activities_org, idx_deal_checklist_items_chk, idx_deal_checklists_deal, idx_deal_comments_deal, idx_deals_client_id, idx_deals_org_close_date, idx_deals_org_owner (+15 more)
 
+### Community 363 - "ISSUE-S4.12-Maintenance-Mode — Maintenance mode"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
 ### Community 364 - "Innoventix Plan & Tier Rules"
 Cohesion: 0.33
 Nodes (5): 1. Core Principle: Full Platform Access on Free Tier, 2. Free Tier Limits: Team Size & Pending Invites Only, 3. Verified Business Domains (Pro+ Only), Enforcement Mechanics:, Innoventix Plan & Tier Rules
+
+### Community 365 - "ISSUE-S4.2-Org-Management-Actions — Org management: list, suspend, resume, plan override, impersonate"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 366 - "ISSUE-S4.3-Global-Platform-Settings — Global settings: feature flags, AI kill switch, plan limits editing"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 367 - "0001_init_auth_system.sql"
 Cohesion: 0.17
@@ -1857,9 +2018,29 @@ Nodes (15): idx_refresh_tokens_expires_at, idx_refresh_tokens_token_hash, idx_re
 Cohesion: 0.11
 Nodes (18): 1. Prepare Environment on Server, 2. Build and Deploy, 3. Setup Backups, 4. Setup Monitoring, 5. Verify Deployment, Access Monitoring, Application won't start, Database connection issues (+10 more)
 
+### Community 369 - "ISSUE-S4.4-Audit-Log-Filters-And-Export — Audit log: more filters and export"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 370 - "ISSUE-S4.5-Platform-Branding — Platform logo and app name customization"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
 ### Community 371 - "run-load-test.ts"
 Cohesion: 0.06
 Nodes (33): adminClient, { createClient }, env, envFile, fs, path, adminClient, anonClient (+25 more)
+
+### Community 372 - "ISSUE-S4.7-Sponsored-Free-Access — Grant free or sponsored access (for example, 1-year Pro)"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 373 - "ISSUE-S4.8-User-Management-Edit-Delete — User management: edit and delete users"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 374 - "ISSUE-S5.10-Inline-Form-Validation — Inline form validation and real-time feedback"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 375 - "05: Fixes for Antigravity (run before any other email or invite work)"
 Cohesion: 0.20
@@ -1873,6 +2054,18 @@ Nodes (17): ⚠️ Critical Decisions Already Made, 🔄 Migration Workflow (for
 Cohesion: 0.11
 Nodes (17): Add, API Routes, Authentication Files, Code Changes by Layer, Dependency Audit: All Supabase References in Codebase, Environment Variables, Estimated Impact, File-by-File Breakdown (+9 more)
 
+### Community 378 - "ISSUE-S5.11-Accessibility-Pass — Accessibility: keyboard, ARIA labels, contrast"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 379 - "ISSUE-S5.12-Theme-Preference-Persistence — Light and dark preference persists"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 380 - "ISSUE-S5.14-Logo-Upload-Org-And-Client — Logo upload for organizations and clients"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
 ### Community 381 - "4. Tracked Action Taxonomy"
 Cohesion: 0.12
 Nodes (16): 1. Executive Summary, 2. Immutability & Security Architecture, 3. Audit Log Schema, 4. Tracked Action Taxonomy, 5. Data Retention & Archival Policy, 6. Regulatory & Compliance Alignment, Append-Only Guarantee, Audit Logging & Retention Policy (+8 more)
@@ -1880,6 +2073,14 @@ Nodes (16): 1. Executive Summary, 2. Immutability & Security Architecture, 3. Au
 ### Community 382 - "N8N Automation Architecture & Webhook Contracts"
 Cohesion: 0.12
 Nodes (16): 1. Overview & Architecture, 2. HTTP Request Specification, 3. The 4 Core Automation Flows, 4. n8n Signature Verification Code Node, 5. Testing & Verification, Flow 1: Project Delivered → Invoice Trigger (`project.delivered`), Flow 2: Task Deadline Approaching (`task.deadline_approaching`), Flow 3: Project Overdue Alert (`project.overdue`) (+8 more)
+
+### Community 383 - "ISSUE-S5.15-Favicon-Customization — Customizable favicon"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 384 - "ISSUE-S5.1-Light-Dark-Mode-Verify — Dark mode only: verify light mode toggle"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 385 - "Core Modules"
 Cohesion: 0.12
@@ -1889,9 +2090,33 @@ Nodes (16): 19: Auth System Overview, 20: JWT Implementation, 21: Password Hashi
 Cohesion: 0.27
 Nodes (9): fs, generateDump(), getAllFiles(), getLevel(), IGNORED_PATHS, isIgnored(), outputFile, path (+1 more)
 
+### Community 387 - "ISSUE-S5.2-Responsive-Design — Responsive design across screens"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 388 - "ISSUE-S5.3-Spacing-And-Typography — Consistent spacing and typography"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
 ### Community 389 - "Innoventix Platform v2 — Production Deployment & Operations Runbook"
 Cohesion: 0.12
 Nodes (15): 1. Database Migrations, 1. VPS Provisioning & Initial Setup (Contabo VPS), 2. Environment Configuration, 2. Manual Backup Creation, 3. Database Restoration (Disaster Recovery), 3. Start Production Stack, 4. Performance Diagnostics, 🏗️ Architecture Overview (+7 more)
+
+### Community 390 - "ISSUE-S5.4-Header-Navigation-Fixes — Sidebar and topbar: active states and mobile menu"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 391 - "ISSUE-S5.5-Loading-Skeletons — Loading states and skeletons"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 392 - "ISSUE-S5.6-Empty-States — Empty states across pages"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 393 - "ISSUE-S5.7-Friendly-Error-States — User-friendly error messages instead of raw JSON"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 394 - "Team Invitation Email Rules & Architecture"
 Cohesion: 0.40
@@ -1901,6 +2126,10 @@ Nodes (4): 1. Sender Identity & Domain Alignment, 2. Content & Privacy Standards
 Cohesion: 0.12
 Nodes (16): 10. AI Settings & Usage Controls, 11. Security & Compliance Audit Log, 12. Billing & Subscription Management, 13. Isolated Client Portal, 14. Super Admin Platform Overview, 15. Super Admin Tenant Organizations, 1. Executive Dashboard, 2. CRM & Client Management (+8 more)
 
+### Community 396 - "ISSUE-S5.8-Toast-Notifications — Global toast notification system"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
 ### Community 397 - "ADR 003: AI Feature Architecture, Model Provider Abstraction & Multi-Tenant Usage Governance"
 Cohesion: 0.13
 Nodes (14): 1. Direct Vendor SDK Integration per Feature, 1. Provider Abstraction & Model Configuration, 2. Client-Side AI Calls via Browser SDK, 2. Dual-Tier Access Gating, 3. Centralized Prompt Repository, 3. Unified Server-Side Provider-Agnostic Layer with Dual Gating & Usage Accounting (SELECTED), 4. Usage Accounting & Cost Governance, 5. Data Minimization & Privacy (+6 more)
@@ -1908,6 +2137,10 @@ Nodes (14): 1. Direct Vendor SDK Integration per Feature, 1. Provider Abstractio
 ### Community 398 - "TASK 66 — Performance, Load & Multi-Tenant Scale Analysis"
 Cohesion: 0.13
 Nodes (14): 1. Benchmark Dataset & Target Scale, 2. Query Bottlenecks & Optimization (Before vs. After), 3. High-Concurrency Load Test Results, 4. Self-Hosted Infrastructure Resource Headroom, A. Multi-Tenant Concurrent Read Queries, B. Concurrent Multi-User Write Operations, C. Automation Deadline Check Cron Query, Capacity Planning & Contabo VPS Ceiling: (+6 more)
+
+### Community 399 - "ISSUE-S5.9-Unified-Modal-Drawer — Unified modal and drawer component"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 400 - "Route Refactoring"
 Cohesion: 0.13
@@ -1921,17 +2154,57 @@ Nodes (14): 31: Prisma Setup (or raw pg), 32: Database Client, 33: Query Builder
 Cohesion: 0.13
 Nodes (14): 51: Contabo PostgreSQL Setup, 52: Nginx Configuration, 53: Docker Compose Setup, 54: Secrets Management, 55: Coolify Deployment, 56: Backup Automation, 57: Monitoring & Alerting, 58: SSL Certificates (+6 more)
 
+### Community 403 - "ISSUE-10-Client-Tags — Client tags: create, assign, filter"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
 ### Community 404 - "CI/CD Deployment Pipeline — Contabo VPS"
 Cohesion: 0.14
 Nodes (13): 1. Overview, 2. GitHub Repository Secrets Required, 3. Server Setup on Contabo VPS, 4. Pipeline Stages & Execution, 5. Deployment Strategies & Downtime Window, 6. Staging Deployments, CI/CD Deployment Pipeline — Contabo VPS, Current Deployment Model: Fast In-Place Swap (+5 more)
+
+### Community 406 - "ISSUE-11-Kanban-Duplicate-Cards — Pipeline kanban creates duplicate cards on drag/move"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 407 - "ISSUE-12-Lead-Score-Rescore-Button — Lead scoring: add re-score button"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 408 - "ISSUE-13-Deal-Value-Currency — Deal value currency formatting"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 409 - "ISSUE-14-Lost-Reason-Modal — Lost reason modal when marking a deal lost"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 410 - "ISSUE-15-Customizable-Pipeline-Stages — Pipeline stages: customizable (checklist says not implemented)"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 411 - "middleware.ts"
 Cohesion: 0.17
 Nodes (15): EdgeTokenPayload, getJwtSecret(), getRefreshSecret(), verifyTokenEdge(), applyCorsHeaders(), CorsOptions, DEFAULT_ALLOWED_HEADERS, DEFAULT_ALLOWED_METHODS (+7 more)
 
+### Community 412 - "ISSUE-16-Client-Portal-Access — Client portal access: invite and revoke"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 413 - "ISSUE-17-Client-CSV-Import-Export — Client CSV import and export"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
 ### Community 415 - "TASK 67 — Production Environment & Secrets Deployment Checklist"
 Cohesion: 0.15
 Nodes (12): 1. Filesystem Layout on Contabo VPS, 2. Secrets Generation & Cryptography Standards, 3. Required Environment Variables Matrix, 4. Safe Provisioning Procedure on Contabo VPS, 5. Pre-Flight Verification Checklist, A. Supabase Stack (`/opt/innoventix/supabase/.env.supabase`), B. Application Container (`/opt/innoventix/app/.env.production`), Overview (+4 more)
+
+### Community 416 - "ISSUE-19-Projects-List-Filters-Health — Projects list: filters, status badges, health indicators"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 417 - "ISSUE-20-Projects-Kanban-DnD — Projects kanban: drag-and-drop between statuses"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 418 - "0005_projects_tasks_deliverables.sql"
 Cohesion: 0.23
@@ -1940,6 +2213,14 @@ Nodes (13): idx_deliverables_organization_id, idx_deliverables_project_id, idx_p
 ### Community 419 - "Core Topics Covered"
 Cohesion: 0.15
 Nodes (12): 11: package.json Updates, 12: Environment Variables, 13: PostgreSQL Setup, 14: Connection Pooling (PgBouncer), 15: Database Initialization, 16: Seed Data Import, 17: Configuration Files, 18: TypeScript Types (+4 more)
+
+### Community 420 - "ISSUE-21-Project-Detail-Tabs — Project detail: tasks, deliverables, activity log"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 421 - "ISSUE-22-Deliverables-Lifecycle — Deliverables: upload, link, approve, request revision"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 422 - "Custom Authentication Architecture"
 Cohesion: 0.17
@@ -1961,6 +2242,14 @@ Nodes (12): 1. Mailcow Mailbox Provisioning, 2. DKIM Key Generation, 3. DNS Conf
 Cohesion: 0.17
 Nodes (9): idx_clients_org_created_desc, idx_clients_org_stage_score, idx_deliverables_org_project, idx_messages_org_sent_desc, idx_messages_org_unmatched_sent, idx_projects_org_deadline, idx_projects_org_status_deadline, idx_tasks_org_status (+1 more)
 
+### Community 427 - "ISSUE-23-Project-Templates — Project templates: create, apply, manage"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 428 - "ISSUE-24-Global-Tasks-Workload — Global tasks and workload view"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
 ### Community 429 - "dump_project.js"
 Cohesion: 0.20
 Nodes (10): files, fs, getCategoryLevel(), ignoreDirs, ignoreFiles, outputFile, outStream, path (+2 more)
@@ -1973,6 +2262,10 @@ Nodes (9): 1. Final Verification (1 hour before), 2. Deployment (Production Cuto
 Cohesion: 0.20
 Nodes (9): ADR 002: Communication Hub Architecture & Unified Inbox Data Layer, Architecture & Data Flow, Consequences, Context, Decision Drivers, Negative, Positive, Schema Contract (`communication_messages`) (+1 more)
 
+### Community 432 - "ISSUE-25-Task-Assignment — Task assignment to team members"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
 ### Community 433 - "Transactional Email Setup & Configuration (Mailcow SMTP)"
 Cohesion: 0.22
 Nodes (8): 1. Environment Variables Reference, 1. SPF (Sender Policy Framework), 2. DKIM (DomainKeys Identified Mail), 2. Environment Behavior & Safety Rules, 3. DMARC, 3. Sender Name & From Address Rule, 4. DNS Configuration: SPF, DKIM, and DMARC, Transactional Email Setup & Configuration (Mailcow SMTP)
@@ -1980,6 +2273,18 @@ Nodes (8): 1. Environment Variables Reference, 1. SPF (Sender Policy Framework),
 ### Community 434 - "Innoventix Sales Pipeline — Architectural Plan & Audit"
 Cohesion: 0.22
 Nodes (8): 1. Current Architecture Overview, 2. Target Trello-Style Pipeline Architecture, 3. Files to Create / Modify, 4. Conflict & Risk Mitigation, A. Data Layer (`lib/types/pipeline.ts`, `lib/db/repositories/`), B. Business Services & API Routes (`lib/services/`, `app/api/pipeline/`), C. UI & Drag-and-Drop Layer (`components/pipeline/`, `app/leads/`, `app/pipelines/`), Innoventix Sales Pipeline — Architectural Plan & Audit
+
+### Community 435 - "ISSUE-26A-Task-Dependencies-Backend — Task dependencies: data model, service, and API"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 436 - "ISSUE-26B-Task-Dependencies-UI — Task dependencies: UI"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 437 - "ISSUE-27A-Gantt-Chart-Data — Gantt chart: data layer"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 438 - "rls-isolation.test.ts"
 Cohesion: 0.25
@@ -2001,6 +2306,10 @@ Nodes (7): 1. Required, Set in Coolify Application Settings, 2. Required, Genera
 Cohesion: 0.17
 Nodes (3): { loadEnvConfig }, { loadEnvConfig }, @playwright/test
 
+### Community 443 - "ISSUE-27B-Gantt-Chart-UI — Gantt chart: rendering"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
 ### Community 444 - "01: Test invitation emails now, using Resend SMTP (temporary)"
 Cohesion: 0.22
 Nodes (8): 01: Test invitation emails now, using Resend SMTP (temporary), A. Create the Resend key, B. Quick test without a domain (sandbox), C. Real test with your domain (needed for invites to other people), D. Values for .env.local (local) and Coolify (production), E. Send a test email, F. Test address for invitations, G. Do not use Resend for the boss demo unless the domain is verified.
@@ -2008,6 +2317,30 @@ Nodes (8): 01: Test invitation emails now, using Resend SMTP (temporary), A. Cre
 ### Community 445 - "04: Coolify environment variables (innoventix-app)"
 Cohesion: 0.22
 Nodes (8): 04: Coolify environment variables (innoventix-app), App, Email (temporary: Resend SMTP; switch to Mailcow later by changing SMTP_* only), Publishable key later, Remove from Coolify, Stripe Billing Portal, Stripe (test mode), Stripe webhook in test mode
+
+### Community 446 - "ISSUE-28A-Time-Tracking-Backend — Time tracking: data model and API"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 447 - "ISSUE-28B-Time-Tracking-UI — Time tracking: UI"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 448 - "ISSUE-29-Project-Budget-Tracking — Project budget: track spending vs budget"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 449 - "ISSUE-30-Project-File-Attachments — Project files: attachments beyond deliverables"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 450 - "ISSUE-31-Project-Notes-Rich-Text — Project notes: rich text editor"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 451 - "ISSUE-33-Unified-Inbox — Unified inbox across channels"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
 
 ### Community 452 - "Migration Phase (Template)"
 Cohesion: 0.29
@@ -2209,6 +2542,174 @@ Nodes (6): Database Schema, Implementation, Key Topics, Migration Phase (Templat
 Cohesion: 0.29
 Nodes (6): Database Schema, Implementation, Key Topics, Migration Phase (Template), Testing, Troubleshooting
 
+### Community 504 - "ISSUE-34-Channel-Integrations — Channel integrations: Slack, WhatsApp, Email, Discord, Upwork"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 506 - "ISSUE-35-Webhook-Signature-Verification — Webhook handling: signature verification and ingestion (SECURITY PRIORITY)"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 507 - "ISSUE-36-Auto-Match-Clients — Auto-matching messages to clients by email and phone"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 508 - "ISSUE-37-Manual-Mode-Clients — Manual mode clients (no auto-sync)"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 509 - "ISSUE-38-Connected-Mode-One-Way — Connected mode: one-way transition enforcement"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 510 - "ISSUE-39-AI-Reply-Suggestions-Three-Options — AI reply suggestions: three options, human-in-the-loop"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 511 - "ISSUE-40-AI-Task-Extraction — AI task extraction from messages"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 512 - "ISSUE-41-Read-Unread-State — Read and unread message state"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 513 - "ISSUE-42-Message-Search-Full-Text — Message search: full text"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 514 - "ISSUE-43-Channel-Status-Badge — Channel status: connected and disconnected display"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 515 - "ISSUE-44-Send-Outbound-Messages — Send outbound messages via platform"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 516 - "ISSUE-45A-Attachment-Support-Backend — Attachment support: storage and send path"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 517 - "ISSUE-45B-Attachment-Support-UI — Attachment support: UI"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 518 - "ISSUE-47-Mistral-AI-Provider — Mistral AI provider integration"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 519 - "ISSUE-48-Per-Org-AI-Provider-Selection — AI provider selection per organization"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 520 - "ISSUE-49-AI-Usage-Reporting — AI usage logging and reporting"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 521 - "ISSUE-50-AI-Feature-Toggles-Per-Org — AI feature toggles per organization"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 522 - "ISSUE-51-AI-Kill-Switch — AI kill switch (super admin)"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 523 - "ISSUE-53-Reply-Suggestion-Context — Reply suggestions: better context"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 524 - "ISSUE-54-Task-Extraction-Parsing — Task extraction: parsing robustness"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 525 - "ISSUE-55-Weekly-Narrative-Customization — Weekly narrative customization"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 526 - "ISSUE-57-Per-Org-AI-Rate-Limit — AI rate limiting per organization"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 527 - "ISSUE-58A-Editable-AI-Prompts-Backend — Editable AI prompts: storage, versioning, service"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 528 - "ISSUE-58B-Editable-AI-Prompts-UI — Editable AI prompts: admin UI"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 529 - "ISSUE-7-Client-List-Search-Badges — Client list search, filters, pagination, and communication-mode badges"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 530 - "ISSUE-8-Client-Detail-Tabs — Client detail tabs (overview, projects, communications, activity)"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 531 - "ISSUE-9-Client-Communication-Log — Client communication log timeline and manual logging"
+Cohesion: 0.08
+Nodes (25): 0. MANDATORY SESSION STARTUP CHECKLIST, 10. HARD RULES, 11. PHASE A STOP POINT, 12. PHASE B STOP POINT (after fixes and gates), 1. SCOPE — Files likely in play, 2. INVESTIGATION PHASE — MANDATORY, 3. FIX PHASE — ONLY AFTER APPROVAL, 4. REPRODUCTION & EVIDENCE — BEFORE/AFTER (+17 more)
+
+### Community 532 - "whatsapp/actions.ts"
+Cohesion: 0.20
+Nodes (16): dynamic, POST(), disconnectWhatsAppIntegrationAction(), getWhatsAppIntegrationStatusAction(), saveWhatsAppIntegrationAction(), testWhatsAppConnectionAction(), WhatsAppChannelConfig, metadata (+8 more)
+
+### Community 533 - "projectService"
+Cohesion: 0.14
+Nodes (4): ProjectRepository, projectService, Deliverable, Project
+
+### Community 534 - "PaginationOptions"
+Cohesion: 0.13
+Nodes (6): AuditRepository, auditService, AuditAction, AuditLog, InAppNotification, PaginationOptions
+
+### Community 535 - "Topbar.tsx"
+Cohesion: 0.17
+Nodes (13): DashboardLayout(), dynamic, DashboardShell(), DashboardShellProps, OrgSwitcher(), OrgSwitcherProps, navItems, Sidebar() (+5 more)
+
+### Community 536 - "TASK 30 — Communication Hub — Discord & Upwork Channel Stubs"
+Cohesion: 0.10
+Nodes (19): Acceptance Criteria, API Requirements, Backend Requirements, Current State, Database Requirements, Dependencies, Files To Create, Files To Inspect (+11 more)
+
+### Community 537 - "transaction"
+Cohesion: 0.15
+Nodes (15): Acceptance Criteria, Implementation Steps, ITEM 2 — Fix Password Reset Link Handling, Objective, register(), closePool(), getPool(), initializePool() (+7 more)
+
+### Community 538 - "User"
+Cohesion: 0.17
+Nodes (3): userService, User, UserRole
+
+### Community 539 - "webhook/route.ts"
+Cohesion: 0.36
+Nodes (5): dynamic, POST(), stripe, getWebhookSecret(), stripe
+
+### Community 540 - "team/page.tsx"
+Cohesion: 0.38
+Nodes (5): dynamic, TeamSettingsPage(), EmailVerificationBanner(), EmailVerificationBannerProps, MemberItem
+
+### Community 541 - "Project Context"
+Cohesion: 0.29
+Nodes (6): 1. Purpose, 2. Tech Stack, 3. Core Architectural Constraints, 4. Key Architectural Decisions, 5. Related Files, Project Context
+
+### Community 542 - "ITEM 4 — Fix Sign-In Rate Limiting (No 429 on HTML Pages)"
+Cohesion: 0.33
+Nodes (6): Acceptance Criteria, Files to Inspect, Implementation Steps, ITEM 4 — Fix Sign-In Rate Limiting (No 429 on HTML Pages), Objective, Root Cause Analysis (confirm before fixing)
+
+### Community 543 - "settings/audit-log/page.tsx"
+Cohesion: 0.60
+Nodes (4): AuditLogOrgView(), dynamic, OrgAuditLogPage(), fetchOrgAuditLogs()
+
+### Community 544 - "4. TESTING REQUIREMENTS (ALL BATCHES)"
+Cohesion: 0.40
+Nodes (5): 4. TESTING REQUIREMENTS (ALL BATCHES), E2E Tests (`e2e/auth/*.spec.ts`), Integration Tests (`tests/integration/*.test.ts`), Performance & Security Tests, Unit Tests (`tests/auth/*.test.ts`)
+
+### Community 545 - "Innoventix — Triage Table"
+Cohesion: 0.50
+Nodes (3): Innoventix — Triage Table, Recommended Sequence, Skipped (ambiguous)
+
+### Community 546 - "Innoventix — Triage Table (Batch 2: Auth, Team, Billing, Admin, UI)"
+Cohesion: 0.50
+Nodes (3): Innoventix — Triage Table (Batch 2: Auth, Team, Billing, Admin, UI), Not generated, Recommended Sequence (Batch 2)
+
 ### Community 559 - "Mailcow Email Patch (apply on top of the current invite work)"
 Cohesion: 0.33
 Nodes (5): Mailcow Email Patch (apply on top of the current invite work), Order, What you need from the company (not from me), Which original prompts this replaces, Why this setup
@@ -2327,22 +2828,22 @@ Nodes (3): 1. Prerequisites Checklist, 2. Verification Steps, Stripe Test Paymen
 
 ## Knowledge Gaps
 - **24 isolated node(s):** `autoprefixer`, `clsx`, `eslint`, `eslint-config-next`, `postcss` (+19 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 5122 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **253 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 7750 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **249 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `next` connect `next` to `package.json`, `getAuthFromRequest`, `signup.ts`, `db/index.ts`, `getPipelineSession`, `client/dashboard/page.tsx`, `session.ts`, `projects/actions.ts`, `ai/actions.ts`, `log.ts`, `billing/page.tsx`, `app/layout.tsx`, `lucide-react`, `crm-service.ts`, `email/actions.ts`, `emitter.ts`, `pipeline.ts`, `run-e2e-full-system.ts`, `middleware.ts`, `onboarding/page.tsx`, `platform-settings.ts`, `query`, `apiError`, `weekly-summary/route.ts`, `channels/route.ts`, `auth/middleware.ts`, `team/actions.ts`, `jwt.ts`, `analytics/page.tsx`, `super-admin/dashboard/page.tsx`, `getCurrentSessionContext`, `ingest.ts`, `test-phase3-auth-api.ts`, `logAuditEvent`, `TeamWorkloadCard.tsx`, `settings/layout.tsx`, `decryptSecret`, `clients/actions.ts`, `server-actions-auth.test.ts`, `automation/history/route.ts`, `hashToken`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `(dashboard)/dashboard/page.tsx`, `TeamMemberList.tsx`, `org-service.ts`, `ClientForm.tsx`, `DeadlinesAndOverdueCard.tsx`, `crmService`, `usage/route.ts`, `requirePortalSession`, `server-action-rbac.test.ts`, `tasks/actions.ts`, `client/login/page.tsx`, `billing/plan-limits.ts`, `activity/route.ts`, `react`, `portal-settings.ts`, `upwork/actions.ts`, `InviteMemberDialog.tsx`, `ThemeToggle`, `revenue/page.tsx`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
+- **Why does `next` connect `next` to `package.json`, `db/index.ts`, `getPipelineSession`, `leads/actions.ts`, `client/dashboard/page.tsx`, `getCurrentSessionContext`, `lucide-react`, `security/rate-limit.ts`, `ai/actions.ts`, `whatsapp/actions.ts`, `billing/page.tsx`, `app/layout.tsx`, `react`, `Topbar.tsx`, `decryptSecret`, `emitter.ts`, `webhook/route.ts`, `run-e2e-full-system.ts`, `pipeline.ts`, `team/page.tsx`, `server-actions-auth.test.ts`, `platform-settings.ts`, `settings/audit-log/page.tsx`, `current-plan.ts`, `middleware.ts`, `super-admin/dashboard/page.tsx`, `jwt.ts`, `data.ts`, `notifications/actions.ts`, `ingest.ts`, `organizations/[id]/page.tsx`, `ClientsList.tsx`, `slack/actions.ts`, `TemplateList.tsx`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `(dashboard)/dashboard/page.tsx`, `TeamMemberList.tsx`, `sender.ts`, `ClientForm.tsx`, `client/projects/[id]/page.tsx`, `logAuditEvent`, `tasks/actions.ts`, `activity/route.ts`, `ClientCommunicationsView.tsx`, `requirePortalSession`, `InviteMemberDialog.tsx`, `ThemeToggle`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `query()` (e.g. with `Step 9: Coolify Deployment Fix — Complete Supabase Elimination & Edge JWT Auth` and `communication-mode.test.ts`) actually correct?**
   _`query()` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `autoprefixer`, `clsx`, `eslint` to the rest of the system?**
   _24 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `package.json` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
-- **Why does `query()` connect `query` to `signup.ts`, `db/index.ts`, `getPipelineSession`, `features/lead-scoring.ts`, `client/dashboard/page.tsx`, `session.ts`, `projects/actions.ts`, `ai/actions.ts`, `log.ts`, `billing/page.tsx`, `lucide-react`, `crm-service.ts`, `email/actions.ts`, `emitter.ts`, `data.ts`, `pipeline.ts`, `onboarding/page.tsx`, `platform-settings.ts`, `channels/route.ts`, `weekly-summary/route.ts`, `database.ts`, `auth/middleware.ts`, `invoices/page.tsx`, `super-admin/dashboard/page.tsx`, `jwt.ts`, `team/actions.ts`, `OrganizationRepository`, `getCurrentSessionContext`, `ingest.ts`, `invitation-service.ts`, `deal-service.ts`, `test-phase3-auth-api.ts`, `logAuditEvent`, `MembershipRole`, `clients/actions.ts`, `decryptSecret`, `server-actions-auth.test.ts`, `automation/history/route.ts`, `hashToken`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `transaction`, `(dashboard)/dashboard/page.tsx`, `ai/client.ts`, `org-service.ts`, `sender.ts`, `crmService`, `requirePortalSession`, `server-action-rbac.test.ts`, `tasks/actions.ts`, `activity/route.ts`, `portal-settings.ts`, `upwork/actions.ts`?**
-  _High betweenness centrality (0.041) - this node is a cross-community bridge._
+- **Why does `query()` connect `query` to `ref_fs`, `next`, `db/index.ts`, `getPipelineSession`, `leads/actions.ts`, `client/dashboard/page.tsx`, `getCurrentSessionContext`, `lucide-react`, `ai/actions.ts`, `whatsapp/actions.ts`, `log.ts`, `PaginationOptions`, `react`, `queryOne`, `decryptSecret`, `emitter.ts`, `webhook/route.ts`, `team/page.tsx`, `transaction`, `pipeline.ts`, `server-actions-auth.test.ts`, `platform-settings.ts`, `current-plan.ts`, `buildInsertQuery`, `User`, `database.ts`, `super-admin/dashboard/page.tsx`, `jwt.ts`, `data.ts`, `notifications/actions.ts`, `ingest.ts`, `Invitation`, `deal-service.ts`, `organizations/[id]/page.tsx`, `crmService`, `ClientsList.tsx`, `slack/actions.ts`, `TemplateList.tsx`, `automationService`, `isValidEmail`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `database-layer.test.ts`, `(dashboard)/dashboard/page.tsx`, `📝 Execution History`, `ai/client.ts`, `org-service.ts`, `sender.ts`, `client/projects/[id]/page.tsx`, `logAuditEvent`, `tasks/actions.ts`, `activity/route.ts`, `requirePortalSession`, `projectService`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Are the 8 inferred relationships involving `getCurrentSessionContext()` (e.g. with `3. Session Lifecycle & Token Architecture` and `1. Current Architecture Overview`) actually correct?**
   _`getCurrentSessionContext()` has 8 INFERRED edges - model-reasoned connections that need verification._
 - **Should `compilerOptions` be split into smaller, more focused modules?**
