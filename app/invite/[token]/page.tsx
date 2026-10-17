@@ -6,6 +6,7 @@ import { hashToken } from '@/lib/security/invite-token'
 import { invitationRepo } from '@/lib/db/repositories/invitation-repo'
 import { Users, AlertTriangle, ArrowRight, ShieldCheck, Mail, LogOut, CheckCircle2 } from 'lucide-react'
 import { AcceptInviteButton } from './AcceptInviteButton'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 interface PageProps {
   params: Promise<{ token: string }> | { token: string }
@@ -23,30 +24,33 @@ export default async function InviteAcceptancePage({ params }: PageProps) {
   if (!acceptInfoRes.success) {
     const isExpired = acceptInfoRes.error === 'expired'
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 text-slate-100 relative">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 text-slate-900 dark:text-slate-100 relative transition-colors duration-150">
+        <div className="fixed top-5 right-5 z-50">
+          <ThemeToggle />
+        </div>
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-8 shadow-2xl text-center space-y-4">
+          <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl text-center space-y-4">
             <div
               className={`w-12 h-12 rounded-2xl ${
                 isExpired
-                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-                  : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
+                  : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'
               } border flex items-center justify-center mx-auto`}
             >
               <AlertTriangle className="w-6 h-6" />
             </div>
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
               {isExpired ? 'This Invitation Has Expired' : 'Invitation Unavailable'}
             </h2>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               {isExpired
                 ? 'This invitation link has expired. Workspace invitations are valid for 7 days. Please contact your workspace administrator to request a new invitation.'
                 : 'This invitation is invalid or has been revoked. Please contact your workspace administrator to request a new invitation.'}
             </p>
-            <div className="pt-4 border-t border-slate-800 space-y-2">
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center gap-2 w-full rounded-xl bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-700 transition"
+                className="inline-flex items-center justify-center gap-2 w-full rounded-xl bg-slate-900 dark:bg-slate-800 px-4 py-2.5 text-xs font-bold text-white dark:text-slate-200 hover:bg-slate-800 dark:hover:bg-slate-700 transition"
               >
                 Sign in to your account
                 <ArrowRight className="w-4 h-4" />
@@ -68,7 +72,10 @@ export default async function InviteAcceptancePage({ params }: PageProps) {
   const isWrongAccount = loggedInEmail && loggedInEmail !== targetEmail
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 text-slate-100 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 text-slate-900 dark:text-slate-100 relative overflow-hidden transition-colors duration-150">
+      <div className="fixed top-5 right-5 z-50">
+        <ThemeToggle />
+      </div>
       {/* Background ambient glow */}
       <div className="absolute top-1/4 right-1/2 translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/15 blur-3xl rounded-full pointer-events-none" />
 
@@ -77,24 +84,24 @@ export default async function InviteAcceptancePage({ params }: PageProps) {
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/30">
             IX
           </div>
-          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
+          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 dark:from-white dark:via-slate-200 dark:to-slate-400">
             Innoventix Platform
           </span>
         </div>
 
-        <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-8 shadow-2xl backdrop-blur-xl space-y-6">
+        <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-8 shadow-2xl backdrop-blur-xl space-y-6">
           {/* Header */}
           <div className="text-center space-y-1.5">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/10 px-3 py-1 text-[11px] font-bold text-sky-400 border border-sky-500/20">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/10 px-3 py-1 text-[11px] font-bold text-sky-600 dark:text-sky-400 border border-sky-500/20">
               <Users className="w-3.5 h-3.5" />
               Team Invitation
             </span>
-            <h2 className="text-2xl font-black text-white pt-2">
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white pt-2">
               Join {acceptInfoRes.organizationName}
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-600 dark:text-slate-400">
               You have been invited to join this workspace as a{' '}
-              <span className="font-semibold text-white uppercase font-mono">{acceptInfoRes.role}</span>.
+              <span className="font-semibold text-slate-900 dark:text-white uppercase font-mono">{acceptInfoRes.role}</span>.
             </p>
           </div>
 
@@ -127,14 +134,14 @@ export default async function InviteAcceptancePage({ params }: PageProps) {
           ) : isRightAccount ? (
             /* STATE 3: Signed in with the right email */
             <div className="space-y-4 pt-2">
-              <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-xs space-y-2">
-                <div className="flex items-center justify-between text-slate-400">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 p-4 text-xs space-y-2">
+                <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
                   <span>Signed in as:</span>
-                  <span className="font-mono text-white font-medium">{session?.user?.email}</span>
+                  <span className="font-mono text-slate-900 dark:text-white font-medium">{session?.user?.email}</span>
                 </div>
-                <div className="flex items-center justify-between text-slate-400">
+                <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
                   <span>Assigned Role:</span>
-                  <span className="rounded bg-sky-500/20 text-sky-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                  <span className="rounded bg-sky-500/20 text-sky-600 dark:text-sky-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
                     {acceptInfoRes.role}
                   </span>
                 </div>
@@ -145,9 +152,9 @@ export default async function InviteAcceptancePage({ params }: PageProps) {
           ) : (
             /* STATE 2: Needs account / Not signed in */
             <div className="space-y-4 pt-2">
-              <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-slate-400 space-y-1">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 p-4 text-xs text-slate-500 dark:text-slate-400 space-y-1">
                 <div>Invited Recipient:</div>
-                <div className="font-mono text-white font-semibold text-sm">
+                <div className="font-mono text-slate-900 dark:text-white font-semibold text-sm">
                   {acceptInfoRes.maskedEmail}
                 </div>
               </div>
