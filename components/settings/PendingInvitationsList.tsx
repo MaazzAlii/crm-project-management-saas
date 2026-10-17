@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
+import { extractApiError } from '@/lib/utils/api-error'
 import {
   Mail,
   RefreshCw,
@@ -62,6 +64,11 @@ export function PendingInvitationsList({
   const [copyingId, setCopyingId] = useState<string | null>(null)
   const [copiedLinks, setCopiedLinks] = useState<Record<string, string>>({})
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const canManage =
     currentUserRole === 'owner' || currentUserRole === 'admin' || isSuperAdmin
@@ -167,7 +174,7 @@ export function PendingInvitationsList({
         console.error('[RESEND_INVITATION_ERROR] Server returned non-JSON:', raw)
       }
       if (!res.ok) {
-        throw new Error(data.error || data.message || `Failed to resend invitation (status ${res.status})`)
+        throw new Error(extractApiError(data, `Failed to resend invitation (status ${res.status})`))
       }
       setFeedback({
         type: 'success',
@@ -205,14 +212,13 @@ export function PendingInvitationsList({
         console.error('[REVOKE_INVITATION_ERROR] Server returned non-JSON:', raw)
       }
       if (!res.ok) {
-        throw new Error(data.error || data.message || `Failed to revoke invitation (status ${res.status})`)
+        throw new Error(extractApiError(data, `Failed to revoke invitation (status ${res.status})`))
       }
       setInvitations((prev) => prev.filter((i) => i.id !== invitationToRevoke.id))
       setFeedback({
         type: 'success',
         text: 'Invitation revoked',
       })
-      setInvitationToRevoke(null)
       if (onInviteRevoked) onInviteRevoked()
     } catch (err: any) {
       console.error('[REVOKE_INVITATION_EXCEPTION]:', err)
@@ -222,6 +228,7 @@ export function PendingInvitationsList({
       })
     } finally {
       setRevoking(false)
+      setInvitationToRevoke(null)
     }
   }
 
@@ -262,7 +269,7 @@ export function PendingInvitationsList({
         console.error('[REGENERATE_LINK_ERROR] Server returned non-JSON:', raw)
       }
       if (!res.ok) {
-        throw new Error(data.error || data.message || `Failed to regenerate invite link (status ${res.status})`)
+        throw new Error(extractApiError(data, `Failed to regenerate invite link (status ${res.status})`))
       }
       const newLink = data.data?.inviteLink || data.inviteLink
       if (newLink) {
@@ -477,7 +484,7 @@ export function PendingInvitationsList({
       )}
 
       {/* Revoke Confirmation Dialog */}
-      {invitationToRevoke && (
+      {invitationToRevoke && mounted && createPortal(
         <div
           data-testid="revoke-invite-modal"
           className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-overlay)] p-4 backdrop-blur-sm animate-in fade-in"
@@ -513,7 +520,8 @@ export function PendingInvitationsList({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
