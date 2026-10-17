@@ -130,19 +130,20 @@ async function verifyAdmin1E2E() {
     const impersonatedTenantToken = generateAccessToken({
       userId: tenantUserId,
       email: 'innoventixhub@gmail.com',
-      role: 'owner',
+      role: 'org_admin',
       orgId: tenantOrgId,
     });
 
     const originToken = signOriginToken({
       superAdminId: superAdminUserId,
+      superAdminEmail: 'superadmin@innoventix.com',
       impersonatedUserId: tenantUserId,
       impersonatedOrgId: tenantOrgId,
       impersonatedOrgName: 'Innoventix Hub',
       impersonatedUserName: 'Innoventix Enterprise Admin',
       impersonatedUserEmail: 'innoventixhub@gmail.com',
-      startedAt: Date.now(),
-      expiresAt: Date.now() + 3600_000,
+      startedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 3600_000).toISOString(),
     });
 
     // -------------------------------------------------------------
