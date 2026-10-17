@@ -3564,9 +3564,9 @@
     "semantic_hash": ""
   },
   "scripts/generate-full-dump.ts": {
-    "mtime": 1791879740.9825099,
-    "seen": 1791879850.915715,
-    "ast_hash": "94415d156805cbaabb821c18118a9518",
+    "mtime": 1792224865.1492445,
+    "seen": 1792224907.0312536,
+    "ast_hash": "19570b88281ad8844869e6ef90686ad8",
     "semantic_hash": ""
   },
   "scripts/generate-production-secrets.ts": {

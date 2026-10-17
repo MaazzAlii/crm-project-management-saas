@@ -1,7 +1,7 @@
 # Graph Report - 91-crm-project-management-saas  (2026-10-17)
 
 ## Corpus Check
-- 1112 files · ~2,282,725 words
+- 1112 files · ~2,282,730 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 18 file(s) not represented in the graph (top: .conf 7, (none) 5, .example 4)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `43b37b26`
+- Built from commit: `cbfa2791`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -641,16 +641,16 @@
 10. `react` - 104 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Step 11: Production Auto-Migration, Lifetime VIP Access & Admin Bootstrap` --references--> `bootstrapAdminUser()`  [INFERRED]
-  MIGRATION_EXECUTION_LOG.md → lib/db/auto-migrate.ts
+- `Implementation Steps` --references--> `createRateLimitExceededResponse()`  [INFERRED]
+  docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md → lib/security/rate-limit.ts
 - `Step 11: Production Cookie Protocol Adaptation & JWT Secret Hardening` --references--> `getCookieSecure()`  [INFERRED]
   MIGRATION_EXECUTION_LOG.md → lib/auth/session.ts
-- `[2026-10-12 21:58] Security Audit Review: Auth & Billing Hardening` --references--> `getAuthFromRequest()`  [INFERRED]
-  MIGRATION_EXECUTION_LOG.md → lib/auth/middleware.ts
 - `[2026-10-12 22:05] Security Audit Review: Strict Isolation & Lifetime Decoupling` --references--> `getTenantOrgId()`  [INFERRED]
   MIGRATION_EXECUTION_LOG.md → lib/auth/middleware.ts
-- `[2026-10-12 22:15] Security Audit Review: Refresh Fallback Removal, Script Decoupling & DB Integration Tests` --references--> `getAuthFromRequest()`  [INFERRED]
-  MIGRATION_EXECUTION_LOG.md → lib/auth/middleware.ts
+- `Files to Inspect` --references--> `withRole()`  [INFERRED]
+  docs/prompts/AUTH-HARDENING-MASTER-PROMPT.md → lib/auth/middleware.ts
+- `3. Session Lifecycle & Token Architecture` --references--> `getCurrentSessionContext()`  [INFERRED]
+  docs/engineering/AUTH-AND-RBAC.md → lib/auth/session.ts
 
 ## Import Cycles
 - None detected.
@@ -2333,16 +2333,16 @@ Nodes (3): 1. Prerequisites Checklist, 2. Verification Steps, Stripe Test Paymen
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `query()` connect `query` to `signup.ts`, `db/index.ts`, `getPipelineSession`, `features/lead-scoring.ts`, `client/dashboard/page.tsx`, `session.ts`, `projects/actions.ts`, `ai/actions.ts`, `log.ts`, `billing/page.tsx`, `lucide-react`, `crm-service.ts`, `email/actions.ts`, `emitter.ts`, `data.ts`, `pipeline.ts`, `onboarding/page.tsx`, `platform-settings.ts`, `channels/route.ts`, `weekly-summary/route.ts`, `database.ts`, `auth/middleware.ts`, `invoices/page.tsx`, `super-admin/dashboard/page.tsx`, `jwt.ts`, `team/actions.ts`, `OrganizationRepository`, `getCurrentSessionContext`, `ingest.ts`, `invitation-service.ts`, `deal-service.ts`, `test-phase3-auth-api.ts`, `logAuditEvent`, `MembershipRole`, `clients/actions.ts`, `decryptSecret`, `server-actions-auth.test.ts`, `automation/history/route.ts`, `hashToken`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `transaction`, `(dashboard)/dashboard/page.tsx`, `ai/client.ts`, `org-service.ts`, `sender.ts`, `crmService`, `requirePortalSession`, `server-action-rbac.test.ts`, `tasks/actions.ts`, `activity/route.ts`, `portal-settings.ts`, `upwork/actions.ts`?**
-  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+- **Why does `next` connect `next` to `package.json`, `getAuthFromRequest`, `signup.ts`, `db/index.ts`, `getPipelineSession`, `client/dashboard/page.tsx`, `session.ts`, `projects/actions.ts`, `ai/actions.ts`, `log.ts`, `billing/page.tsx`, `app/layout.tsx`, `lucide-react`, `crm-service.ts`, `email/actions.ts`, `emitter.ts`, `pipeline.ts`, `run-e2e-full-system.ts`, `middleware.ts`, `onboarding/page.tsx`, `platform-settings.ts`, `query`, `apiError`, `weekly-summary/route.ts`, `channels/route.ts`, `auth/middleware.ts`, `team/actions.ts`, `jwt.ts`, `analytics/page.tsx`, `super-admin/dashboard/page.tsx`, `getCurrentSessionContext`, `ingest.ts`, `test-phase3-auth-api.ts`, `logAuditEvent`, `TeamWorkloadCard.tsx`, `settings/layout.tsx`, `decryptSecret`, `clients/actions.ts`, `server-actions-auth.test.ts`, `automation/history/route.ts`, `hashToken`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `(dashboard)/dashboard/page.tsx`, `TeamMemberList.tsx`, `org-service.ts`, `ClientForm.tsx`, `DeadlinesAndOverdueCard.tsx`, `crmService`, `usage/route.ts`, `requirePortalSession`, `server-action-rbac.test.ts`, `tasks/actions.ts`, `client/login/page.tsx`, `billing/plan-limits.ts`, `activity/route.ts`, `react`, `portal-settings.ts`, `upwork/actions.ts`, `InviteMemberDialog.tsx`, `ThemeToggle`, `revenue/page.tsx`?**
+  _High betweenness centrality (0.044) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `query()` (e.g. with `Step 9: Coolify Deployment Fix — Complete Supabase Elimination & Edge JWT Auth` and `communication-mode.test.ts`) actually correct?**
   _`query()` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `autoprefixer`, `clsx`, `eslint` to the rest of the system?**
   _24 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `package.json` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
-- **Why does `next` connect `next` to `package.json`, `getAuthFromRequest`, `signup.ts`, `db/index.ts`, `getPipelineSession`, `client/dashboard/page.tsx`, `session.ts`, `projects/actions.ts`, `ai/actions.ts`, `log.ts`, `billing/page.tsx`, `app/layout.tsx`, `lucide-react`, `crm-service.ts`, `email/actions.ts`, `emitter.ts`, `pipeline.ts`, `run-e2e-full-system.ts`, `middleware.ts`, `onboarding/page.tsx`, `platform-settings.ts`, `query`, `apiError`, `weekly-summary/route.ts`, `channels/route.ts`, `auth/middleware.ts`, `team/actions.ts`, `jwt.ts`, `analytics/page.tsx`, `super-admin/dashboard/page.tsx`, `getCurrentSessionContext`, `ingest.ts`, `test-phase3-auth-api.ts`, `logAuditEvent`, `TeamWorkloadCard.tsx`, `settings/layout.tsx`, `decryptSecret`, `clients/actions.ts`, `server-actions-auth.test.ts`, `automation/history/route.ts`, `hashToken`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `(dashboard)/dashboard/page.tsx`, `TeamMemberList.tsx`, `org-service.ts`, `ClientForm.tsx`, `DeadlinesAndOverdueCard.tsx`, `crmService`, `usage/route.ts`, `requirePortalSession`, `server-action-rbac.test.ts`, `tasks/actions.ts`, `client/login/page.tsx`, `billing/plan-limits.ts`, `activity/route.ts`, `react`, `portal-settings.ts`, `upwork/actions.ts`, `InviteMemberDialog.tsx`, `ThemeToggle`, `revenue/page.tsx`?**
-  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+- **Why does `query()` connect `query` to `signup.ts`, `db/index.ts`, `getPipelineSession`, `features/lead-scoring.ts`, `client/dashboard/page.tsx`, `session.ts`, `projects/actions.ts`, `ai/actions.ts`, `log.ts`, `billing/page.tsx`, `lucide-react`, `crm-service.ts`, `email/actions.ts`, `emitter.ts`, `data.ts`, `pipeline.ts`, `onboarding/page.tsx`, `platform-settings.ts`, `channels/route.ts`, `weekly-summary/route.ts`, `database.ts`, `auth/middleware.ts`, `invoices/page.tsx`, `super-admin/dashboard/page.tsx`, `jwt.ts`, `team/actions.ts`, `OrganizationRepository`, `getCurrentSessionContext`, `ingest.ts`, `invitation-service.ts`, `deal-service.ts`, `test-phase3-auth-api.ts`, `logAuditEvent`, `MembershipRole`, `clients/actions.ts`, `decryptSecret`, `server-actions-auth.test.ts`, `automation/history/route.ts`, `hashToken`, `Step 28: Auth Hardening — Batch A Conclusion: Item 7 (Server Actions Auth & Role Guards)`, `transaction`, `(dashboard)/dashboard/page.tsx`, `ai/client.ts`, `org-service.ts`, `sender.ts`, `crmService`, `requirePortalSession`, `server-action-rbac.test.ts`, `tasks/actions.ts`, `activity/route.ts`, `portal-settings.ts`, `upwork/actions.ts`?**
+  _High betweenness centrality (0.041) - this node is a cross-community bridge._
 - **Are the 8 inferred relationships involving `getCurrentSessionContext()` (e.g. with `3. Session Lifecycle & Token Architecture` and `1. Current Architecture Overview`) actually correct?**
   _`getCurrentSessionContext()` has 8 INFERRED edges - model-reasoned connections that need verification._
 - **Should `compilerOptions` be split into smaller, more focused modules?**
