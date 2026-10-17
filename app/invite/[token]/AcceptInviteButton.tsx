@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { extractApiError } from '@/lib/utils/api-error'
 
 interface AcceptInviteButtonProps {
   token: string
@@ -28,7 +29,7 @@ export function AcceptInviteButton({ token }: AcceptInviteButtonProps) {
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.message || data.error || 'Failed to accept invitation')
+        throw new Error(extractApiError(data, 'Failed to accept invitation'))
       }
 
       setSuccess(true)
