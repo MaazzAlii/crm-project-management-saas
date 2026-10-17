@@ -3959,6 +3959,34 @@ paste at the start of every batch report.
   - `npm test`: 90 test files, 761/761 tests passing (100%).
   - Both remotes up-to-date and in sync.
 
+---
+
+### [2026-10-17 13:45] Prompt Suite Ingestion, Type Hardening & ISSUE-S1.4 Verification
+- **Phase / Task ID**: PROMPTS-BATCH2-INGESTION & ISSUE-S1.4
+- **Action Performed**:
+  1. Ingested and committed all 116 prompt specification files individually (`innoventix-prompts/` and `innoventix-prompts-batch2/`).
+  2. Updated full project dump generator to strictly omit all `env.local` variants and secrets.
+  3. Hardened TypeScript types across `scripts/verify-admin-1-e2e.ts` and `tests/admin/admin-impersonation.test.ts` (0 errors on `npx tsc --noEmit`).
+  4. Executed Phase A investigation for `ISSUE-S1.4` (Sign-in rate limiting scoped to API only). Verified that HTML routes (`/login`, `/sign-in`) are never rate limited, while credentials API route (`/api/auth/login`) maintains brute force rate limiting with in-form countdown timer.
+  5. Implemented comprehensive regression test suite in `tests/issue-s1.4-sign-in-rate-limit-html-429.test.ts` (+7 tests).
+  6. Rebuilt and synchronized Graphify knowledge graph (10,754 nodes, 17,197 edges, 767 communities).
+  7. Dual-repository push executed to `origin/main` and `deploy/main` per explicit user approval.
+- **Files Modified / Created**:
+  - `innoventix-prompts/*` (53 files created)
+  - `innoventix-prompts-batch2/*` (63 files created)
+  - `scripts/generate-full-dump.ts` (updated)
+  - `scripts/verify-admin-1-e2e.ts` (updated)
+  - `tests/admin/admin-impersonation.test.ts` (updated)
+  - `tests/issue-s1.4-sign-in-rate-limit-html-429.test.ts` (created)
+  - `graphify-out/*` (updated)
+- **Verification / Test Result**:
+  - `npx tsc --noEmit`: Exit 0 (0 type errors)
+  - `npm test`: 91 test files, 768/768 passing (100% pass rate, +7 tests)
+  - `npm run lint`: 0 errors, 3 baseline warnings
+  - `npm run build`: 142 routes compiled cleanly (exact 142 route baseline strictly preserved)
+  - Remotes: `origin/main` and `deploy/main` 100% in sync
+
+
 
 
 
