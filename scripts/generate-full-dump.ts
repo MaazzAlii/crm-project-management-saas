@@ -157,7 +157,8 @@ function scanDir(dir: string, fileList: FileEntry[] = []): FileEntry[] {
       }
     } else {
       const ext = path.extname(item.name).toLowerCase();
-      // Environment template check: allow .env.example, .env.*.example, forbid actual secrets like .env or .env.local
+      // Environment template check: allow .env.example, .env.production.example, forbid any env.local and actual secrets
+      const isEnvLocal = item.name.includes('env.local');
       const isEnvExample = item.name.includes('.example') || item.name.includes('TEMPLATE');
       const isSecretEnv =
         (item.name === '.env' ||
@@ -166,7 +167,7 @@ function scanDir(dir: string, fileList: FileEntry[] = []): FileEntry[] {
           item.name.endsWith('.env')) &&
         !isEnvExample;
 
-      if (!ignoreFiles.has(item.name) && !binaryExts.has(ext) && !isSecretEnv) {
+      if (!ignoreFiles.has(item.name) && !binaryExts.has(ext) && !isSecretEnv && !isEnvLocal) {
         const stat = fs.statSync(fullPath);
         fileList.push({
           fullPath,
