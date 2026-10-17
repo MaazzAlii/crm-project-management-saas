@@ -9,6 +9,10 @@ interface AcceptInviteButtonProps {
   token: string
 }
 
+export function handleAcceptError(data: any, fallback = 'Failed to accept invitation'): string {
+  return extractApiError(data, fallback)
+}
+
 export function AcceptInviteButton({ token }: AcceptInviteButtonProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -29,7 +33,7 @@ export function AcceptInviteButton({ token }: AcceptInviteButtonProps) {
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(extractApiError(data, 'Failed to accept invitation'))
+        throw new Error(handleAcceptError(data, 'Failed to accept invitation'))
       }
 
       setSuccess(true)
