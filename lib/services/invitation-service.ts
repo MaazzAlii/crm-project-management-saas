@@ -16,7 +16,7 @@ import { checkMemberLimit, checkPendingInviteLimit } from './plan-limits';
 import { normalizeEmail, isValidEmail } from '../validation/email';
 import { generateToken, hashToken } from '../security/invite-token';
 import { logInvitationAudit } from '../audit/invitations';
-import { canResend, canRevoke } from '../invitations/status';
+import { canResend, canRevoke, computeStatus } from '../invitations/status';
 import { sendEmail } from '../email/sender';
 import { renderInviteEmail } from '../email/templates';
 import { hashPassword, validatePasswordStrength } from '../auth/password';
@@ -521,12 +521,13 @@ export async function revokeInvitation(
     };
   }
 
+  const computedStatus = computeStatus(invite);
   if (!canRevoke(invite)) {
     return {
       success: false,
       error: 'invalid_status',
       status: 400,
-      message: `Only pending invitations can be revoked. Current status is ${invite.status}.`,
+      message: `Only pending invitations can be revoked. Current status is ${computedStatus}.`,
     };
   }
 
