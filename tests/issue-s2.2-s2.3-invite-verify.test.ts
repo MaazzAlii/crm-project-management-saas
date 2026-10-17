@@ -1,8 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { extractApiError } from '@/lib/utils/api-error';
+import { AcceptInviteButton, handleAcceptError } from '@/app/invite/[token]/AcceptInviteButton';
 
 describe('ISSUE-S2.2 & S2.3: Invite Expiry & Invalidation Error Handling', () => {
-  it('extracts human-readable message from 410 EXPIRED response shape, preventing [object Object]', () => {
+  it('AcceptInviteButton component is exported', () => {
+    expect(AcceptInviteButton).toBeDefined();
+    expect(typeof AcceptInviteButton).toBe('function');
+  });
+
+  it('handleAcceptError extracts human-readable message from 410 EXPIRED response shape, preventing [object Object]', () => {
     // Exact response shape returned by POST /api/invitations/accept when token has expired
     const expiredApiResponse: Record<string, any> = {
       success: false,
@@ -13,28 +19,23 @@ describe('ISSUE-S2.2 & S2.3: Invite Expiry & Invalidation Error Handling', () =>
       },
     };
 
-    // The defective implementation in AcceptInviteButton.tsx did:
-    // throw new Error(data.message || data.error || 'Failed to accept invitation')
-    const oldDefectiveExtracted = expiredApiResponse.message || expiredApiResponse.error;
-    const oldErrorMessage = new Error(oldDefectiveExtracted as any).message;
-    expect(oldErrorMessage).toBe('[object Object]'); // Confirms the reproduction of the bug!
-
-    // The fixed implementation uses extractApiError:
-    const friendlyMessage = extractApiError(expiredApiResponse, 'Failed to accept invitation');
-    expect(friendlyMessage).not.toBe('[object Object]');
-    expect(friendlyMessage).not.toContain('[object Object]');
-    expect(friendlyMessage).toBe(
+    // Calls the real handleAcceptError from AcceptInviteButton
+    const errorMessage = handleAcceptError(expiredApiResponse);
+    expect(typeof errorMessage).toBe('string');
+    expect(errorMessage).not.toBe('[object Object]');
+    expect(errorMessage).not.toContain('[object Object]');
+    expect(errorMessage).toBe(
       'This invitation has expired. Invitations are valid for 7 days. Please request a new invitation from your workspace administrator.'
     );
 
-    // When passed to new Error(friendlyMessage):
-    const newErrorMessage = new Error(friendlyMessage).message;
-    expect(newErrorMessage).toBe(
+    // When used in new Error(errorMessage).message as done in AcceptInviteButton
+    const errorInstance = new Error(errorMessage);
+    expect(errorInstance.message).toBe(
       'This invitation has expired. Invitations are valid for 7 days. Please request a new invitation from your workspace administrator.'
     );
   });
 
-  it('extracts human-readable message from 400 invalid_or_expired response shape, preventing [object Object]', () => {
+  it('handleAcceptError extracts human-readable message from 400 invalid_or_expired response shape, preventing [object Object]', () => {
     // Exact response shape returned when old invalidated token is submitted
     const invalidatedApiResponse: Record<string, any> = {
       success: false,
@@ -44,19 +45,18 @@ describe('ISSUE-S2.2 & S2.3: Invite Expiry & Invalidation Error Handling', () =>
       },
     };
 
-    // Defective implementation reproduction
-    const oldDefectiveExtracted = invalidatedApiResponse.message || invalidatedApiResponse.error;
-    const oldErrorMessage = new Error(oldDefectiveExtracted as any).message;
-    expect(oldErrorMessage).toBe('[object Object]');
+    // Calls the real handleAcceptError from AcceptInviteButton
+    const errorMessage = handleAcceptError(invalidatedApiResponse);
+    expect(typeof errorMessage).toBe('string');
+    expect(errorMessage).not.toBe('[object Object]');
+    expect(errorMessage).not.toContain('[object Object]');
+    expect(errorMessage).toBe('This invitation is invalid or has expired');
 
-    // Fixed implementation
-    const friendlyMessage = extractApiError(invalidatedApiResponse, 'Failed to accept invitation');
-    expect(friendlyMessage).not.toBe('[object Object]');
-    expect(friendlyMessage).not.toContain('[object Object]');
-    expect(friendlyMessage).toBe('This invitation is invalid or has expired');
+    const errorInstance = new Error(errorMessage);
+    expect(errorInstance.message).toBe('This invitation is invalid or has expired');
   });
 
-  it('handles technical error codes and fallback cleanly', () => {
+  it('extractApiError handles technical error codes and fallback cleanly', () => {
     expect(extractApiError({ error: { code: 'NOT_FOUND' } })).toBe(
       'The invitation was not found or may have been deleted.'
     );
