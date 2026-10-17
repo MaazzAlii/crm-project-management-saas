@@ -487,7 +487,7 @@ export function PendingInvitationsList({
       {invitationToRevoke && mounted && createPortal(
         <div
           data-testid="revoke-invite-modal"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-overlay)] p-4 backdrop-blur-sm animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-overlay)] p-4 animate-in fade-in"
         >
           <div className="w-full max-w-md rounded-2xl border border-destructive/30 bg-card p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3 text-destructive">
