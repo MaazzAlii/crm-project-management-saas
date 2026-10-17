@@ -21,14 +21,14 @@ describe('ADMIN-1 Impersonation Security & Session Model', () => {
 
   describe('Guardrail 1: Origin Cookie Signing & Secret Isolation', () => {
     it('throws CONFIG_ERROR in production if IMPERSONATION_ORIGIN_SECRET is missing', () => {
-      process.env.NODE_ENV = 'production'
+      ;(process.env as any).NODE_ENV = 'production'
       delete process.env.IMPERSONATION_ORIGIN_SECRET
 
       expect(() => getImpersonationOriginSecret()).toThrowError(/CONFIG_ERROR/)
     })
 
     it('falls back to JWT_SECRET with warning in development if IMPERSONATION_ORIGIN_SECRET is unset', () => {
-      process.env.NODE_ENV = 'development'
+      ;(process.env as any).NODE_ENV = 'development'
       delete process.env.IMPERSONATION_ORIGIN_SECRET
       process.env.JWT_SECRET = 'dev_jwt_secret_test_value_123456789'
 
@@ -41,13 +41,14 @@ describe('ADMIN-1 Impersonation Security & Session Model', () => {
 
       const payload = {
         superAdminId: '00000000-0000-0000-0000-superadmin01',
+        superAdminEmail: 'superadmin@example.com',
         impersonatedUserId: '00000000-0000-0000-0000-tenantuser01',
         impersonatedOrgId: '00000000-0000-0000-0000-tenantorg001',
         impersonatedOrgName: 'Acme Tenant Corp',
         impersonatedUserName: 'Jane Tenant',
         impersonatedUserEmail: 'jane@acme.com',
-        startedAt: Date.now(),
-        expiresAt: Date.now() + 3600_000,
+        startedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 3600_000).toISOString(),
       }
 
       const token = signOriginToken(payload)
@@ -65,13 +66,14 @@ describe('ADMIN-1 Impersonation Security & Session Model', () => {
       process.env.IMPERSONATION_ORIGIN_SECRET = 'secret_A_origin_secret_99999999999'
       const payload = {
         superAdminId: 'super-admin-id',
+        superAdminEmail: 'superadmin@example.com',
         impersonatedUserId: 'user-id',
         impersonatedOrgId: 'org-id',
         impersonatedOrgName: 'Org',
         impersonatedUserName: 'User',
         impersonatedUserEmail: 'user@example.com',
-        startedAt: Date.now(),
-        expiresAt: Date.now() + 3600_000,
+        startedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 3600_000).toISOString(),
       }
       const token = signOriginToken(payload)
 
@@ -205,7 +207,7 @@ describe('ADMIN-1 Impersonation Security & Session Model', () => {
       // Verify DB write includes impersonation provenance in details JSON
       const dbCalls = dbQuerySpy.mock.calls
       expect(dbCalls.length).toBeGreaterThan(0)
-      const detailsArg = dbCalls[0][1][12] // details parameter ($13)
+      const detailsArg = dbCalls[0]?.[1]?.[12] // details parameter ($13)
       const parsedDetails = typeof detailsArg === 'string' ? JSON.parse(detailsArg) : detailsArg
 
       expect(parsedDetails.impersonated_by).toBe('00000000-0000-0000-0000-superadmin01')
