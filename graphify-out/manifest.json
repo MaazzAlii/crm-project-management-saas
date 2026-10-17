@@ -8248,5 +8248,701 @@
     "seen": 1792139748.5277863,
     "ast_hash": "f81a672c103860b735a2d4891d5e5bac",
     "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/00-TRIAGE-AND-SEQUENCE.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450193,
+    "ast_hash": "5d4a4abd042203d3552512c8b972481d",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.1-Forgot-Password-Flow.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4501958,
+    "ast_hash": "0f4a63a5a893682edcc45bfe87dc50a0",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.10-Session-Refresh-Rotation-Test.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4501977,
+    "ast_hash": "fb263030383acf43bc38778e4b5340b6",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.11-Logout-Revoke-And-Clear-Cookies.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4501994,
+    "ast_hash": "3bf5e130bd4dbacc632aa5471330c68c",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.12-Email-Verification-Banner.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502006,
+    "ast_hash": "c3a1b0f93333cf8112ae5e5d35244364",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.13A-MFA-TOTP-Backend.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502017,
+    "ast_hash": "a99927cb339a8062ff02c7975373ddaa",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.13B-MFA-TOTP-UI.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450203,
+    "ast_hash": "e6ed9fcc79f4fabf35f786ce8671794d",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.14A-OAuth-Google-GitHub-Backend.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502041,
+    "ast_hash": "b548c3713ff4d68be1237a9eedf8d97a",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.14B-OAuth-Login-UI.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450205,
+    "ast_hash": "84581678c40e0a6e01ceb79c129b7864",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.15-Password-Strength-Meter.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502063,
+    "ast_hash": "6f56080983692f2924956daacfe7e49b",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.2-Reset-Password-Link.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502072,
+    "ast_hash": "205540bc96c86b2fac817f033771b4d4",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.3-Sign-Up-Validation-And-Email-Verify.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502082,
+    "ast_hash": "908f128bcd0143f45b63d45d17047675",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.4-Sign-In-Rate-Limit-HTML-429.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502094,
+    "ast_hash": "ef8acc13cdd189be515cc478e7a20532",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.5-Temp-Password-On-Invite.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502103,
+    "ast_hash": "3f79a408e53d2e4f56f6c6df38fa6eae",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.6-Invite-Acceptance-Set-Password.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502113,
+    "ast_hash": "356b3ee24dbe9a031a627f5dd9afdfb5",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.7-Server-Action-Auth-Audit.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502122,
+    "ast_hash": "c4d9e34a8c52c99630198238d366f01a",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S1.8-Role-Based-Access-Consistency.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502134,
+    "ast_hash": "b1f10f9236a31df1ca519402e52d83ac",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.1-Invite-Email-Delivery.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502144,
+    "ast_hash": "f9df21c3d6389ff97170cd9c7275e9cc",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.10-Invite-Role-Restrictions-UI.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502153,
+    "ast_hash": "20ce13b9c24cb1743b2e29865fdd8a21",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.11-Member-Removal-Rules.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502165,
+    "ast_hash": "6d5a9ba5841193ece47cd081821245d4",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.12-Role-Change-Rules.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502175,
+    "ast_hash": "8b4337593aaf2e10b118da06853bf83e",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.13-Team-Workload-Project-Filter.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502184,
+    "ast_hash": "ffb0d713124d8c714c216a50d111c5f4",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.14-Member-Avatar-And-Profile.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502192,
+    "ast_hash": "141b8df9bd618015dab36dfe52028d0a",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.15-Member-Status-And-Last-Login.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502203,
+    "ast_hash": "17c03b3bcbd0a22059b7e3f6cda71656",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.2-Invite-Expiry-Message.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502213,
+    "ast_hash": "dae881a68a75ad5bda43edcbc27f88c8",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.3-Resend-Invalidates-Old-Link.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502223,
+    "ast_hash": "8be493e7fa185871427b820c10ee406f",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.4-Revoke-Invite-JSON-Error.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502234,
+    "ast_hash": "32566f90589fc12bf518c2dd9c8bd235",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.5-Pending-Invites-Live-Update.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502246,
+    "ast_hash": "32ed75f4f8810f4a4b3e9729ffdd56b1",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.6-Seat-Limits-Everywhere.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502256,
+    "ast_hash": "9d575a50fcbdd95d2bae125a78734d5c",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.7-Upgrade-CTA-At-Limit.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502268,
+    "ast_hash": "94b0d4cd064758481d46bc4951bd7960",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S2.9-Bulk-Invites.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502275,
+    "ast_hash": "4914db1d0d7befec63d0db7cac67dab2",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S3.1-Plan-Limits-Server-Enforced.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502285,
+    "ast_hash": "31ca8dae252f6b7dc03c874731b8c6e6",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S3.11-Free-Plan-Limitations.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502294,
+    "ast_hash": "5cc664f8ddad6b7fdb30fcbec05321fa",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S3.12-Trial-Period-14-Day.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502306,
+    "ast_hash": "0d701bc186283f05e1a343ea55d585e5",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S3.13-Billing-Email-Notifications.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502316,
+    "ast_hash": "2537dfe4ece71245fe8293a5221b322a",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S3.2-Lifetime-VIP-Grants-All-Features.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502327,
+    "ast_hash": "f819890cb367c092f4b30f743c413114",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S3.6-Billing-Portal-UI.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450234,
+    "ast_hash": "7187e9e24fe4b5bfea7039e58bb77980",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S3.7-Invoice-History-Missing-Customer.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502347,
+    "ast_hash": "fbaa70c2bea6433739b8e0e9f7d5f76c",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S3.8-Upgrade-Downgrade-Proration.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502356,
+    "ast_hash": "5bebd1be2dfbcdd0a9ffca9f9b57d4fa",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S3.9-Plan-Usage-Card-Realtime.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450237,
+    "ast_hash": "71f6b0450589cc5a62562d3153d25a1e",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S4.10-System-Health-Dashboard.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450238,
+    "ast_hash": "ca34d939d49aa3bb944aafcec5f7c2d6",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S4.11-Announcements.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450239,
+    "ast_hash": "c064a7713d5d385515de97d32c6fe1b9",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S4.12-Maintenance-Mode.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.45024,
+    "ast_hash": "636ce5314f6f0f844e348dd0d7f40f0b",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S4.2-Org-Management-Actions.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450241,
+    "ast_hash": "740450fb776af447654d01f8678d6477",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S4.3-Global-Platform-Settings.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450242,
+    "ast_hash": "8e1db0bf93e1ad0f72a58aa3844a2da5",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S4.4-Audit-Log-Filters-And-Export.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502428,
+    "ast_hash": "458e272f757d5e765cf60cdc934f397e",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S4.5-Platform-Branding.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450244,
+    "ast_hash": "69196b2087772d37c1663217cc2d6f3b",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S4.7-Sponsored-Free-Access.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450245,
+    "ast_hash": "7c1b0dbad7accec8c6542d47b7eca1c2",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S4.8-User-Management-Edit-Delete.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502459,
+    "ast_hash": "5ea4460c568a988c1c64b5ef47c3f986",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.1-Light-Dark-Mode-Verify.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502468,
+    "ast_hash": "6269f714f7b01f04e8b8994a901891ff",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.10-Inline-Form-Validation.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450248,
+    "ast_hash": "7577d7c16937222caaa8ad29f009fe72",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.11-Accessibility-Pass.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450249,
+    "ast_hash": "ff78c449ba1d2c8bf120645cfe2bf6eb",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.12-Theme-Preference-Persistence.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.45025,
+    "ast_hash": "8d311158e6b84666bcf7dfca20261dc4",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.14-Logo-Upload-Org-And-Client.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450251,
+    "ast_hash": "6743fea72834153c85e5e81120f8eacd",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.15-Favicon-Customization.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450252,
+    "ast_hash": "d55cc0a8ad47cffbd95383bca644aa11",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.2-Responsive-Design.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450253,
+    "ast_hash": "055cadab1f582945a490db372d44c8a9",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.3-Spacing-And-Typography.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450254,
+    "ast_hash": "25101cd800a328e7f3bf9982ed207387",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.4-Header-Navigation-Fixes.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502552,
+    "ast_hash": "22bc0c1a54a259649dc568a5dc29c0bc",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.5-Loading-Skeletons.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502559,
+    "ast_hash": "5d684565b16b2d0da04e1e076b77ec74",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.6-Empty-States.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502568,
+    "ast_hash": "8744c89de3c48873f61afcb5347eb2a6",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.7-Friendly-Error-States.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450258,
+    "ast_hash": "1c22e960bdc7dc24f11470223aea3712",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.8-Toast-Notifications.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.450259,
+    "ast_hash": "0666041d6a4a2166d92491dae7b687db",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts-batch2/ISSUE-S5.9-Unified-Modal-Drawer.md": {
+    "mtime": 1792207542.0,
+    "seen": 1792225980.4502597,
+    "ast_hash": "e9b136a108d1733519564fa3b833cc39",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/00-TRIAGE-AND-SEQUENCE.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502609,
+    "ast_hash": "c4b666584683047d15459cc83ead081b",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-10-Client-Tags.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.450262,
+    "ast_hash": "6c393dea2e2c43adfc44a634fbe3fdef",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-11-Kanban-Duplicate-Cards.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.450263,
+    "ast_hash": "f8ddbc6e9f8ba719751519f1dae48e59",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-12-Lead-Score-Rescore-Button.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.450264,
+    "ast_hash": "73d070cd0c060d68a2b09d51f07e3a66",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-13-Deal-Value-Currency.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502652,
+    "ast_hash": "b9c8c41245eb37f260de92b25c6b8847",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-14-Lost-Reason-Modal.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502661,
+    "ast_hash": "ef24c1d322ddd3e78a213f484f79b83e",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-15-Customizable-Pipeline-Stages.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.450267,
+    "ast_hash": "29cdea18bf842c5157c96b978e8a8284",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-16-Client-Portal-Access.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502683,
+    "ast_hash": "98854cf17226027e79bd4806a56aa8cd",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-17-Client-CSV-Import-Export.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502692,
+    "ast_hash": "83e97cf055d7d7625673535afbf94766",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-19-Projects-List-Filters-Health.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502704,
+    "ast_hash": "6f3666c9298ecfd9a96383eca49081b9",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-20-Projects-Kanban-DnD.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502716,
+    "ast_hash": "9167b926d77f724b512180518669e1cd",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-21-Project-Detail-Tabs.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502726,
+    "ast_hash": "2313a3f7f036da26c2836ee6d668b9b7",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-22-Deliverables-Lifecycle.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502733,
+    "ast_hash": "e6c8a2ab7ccd6b40d465e276b401f5a2",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-23-Project-Templates.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502742,
+    "ast_hash": "ee9897e82486c92d65387528058edf98",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-24-Global-Tasks-Workload.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502754,
+    "ast_hash": "547b4cc38696df757555fee50aca9bd7",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-25-Task-Assignment.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502764,
+    "ast_hash": "0054246b965eed0af7c2ff077ea20eea",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-26A-Task-Dependencies-Backend.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502773,
+    "ast_hash": "7ef0df11b88c5aa634dbf9aad75c5bc5",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-26B-Task-Dependencies-UI.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502783,
+    "ast_hash": "d40aa639c63304e9d19fc6f2a913b89e",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-27A-Gantt-Chart-Data.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502792,
+    "ast_hash": "e59ca9f4528a9314838e065ab3f0e08b",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-27B-Gantt-Chart-UI.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502804,
+    "ast_hash": "645d80e242748daa06764ab3ef1a7660",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-28A-Time-Tracking-Backend.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502814,
+    "ast_hash": "16bb7237c550308c3036c485004991a6",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-28B-Time-Tracking-UI.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502826,
+    "ast_hash": "d72d125d16395d2bb091d437d3ac2dfd",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-29-Project-Budget-Tracking.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502835,
+    "ast_hash": "306216064a4ed2dd2160f25f9b345682",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-30-Project-File-Attachments.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502845,
+    "ast_hash": "444711fb7b00e01e21f1b2cb38f454f8",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-31-Project-Notes-Rich-Text.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502861,
+    "ast_hash": "78a4f83bcfe1ec4bf1bfe7e1849f94ee",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-33-Unified-Inbox.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.450287,
+    "ast_hash": "f2e5c24acfa95be3180f3e11ddb2e73a",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-34-Channel-Integrations.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.450288,
+    "ast_hash": "35e3fc3458fb77407ad734d606170249",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-35-Webhook-Signature-Verification.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502892,
+    "ast_hash": "91574153176121408e27b8eb51902581",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-36-Auto-Match-Clients.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502902,
+    "ast_hash": "844097627cd91cbf43b83ea4a281225a",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-37-Manual-Mode-Clients.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502912,
+    "ast_hash": "f1e6ecc2fd90226b8e762ad5b212b41f",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-38-Connected-Mode-One-Way.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.450292,
+    "ast_hash": "360ab9fc40cc6e1ad5184198752532c5",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-39-AI-Reply-Suggestions-Three-Options.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502933,
+    "ast_hash": "057b55f27138ee53284fd9d19df650ba",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-40-AI-Task-Extraction.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502943,
+    "ast_hash": "3445abde0b72aeee11dd78a6be28f403",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-41-Read-Unread-State.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502952,
+    "ast_hash": "7a2a0e6ff184f5677636c4214fadbd24",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-42-Message-Search-Full-Text.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502964,
+    "ast_hash": "15ae17a8d94118d5c58109b847a07a5a",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-43-Channel-Status-Badge.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502974,
+    "ast_hash": "e8aee1511625e42254e5edbdf8d7c071",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-44-Send-Outbound-Messages.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502983,
+    "ast_hash": "8095f01c57469a3e889afbddc8373a4f",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-45A-Attachment-Support-Backend.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4502997,
+    "ast_hash": "5a19c2cd81d69c60536dcf65ec477722",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-45B-Attachment-Support-UI.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503007,
+    "ast_hash": "f8227f313c801d1d08664123b466dc89",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-47-Mistral-AI-Provider.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503016,
+    "ast_hash": "0f54e149be1c6990c036ff1cdbab0fba",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-48-Per-Org-AI-Provider-Selection.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503026,
+    "ast_hash": "84ee2c1bd765969773a5550e806cb7f1",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-49-AI-Usage-Reporting.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503038,
+    "ast_hash": "794eddf04af26fdb6578a3291dc8e959",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-50-AI-Feature-Toggles-Per-Org.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503047,
+    "ast_hash": "7bbbdf6222fa1a277a5e0bb1918335a8",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-51-AI-Kill-Switch.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503057,
+    "ast_hash": "06d3021d181bde229f83fcb18be0a84a",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-53-Reply-Suggestion-Context.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503074,
+    "ast_hash": "9c3268d1c0938422b59383fa89a56a62",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-54-Task-Extraction-Parsing.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503083,
+    "ast_hash": "8c58a04eb36b0f9dbb4e40c1efc0061d",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-55-Weekly-Narrative-Customization.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503093,
+    "ast_hash": "8234056a7378abea4e18842d9e519e8f",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-57-Per-Org-AI-Rate-Limit.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503105,
+    "ast_hash": "2fce87fa8518342e8b4c7e8a7ee42d48",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-58A-Editable-AI-Prompts-Backend.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503114,
+    "ast_hash": "6371037cc33223fb1e31ca3aff6f063d",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-58B-Editable-AI-Prompts-UI.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503124,
+    "ast_hash": "41debcbc275879a1f1291948c07e23a8",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-7-Client-List-Search-Badges.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503136,
+    "ast_hash": "1b0efb4662ad9154cd6a58b97d23c87e",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-8-Client-Detail-Tabs.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503145,
+    "ast_hash": "fe540a53fe6cc67476cd428ac92bfcb8",
+    "semantic_hash": ""
+  },
+  "innoventix-prompts/ISSUE-9-Client-Communication-Log.md": {
+    "mtime": 1792207212.0,
+    "seen": 1792225980.4503155,
+    "ast_hash": "1967012b87553ab50d3b69b2c407fbee",
+    "semantic_hash": ""
   }
 }
